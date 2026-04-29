@@ -1,0 +1,58 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630">
+    <!-- Background -->
+    <defs>
+        <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stop-color="#0A0F1C"/>
+            <stop offset="100%" stop-color="#131B2E"/>
+        </linearGradient>
+        <radialGradient id="glow" cx="0.85" cy="0.15" r="0.5">
+            <stop offset="0%" stop-color="#00F0FF" stop-opacity="0.3"/>
+            <stop offset="100%" stop-color="#00F0FF" stop-opacity="0"/>
+        </radialGradient>
+    </defs>
+
+    <rect width="1200" height="630" fill="url(#bg)"/>
+    <rect width="1200" height="630" fill="url(#glow)"/>
+
+    <!-- Wordmark -->
+    <text x="80" y="140" font-family="-apple-system, BlinkMacSystemFont, 'Inter', system-ui, sans-serif"
+          font-size="44" font-weight="600" fill="#F5FEFF" letter-spacing="-1">
+        melveo
+    </text>
+
+    <!-- Eyebrow -->
+    <text x="80" y="290" font-family="-apple-system, 'Inter', system-ui, sans-serif"
+          font-size="22" font-weight="600" fill="#00F0FF" letter-spacing="3" text-transform="uppercase">
+        PRO KLUBY, TRENÉRY I HRÁČE
+    </text>
+
+    <!-- Headline -->
+    <text x="80" y="380" font-family="-apple-system, 'Inter', system-ui, sans-serif"
+          font-size="76" font-weight="700" fill="#F5FEFF" letter-spacing="-2">
+        Chytřejší tréninky,
+    </text>
+    <text x="80" y="470" font-family="-apple-system, 'Inter', system-ui, sans-serif"
+          font-size="76" font-weight="700" fill="#00F0FF" letter-spacing="-2">
+        zdravější hráči.
+    </text>
+
+    <!-- Tagline -->
+    <text x="80" y="540" font-family="-apple-system, 'Inter', system-ui, sans-serif"
+          font-size="28" font-weight="400" fill="#B8C5D6">
+        Aplikace pro správu týmu — wellness, sessions, coach board.
+    </text>
+
+    <!-- Brand mark right -->
+    <g transform="translate(900, 60)">
+        <rect width="240" height="240" rx="56" fill="#00F0FF" fill-opacity="0.08" stroke="#00F0FF" stroke-opacity="0.3" stroke-width="2"/>
+        <path
+            d="M55 175V65h25l32 50 32-50h25v110h-25V100l-25 38h-14l-25-38v75H55Z"
+            fill="#00F0FF"/>
+    </g>
+
+    <!-- Bottom domain -->
+    <text x="80" y="585" font-family="-apple-system, 'Inter', monospace"
+          font-size="22" font-weight="500" fill="#8A9BB0" letter-spacing="0.5">
+        melveo.app
+    </text>
+</svg>
