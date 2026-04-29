@@ -2,13 +2,17 @@
 import BaseLayout from "../layouts/BaseLayout.astro";
 
 /**
- * Landing — fullwidth, single page, indie-iOS-app style.
+ * Landing V3 — fullwidth, pitch-black, dark-only.
  *
- * Reference patterns: flighty.app, mercury.fm, culturedcode.com/things,
- * bear-writer.com — single hero, App Store badge, one screenshot, three
- * tight features, footer. No marketing grid, no testimonials, no pricing
- * teaser (App Store handles consumer install; pilot enquiry goes through
- * hello@melveo.app for clubs).
+ * Reference DNA: fey.com + raycast.com.
+ *   - Pitch-black canvas (#050608, near-pure)
+ *   - Edge-to-edge sections, no max-width container — content gets only
+ *     px- breathing padding, no outer box
+ *   - Big bold typography (clamp() so it scales with viewport)
+ *   - Hero halo (.halo-cyan) bleeds across viewport
+ *   - Section bands alternate dark levels: canvas → surface → canvas
+ *   - Each feature is its own full-bleed stage with its own visual
+ *   - One CTA: App Store badge in hero, secondary mailto in footer
  */
 ---
 
@@ -17,49 +21,43 @@ import BaseLayout from "../layouts/BaseLayout.astro";
   description="Chytřejší tréninky a zdravější hráči. Aplikace pro sportovní kluby."
 >
   <!-- ============================================================== -->
-  <!-- HERO — full viewport, dominant claim + App Store badge          -->
+  <!-- HERO — pitch-black, full viewport, halo, claim, App Store      -->
   <!-- ============================================================== -->
-  <section
-    class="relative flex min-h-screen w-full flex-col overflow-hidden bg-[var(--color-bg-canvas)]"
-  >
-    <!-- Brand glow halo — subtle, behind text -->
-    <div
-      aria-hidden="true"
-      class="pointer-events-none absolute -top-1/4 left-1/2 h-[120vh] w-[120vh] -translate-x-1/2 rounded-full opacity-[0.18] blur-3xl"
-      style="background: radial-gradient(circle, var(--color-accent-primary) 0%, transparent 60%);"
-    >
-    </div>
+  <section class="relative isolate flex min-h-screen w-full flex-col overflow-hidden bg-[var(--color-bg-canvas)]">
+    <div class="halo-cyan"></div>
 
-    <!-- Wordmark in top-left, no nav -->
-    <header class="relative z-10 px-6 pt-8 sm:px-10 sm:pt-10">
-      <a
-        href="/"
-        class="inline-block text-xl font-semibold tracking-tight text-[var(--color-text-primary)]"
-      >
+    <!-- Wordmark, no nav -->
+    <header class="relative z-10 flex w-full items-center justify-between px-6 pt-6 sm:px-12 sm:pt-10">
+      <a href="/" class="text-xl font-semibold tracking-tight text-[var(--color-text-primary)]">
         melveo
+      </a>
+      <a
+        href="mailto:hello@melveo.app"
+        class="hidden text-sm text-[var(--color-text-secondary)] transition-colors hover:text-[var(--color-text-primary)] sm:inline"
+      >
+        hello@melveo.app
       </a>
     </header>
 
-    <!-- Hero content -->
-    <div class="relative z-10 flex flex-1 flex-col items-center justify-center px-6 pb-24 pt-16 text-center sm:pb-32">
-      <h1
-        class="text-balance text-5xl font-bold leading-[1.05] tracking-tight text-[var(--color-text-primary)] sm:text-7xl lg:text-[5.5rem]"
-      >
-        Chytřejší tréninky,<br />
-        <span class="text-[var(--color-accent-primary)]">zdravější hráči.</span>
-      </h1>
-
-      <p
-        class="mx-auto mt-8 max-w-xl text-pretty text-lg text-[var(--color-text-secondary)] sm:text-xl"
-      >
-        Aplikace pro sportovní kluby — wellness, sessions, coach board.
+    <!-- Hero claim + CTA -->
+    <div class="relative z-10 flex flex-1 flex-col items-center justify-center px-6 pb-8 pt-24 text-center sm:pt-32">
+      <p class="mb-8 text-xs font-semibold uppercase tracking-[0.4em] text-[var(--color-accent-primary)]">
+        Pro sportovní kluby
       </p>
 
-      <!-- App Store badge. Replace src once Apple Dev account exists +
-           App Store listing is live. The placeholder uses the official
-           Apple SVG; until the listing is approved, link href stays
-           on a fallback "soon" anchor. -->
-      <div class="mt-12">
+      <h1
+        class="text-balance font-bold leading-[0.95] tracking-tight text-[var(--color-text-primary)]"
+        style="font-size: clamp(3rem, 8.5vw, 8.5rem); letter-spacing: -0.04em;"
+      >
+        Chytřejší tréninky.<br />
+        <span class="text-[var(--color-accent-primary)]">Zdravější hráči.</span>
+      </h1>
+
+      <p class="mx-auto mt-10 max-w-xl text-pretty text-lg text-[var(--color-text-secondary)] sm:text-xl">
+        Wellness, sessions a coach board v jedné aplikaci. Bez Excelu, bez WhatsAppu, bez prokrastinace.
+      </p>
+
+      <div class="mt-12 flex flex-col items-center gap-4 sm:flex-row sm:gap-6">
         <a
           href="#brzy"
           aria-label="Stáhnout v App Store"
@@ -73,37 +71,30 @@ import BaseLayout from "../layouts/BaseLayout.astro";
             height="60"
           />
         </a>
+        <a
+          href="mailto:hello@melveo.app?subject=Zájem%20o%20pilot"
+          class="text-base font-medium text-[var(--color-text-primary)] transition-opacity hover:opacity-70"
+        >
+          Pilot pro klub →
+        </a>
       </div>
 
       <p
         id="brzy"
-        class="mt-6 text-sm text-[var(--color-text-tertiary)]"
+        class="mt-8 text-xs uppercase tracking-[0.2em] text-[var(--color-text-tertiary)]"
       >
-        TestFlight beta startuje brzy ·
-        <a
-          href="mailto:hello@melveo.app?subject=Mám%20zájem%20o%20pilot"
-          class="text-[var(--color-accent-primary)] transition-opacity hover:opacity-80"
-        >
-          hello@melveo.app
-        </a>
+        TestFlight beta · brzy
       </p>
     </div>
 
-    <!-- Screenshot mock — full bleed, anchored to bottom -->
-    <div class="relative z-10 mx-auto w-full max-w-3xl px-6 pb-16 sm:pb-24">
+    <!-- Hero screenshot — full bleed bottom -->
+    <div class="relative z-10 mx-auto w-full max-w-5xl px-4 pb-12 sm:px-6 sm:pb-20">
       <div
-        class="relative aspect-[9/16] overflow-hidden rounded-[2.5rem] border border-[var(--color-stroke-base)] bg-[var(--color-bg-surface)] shadow-[0_24px_80px_-24px_rgba(0,240,255,0.25)] sm:aspect-[3/4] sm:rounded-[3rem]"
+        class="relative aspect-[4/3] overflow-hidden rounded-[2rem] border border-[var(--color-stroke-emphasized)] bg-[var(--color-bg-surface-elevated)] shadow-[0_60px_120px_-24px_rgba(0,240,255,0.18),0_0_0_1px_rgba(0,240,255,0.08)] sm:rounded-[2.5rem]"
       >
-        <!-- Placeholder until real iOS screenshot lands. Aspect picked
-             to match a 6.7" iPhone hero shot in portrait, with a soft
-             gradient that hints at the brand-cyan readiness UI. -->
-        <div
-          class="flex h-full w-full flex-col items-center justify-center bg-gradient-to-br from-[var(--color-accent-primary-subtle)]/20 via-[var(--color-bg-tint)]/40 to-[var(--color-bg-canvas)] p-12"
-        >
+        <div class="flex h-full w-full items-center justify-center bg-gradient-to-br from-[var(--color-bg-surface-elevated)] via-[var(--color-bg-surface)] to-[var(--color-bg-canvas)]">
           <div class="text-center">
-            <p
-              class="text-xs uppercase tracking-[0.3em] text-[var(--color-text-tertiary)]"
-            >
+            <p class="text-xs uppercase tracking-[0.3em] text-[var(--color-text-tertiary)]">
               Náhled aplikace
             </p>
             <p class="mt-3 text-base text-[var(--color-text-secondary)]">
@@ -116,83 +107,161 @@ import BaseLayout from "../layouts/BaseLayout.astro";
   </section>
 
   <!-- ============================================================== -->
-  <!-- SHORT FEATURES — 3 řádky, 1 řádek per features                  -->
+  <!-- STAGE 1 — Ranní readiness                                       -->
   <!-- ============================================================== -->
-  <section
-    class="w-full border-t border-[var(--color-stroke-base)]/60 bg-[var(--color-bg-surface)]"
-  >
-    <div class="mx-auto max-w-5xl px-6 py-24 sm:py-32">
-      <div class="grid gap-12 sm:grid-cols-3 sm:gap-16">
-        <div>
-          <p
-            class="mb-3 text-xs font-semibold uppercase tracking-[0.2em] text-[var(--color-accent-primary)]"
-          >
-            Ráno
-          </p>
-          <h3 class="text-xl font-semibold text-[var(--color-text-primary)]">
-            Pětiosý check-in
-          </h3>
-          <p class="mt-3 text-[var(--color-text-secondary)]">
-            Hráč vyplní za 30 sekund. Trenér vidí tým — nikdy individuální
-            čísla.
-          </p>
-        </div>
+  <section class="relative isolate w-full overflow-hidden border-t border-[var(--color-stroke-base)] bg-[var(--color-bg-surface)]">
+    <div class="grid-overlay"></div>
 
-        <div>
-          <p
-            class="mb-3 text-xs font-semibold uppercase tracking-[0.2em] text-[var(--color-accent-primary)]"
-          >
-            Trénink
-          </p>
-          <h3 class="text-xl font-semibold text-[var(--color-text-primary)]">
-            Sessions a docházka
-          </h3>
-          <p class="mt-3 text-[var(--color-text-secondary)]">
-            Plánuj, zaznamenej účast, měř zátěž. Bez Excelu, bez WhatsAppu.
-          </p>
-        </div>
+    <div class="relative z-10 grid items-center gap-16 px-6 py-24 sm:px-12 sm:py-32 lg:grid-cols-2 lg:gap-24 lg:px-20 lg:py-40">
+      <div>
+        <p class="mb-6 text-xs font-semibold uppercase tracking-[0.4em] text-[var(--color-accent-primary)]">
+          Ráno · 30 sekund
+        </p>
+        <h2
+          class="text-balance font-bold leading-[1.05] tracking-tight text-[var(--color-text-primary)]"
+          style="font-size: clamp(2rem, 5vw, 4.5rem); letter-spacing: -0.03em;"
+        >
+          Pětiosý<br />check-in.
+        </h2>
+        <p class="mt-6 max-w-md text-pretty text-lg text-[var(--color-text-secondary)]">
+          Hráč rychle ohodnotí energii, spánek, bolestivost, náladu a motivaci. Trenér vidí <strong class="text-[var(--color-text-primary)]">tým</strong> — nikdy individuální čísla.
+        </p>
+      </div>
 
-        <div>
-          <p
-            class="mb-3 text-xs font-semibold uppercase tracking-[0.2em] text-[var(--color-accent-primary)]"
-          >
-            Coach Board
-          </p>
-          <h3 class="text-xl font-semibold text-[var(--color-text-primary)]">
-            Připravený předem
-          </h3>
-          <p class="mt-3 text-[var(--color-text-secondary)]">
-            Než přijedeš na hřiště, víš co tým potřebuje. Jeden pohled,
-            jasná volba.
-          </p>
+      <div class="relative">
+        <div
+          class="aspect-[9/16] overflow-hidden rounded-[2.5rem] border border-[var(--color-stroke-emphasized)] bg-[var(--color-bg-canvas)] shadow-[0_40px_120px_-20px_rgba(0,240,255,0.15)]"
+        >
+          <div class="flex h-full w-full items-center justify-center bg-gradient-to-b from-[var(--color-bg-surface-elevated)] to-[var(--color-bg-canvas)]">
+            <p class="text-xs uppercase tracking-[0.3em] text-[var(--color-text-tertiary)]">
+              Check-in screen
+            </p>
+          </div>
         </div>
       </div>
     </div>
   </section>
 
   <!-- ============================================================== -->
-  <!-- CONTACT — single line for clubs                                 -->
+  <!-- STAGE 2 — Sessions                                              -->
   <!-- ============================================================== -->
-  <section
-    class="w-full border-t border-[var(--color-stroke-base)]/60 bg-[var(--color-bg-canvas)]"
-  >
-    <div
-      class="mx-auto flex max-w-3xl flex-col items-center px-6 py-20 text-center sm:py-24"
-    >
+  <section class="relative isolate w-full overflow-hidden border-t border-[var(--color-stroke-base)] bg-[var(--color-bg-canvas)]">
+    <div class="halo-cyan" style="opacity: 0.4; inset: auto 0 -50% 50%;"></div>
+
+    <div class="relative z-10 grid items-center gap-16 px-6 py-24 sm:px-12 sm:py-32 lg:grid-cols-2 lg:gap-24 lg:px-20 lg:py-40">
+      <div class="lg:order-2">
+        <p class="mb-6 text-xs font-semibold uppercase tracking-[0.4em] text-[var(--color-accent-primary)]">
+          Trénink
+        </p>
+        <h2
+          class="text-balance font-bold leading-[1.05] tracking-tight text-[var(--color-text-primary)]"
+          style="font-size: clamp(2rem, 5vw, 4.5rem); letter-spacing: -0.03em;"
+        >
+          Sessions<br />a docházka.
+        </h2>
+        <p class="mt-6 max-w-md text-pretty text-lg text-[var(--color-text-secondary)]">
+          Plánuj tréninky, zaznamenej účast, měř zátěž (RPE). Hráč po skončení odešle subjektivní intenzitu — trenér vidí, jak tým reagoval.
+        </p>
+      </div>
+
+      <div class="relative lg:order-1">
+        <div
+          class="aspect-[4/5] overflow-hidden rounded-[2.5rem] border border-[var(--color-stroke-emphasized)] bg-[var(--color-bg-surface)] shadow-[0_40px_120px_-20px_rgba(0,240,255,0.12)]"
+        >
+          <div class="flex h-full w-full items-center justify-center bg-gradient-to-tr from-[var(--color-bg-surface)] to-[var(--color-bg-surface-elevated)]">
+            <p class="text-xs uppercase tracking-[0.3em] text-[var(--color-text-tertiary)]">
+              Sessions screen
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================== -->
+  <!-- STAGE 3 — Coach Board                                           -->
+  <!-- ============================================================== -->
+  <section class="relative isolate w-full overflow-hidden border-t border-[var(--color-stroke-base)] bg-[var(--color-bg-surface)]">
+    <div class="grid-overlay"></div>
+
+    <div class="relative z-10 grid items-center gap-16 px-6 py-24 sm:px-12 sm:py-32 lg:grid-cols-2 lg:gap-24 lg:px-20 lg:py-40">
+      <div>
+        <p class="mb-6 text-xs font-semibold uppercase tracking-[0.4em] text-[var(--color-accent-primary)]">
+          Coach Board
+        </p>
+        <h2
+          class="text-balance font-bold leading-[1.05] tracking-tight text-[var(--color-text-primary)]"
+          style="font-size: clamp(2rem, 5vw, 4.5rem); letter-spacing: -0.03em;"
+        >
+          Připravený<br />předem.
+        </h2>
+        <p class="mt-6 max-w-md text-pretty text-lg text-[var(--color-text-secondary)]">
+          Než přijedeš na hřiště, víš co tým potřebuje. Agregovaná readiness, watchlist, dnešní volba — jeden pohled, jasná akce.
+        </p>
+      </div>
+
+      <div class="relative">
+        <div
+          class="aspect-video overflow-hidden rounded-[2rem] border border-[var(--color-stroke-emphasized)] bg-[var(--color-bg-canvas)] shadow-[0_40px_120px_-20px_rgba(0,240,255,0.18)]"
+        >
+          <div class="flex h-full w-full items-center justify-center bg-gradient-to-bl from-[var(--color-bg-surface-elevated)] via-[var(--color-bg-surface)] to-[var(--color-bg-canvas)]">
+            <p class="text-xs uppercase tracking-[0.3em] text-[var(--color-text-tertiary)]">
+              Coach Board screen
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================== -->
+  <!-- BIG STATEMENT — privacy promise                                 -->
+  <!-- ============================================================== -->
+  <section class="relative isolate w-full overflow-hidden border-t border-[var(--color-stroke-base)] bg-[var(--color-bg-canvas)]">
+    <div class="halo-cyan" style="opacity: 0.5;"></div>
+
+    <div class="relative z-10 mx-auto max-w-5xl px-6 py-32 text-center sm:py-48">
+      <p class="mb-6 text-xs font-semibold uppercase tracking-[0.4em] text-[var(--color-accent-primary)]">
+        Soukromí · doc 174 §3
+      </p>
       <h2
-        class="text-balance text-3xl font-bold tracking-tight text-[var(--color-text-primary)] sm:text-4xl"
+        class="text-balance font-bold leading-[1.05] tracking-tight text-[var(--color-text-primary)]"
+        style="font-size: clamp(2.5rem, 6vw, 6rem); letter-spacing: -0.04em;"
+      >
+        Trenér nikdy nevidí<br />
+        <span class="text-[var(--color-accent-primary)]">syrová čísla hráče.</span>
+      </h2>
+      <p class="mx-auto mt-8 max-w-2xl text-pretty text-lg text-[var(--color-text-secondary)] sm:text-xl">
+        Wellness data jsou agregovaná. Klub kupuje, hráč nikdy neplatí, a co je hráčovo, zůstává hráčovo.
+      </p>
+    </div>
+  </section>
+
+  <!-- ============================================================== -->
+  <!-- CTA — pilot enquiry                                             -->
+  <!-- ============================================================== -->
+  <section class="relative isolate w-full overflow-hidden border-t border-[var(--color-stroke-base)] bg-[var(--color-bg-canvas)]">
+    <div class="relative z-10 mx-auto max-w-3xl px-6 py-32 text-center sm:py-40">
+      <h2
+        class="text-balance font-bold leading-[1.05] tracking-tight text-[var(--color-text-primary)]"
+        style="font-size: clamp(2rem, 4.5vw, 3.5rem); letter-spacing: -0.03em;"
       >
         Klub a chcete pilot?
       </h2>
-      <p class="mt-4 max-w-md text-[var(--color-text-secondary)]">
-        Napište nám, krátce zavoláme, do 14 dní spustíte první trénink.
+      <p class="mt-6 max-w-md text-pretty text-lg text-[var(--color-text-secondary)] mx-auto">
+        Napište, krátce zavoláme, do 14 dní spustíme první trénink.
       </p>
       <a
         href="mailto:hello@melveo.app?subject=Mám%20zájem%20o%20pilot"
-        class="mt-8 inline-flex items-center gap-2 text-2xl font-semibold tracking-tight text-[var(--color-accent-primary)] transition-opacity hover:opacity-80 sm:text-3xl"
+        class="mt-12 inline-flex items-baseline gap-3 transition-opacity hover:opacity-70"
       >
-        hello@melveo.app
-        <span aria-hidden="true">→</span>
+        <span
+          class="font-semibold tracking-tight text-[var(--color-accent-primary)]"
+          style="font-size: clamp(1.75rem, 4vw, 3rem);"
+        >
+          hello@melveo.app
+        </span>
+        <span class="text-2xl text-[var(--color-accent-primary)]" aria-hidden="true">→</span>
       </a>
     </div>
   </section>

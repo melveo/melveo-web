@@ -4,6 +4,9 @@
   Melveo.xcassets/Colors/*.colorset/Contents.json
   (canonical: docs/planning/58_design_tokens_motion_haptic.md §1)
 
+  V3: pitch-black canvas + bigger type scale (raycast.com / fey.com pattern).
+  We force dark on the landing — light mode stays a fallback for legal pages.
+
   RULE: never hand-write hex values in components — reference these vars.
   When SwiftUI tokens change, update here too — see doc 178.
 */
@@ -20,23 +23,25 @@
   --color-accent-warm: #b0702e;
   --color-accent-warm-dark: #d18a42;
 
-  /* Light surface */
-  --color-bg-canvas: #f5f7fa;
-  --color-bg-surface: #ffffff;
-  --color-bg-surface-elevated: #ffffff;
-  --color-bg-tint: #e6fbfe;
+  /* Pitch-black landing canvas. The iOS app uses #0A0F1C; on web we go
+     darker so the brand cyan and screenshots punch harder, matching the
+     fey.com / raycast.com aesthetic the user picked as reference. */
+  --color-bg-canvas: #050608;
+  --color-bg-surface: #0c0d11;
+  --color-bg-surface-elevated: #15171c;
+  --color-bg-tint: #0a3a44;
 
-  /* Light text */
-  --color-text-primary: #0a0f1c;
-  --color-text-secondary: #475569;
-  --color-text-tertiary: #94a3b8;
-  --color-text-inverse: #f5feff;
+  /* Text — pure white-ish on pitch black */
+  --color-text-primary: #f5feff;
+  --color-text-secondary: #9aa3b2;
+  --color-text-tertiary: #5d6573;
+  --color-text-inverse: #050608;
 
-  /* Light strokes */
-  --color-stroke-base: #e2e8f0;
-  --color-stroke-emphasized: #cbd5e1;
+  /* Strokes — barely visible */
+  --color-stroke-base: rgba(255, 255, 255, 0.06);
+  --color-stroke-emphasized: rgba(255, 255, 255, 0.14);
 
-  /* Feedback (same in light + dark) */
+  /* Feedback */
   --color-feedback-success: #22c55e;
   --color-feedback-warning: #f59e0b;
   --color-feedback-error: #ef4444;
@@ -60,23 +65,13 @@
   --radius-m: 12px;
   --radius-l: 16px;
   --radius-xl: 24px;
+  --radius-2xl: 32px;
 }
 
-/* Dark mode override — switches when prefers-color-scheme: dark.
-   Matches the dark variant in each .colorset Contents.json. */
-@media (prefers-color-scheme: dark) {
-  :root {
-    --color-bg-canvas: #0a0f1c;
-    --color-bg-surface: #131b2e;
-    --color-bg-surface-elevated: #1a2238;
-    --color-bg-tint: #0a3a44;
-    --color-text-primary: #f5feff;
-    --color-text-secondary: #b8c5d6;
-    --color-text-tertiary: #8a9bb0;
-    --color-text-inverse: #0a0f1c;
-    --color-stroke-base: #1f2a44;
-    --color-stroke-emphasized: #2c3a58;
-  }
+/* Light mode — only used by Privacy / Terms / checkout-success.
+   Landing forces dark via class on <html>. */
+:root {
+  color-scheme: dark;
 }
 
 /* Base reset + body */
@@ -93,11 +88,45 @@ body {
   min-height: 100vh;
 }
 
-/* Typographic helpers used across pages */
+/* Typographic helpers */
 .text-balance {
   text-wrap: balance;
 }
 
 .text-pretty {
   text-wrap: pretty;
+}
+
+/* Reusable hero halo: cyan radial bleed, sized to viewport.
+   Both fey.com and raycast.com lean on this device.
+   Kept on-class so we don't recompute it inline in templates. */
+.halo-cyan {
+  position: absolute;
+  inset: -20% 0 auto 50%;
+  width: 120vmin;
+  height: 120vmin;
+  transform: translateX(-50%);
+  background: radial-gradient(
+    closest-side,
+    rgba(0, 240, 255, 0.32),
+    rgba(0, 240, 255, 0.12) 40%,
+    transparent 70%
+  );
+  filter: blur(40px);
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Subtle grid overlay used in feature bands (raycast pattern) */
+.grid-overlay {
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(to right, rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+  background-size: 64px 64px;
+  mask-image: radial-gradient(ellipse at center, black 30%, transparent 70%);
+  -webkit-mask-image: radial-gradient(ellipse at center, black 30%, transparent 70%);
+  pointer-events: none;
+  z-index: 0;
 }
