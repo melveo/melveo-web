@@ -1,0 +1,96 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+
+/**
+ * Privacy policy — placeholder. Real copy must be reviewed by legal
+ * counsel and aligned with:
+ *   - GDPR Art. 13 + 14 (transparent information)
+ *   - Apple App Store Review Guideline 5.1.1 (privacy policy required)
+ *   - Czech ÚOOÚ guidance for sport-club data
+ *
+ * The bullet points below are accurate per the current product but
+ * are NOT a substitute for a vetted legal document. Replace before
+ * production launch.
+ */
+---
+
+<BaseLayout
+  title="Ochrana soukromí"
+  description="Jak Melveo zpracovává osobní údaje. Nakládáme s daty hráčů a trenérů transparentně, podle GDPR."
+>
+  <article class="mx-auto max-w-3xl px-6 py-20">
+    <p class="mb-4 text-sm font-semibold uppercase tracking-widest text-[var(--color-accent-primary)]">
+      Verze placeholder · 2026-04-29
+    </p>
+    <h1 class="text-balance text-4xl font-bold tracking-tight sm:text-5xl">
+      Ochrana soukromí
+    </h1>
+    <p class="mt-6 text-lg text-[var(--color-text-secondary)]">
+      Tato stránka je provizorní shrnutí pro účely vývoje. Finální závazné
+      znění bude k dispozici před spuštěním placené verze.
+    </p>
+
+    <hr class="my-12 border-[var(--color-stroke-base)]" />
+
+    <h2 class="mt-12 text-2xl font-semibold">Kdo jsme</h2>
+    <p class="mt-4 text-[var(--color-text-secondary)]">
+      Melveo je aplikace pro správu sportovních klubů, vytvořená v Česku.
+      Provozovatelem je <strong>[doplnit IČO + sídlo]</strong>. Kontakt:
+      <a href="mailto:privacy@melveo.app" class="text-[var(--color-accent-primary)]">
+        privacy@melveo.app</a
+      >.
+    </p>
+
+    <h2 class="mt-10 text-2xl font-semibold">Jaké údaje zpracováváme</h2>
+    <ul class="mt-4 space-y-3 text-[var(--color-text-secondary)]">
+      <li>
+        <strong>Identifikační:</strong> jméno, e-mail, role v klubu (hráč /
+        trenér / management).
+      </li>
+      <li>
+        <strong>Wellness check-iny:</strong> denní hodnoty energie, spánku,
+        bolestivosti, nálady a motivace (1–5). Trenér vidí výhradně agregát —
+        nikdy individuální čísla.
+      </li>
+      <li>
+        <strong>Tréninkové sessions:</strong> docházka, RPE (vnímaná zátěž).
+      </li>
+      <li>
+        <strong>Zařízení:</strong> Apple Health (jen pokud hráč povolí), Polar
+        (volitelné).
+      </li>
+    </ul>
+
+    <h2 class="mt-10 text-2xl font-semibold">Vaše práva</h2>
+    <ul class="mt-4 space-y-3 text-[var(--color-text-secondary)]">
+      <li>
+        <strong>Přístup a export</strong> — v aplikaci v sekci Účet můžete
+        kdykoliv stáhnout JSON s celou svou historií.
+      </li>
+      <li>
+        <strong>Smazání účtu</strong> — v aplikaci v sekci Účet, smazání je
+        nevratné.
+      </li>
+      <li>
+        <strong>Námitka, omezení, oprava</strong> — pište na
+        <a href="mailto:privacy@melveo.app" class="text-[var(--color-accent-primary)]">
+          privacy@melveo.app</a
+        >.
+      </li>
+    </ul>
+
+    <h2 class="mt-10 text-2xl font-semibold">Zpracovatelé</h2>
+    <ul class="mt-4 space-y-3 text-[var(--color-text-secondary)]">
+      <li>Supabase / vlastní hosting v EU (databáze, autentizace).</li>
+      <li>Stripe (zpracování plateb klubů, nikdy hráčů).</li>
+      <li>Resend (transakční e-maily).</li>
+      <li>Cloudflare (CDN, statický web).</li>
+    </ul>
+
+    <p class="mt-12 rounded-xl border border-[var(--color-stroke-emphasized)] bg-[var(--color-bg-surface)] p-6 text-sm text-[var(--color-text-secondary)]">
+      <strong>Poznámka pro vývoj:</strong> tato stránka projde právní revizí a
+      bude doplněna o úplné znění závazků dle GDPR Art. 13 + Apple App Store
+      review §5.1.1 před prvním placeným klientem.
+    </p>
+  </article>
+</BaseLayout>

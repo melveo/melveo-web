@@ -1,0 +1,197 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+
+const features = [
+  {
+    title: "Ranní readiness, beze spěchu",
+    body: "Hráči vyplní pětiosý check-in za půl minuty. Trenér vidí týmový průměr — nikdy ne syrová čísla jednotlivců.",
+    icon: "sun",
+  },
+  {
+    title: "Tréninkové sessions, bez tabulek",
+    body: "Plánuj, zaznamenej účast, sleduj zátěž (RPE) a buď připravený na další trénink — vše v jedné aplikaci.",
+    icon: "calendar",
+  },
+  {
+    title: "Coach Board, jednou ráno",
+    body: "Než přijedeš na hřiště, víš co tým potřebuje. Agregovaná readiness, watchlist, dnešní volba — bez šťourání v Excelu.",
+    icon: "board",
+  },
+  {
+    title: "Klub, ne jednotlivec",
+    body: "Klub kupuje licenci, hráč nikdy neplatí. Trenér zve hráče přes pozvánku — žádné placení, žádné Apple účty navíc.",
+    icon: "shield",
+  },
+];
+
+const pricingNotes = [
+  "Pilot: 1 970 Kč na 30 dní pro celý tým",
+  "Po pilotu: roční licence 1 tým = 1 sezóna",
+  "Žádné Apple In-App Purchase — klub platí přes Stripe (kartou nebo fakturou)",
+  "Refund pokud nedodáme co slíbíme",
+];
+---
+
+<BaseLayout
+  title="Melveo"
+  description="Chytřejší tréninky a zdravější hráči. Aplikace pro kluby, trenéry i hráče."
+>
+  <!-- Hero -->
+  <section class="border-b border-[var(--color-stroke-base)]">
+    <div class="mx-auto max-w-6xl px-6 pt-20 pb-24 sm:pt-32 sm:pb-32">
+      <div class="grid gap-16 sm:grid-cols-2 sm:items-center">
+        <div>
+          <p class="mb-4 text-sm font-semibold uppercase tracking-widest text-[var(--color-accent-primary)]">
+            Pro kluby, trenéry i hráče
+          </p>
+          <h1
+            class="text-balance text-4xl font-bold leading-tight tracking-tight sm:text-5xl lg:text-6xl"
+          >
+            Chytřejší tréninky,<br />
+            <span class="text-[var(--color-accent-primary)]">zdravější hráči.</span>
+          </h1>
+          <p
+            class="mt-6 max-w-lg text-pretty text-lg text-[var(--color-text-secondary)] sm:text-xl"
+          >
+            Melveo dává trenérům data o únavě, zátěži a docházce — bez Excelu,
+            bez whatsappu, bez prokrastinace.
+          </p>
+          <div class="mt-10 flex flex-wrap items-center gap-4">
+            <a
+              href="#kontakt"
+              class="inline-flex items-center justify-center rounded-xl bg-[var(--color-accent-primary)] px-6 py-3 text-base font-semibold text-[var(--color-accent-primary-cta-fg)] shadow-sm transition hover:bg-[var(--color-accent-primary-hover)]"
+            >
+              Zarezervovat pilot
+            </a>
+            <a
+              href="#funkce"
+              class="text-base font-medium text-[var(--color-text-primary)] hover:text-[var(--color-accent-primary)]"
+            >
+              Co umíme →
+            </a>
+          </div>
+        </div>
+
+        <div class="relative">
+          <!-- Hero halo placeholder. Replace with real screenshot once mockups
+               are signed off (see docs/planning/177 fáze D, blocked on
+               user-supplied design styles). -->
+          <div
+            class="aspect-[4/5] rounded-3xl bg-gradient-to-br from-[var(--color-accent-primary-subtle)] via-[var(--color-bg-tint)] to-[var(--color-bg-surface)] p-1 shadow-xl"
+          >
+            <div
+              class="flex h-full w-full items-center justify-center rounded-[22px] bg-[var(--color-bg-surface)] p-12 text-center"
+            >
+              <div>
+                <p class="text-sm uppercase tracking-widest text-[var(--color-text-tertiary)]">
+                  Hero placeholder
+                </p>
+                <p class="mt-2 text-base text-[var(--color-text-secondary)]">
+                  Screenshot přibude po finální UX validaci.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Features -->
+  <section id="funkce" class="border-b border-[var(--color-stroke-base)]">
+    <div class="mx-auto max-w-6xl px-6 py-24">
+      <div class="mb-16 max-w-2xl">
+        <p class="mb-3 text-sm font-semibold uppercase tracking-widest text-[var(--color-accent-primary)]">
+          Co Melveo dělá
+        </p>
+        <h2 class="text-balance text-3xl font-bold tracking-tight sm:text-4xl">
+          Čtyři disciplíny, žádný cirkus.
+        </h2>
+        <p class="mt-4 text-lg text-[var(--color-text-secondary)]">
+          Žádné gamifikace, žádné AI „insights" co nikdo neumí přečíst. Jen
+          věci co kluby denně řeší.
+        </p>
+      </div>
+
+      <div class="grid gap-8 sm:grid-cols-2">
+        {
+          features.map((f) => (
+            <div class="rounded-2xl border border-[var(--color-stroke-base)] bg-[var(--color-bg-surface)] p-8">
+              <div class="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-xl bg-[var(--color-accent-primary-subtle)] text-[var(--color-accent-primary-cta-fg)]">
+                <span class="text-xl font-bold">★</span>
+              </div>
+              <h3 class="mb-2 text-xl font-semibold">{f.title}</h3>
+              <p class="text-[var(--color-text-secondary)]">{f.body}</p>
+            </div>
+          ))
+        }
+      </div>
+    </div>
+  </section>
+
+  <!-- Pricing teaser -->
+  <section id="cena" class="border-b border-[var(--color-stroke-base)]">
+    <div class="mx-auto max-w-6xl px-6 py-24">
+      <div class="grid gap-16 sm:grid-cols-2 sm:items-start">
+        <div>
+          <p class="mb-3 text-sm font-semibold uppercase tracking-widest text-[var(--color-accent-primary)]">
+            Cena
+          </p>
+          <h2 class="text-balance text-3xl font-bold tracking-tight sm:text-4xl">
+            1 tým = 1 licence. Hráč nikdy neplatí.
+          </h2>
+          <p class="mt-4 text-lg text-[var(--color-text-secondary)]">
+            Klub kupuje licenci na sezónu. Trenér zve hráče přes pozvánkový
+            kód — bez Apple účtů, bez kartiček, bez registrací.
+          </p>
+        </div>
+
+        <div class="rounded-2xl border border-[var(--color-stroke-base)] bg-[var(--color-bg-surface)] p-8">
+          <h3 class="mb-1 text-2xl font-bold">Pilot 30 dní</h3>
+          <p class="mb-6 text-[var(--color-text-secondary)]">
+            Zkuste to s celým týmem.
+          </p>
+          <p class="mb-6">
+            <span class="text-4xl font-bold">1 970 Kč</span>
+            <span class="text-[var(--color-text-secondary)]"> / 30 dní / tým</span>
+          </p>
+          <ul class="space-y-3">
+            {
+              pricingNotes.map((note) => (
+                <li class="flex items-start gap-3 text-[var(--color-text-secondary)]">
+                  <span class="mt-1 inline-block h-1.5 w-1.5 flex-none rounded-full bg-[var(--color-accent-primary)]" />
+                  <span>{note}</span>
+                </li>
+              ))
+            }
+          </ul>
+          <a
+            href="#kontakt"
+            class="mt-8 inline-flex w-full items-center justify-center rounded-xl bg-[var(--color-accent-primary)] px-6 py-3 text-base font-semibold text-[var(--color-accent-primary-cta-fg)] transition hover:bg-[var(--color-accent-primary-hover)]"
+          >
+            Zarezervovat pilot
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Contact -->
+  <section id="kontakt">
+    <div class="mx-auto max-w-3xl px-6 py-24 text-center">
+      <h2 class="text-balance text-3xl font-bold tracking-tight sm:text-4xl">
+        Pojďme to zkusit s vaším týmem.
+      </h2>
+      <p class="mx-auto mt-4 max-w-xl text-lg text-[var(--color-text-secondary)]">
+        Napište nám, krátce zavoláme, společně domluvíme pilot a 1. trénink na
+        Melveu proběhne do 14 dní.
+      </p>
+      <a
+        href="mailto:hello@melveo.app?subject=Mám%20zájem%20o%20pilot"
+        class="mt-10 inline-flex items-center justify-center rounded-xl bg-[var(--color-accent-primary)] px-8 py-4 text-lg font-semibold text-[var(--color-accent-primary-cta-fg)] transition hover:bg-[var(--color-accent-primary-hover)]"
+      >
+        hello@melveo.app
+      </a>
+    </div>
+  </section>
+</BaseLayout>

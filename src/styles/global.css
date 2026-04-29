@@ -1,0 +1,103 @@
+/*
+  Melveo design tokens — mirrored from
+  team_app/Melveo/Melveo/Design/Tokens/Colors.swift +
+  Melveo.xcassets/Colors/*.colorset/Contents.json
+  (canonical: docs/planning/58_design_tokens_motion_haptic.md §1)
+
+  RULE: never hand-write hex values in components — reference these vars.
+  When SwiftUI tokens change, update here too — see doc 178.
+*/
+
+@import "tailwindcss";
+
+@theme {
+  /* Brand cyan (Electric Cyan ramp from doc 58) */
+  --color-accent-primary: #00f0ff;
+  --color-accent-primary-hover: #1ad6e6;
+  --color-accent-primary-pressed: #14b8c4;
+  --color-accent-primary-subtle: #cdf7fb;
+  --color-accent-primary-cta-fg: #001014;
+  --color-accent-warm: #b0702e;
+  --color-accent-warm-dark: #d18a42;
+
+  /* Light surface */
+  --color-bg-canvas: #f5f7fa;
+  --color-bg-surface: #ffffff;
+  --color-bg-surface-elevated: #ffffff;
+  --color-bg-tint: #e6fbfe;
+
+  /* Light text */
+  --color-text-primary: #0a0f1c;
+  --color-text-secondary: #475569;
+  --color-text-tertiary: #94a3b8;
+  --color-text-inverse: #f5feff;
+
+  /* Light strokes */
+  --color-stroke-base: #e2e8f0;
+  --color-stroke-emphasized: #cbd5e1;
+
+  /* Feedback (same in light + dark) */
+  --color-feedback-success: #22c55e;
+  --color-feedback-warning: #f59e0b;
+  --color-feedback-error: #ef4444;
+  --color-feedback-info: #3b82f6;
+
+  /* Typography */
+  --font-sans: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+  --font-display: "Inter", -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+
+  /* Spacing scale — 4px base, mirrors SwiftUI .spacing* tokens */
+  --spacing-2xs: 4px;
+  --spacing-xs: 8px;
+  --spacing-s: 12px;
+  --spacing-m: 16px;
+  --spacing-l: 24px;
+  --spacing-xl: 32px;
+  --spacing-2xl: 48px;
+
+  /* Radii */
+  --radius-s: 8px;
+  --radius-m: 12px;
+  --radius-l: 16px;
+  --radius-xl: 24px;
+}
+
+/* Dark mode override — switches when prefers-color-scheme: dark.
+   Matches the dark variant in each .colorset Contents.json. */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-bg-canvas: #0a0f1c;
+    --color-bg-surface: #131b2e;
+    --color-bg-surface-elevated: #1a2238;
+    --color-bg-tint: #0a3a44;
+    --color-text-primary: #f5feff;
+    --color-text-secondary: #b8c5d6;
+    --color-text-tertiary: #8a9bb0;
+    --color-text-inverse: #0a0f1c;
+    --color-stroke-base: #1f2a44;
+    --color-stroke-emphasized: #2c3a58;
+  }
+}
+
+/* Base reset + body */
+html {
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background: var(--color-bg-canvas);
+  color: var(--color-text-primary);
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+}
+
+/* Typographic helpers used across pages */
+.text-balance {
+  text-wrap: balance;
+}
+
+.text-pretty {
+  text-wrap: pretty;
+}

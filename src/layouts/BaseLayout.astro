@@ -1,0 +1,104 @@
+---
+/**
+ * BaseLayout — wraps every page with header, footer, and global meta.
+ *
+ * Apple App Store discipline (docs/planning/15 §"Apple-safe"):
+ * the iOS companion app must never see Buy/Subscribe CTAs. The web
+ * surface is allowed (and required) to handle commerce — that's the
+ * whole point of having a web. Keep CTAs labeled in Czech consistent
+ * with the in-app pricing copy ("Vyžádat upgrade" → "Zarezervovat
+ * pilot" on web).
+ */
+
+interface Props {
+  title: string;
+  description?: string;
+  /** Path-only URL used for canonical + OG tags. Trailing slash optional. */
+  canonical?: string;
+  /** Override the default OG image. */
+  ogImage?: string;
+}
+
+const {
+  title,
+  description = "Melveo — chytřejší tréninky a zdravější hráči pro kluby, trenéry i hráče.",
+  canonical,
+  ogImage = "/og-default.png",
+} = Astro.props;
+
+const fullTitle = title === "Melveo" ? title : `${title} — Melveo`;
+const canonicalUrl = canonical
+  ? new URL(canonical, Astro.site).toString()
+  : new URL(Astro.url.pathname, Astro.site).toString();
+---
+
+<!doctype html>
+<html lang="cs">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="generator" content={Astro.generator} />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="canonical" href={canonicalUrl} />
+
+    <title>{fullTitle}</title>
+    <meta name="description" content={description} />
+
+    <!-- OG / Twitter -->
+    <meta property="og:title" content={fullTitle} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonicalUrl} />
+    <meta property="og:image" content={new URL(ogImage, Astro.site).toString()} />
+    <meta property="og:type" content="website" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={fullTitle} />
+    <meta name="twitter:description" content={description} />
+
+    <!-- Universal Links: app association files live in /public/.well-known/ -->
+  </head>
+  <body class="bg-[var(--color-bg-canvas)] text-[var(--color-text-primary)]">
+    <header class="border-b border-[var(--color-stroke-base)]">
+      <div class="mx-auto flex max-w-6xl items-center justify-between px-6 py-5">
+        <a href="/" class="text-xl font-semibold tracking-tight">melveo</a>
+        <nav class="flex items-center gap-6 text-sm text-[var(--color-text-secondary)]">
+          <a href="/#funkce" class="hover:text-[var(--color-text-primary)] transition-colors">Funkce</a>
+          <a href="/#cena" class="hover:text-[var(--color-text-primary)] transition-colors">Cena</a>
+          <a href="/#kontakt" class="hover:text-[var(--color-text-primary)] transition-colors">Kontakt</a>
+        </nav>
+      </div>
+    </header>
+
+    <main>
+      <slot />
+    </main>
+
+    <footer class="mt-24 border-t border-[var(--color-stroke-base)]">
+      <div class="mx-auto flex max-w-6xl flex-col gap-6 px-6 py-12 sm:flex-row sm:items-center sm:justify-between">
+        <div class="text-sm text-[var(--color-text-secondary)]">
+          © 2026 Melveo. Made with care in Czechia.
+        </div>
+        <nav class="flex flex-wrap gap-6 text-sm">
+          <a
+            href="/privacy"
+            class="text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] transition-colors"
+            >Ochrana soukromí</a
+          >
+          <a
+            href="/terms"
+            class="text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] transition-colors"
+            >Podmínky</a
+          >
+          <a
+            href="mailto:hello@melveo.app"
+            class="text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] transition-colors"
+            >hello@melveo.app</a
+          >
+        </nav>
+      </div>
+    </footer>
+  </body>
+</html>
+
+<style is:global>
+  @import "../styles/global.css";
+</style>
