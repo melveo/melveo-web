@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 60" role="img" aria-label="Stáhnout v App Store">
+    <!--
+        Placeholder Czech App Store badge. NOT the official Apple asset —
+        replace with the localized SVG from
+        https://tools.applemediaservices.com/app-store/badges/cs-cz
+        once the App Store listing is live and the brand guidelines link
+        binds to a real itms-apps URL. Apple requires using their official
+        artwork (Marketing & Identity Guidelines §"App Store Badges").
+    -->
+    <rect width="200" height="60" rx="10" fill="#000"/>
+    <rect x="0.5" y="0.5" width="199" height="59" rx="9.5" fill="none" stroke="#fff" stroke-opacity="0.16"/>
+
+    <!-- Apple logo -->
+    <g transform="translate(16, 14)" fill="#fff">
+        <path d="M14.6 16.5c0-3.5 2.9-5.2 3-5.3-1.6-2.4-4.2-2.7-5.1-2.8-2.2-.2-4.2 1.3-5.3 1.3-1.1 0-2.8-1.3-4.6-1.2-2.4 0-4.6 1.4-5.8 3.5-2.5 4.3-.6 10.7 1.8 14.2 1.2 1.7 2.5 3.6 4.4 3.5 1.8-.1 2.4-1.1 4.6-1.1 2.1 0 2.7 1.1 4.6 1.1 1.9 0 3.1-1.7 4.3-3.4 1.4-2 1.9-3.9 2-4-.1 0-3.9-1.5-3.9-5.8zm-3.5-10.8c1-1.2 1.7-2.9 1.5-4.5-1.4.1-3.2 1-4.2 2.1-.9 1-1.7 2.7-1.5 4.3 1.6.1 3.2-.8 4.2-1.9z"/>
+    </g>
+
+    <!-- Stáhnout v -->
+    <text x="46" y="22" fill="#fff" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" font-size="9" font-weight="400" letter-spacing="0.3">
+        Stáhnout v
+    </text>
+
+    <!-- App Store -->
+    <text x="46" y="42" fill="#fff" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" font-size="20" font-weight="600" letter-spacing="-0.4">
+        App Store
+    </text>
+</svg>

@@ -1,13 +1,16 @@
 ---
 /**
- * BaseLayout — wraps every page with header, footer, and global meta.
+ * BaseLayout — fullwidth, indie-iOS-app style.
+ *
+ * No max-width container; pages render edge-to-edge. Content padding
+ * is handled per-section. Header is intentionally absent on the
+ * landing — the wordmark sits inside the hero. Privacy/Terms pages
+ * use their own constrained article width.
  *
  * Apple App Store discipline (docs/planning/15 §"Apple-safe"):
  * the iOS companion app must never see Buy/Subscribe CTAs. The web
- * surface is allowed (and required) to handle commerce — that's the
- * whole point of having a web. Keep CTAs labeled in Czech consistent
- * with the in-app pricing copy ("Vyžádat upgrade" → "Zarezervovat
- * pilot" on web).
+ * surface is allowed and required to host the App Store badge,
+ * pilot enquiry email, and legal pages.
  */
 
 interface Props {
@@ -17,6 +20,9 @@ interface Props {
   canonical?: string;
   /** Override the default OG image. */
   ogImage?: string;
+  /** When true, render the minimal landing footer (default).
+   *  Privacy/Terms pages set this false to render an even lighter footer. */
+  showLandingFooter?: boolean;
 }
 
 const {
@@ -24,6 +30,7 @@ const {
   description = "Melveo — chytřejší tréninky a zdravější hráči pro kluby, trenéry i hráče.",
   canonical,
   ogImage = "/og-default.png",
+  showLandingFooter = true,
 } = Astro.props;
 
 const fullTitle = title === "Melveo" ? title : `${title} — Melveo`;
@@ -53,49 +60,37 @@ const canonicalUrl = canonical
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content={fullTitle} />
     <meta name="twitter:description" content={description} />
-
-    <!-- Universal Links: app association files live in /public/.well-known/ -->
   </head>
-  <body class="bg-[var(--color-bg-canvas)] text-[var(--color-text-primary)]">
-    <header class="border-b border-[var(--color-stroke-base)]">
-      <div class="mx-auto flex max-w-6xl items-center justify-between px-6 py-5">
-        <a href="/" class="text-xl font-semibold tracking-tight">melveo</a>
-        <nav class="flex items-center gap-6 text-sm text-[var(--color-text-secondary)]">
-          <a href="/#funkce" class="hover:text-[var(--color-text-primary)] transition-colors">Funkce</a>
-          <a href="/#cena" class="hover:text-[var(--color-text-primary)] transition-colors">Cena</a>
-          <a href="/#kontakt" class="hover:text-[var(--color-text-primary)] transition-colors">Kontakt</a>
-        </nav>
-      </div>
-    </header>
+  <body class="min-h-screen bg-[var(--color-bg-canvas)] text-[var(--color-text-primary)]">
+    <slot />
 
-    <main>
-      <slot />
-    </main>
-
-    <footer class="mt-24 border-t border-[var(--color-stroke-base)]">
-      <div class="mx-auto flex max-w-6xl flex-col gap-6 px-6 py-12 sm:flex-row sm:items-center sm:justify-between">
-        <div class="text-sm text-[var(--color-text-secondary)]">
-          © 2026 Melveo. Made with care in Czechia.
-        </div>
-        <nav class="flex flex-wrap gap-6 text-sm">
-          <a
-            href="/privacy"
-            class="text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] transition-colors"
-            >Ochrana soukromí</a
-          >
-          <a
-            href="/terms"
-            class="text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] transition-colors"
-            >Podmínky</a
-          >
-          <a
-            href="mailto:hello@melveo.app"
-            class="text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] transition-colors"
-            >hello@melveo.app</a
-          >
-        </nav>
-      </div>
-    </footer>
+    {
+      showLandingFooter && (
+        <footer class="border-t border-[var(--color-stroke-base)]/60">
+          <div class="flex flex-col items-center gap-4 px-6 py-10 text-center text-sm text-[var(--color-text-tertiary)] sm:flex-row sm:justify-center sm:gap-8">
+            <span>© 2026 Melveo</span>
+            <a
+              href="mailto:hello@melveo.app"
+              class="transition-colors hover:text-[var(--color-text-primary)]"
+            >
+              hello@melveo.app
+            </a>
+            <a
+              href="/privacy"
+              class="transition-colors hover:text-[var(--color-text-primary)]"
+            >
+              Ochrana soukromí
+            </a>
+            <a
+              href="/terms"
+              class="transition-colors hover:text-[var(--color-text-primary)]"
+            >
+              Podmínky
+            </a>
+          </div>
+        </footer>
+      )
+    }
   </body>
 </html>
 
