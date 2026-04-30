@@ -1,66 +1,253 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import PageHeader from '../../components/PageHeader.astro';
+
+/**
+ * Terms of use CS — V4-B draft.
+ *
+ * Per PLAN.md §16.6 written against:
+ *   - Zákon č. 89/2012 Sb. (občanský zákoník), zejm. §1810-1867
+ *     spotřebitelské smlouvy
+ *   - Zákon č. 634/1992 Sb. o ochraně spotřebitele
+ *   - Zákon č. 480/2004 Sb. — informační společnost
+ *   - Apple App Store Review Guideline 3.1.3(f) — companion apps
+ *   - Pilot pricing decision: 1 970 Kč / 30 dní + auto-convert
+ *     (memory project_pilot_pricing_tbd, decided 2026-04-28)
+ *
+ * Pre-první-velký-klient bude advokát review (per rev.3 Q4).
+ */
+
+const lastUpdated = '2026-04-30';
 ---
 
 <BaseLayout
-  title="Podmínky používání"
-  description="Smluvní podmínky pro využívání aplikace Melveo. Klub je plátce, hráč nikdy."
+  title="Smluvní podmínky"
+  description="Smluvní podmínky pro používání aplikace Melveo. Klub je plátce, hráč nikdy."
   lang="cs"
 >
   <PageHeader lang="cs" />
-  <article class="mx-auto max-w-3xl px-6 py-20">
-    <p class="mb-4 text-sm font-semibold uppercase tracking-widest text-[var(--color-accent-primary)]">
-      Verze placeholder · 2026-04-30
-    </p>
-    <h1 class="text-balance text-4xl font-bold tracking-tight sm:text-5xl">
-      Podmínky používání
-    </h1>
-    <p class="mt-6 text-lg text-[var(--color-text-secondary)]">
-      Stránka je provizorní. Závazné znění vstoupí v platnost před první
-      placenou licencí.
+  <article class="legal-article">
+    <p class="legal-eyebrow">Účinnost · {lastUpdated}</p>
+    <h1 class="legal-h1">Smluvní podmínky</h1>
+    <p class="legal-lead">
+      Tyto smluvní podmínky (dále jen <strong>„Podmínky"</strong>) upravují
+      vztahy mezi provozovatelem aplikace a webu Melveo a jeho uživateli.
+      Vychází ze zákona č. 89/2012 Sb., občanského zákoníku, a navazujících
+      právních předpisů.
     </p>
 
-    <hr class="my-12 border-[var(--color-stroke-base)]" />
+    <hr />
 
-    <h2 class="mt-12 text-2xl font-semibold">Provozovatel</h2>
-    <p class="mt-4 text-[var(--color-text-secondary)]">
-      <strong>QUIX Global s.r.o.</strong>, IČO 22466444, sídlo Příčná
-      1892/4, 110 00 Praha 1, zapsaná u Městského soudu v Praze, oddíl C,
-      vložka 416432. Datová schránka: <code>g7v78rx</code>.
+    <h2>1. Provozovatel</h2>
+    <p class="legal-block">
+      <strong>QUIX Global s.r.o.</strong><br />
+      IČO: 22466444<br />
+      Sídlo: Příčná 1892/4, Nové Město, 110 00 Praha 1<br />
+      Datová schránka: <code>g7v78rx</code><br />
+      Spisová značka: C 416432, Městský soud v Praze<br />
+      <br />
+      Kontakt: <a href="mailto:hello@melveo.app">hello@melveo.app</a>
     </p>
 
-    <h2 class="mt-10 text-2xl font-semibold">Model licencování</h2>
-    <p class="mt-4 text-[var(--color-text-secondary)]">
-      <strong>1 licence = 1 tým × 1 sezóna.</strong> Plátcem je vždy klub
-      (právní subjekt nebo statutární zástupce). Hráči ani trenéři aplikaci
-      nikdy přímo neplatí — přístup získávají přes pozvánku od klubu.
-    </p>
-
-    <h2 class="mt-10 text-2xl font-semibold">Platby</h2>
-    <p class="mt-4 text-[var(--color-text-secondary)]">
-      Platby zpracovává Stripe Inc. Platit lze kartou nebo na fakturu.
-      Aplikace pro iOS je <em>companion app</em> dle pravidel Apple App
-      Store §3.1.3(f) — všechny komerční operace probíhají na webu, nikdy
-      v iOS aplikaci.
-    </p>
-
-    <h2 class="mt-10 text-2xl font-semibold">Odpovědnost a omezení</h2>
-    <ul class="mt-4 space-y-3 text-[var(--color-text-secondary)]">
-      <li>
-        Melveo není zdravotnické zařízení. Wellness check-iny slouží
-        sportovní přípravě, ne medicínským rozhodnutím.
-      </li>
-      <li>
-        Klub odpovídá za to, že hráči s aplikací souhlasí (zejm. nezletilí
-        přes zákonného zástupce).
-      </li>
+    <h2>2. Definice</h2>
+    <ul>
+      <li><strong>Aplikace</strong> — mobilní aplikace Melveo pro iOS/iPadOS,
+        dostupná v Apple App Store.</li>
+      <li><strong>Web</strong> — webové stránky <code>melveo.app</code>.</li>
+      <li><strong>Klub</strong> — sportovní klub či organizace (právnická
+        nebo fyzická osoba — podnikatel), která uzavřela licenční smlouvu.</li>
+      <li><strong>Uživatel</strong> — fyzická osoba, která používá aplikaci
+        z titulu pozvání klubem (hráč, trenér, manager, atd.).</li>
+      <li><strong>Licence</strong> — právo používat aplikaci pro jeden tým
+        v jedné sezóně.</li>
+      <li><strong>Pilot</strong> — zvýhodněné krátkodobé licenční schéma
+        pro nové kluby (viz čl. 6).</li>
     </ul>
 
-    <p class="mt-12 rounded-xl border border-[var(--color-stroke-emphasized)] bg-[var(--color-bg-surface)] p-6 text-sm text-[var(--color-text-secondary)]">
-      <strong>Poznámka pro vývoj:</strong> finální podmínky budou doplněny
-      ve V4-B fázi včetně specifikace jurisdikce, řešení sporů a údaje
-      o správci podle právní revize.
+    <h2>3. Předmět smlouvy</h2>
+    <p>
+      Provozovatel poskytuje klubu nevýhradní, nepřevoditelnou licenci
+      k používání aplikace Melveo pro správu wellness, tréninkových sessions
+      a coach board pro jeden tým v jedné sezóně. Klub umožňuje hráčům a
+      dalším uživatelům přístup k aplikaci v rámci své licence.
+    </p>
+
+    <h2>4. Vznik smlouvy</h2>
+    <p>
+      Smlouva mezi klubem a provozovatelem vzniká okamžikem zaplacení
+      objednané licence prostřednictvím platebního systému Stripe nebo
+      přijetí faktury klubem. Pro hráče a další uživatele vzniká smluvní
+      vztah okamžikem akceptace pozvání do týmu.
+    </p>
+
+    <h2>5. Cena a platební podmínky</h2>
+    <p>
+      <strong>Princip:</strong> 1 licence = 1 tým × 1 sezóna. Plátcem
+      licence je vždy klub (právnická osoba nebo statutární zástupce).
+      Hráči, trenéři ani jiní uživatelé aplikaci nikdy přímo neplatí.
+    </p>
+    <p>
+      Aktuální ceny jsou komunikovány individuálně. Veškeré platby jsou
+      zpracovávány přes Stripe Payments Europe Ltd. Akceptujeme platby
+      kartou nebo na fakturu (po předchozí dohodě).
+    </p>
+    <p>
+      Provozovatel <em>není v současné době plátcem DPH.</em> Faktury jsou
+      vystavovány bez DPH. V případě změny statusu plátce DPH budou klubům
+      vystavovány faktury s DPH a podmínky budou aktualizovány s předstihem
+      30 dní.
+    </p>
+
+    <h2>6. Pilotní program</h2>
+    <p>
+      Pro nové kluby nabízíme <strong>pilotní licenci na 30 dní</strong>
+      za zvýhodněnou cenu, která je individuálně dohodnuta při uzavření
+      smlouvy. Pilot zahrnuje:
+    </p>
+    <ul>
+      <li>Plnou funkcionalitu aplikace pro celý tým (až 12 hráčů + neomezený
+        počet trenérů a vedení)</li>
+      <li>Onboarding telefonát a podporu při prvním tréninku</li>
+      <li>
+        <strong>Záruku dodání:</strong> pokud aplikace neslouží Vašemu
+        provozu a my nedokážeme problém vyřešit do 14 kalendářních dnů
+        od písemné reklamace, vracíme plnou cenu pilotu.
+      </li>
+    </ul>
+    <p>
+      Po skončení pilotu má klub možnost pokračovat na roční licenci.
+      Cena roční licence bude komunikována nejméně 7 dní před koncem pilotu.
+      Pokud klub nepokračuje, jeho data zůstanou archivována 90 dní
+      pro případnou re-aktivaci, poté budou trvale smazána.
+    </p>
+
+    <h2>7. Apple App Store — companion app</h2>
+    <p>
+      Aplikace Melveo pro iOS je tzv. <strong>companion app</strong> ve
+      smyslu pravidel Apple App Store §3.1.3(f). To znamená, že:
+    </p>
+    <ul>
+      <li>Aplikace neobsahuje žádné nákupní tlačítka ani in-app purchases</li>
+      <li>Veškeré komerční operace (zakoupení licence, fakturace) probíhají
+        výhradně mimo aplikaci — na webu nebo přes faktury</li>
+      <li>Stažení aplikace z App Store je zdarma</li>
+    </ul>
+
+    <h2>8. Práva a povinnosti klubu</h2>
+    <p>Klub se zavazuje:</p>
+    <ul>
+      <li>Poskytnout pravdivé fakturační a kontaktní údaje</li>
+      <li>Získat souhlas všech pozvaných uživatelů s těmito Podmínkami a
+        s Ochranou osobních údajů, zejména u nezletilých přes zákonného
+        zástupce (§ 11 zák. 110/2019 Sb.)</li>
+      <li>Nepoužívat aplikaci k účelům, které jsou v rozporu se zákonem</li>
+      <li>Nesdílet přístupové údaje s neoprávněnými osobami</li>
+    </ul>
+
+    <h2>9. Práva a povinnosti uživatele (hráče, trenéra)</h2>
+    <p>Uživatel se zavazuje:</p>
+    <ul>
+      <li>Používat aplikaci v souladu s pokyny klubu</li>
+      <li>Vyplňovat wellness check-iny pravdivě (jejich účelem je
+        sportovní příprava, ne medicína)</li>
+      <li>Chránit své přihlašovací údaje</li>
+    </ul>
+    <p>
+      Uživatel má právo kdykoli ukončit používání aplikace smazáním účtu
+      v sekci „Účet" — tím opouští všechny týmy a jeho data jsou smazána
+      v souladu s Ochranou osobních údajů.
+    </p>
+
+    <h2>10. Omezení odpovědnosti</h2>
+    <p>
+      <strong>Aplikace Melveo není zdravotnickým prostředkem ani
+      diagnostickým nástrojem.</strong> Wellness check-iny a další
+      data slouží výhradně pro sportovní přípravu a komunikaci v týmu.
+      Provozovatel neodpovídá za rozhodnutí klubu, trenéra ani hráče,
+      která jsou činěna na základě dat z aplikace.
+    </p>
+    <p>
+      Provozovatel neodpovídá za škody vzniklé:
+    </p>
+    <ul>
+      <li>Nedostupností služby v důsledku okolností mimo jeho kontrolu
+        (výpadky internetu, App Store, Apple push services, atd.)</li>
+      <li>Nesprávným použitím aplikace ze strany uživatele nebo klubu</li>
+      <li>Ztrátou dat v důsledku zaviněného jednání uživatele</li>
+    </ul>
+    <p>
+      V případě prokázané vady na straně provozovatele je odpovědnost
+      omezena maximálně na výši uhrazené ceny licence za poslední účtovací
+      období.
+    </p>
+
+    <h2>11. Reklamace a ukončení</h2>
+    <p>
+      Reklamaci lze podat e-mailem na
+      <a href="mailto:hello@melveo.app">hello@melveo.app</a> nebo
+      datovou schránkou <code>g7v78rx</code>. Reklamace bude vyřízena
+      do 30 dnů od přijetí. V průběhu pilotu platí specifická záruka
+      dodání (čl. 6).
+    </p>
+    <p>
+      Smlouvu lze ze strany klubu vypovědět:
+    </p>
+    <ul>
+      <li>Kdykoli e-mailem na <a href="mailto:hello@melveo.app">hello@melveo.app</a>
+        — s účinností ke konci aktuálního zúčtovacího období</li>
+      <li>Bezprostředně v případě závažného porušení Podmínek
+        provozovatelem</li>
+    </ul>
+    <p>
+      Provozovatel může smlouvu vypovědět:
+    </p>
+    <ul>
+      <li>S výpovědní lhůtou 30 dnů, e-mailem na klubový kontakt</li>
+      <li>Okamžitě v případě závažného porušení Podmínek klubem nebo
+        nezaplacení splatné faktury déle než 30 dní</li>
+    </ul>
+
+    <h2>12. Spotřebitelské spory</h2>
+    <p>
+      Tato smlouva je primárně B2B (klub ↔ provozovatel). V případě, že
+      je klub spotřebitelem dle § 419 zák. 89/2012 Sb. (např. nezisková
+      sportovní organizace bez podnikatelské činnosti), uplatní se na
+      tuto smlouvu zvláštní ochrana spotřebitele dle zákona č. 634/1992 Sb.
+    </p>
+    <p>
+      V případě sporu se mohou spotřebitelé obrátit na:
+    </p>
+    <p class="legal-block">
+      <strong>Česká obchodní inspekce</strong><br />
+      Štěpánská 567/15, 120 00 Praha 2<br />
+      <a href="https://www.coi.cz" target="_blank" rel="noopener">www.coi.cz</a>
+    </p>
+
+    <h2>13. Změny Podmínek</h2>
+    <p>
+      Tyto Podmínky můžeme aktualizovat. Klubům s aktivní licencí budou
+      podstatné změny oznámeny e-mailem nejméně 30 dní před účinností.
+      Pokud klub se změnami nesouhlasí, má právo smlouvu vypovědět
+      bez sankce.
+    </p>
+
+    <h2>14. Závěrečná ustanovení</h2>
+    <p>
+      Tyto Podmínky a smlouvu mezi provozovatelem a klubem se řídí
+      právním řádem České republiky. Příslušnými soudy jsou české
+      obecné soudy podle sídla provozovatele.
+    </p>
+    <p>
+      Pokud bude některé ustanovení Podmínek neplatné nebo neúčinné,
+      zůstávají ostatní ustanovení v platnosti (salvátorská klauzule).
+    </p>
+
+    <p class="legal-disclaimer">
+      Tento dokument je vlastní zpracování provozovatele a vychází z
+      platné legislativy. Pro enterprise smlouvy a komplexní zpracování
+      doporučujeme advokátní revizi.
     </p>
   </article>
 </BaseLayout>
+
+<!-- Styles in src/styles/legal.css (imported via global.css) -->

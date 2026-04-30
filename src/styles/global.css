@@ -117,6 +117,8 @@ body {
   z-index: 0;
 }
 
+@import "./legal.css";
+
 /* Subtle grid overlay used in feature bands (raycast pattern) */
 .grid-overlay {
   position: absolute;

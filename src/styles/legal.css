@@ -1,0 +1,131 @@
+/*
+  Shared typography for legal pages (Privacy, Terms).
+  Imported via global stylesheet so .legal-article works on every locale.
+*/
+
+.legal-article {
+  margin: 0 auto;
+  max-width: 48rem;
+  padding: 4rem 1.5rem 6rem;
+  color: var(--color-text-secondary);
+  line-height: 1.7;
+}
+
+.legal-article h1.legal-h1 {
+  font-size: clamp(2rem, 4vw, 3rem);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--color-text-primary);
+  margin: 0 0 1.5rem;
+}
+
+.legal-article h2 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--color-text-primary);
+  margin: 3rem 0 1rem;
+  letter-spacing: -0.01em;
+}
+
+.legal-article h3 {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: var(--color-text-primary);
+  margin: 2rem 0 0.75rem;
+}
+
+.legal-article p,
+.legal-article ul,
+.legal-article ol {
+  margin: 1rem 0;
+}
+
+.legal-article ul,
+.legal-article ol {
+  padding-left: 1.5rem;
+}
+
+.legal-article li {
+  margin: 0.5rem 0;
+}
+
+.legal-article .legal-eyebrow {
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  color: var(--color-accent-primary);
+  margin-bottom: 1rem;
+}
+
+.legal-article .legal-lead {
+  font-size: 1.125rem;
+  color: var(--color-text-secondary);
+  margin: 1.5rem 0 0;
+}
+
+.legal-article .legal-block {
+  background: var(--color-bg-surface);
+  border: 1px solid var(--color-stroke-base);
+  border-radius: 0.75rem;
+  padding: 1.25rem 1.5rem;
+  margin: 1.5rem 0;
+  color: var(--color-text-primary);
+}
+
+.legal-article .legal-disclaimer {
+  margin-top: 4rem;
+  padding: 1.5rem;
+  border: 1px solid var(--color-stroke-emphasized);
+  background: var(--color-bg-surface);
+  border-radius: 0.75rem;
+  font-size: 0.875rem;
+  color: var(--color-text-secondary);
+}
+
+.legal-article hr {
+  margin: 3rem 0;
+  border: 0;
+  border-top: 1px solid var(--color-stroke-base);
+}
+
+.legal-article a {
+  color: var(--color-accent-primary);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.legal-article strong {
+  color: var(--color-text-primary);
+  font-weight: 600;
+}
+
+.legal-article code {
+  background: var(--color-bg-surface);
+  padding: 0.125rem 0.375rem;
+  border-radius: 0.25rem;
+  font-size: 0.875em;
+  color: var(--color-text-primary);
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace;
+}
+
+.legal-article .legal-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1.5rem 0;
+  font-size: 0.95rem;
+}
+
+.legal-article .legal-table th,
+.legal-article .legal-table td {
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--color-stroke-base);
+  text-align: left;
+  vertical-align: top;
+}
+
+.legal-article .legal-table th {
+  background: var(--color-bg-surface);
+  color: var(--color-text-primary);
+  font-weight: 600;
+}

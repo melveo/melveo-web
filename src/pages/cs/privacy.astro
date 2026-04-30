@@ -3,96 +3,331 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
 import PageHeader from '../../components/PageHeader.astro';
 
 /**
- * Privacy policy CS — placeholder. V4-B nahradí finálním textem
- * per zák. č. 110/2019 Sb., GDPR, zák. 480/2004 Sb., zák. 89/2012 Sb.
- * a Apple §5.1.1.
+ * Privacy policy CS — V4-B draft.
+ *
+ * Per PLAN.md §16.6 written against:
+ *   - Nařízení EU 2016/679 (GDPR), zejm. Art. 13 + 14 (transparentnost)
+ *     a Art. 15-22 (práva subjektu)
+ *   - Zákon č. 110/2019 Sb., o zpracování osobních údajů
+ *   - Zákon č. 480/2004 Sb. o některých službách informační společnosti
+ *     (§7 e-mail, §89 cookies)
+ *   - Zákon č. 89/2012 Sb., občanský zákoník
+ *   - Apple App Store Review Guideline 5.1.1
+ *
+ * Pre-první-velký-klient bude advokát review (per rev.3 Q4).
+ * Tento text je dobrý baseline pro pilot, ne pro enterprise smlouvy.
  */
+
+const lastUpdated = '2026-04-30';
 ---
 
 <BaseLayout
-  title="Ochrana soukromí"
-  description="Jak Melveo zpracovává osobní údaje hráčů a klubů — transparentně, podle GDPR a české legislativy."
+  title="Ochrana osobních údajů"
+  description="Jak QUIX Global s.r.o. zpracovává osobní údaje uživatelů aplikace Melveo — transparentně, podle GDPR a české legislativy."
   lang="cs"
 >
   <PageHeader lang="cs" />
-  <article class="mx-auto max-w-3xl px-6 py-20">
-    <p class="mb-4 text-sm font-semibold uppercase tracking-widest text-[var(--color-accent-primary)]">
-      Verze placeholder · 2026-04-30
-    </p>
-    <h1 class="text-balance text-4xl font-bold tracking-tight sm:text-5xl">
-      Ochrana soukromí
-    </h1>
-    <p class="mt-6 text-lg text-[var(--color-text-secondary)]">
-      Tato stránka je provizorní shrnutí pro účely vývoje. Finální závazné
-      znění bude k dispozici před spuštěním placené verze.
+  <article class="legal-article">
+    <p class="legal-eyebrow">Účinnost · {lastUpdated}</p>
+    <h1 class="legal-h1">Ochrana osobních údajů</h1>
+    <p class="legal-lead">
+      Tento dokument popisuje, jaké osobní údaje shromažďujeme prostřednictvím
+      aplikace a webu Melveo, k jakým účelům, jak dlouho je uchováváme a
+      jaká máte práva. Vychází z Nařízení Evropského parlamentu a Rady (EU)
+      2016/679 (GDPR), zákona č. 110/2019 Sb. a navazující české legislativy.
     </p>
 
-    <hr class="my-12 border-[var(--color-stroke-base)]" />
+    <hr />
 
-    <h2 class="mt-12 text-2xl font-semibold">Provozovatel</h2>
-    <p class="mt-4 text-[var(--color-text-secondary)]">
-      <strong>QUIX Global s.r.o.</strong>, IČO 22466444, se sídlem Příčná
-      1892/4, 110 00 Praha 1, zapsaná v obchodním rejstříku vedeném
-      Městským soudem v Praze, oddíl C, vložka 416432. Datová schránka:
-      <code>g7v78rx</code>. Kontakt:
-      <a href="mailto:hello@melveo.app" class="text-[var(--color-accent-primary)]">
-        hello@melveo.app</a>.
+    <h2>1. Provozovatel a správce osobních údajů</h2>
+    <p>
+      Správcem osobních údajů ve smyslu čl. 4 odst. 7 GDPR je společnost:
+    </p>
+    <p class="legal-block">
+      <strong>QUIX Global s.r.o.</strong><br />
+      IČO: 22466444<br />
+      Sídlo: Příčná 1892/4, Nové Město, 110 00 Praha 1<br />
+      Datová schránka: <code>g7v78rx</code><br />
+      Spisová značka: C 416432, Městský soud v Praze<br />
+      <br />
+      Kontakt: <a href="mailto:hello@melveo.app">hello@melveo.app</a>
+    </p>
+    <p>
+      Vzhledem k velikosti a povaze zpracování není správce povinen jmenovat
+      pověřence pro ochranu osobních údajů (DPO) ve smyslu čl. 37 GDPR.
+      Veškerá komunikace ohledně osobních údajů probíhá přes uvedený
+      kontaktní e-mail.
     </p>
 
-    <h2 class="mt-10 text-2xl font-semibold">Jaké údaje zpracováváme</h2>
-    <ul class="mt-4 space-y-3 text-[var(--color-text-secondary)]">
-      <li>
-        <strong>Identifikační:</strong> jméno, e-mail, role v klubu (hráč /
-        trenér / management).
-      </li>
-      <li>
-        <strong>Wellness check-iny:</strong> denní hodnoty energie, spánku,
-        bolestivosti, nálady a motivace (1–5). Trenér vidí výhradně agregát —
-        nikdy individuální čísla.
-      </li>
-      <li>
-        <strong>Tréninkové sessions:</strong> docházka, RPE (vnímaná zátěž).
-      </li>
-      <li>
-        <strong>Zařízení:</strong> Apple Health (jen pokud hráč povolí), Polar
-        (volitelné).
+    <h2>2. Definice</h2>
+    <ul>
+      <li><strong>Aplikace</strong> — mobilní aplikace Melveo pro iOS/iPadOS.</li>
+      <li><strong>Web</strong> — webové stránky <code>melveo.app</code>.</li>
+      <li><strong>Klub</strong> — sportovní organizace, která uzavřela smlouvu
+        o licenci.</li>
+      <li><strong>Hráč</strong> — fyzická osoba pozvaná klubem do týmu;
+        uživatel aplikace.</li>
+      <li><strong>Trenér / staff</strong> — fyzická osoba pověřená klubem
+        správou týmu.</li>
+      <li><strong>Wellness check-in</strong> — denní samohodnocení hráče
+        (energie, spánek, bolestivost, nálada, motivace) na škále 1–5.</li>
+    </ul>
+
+    <h2>3. Jaké osobní údaje zpracováváme</h2>
+    <p>Zpracováváme následující kategorie osobních údajů:</p>
+
+    <h3>3.1. Identifikační údaje</h3>
+    <ul>
+      <li>Jméno a příjmení</li>
+      <li>E-mailová adresa</li>
+      <li>Identifikátor uživatele (UUID generovaný systémem)</li>
+      <li>Role v klubu (hráč / trenér / manager / klubový administrátor /
+        majitel klubu)</li>
+      <li>Volitelně: profilová fotografie, lokalizace (cs/en)</li>
+    </ul>
+
+    <h3>3.2. Údaje o sportovní aktivitě</h3>
+    <ul>
+      <li>Wellness check-iny — pětice číselných hodnot 1–5 s časovým razítkem</li>
+      <li>Volitelné poznámky o bolesti, soukromé poznámky hráče</li>
+      <li>Účast na tréninkových sessions</li>
+      <li>Subjektivní vnímaná zátěž (RPE) na škále 1–10 po skončené session</li>
+    </ul>
+
+    <h3>3.3. Údaje ze zařízení a senzorů (volitelné, pouze se souhlasem)</h3>
+    <ul>
+      <li>Apple Health: pouze hodnoty, které hráč v iOS Health
+        explicitně sdílí s aplikací</li>
+      <li>Polar (volitelné): tepová frekvence během tréninku</li>
+    </ul>
+
+    <h3>3.4. Provozní a technické údaje</h3>
+    <ul>
+      <li>Čas přihlášení, IP adresa (zpracována pouze pro detekci podvodu,
+        neukládá se déle než 30 dní)</li>
+      <li>Identifikátor zařízení (pro push notifikace)</li>
+      <li>Anonymizované informace o pádu aplikace (Crash Logs)</li>
+    </ul>
+
+    <h3>3.5. Údaje pro účely platby (pouze klubů)</h3>
+    <ul>
+      <li>Fakturační údaje klubu (název, IČO, adresa)</li>
+      <li>Stripe Customer ID (samotné údaje o kartě nikdy
+        nezpracováváme — vše drží Stripe Inc.)</li>
+    </ul>
+
+    <h3>3.6. Cookies a podobné technologie</h3>
+    <ul>
+      <li>Technické cookies (nezbytné pro funkci webu)</li>
+      <li>Analytické cookies — pouze po výslovném souhlasu (Google Analytics)</li>
+      <li>Marketingové cookies — pouze po výslovném souhlasu (Meta Pixel)</li>
+    </ul>
+    <p>
+      Detaily v odkazu „Nastavení cookies" v patičce stránky.
+    </p>
+
+    <h2>4. Účel zpracování a právní základ (čl. 6 GDPR)</h2>
+    <p>Osobní údaje zpracováváme pro tyto účely:</p>
+    <table class="legal-table">
+      <thead>
+        <tr>
+          <th>Účel</th>
+          <th>Právní základ (čl. 6 GDPR)</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Poskytování služby aplikace</td>
+          <td>Plnění smlouvy — odst. 1 písm. b)</td>
+        </tr>
+        <tr>
+          <td>Komunikace a podpora uživatelů</td>
+          <td>Oprávněný zájem — odst. 1 písm. f)</td>
+        </tr>
+        <tr>
+          <td>Plnění zákonných povinností (účetnictví)</td>
+          <td>Právní povinnost — odst. 1 písm. c)</td>
+        </tr>
+        <tr>
+          <td>Analytika a vylepšení produktu</td>
+          <td>Souhlas — odst. 1 písm. a)</td>
+        </tr>
+        <tr>
+          <td>Marketingová komunikace</td>
+          <td>Souhlas — odst. 1 písm. a)</td>
+        </tr>
+        <tr>
+          <td>Apple Health / Polar integrace</td>
+          <td>Souhlas — odst. 1 písm. a) + čl. 9 odst. 2 písm. a)</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h2>5. Princip agregace dat (privacy by design)</h2>
+    <p>
+      Trenéři a klubové vedení <strong>nikdy nevidí syrová wellness data
+      jednotlivých hráčů</strong>. Vidí pouze agregát (průměry, počty
+      odeslaných check-inů, přítomné varovné příznaky) za celý tým. Tato
+      pravidla jsou zakotvena v interním dokumentu „doc 174 §3" a vynucována
+      na úrovni databáze (RLS politiky a SECURITY DEFINER RPC funkce).
+    </p>
+    <p>
+      Hráč má přístup pouze ke svým vlastním datům. Klub má přístup k
+      agregovaným reportům za své týmy.
+    </p>
+
+    <h2>6. Doba uchování</h2>
+    <ul>
+      <li>Identifikační údaje: po dobu trvání účtu + 1 rok po smazání
+        (pro vyřízení případných sporů)</li>
+      <li>Wellness check-iny a sportovní data: po dobu členství v klubu
+        + 1 rok</li>
+      <li>Účetní a fakturační údaje: 10 let dle zákona č. 235/2004 Sb.
+        o DPH a zákona č. 563/1991 Sb. o účetnictví</li>
+      <li>Provozní údaje (IP, crash logs): nejdéle 30 dní</li>
+      <li>Cookies analytics: dle nastavení daného nástroje (Google
+        Analytics: 14 měsíců, Meta Pixel: 90 dní)</li>
+    </ul>
+
+    <h2>7. Příjemci a zpracovatelé</h2>
+    <p>
+      Vaše osobní údaje předáváme následujícím zpracovatelům, výhradně
+      v rozsahu nezbytném pro plnění smlouvy:
+    </p>
+    <table class="legal-table">
+      <thead>
+        <tr>
+          <th>Zpracovatel</th>
+          <th>Účel</th>
+          <th>Jurisdikce</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Supabase (self-hosted v EU)</td>
+          <td>Databáze, autentizace</td>
+          <td>EU</td>
+        </tr>
+        <tr>
+          <td>Stripe Payments Europe Ltd.</td>
+          <td>Zpracování plateb klubů</td>
+          <td>EU/Irsko</td>
+        </tr>
+        <tr>
+          <td>Resend, Inc.</td>
+          <td>Transakční e-maily</td>
+          <td>USA — Standard Contractual Clauses</td>
+        </tr>
+        <tr>
+          <td>Cloudflare, Inc.</td>
+          <td>CDN, ochrana před útoky, analytika webu</td>
+          <td>EU/USA — DPF</td>
+        </tr>
+        <tr>
+          <td>Apple Inc.</td>
+          <td>App Store, push notifikace, App Privacy</td>
+          <td>USA — DPF</td>
+        </tr>
+        <tr>
+          <td>Google LLC <em>(po souhlasu)</em></td>
+          <td>Analytika návštěvnosti</td>
+          <td>USA — DPF</td>
+        </tr>
+        <tr>
+          <td>Meta Platforms, Inc. <em>(po souhlasu)</em></td>
+          <td>Reklamní pixel</td>
+          <td>USA — DPF</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h2>8. Předávání mimo EU/EHP</h2>
+    <p>
+      Některé výše uvedené zpracovatele sídlí mimo EU. V těchto případech
+      je předávání zajištěno:
+    </p>
+    <ul>
+      <li>Rozhodnutím Komise EU o odpovídající ochraně (Data Privacy
+        Framework — DPF)</li>
+      <li>nebo standardními smluvními doložkami (SCCs) podle čl. 46 GDPR</li>
+    </ul>
+
+    <h2>9. Vaše práva (čl. 15-22 GDPR)</h2>
+    <p>Jako subjekt údajů máte právo:</p>
+    <ul>
+      <li><strong>Na přístup</strong> — víte, jaké údaje o vás zpracováváme.
+        V aplikaci v sekci „Účet → Stáhnout moje data" si můžete kdykoli
+        stáhnout JSON s vaší kompletní historií.</li>
+      <li><strong>Na opravu</strong> — pokud jsou údaje nepřesné, opravíme je.</li>
+      <li><strong>Na výmaz („právo být zapomenut")</strong> — v aplikaci
+        v sekci „Účet → Smazat účet". Smazání je nevratné a zruší
+        všechny vaše údaje kromě těch, které musíme uchovávat ze
+        zákonných důvodů (účetnictví).</li>
+      <li><strong>Na omezení zpracování</strong> — písemně na
+        <a href="mailto:hello@melveo.app">hello@melveo.app</a>.</li>
+      <li><strong>Na přenositelnost údajů</strong> — JSON export poskytuje
+        strojově čitelný formát.</li>
+      <li><strong>Vznést námitku</strong> proti zpracování na základě
+        oprávněného zájmu.</li>
+      <li><strong>Odvolat souhlas</strong> kdykoliv, bez vlivu na zákonnost
+        zpracování provedeného před odvoláním. Pro analytické / marketingové
+        cookies přes patičku „Nastavení cookies".</li>
+      <li><strong>Podat stížnost</strong> u dozorového úřadu:
+        <br />
+        <strong>Úřad pro ochranu osobních údajů</strong><br />
+        Pplk. Sochora 27, 170 00 Praha 7<br />
+        <a href="https://www.uoou.cz" target="_blank" rel="noopener">www.uoou.cz</a>
       </li>
     </ul>
 
-    <h2 class="mt-10 text-2xl font-semibold">Vaše práva (Art. 15-22 GDPR)</h2>
-    <ul class="mt-4 space-y-3 text-[var(--color-text-secondary)]">
-      <li>
-        <strong>Přístup a export</strong> — v aplikaci v sekci Účet můžete
-        kdykoliv stáhnout JSON s celou svou historií.
-      </li>
-      <li>
-        <strong>Smazání účtu</strong> — v aplikaci v sekci Účet, smazání je
-        nevratné.
-      </li>
-      <li>
-        <strong>Námitka, omezení, oprava</strong> — pište na
-        <a href="mailto:hello@melveo.app" class="text-[var(--color-accent-primary)]">
-          hello@melveo.app</a>.
-      </li>
-      <li>
-        <strong>Stížnost</strong> — Úřad pro ochranu osobních údajů,
-        Pplk. Sochora 27, 170 00 Praha 7, www.uoou.cz.
-      </li>
+    <h2>10. Děti pod 15 let</h2>
+    <p>
+      Mnoho mládežnických klubů má hráče mladší 15 let. V souladu s § 11
+      zákona č. 110/2019 Sb. zpracováváme osobní údaje takových hráčů
+      pouze s výslovným souhlasem zákonného zástupce. Klub odpovídá
+      za získání tohoto souhlasu před pozváním hráče do aplikace.
+    </p>
+
+    <h2>11. Bezpečnost</h2>
+    <p>
+      Implementujeme přiměřená technická a organizační opatření:
+    </p>
+    <ul>
+      <li>Šifrování přenosu (TLS 1.3)</li>
+      <li>Šifrování dat v klidu (PostgreSQL at-rest encryption)</li>
+      <li>Row-Level Security politiky pro per-uživatelskou izolaci</li>
+      <li>Pravidelné zálohy s kontrolou integrity</li>
+      <li>Logování přístupu k citlivým datům</li>
+      <li>Two-factor autentizace pro vývojářský přístup</li>
     </ul>
 
-    <h2 class="mt-10 text-2xl font-semibold">Zpracovatelé</h2>
-    <ul class="mt-4 space-y-3 text-[var(--color-text-secondary)]">
-      <li>Supabase / vlastní hosting v EU (databáze, autentizace).</li>
-      <li>Stripe (zpracování plateb klubů, nikdy hráčů).</li>
-      <li>Resend (transakční e-maily).</li>
-      <li>Cloudflare (CDN, statický web, Web Analytics).</li>
-      <li>Po souhlasu: Google Analytics, Meta Pixel.</li>
-    </ul>
+    <h2>12. Změny zásad</h2>
+    <p>
+      Tyto zásady můžeme aktualizovat. Při podstatné změně budou existující
+      uživatelé notifikováni e-mailem nejméně 30 dní před účinností. Verze
+      a datum účinnosti jsou uvedeny nahoře.
+    </p>
 
-    <p class="mt-12 rounded-xl border border-[var(--color-stroke-emphasized)] bg-[var(--color-bg-surface)] p-6 text-sm text-[var(--color-text-secondary)]">
-      <strong>Poznámka pro vývoj:</strong> tato stránka projde právní revizí
-      a bude doplněna o úplné znění závazků dle GDPR Art. 13 + Apple App Store
-      review §5.1.1 v rámci V4-B fáze.
+    <h2>13. Kontakt</h2>
+    <p>
+      Veškeré dotazy ohledně zpracování osobních údajů, žádosti o uplatnění
+      vašich práv nebo stížnosti zasílejte na:
+    </p>
+    <p class="legal-block">
+      <a href="mailto:hello@melveo.app">hello@melveo.app</a><br />
+      Datová schránka: <code>g7v78rx</code>
+    </p>
+    <p>
+      Na žádosti odpovídáme bez zbytečného odkladu, nejpozději do 30 dnů
+      od obdržení.
+    </p>
+
+    <p class="legal-disclaimer">
+      Tento dokument je vlastní zpracování provozovatele a vychází z
+      platné legislativy. Pro enterprise smlouvy a komplexní zpracování
+      doporučujeme advokátní revizi.
     </p>
   </article>
 </BaseLayout>
+
+<!-- Styles in src/styles/legal.css (imported via global.css) -->

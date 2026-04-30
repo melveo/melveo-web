@@ -1,67 +1,233 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import PageHeader from '../../components/PageHeader.astro';
+
+/**
+ * Terms of use EN — V4-B mirror of cs/terms.astro.
+ * Czech version is authoritative in disputes.
+ */
+
+const lastUpdated = '2026-04-30';
 ---
 
 <BaseLayout
-  title="Terms"
-  description="Terms of use for Melveo. Clubs pay, players never."
+  title="Terms of Use"
+  description="Terms governing use of the Melveo app. Clubs pay, players never."
   lang="en"
 >
   <PageHeader lang="en" />
-  <article class="mx-auto max-w-3xl px-6 py-20">
-    <p class="mb-4 text-sm font-semibold uppercase tracking-widest text-[var(--color-accent-primary)]">
-      Placeholder version · 2026-04-30
-    </p>
-    <h1 class="text-balance text-4xl font-bold tracking-tight sm:text-5xl">
-      Terms of use
-    </h1>
-    <p class="mt-6 text-lg text-[var(--color-text-secondary)]">
-      Provisional. Binding text becomes effective before the first paid
-      licence.
+  <article class="legal-article">
+    <p class="legal-eyebrow">Effective · {lastUpdated}</p>
+    <h1 class="legal-h1">Terms of Use</h1>
+    <p class="legal-lead">
+      These Terms of Use (the <strong>"Terms"</strong>) govern relations
+      between the operator of the Melveo app and website and its users.
+      They are based on Czech Act No. 89/2012 Coll. (Civil Code) and
+      related legal regulations.
     </p>
 
-    <hr class="my-12 border-[var(--color-stroke-base)]" />
+    <hr />
 
-    <h2 class="mt-12 text-2xl font-semibold">Operator</h2>
-    <p class="mt-4 text-[var(--color-text-secondary)]">
-      <strong>QUIX Global s.r.o.</strong>, IČO 22466444, registered office:
-      Příčná 1892/4, 110 00 Prague 1, Czech Republic; Commercial Register
-      kept by the Municipal Court in Prague, section C, file 416432. Data
-      box: <code>g7v78rx</code>.
+    <h2>1. Operator</h2>
+    <p class="legal-block">
+      <strong>QUIX Global s.r.o.</strong><br />
+      Company ID (IČO): 22466444<br />
+      Registered office: Příčná 1892/4, Nové Město, 110 00 Prague 1, Czech
+      Republic<br />
+      Data box: <code>g7v78rx</code><br />
+      Commercial Register: file C 416432, Municipal Court in Prague<br />
+      <br />
+      Contact: <a href="mailto:hello@melveo.app">hello@melveo.app</a>
     </p>
 
-    <h2 class="mt-10 text-2xl font-semibold">Licensing model</h2>
-    <p class="mt-4 text-[var(--color-text-secondary)]">
-      <strong>1 licence = 1 team × 1 season.</strong> The payer is always
-      the club (legal entity or statutory representative). Players and
-      coaches never pay for the app directly — access is granted via
-      club invitation.
-    </p>
-
-    <h2 class="mt-10 text-2xl font-semibold">Payments</h2>
-    <p class="mt-4 text-[var(--color-text-secondary)]">
-      Payments are processed by Stripe Inc. Card or invoice accepted.
-      The iOS app is a <em>companion app</em> per Apple App Store
-      §3.1.3(f) — all commerce happens on the web, never in iOS.
-    </p>
-
-    <h2 class="mt-10 text-2xl font-semibold">Liability &amp; limitations</h2>
-    <ul class="mt-4 space-y-3 text-[var(--color-text-secondary)]">
-      <li>
-        Melveo is not a medical device. Wellness check-ins serve sports
-        training, not medical decisions.
-      </li>
-      <li>
-        The club is responsible for ensuring player consent (incl. minors
-        via legal guardian).
-      </li>
+    <h2>2. Definitions</h2>
+    <ul>
+      <li><strong>App</strong> — Melveo mobile app for iOS/iPadOS, available
+        on the Apple App Store.</li>
+      <li><strong>Website</strong> — <code>melveo.app</code>.</li>
+      <li><strong>Club</strong> — sports club or organization (legal entity
+        or sole trader) that has entered a licence agreement.</li>
+      <li><strong>User</strong> — natural person using the app on the basis
+        of a club invitation (player, coach, manager, etc.).</li>
+      <li><strong>Licence</strong> — right to use the app for one team
+        during one season.</li>
+      <li><strong>Pilot</strong> — discounted short-term licence scheme for
+        new clubs (see §6).</li>
     </ul>
 
-    <p class="mt-12 rounded-xl border border-[var(--color-stroke-emphasized)] bg-[var(--color-bg-surface)] p-6 text-sm text-[var(--color-text-secondary)]">
-      <strong>Dev note:</strong> final terms will be added in V4-B, including
-      jurisdiction, dispute resolution, and operator details after legal
-      review.
+    <h2>3. Subject matter</h2>
+    <p>
+      The operator grants the club a non-exclusive, non-transferable licence
+      to use the Melveo app for managing wellness, training sessions, and
+      coach board for one team in one season. The club enables players and
+      other users to access the app under its licence.
+    </p>
+
+    <h2>4. Formation of contract</h2>
+    <p>
+      The contract between the club and the operator is formed upon payment
+      of the ordered licence via Stripe or invoice acceptance. For players
+      and other users, the contractual relationship arises upon accepting
+      the team invitation.
+    </p>
+
+    <h2>5. Price and payment terms</h2>
+    <p>
+      <strong>Principle:</strong> 1 licence = 1 team × 1 season. The payer
+      is always the club (legal entity or statutory representative). Players,
+      coaches, and other users never pay directly.
+    </p>
+    <p>
+      Current prices are communicated individually. All payments are
+      processed via Stripe Payments Europe Ltd. We accept card payments
+      and invoice payments (after prior agreement).
+    </p>
+    <p>
+      The operator <em>is currently not a VAT payer.</em> Invoices are
+      issued without VAT. If the operator becomes a VAT payer in the
+      future, clubs will be invoiced with VAT and the Terms updated
+      30 days in advance.
+    </p>
+
+    <h2>6. Pilot program</h2>
+    <p>
+      For new clubs we offer a <strong>30-day pilot licence</strong> at
+      a discounted price agreed individually upon contracting. The pilot
+      includes:
+    </p>
+    <ul>
+      <li>Full app functionality for the entire team (up to 12 players +
+        unlimited coaches and management)</li>
+      <li>Onboarding call and first-training support</li>
+      <li>
+        <strong>Delivery guarantee:</strong> if the app does not serve your
+        operation and we cannot resolve the issue within 14 calendar days
+        of a written complaint, we refund the full pilot price.
+      </li>
+    </ul>
+    <p>
+      After the pilot, the club may continue with an annual licence. The
+      annual licence price is communicated at least 7 days before pilot end.
+      If the club does not continue, its data remains archived for 90 days
+      for re-activation, then is permanently deleted.
+    </p>
+
+    <h2>7. Apple App Store — companion app</h2>
+    <p>
+      The Melveo iOS app is a <strong>companion app</strong> within the
+      meaning of Apple App Store Guideline §3.1.3(f). This means:
+    </p>
+    <ul>
+      <li>The app contains no purchase buttons or in-app purchases</li>
+      <li>All commerce (licence purchase, invoicing) takes place exclusively
+        outside the app — on the web or via invoice</li>
+      <li>App download from the App Store is free</li>
+    </ul>
+
+    <h2>8. Club rights and obligations</h2>
+    <p>The club commits to:</p>
+    <ul>
+      <li>Provide accurate billing and contact details</li>
+      <li>Obtain consent of all invited users with these Terms and the
+        Privacy Policy, especially for minors via legal guardian
+        (§11 of Act 110/2019)</li>
+      <li>Not use the app for unlawful purposes</li>
+      <li>Not share access credentials with unauthorized persons</li>
+    </ul>
+
+    <h2>9. User rights and obligations (player, coach)</h2>
+    <p>The user commits to:</p>
+    <ul>
+      <li>Use the app in accordance with club instructions</li>
+      <li>Fill out wellness check-ins truthfully (their purpose is sports
+        preparation, not medicine)</li>
+      <li>Protect their login credentials</li>
+    </ul>
+    <p>
+      The user has the right to terminate app use at any time by deleting
+      their account in the "Account" section — this exits all teams and
+      deletes their data per the Privacy Policy.
+    </p>
+
+    <h2>10. Limitation of liability</h2>
+    <p>
+      <strong>The Melveo app is not a medical device or diagnostic
+      tool.</strong> Wellness check-ins and other data serve solely for
+      sports preparation and team communication. The operator is not
+      liable for decisions made by the club, coach, or player based on
+      app data.
+    </p>
+    <p>The operator is not liable for damages caused by:</p>
+    <ul>
+      <li>Service unavailability due to circumstances beyond its control
+        (internet outages, App Store, Apple push services, etc.)</li>
+      <li>Improper app use by user or club</li>
+      <li>Data loss caused by user fault</li>
+    </ul>
+    <p>
+      In case of proven defect on the operator's side, liability is limited
+      to the licence fee paid for the last billing period.
+    </p>
+
+    <h2>11. Complaints and termination</h2>
+    <p>
+      Complaints can be filed by email to
+      <a href="mailto:hello@melveo.app">hello@melveo.app</a> or via
+      data box <code>g7v78rx</code>. Complaints will be processed within
+      30 days of receipt. During the pilot, the specific delivery
+      guarantee applies (§6).
+    </p>
+    <p>The club can terminate the contract:</p>
+    <ul>
+      <li>At any time by email to <a href="mailto:hello@melveo.app">hello@melveo.app</a>
+        — effective at the end of the current billing period</li>
+      <li>Immediately in case of material breach by the operator</li>
+    </ul>
+    <p>The operator can terminate:</p>
+    <ul>
+      <li>With 30 days' notice, by email to the club contact</li>
+      <li>Immediately in case of material breach by the club or unpaid
+        invoice over 30 days past due</li>
+    </ul>
+
+    <h2>12. Consumer disputes</h2>
+    <p>
+      This contract is primarily B2B (club ↔ operator). If the club is
+      a consumer under §419 of Act 89/2012 Coll. (e.g. a non-profit sports
+      organization without business activity), special consumer protection
+      applies under Czech Act No. 634/1992 Coll.
+    </p>
+    <p>For disputes, consumers may contact:</p>
+    <p class="legal-block">
+      <strong>Czech Trade Inspection Authority</strong><br />
+      Štěpánská 567/15, 120 00 Prague 2, Czech Republic<br />
+      <a href="https://www.coi.cz" target="_blank" rel="noopener">www.coi.cz</a>
+    </p>
+
+    <h2>13. Changes to Terms</h2>
+    <p>
+      We may update these Terms. Clubs with active licences will be notified
+      of substantive changes by email at least 30 days before they take
+      effect. If the club disagrees with changes, it has the right to
+      terminate without penalty.
+    </p>
+
+    <h2>14. Final provisions</h2>
+    <p>
+      These Terms and the contract between operator and club are governed
+      by the laws of the Czech Republic. Competent courts are Czech
+      general courts according to the operator's registered office.
+    </p>
+    <p>
+      If any provision of the Terms becomes invalid or ineffective, the
+      remaining provisions remain in force (severability clause).
+    </p>
+
+    <p class="legal-disclaimer">
+      This document is the operator's own draft based on applicable
+      legislation. For enterprise contracts and complex matters we
+      recommend a legal review. <strong>The Czech version is authoritative
+      in disputes</strong> (jurisdiction CZ).
     </p>
   </article>
 </BaseLayout>
