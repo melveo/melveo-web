@@ -1,4 +1,4 @@
-# melveo-web — komplexní plán (verze z 2026-04-30, rev. 3)
+# melveo-web — komplexní plán (verze z 2026-04-30, rev. 4)
 
 > Living document. Žije s kódem (`melveo-web/docs/PLAN.md`) a je
 > referencovaný z app repu jako `melveo-app/docs/planning/180_melveo_web_plan.md`.
@@ -15,6 +15,51 @@
 > IČO 22466444, sídlo Praha 1) + DPO = hello@melveo.app + EN bude
 > psát Claude + analytics IDs deferred + logo zůstává jen wordmark.
 > Q19-Q23 vyřešeno; nová Q24 (plátce DPH?). Připraveno k V4 implementaci.
+>
+> **Rev. 4 (2026-04-30):** roadmap přepsaná na sekvenční V4-A → V4-G,
+> každá fáze má entry/exit/estimate. Day-plan (§13.5). Stale rev.1
+> wording ze §7.1 a §7.5 očištěno. TL;DR navigation (níže).
+
+---
+
+## TL;DR — kde co najdu
+
+Pokud se vrátíš ráno k tomuhle plánu:
+
+| Chci vědět… | Skoč na |
+|-------------|---------|
+| Co je V4 fáze a v jakém pořadí? | **§13** (V4-A až V4-G + day-plan §13.5) |
+| Jaké barvy + tokens? | §6.1 (10 tokens, hex codes) |
+| Type scale? | §6.2 (clamp ranges) |
+| Jak vypadá hero (PRISM Three.js)? | §7.2 (full impl sketch) |
+| Cookie banner code? | §7.8 (full impl sketch + GTM consent mode) |
+| Co píšu v Privacy/Terms? | §16.6 (legal stack + competitor research targets) |
+| QUIX Global s.r.o. boilerplate? | §16.6.1.1 (header block ready k copy) |
+| URL routing cs/en? | §16.5 (i18n routing) |
+| Tech stack — co instalovat? | §8 + §8.1 (deps list) |
+| Performance budget? | §9 (LCP/CLS/JS gzip targets) |
+| Codepen reference catalog? | §14 (7 pens, status per each) |
+| Q&A — všechny user odpovědi? | §15 (Q1-Q23) + §18 (Q24 nová) |
+
+## V4 build order — quick view
+
+```
+V4-A   i18n routing (cs+en)            ~2h  ← start tady
+V4-B   Privacy + Terms drafts          ~3h
+V4-C   Three.js hero (PRISM scene)     ~3h
+V4-D   5 codepen efektů                ~3h
+V4-E   Cookie banner                   ~2h
+V4-F   GTM container scaffolding       ~30min
+V4-G   Cloudflare Pages deploy         ~30min
+─────────────────────────────────────
+TOTAL:                                  ~14h
+```
+
+**Sériová pravidla:**
+- V4-B nezávisí na V4-A → může jet paralelně
+- V4-D závisí na V4-C (potřebuje hero scaffold)
+- V4-E nezávisí na ničem → kdykoli paralelně
+- V4-F + V4-G musí na konci
 
 ---
 
@@ -291,15 +336,11 @@ Privacy halo:
 
 ## 7. Animation library (V4)
 
-### 7.1. Hero rotující text (codepen #2 josh)
+### 7.1. Hero rotující text (codepen #2 josh) ✓
 
 **Zdroj:** https://codepen.io/joshcummingsdesign/pen/jWLpQv
 
-**Implementace:**
-
-Pravděpodobně GSAP + SplitText, nebo pure CSS s `@keyframes`. V4
-preferuje **lightweight Motion One** (https://motion.dev) — 5kB,
-modern API:
+**Implementace:** Motion One y/opacity crossfade, 2400ms interval.
 
 ```ts
 import { animate, stagger } from "motion";
@@ -533,10 +574,45 @@ glass sphere shader. Defer.
 
 ---
 
-### 7.5. Interesting effect placeholder
+### 7.5. Image grid morph (codepen #5 Kevin) ✓
 
-V plánu byla tato sekce pro neznámé giomgio — teď je vyřešeno
-v §7.4. Tato sekce je placeholder pro budoucí jiné efekty.
+**Zdroj:** https://codepen.io/KevinGutowski/pen/QwNZYzL
+**User intent:** "jak jedna fotka se změní do více těch fotek"
+
+**Implementace:**
+
+CSS Grid + IntersectionObserver + Motion One stagger. Jeden velký
+"hero" tile na začátku, po scroll-trigger se rozdělí do gridu 2×3
+s feature kartičkami (žádné photos — abstract feature cards).
+
+```ts
+import { animate, stagger } from "motion";
+
+const tiles = document.querySelectorAll<HTMLElement>(".reveal-tile");
+const obs = new IntersectionObserver(([entry]) => {
+  if (!entry.isIntersecting) return;
+  animate(
+    tiles,
+    { scale: [0.6, 1], opacity: [0, 1], y: [40, 0] },
+    { duration: 0.6, delay: stagger(0.08) }
+  );
+  obs.disconnect();
+}, { threshold: 0.4 });
+obs.observe(document.querySelector("#reveal-stage")!);
+```
+
+**6 feature cards (no photos):**
+1. Pětiosý ranní check-in
+2. Plánování sessions
+3. Coach board today
+4. RPE post-session
+5. Aggregate readiness
+6. Privacy-guarded data
+
+Každá karta: ikona (Lucide) + claim (1 line) + brand cyan accent
+border on hover. Žádné screenshoty.
+
+**Status:** ✓ V4-D implementace ready.
 
 ### 7.5. Image grid morph (codepen #5 KevinGutowski)
 
@@ -952,48 +1028,254 @@ Po každém deployu force refresh:
 curl -I https://melveo.app/.well-known/apple-app-site-association
 ```
 
-## 13. Implementation roadmap
+## 13. Implementation roadmap (V4 sequenced)
 
-### Fáze A — Skeleton + obsah (HOTOVO)
+> Tato je **autoritativní** sekvence. Když cokoliv řekneš "udělej dál",
+> jdeme zde a krokem dolů. Každá fáze má jasný entry, exit
+> condition a estimate.
 
-- [x] Astro skeleton
-- [x] Tailwind 4 + tokens
-- [x] BaseLayout + landing + privacy + terms + checkout success
-- [x] AASA scaffold s placeholder
-- [x] V3 pitch-black landing per fey/raycast DNA
+### Fáze ✓ DONE — Skeleton (V1-V3)
 
-### Fáze B — Codepen integrace (V4) — TADY POKRAČUJEME
+- [x] Astro 6 skeleton (commit `ebcd7ac`)
+- [x] Tailwind 4 + design tokens v `@theme` (commit `ebcd7ac`)
+- [x] BaseLayout + 4 routes (`/`, `/privacy`, `/terms`, `/checkout/success`)
+- [x] Favicon + 1200×630 OG image (commit `285f310`)
+- [x] AASA scaffold s `TEAMID` placeholder (commit `ebcd7ac`)
+- [x] Fullwidth refactor (commit `76fcfa5`)
+- [x] V3 pitch-black landing per fey/raycast DNA (commit `18981bb`)
 
-- [ ] B1: Motion One install + reduced-motion guard utility
-- [ ] B2: Rotující slovo v hero (codepen #2 josh)
-- [ ] B3: Hero base layout finalize (codepen #1 VoXelo) — čeká na user popis
-- [ ] B4: Image grid morph reveal (codepen #5 Kevin)
-- [ ] B5: Metaball gooey filter (codepen #3 ahmad)
-- [ ] B6: Interesting effect sekce (codepen #4 giomgio) — čeká na user popis
-- [ ] B7: Daniel Haim text effect (codepen #6) — čeká na user popis
-- [ ] B8: Scroll reveal universal layer
+---
 
-### Fáze C — Skutečný obsah
+### Fáze V4-A — i18n foundation (cs+en routing)
 
-- [ ] C1: iOS screenshoty (8 screens minimum) — čeká na finální iOS UX
-- [ ] C2: OG image refinement + dark/light variant
-- [ ] C3: Real App Store URL + replace placeholder anchor
+**Velikost:** ~2 hod
+**Entry:** rev.3 plán PLAN.md committed
+**Exit:** `/cs/`, `/en/` routes serve same content; locale switcher
+v headeru funguje; root `/` redirectuje na detected locale
 
-### Fáze D — Polish + ship
+**Kroky:**
+1. `bun add @astrojs/sitemap` (sitemap auto-generates hreflang)
+2. Update `astro.config.mjs` s i18n block (defaultLocale: cs, locales: [cs, en], prefixDefaultLocale: true)
+3. Vytvořit Content Collections schema v `src/content/config.ts`:
+   - `hero/cs.json`, `hero/en.json` (typed JSON)
+   - `stages/cs.json`, `stages/en.json`
+4. Migrate hardcoded copy z `index.astro` do JSON files
+5. Refactor `src/pages/index.astro` → `src/pages/[lang]/index.astro`
+   s getStaticPaths
+6. Move `privacy.astro`, `terms.astro`, `checkout/success.astro`
+   pod `[lang]/` directory
+7. Add `LocaleSwitcher.astro` komponentu do `BaseLayout`
+8. Root middleware/script pro detect-redirect na `/cs/` nebo `/en/`
+9. Hreflang tags do `<head>` (auto via sitemap config)
 
-- [ ] D1: Sitemap + robots.txt + JSON-LD schema
-- [ ] D2: PageSpeed pass (zelená všech 4 metrik)
-- [ ] D3: Cloudflare Pages connect + DNS cutover
-- [ ] D4: Plausible / CF Web Analytics enable
-- [ ] D5: AASA file: replace TEAMID + bundle ID verify
-- [ ] D6: First TestFlight → AASA verification
+**Ověření:** `bun run build` passne, manuální curl test
+`http://localhost:4321/cs/` + `/en/` returnují přeložený content.
 
-### Fáze E — V2 (post-launch)
+---
 
-- [ ] E1: EN locale (`/en/...` routing)
-- [ ] E2: Blog / changelog (Astro Content Collections)
-- [ ] E3: Customer logos / social proof
-- [ ] E4: Demo video sekce
+### Fáze V4-B — Privacy + Terms drafty (cs + en)
+
+**Velikost:** ~3 hod
+**Entry:** V4-A done (i18n routing exists)
+**Exit:** Privacy + Terms na obou jazycích zveřejněné, splňující GDPR Art. 13 + Apple §5.1.1 + zák. 480/2004
+
+**Kroky:**
+1. Research session: WebFetch competitor legal pages (Mews, Productboard, Smartlook, Notion, Linear, Stripe, Raycast — viz §16.6.2)
+2. Sketch outline pro **Privacy** v cs:
+   - Sekce 1: Provozovatel (boilerplate header §16.6.1.1 — QUIX Global s.r.o.)
+   - Sekce 2: Jaké údaje shromažďujeme (5 kategorií: identity, wellness, sessions, device, communication)
+   - Sekce 3: Účel zpracování (Art. 6 GDPR base per category)
+   - Sekce 4: Doba uchování (per kategorie)
+   - Sekce 5: Příjemci (Stripe, Resend, Cloudflare, Apple Push, GA, Meta — všechny po consent)
+   - Sekce 6: Práva subjektu (Art. 15-22)
+   - Sekce 7: Cookies (link na cookie list)
+   - Sekce 8: Změny zásad
+   - Sekce 9: Kontakt + ÚOOÚ
+3. Write Privacy CS jako MDX v `src/content/privacy/cs.md`
+4. Translate to EN → `src/content/privacy/en.md`
+5. Sketch outline pro **Terms** v cs:
+   - Sekce 1: Předmět smlouvy (1 licence = 1 team_season)
+   - Sekce 2: Pilot pricing + auto-convert (memory project_pilot_pricing_tbd)
+   - Sekce 3: Refund guarantee
+   - Sekce 4: Práva a povinnosti (klub vs. hráč)
+   - Sekce 5: Apple §3.1.3(f) companion app stance
+   - Sekce 6: Spotřebitel pro nepodnikatelské spolky
+   - Sekce 7: Reklamace + ukončení
+   - Sekce 8: Závěr (jurisdikce, salvátorská klauzule)
+6. Write Terms CS → MDX
+7. Translate to EN
+8. Wire `[lang]/privacy.astro` + `[lang]/terms.astro` to render MDX content
+9. Verify all GDPR Art. 13 fields present (use checklist)
+
+**Ověření:** human read-through + checklist match.
+
+---
+
+### Fáze V4-C — Three.js hero (PRISM-style)
+
+**Velikost:** ~3 hod
+**Entry:** V4-A done (i18n routing exists tak hero ví o lang prop)
+**Exit:** Hero render 4-6 floating iridescent shapes na pitch black, lazy-loaded past LCP, mobile fallback works, reduced-motion fallback shows static SVG
+
+**Kroky:**
+1. `bun add three @types/three`
+2. Vytvořit `src/scripts/hero-scene.ts` s implementací z §7.2
+3. Vytvořit `src/components/HeroScene.astro` co inline'uje canvas
+   element + lazy-imports script
+4. Wire do `src/pages/[lang]/index.astro` hero sekce
+5. SSR fallback: 5 static SVG octahedrons positioned via CSS
+   (visible během načítání + reduced-motion)
+6. IntersectionObserver lazy-init: scéna spustí jen když user
+   nastoupí na hero (i.e. okamžitě, ale ne při SSR)
+7. Mobile detect: `matchMedia("(max-width: 768px)")` → 3 shapes
+   + lower geometry detail
+8. `prefers-reduced-motion: reduce` → scéna nikdy nestartuje, jen SVG
+9. `requestAnimationFrame` pause na `document.visibilitychange`
+10. Bundle check: `bun run build` → Three.js by měl být v separate chunk
+
+**Ověření:** localhost:4321/cs/ → vidíš shapes co rotují, mouse hýbe scénou; mobile preview → menší shapes; settings → reduce motion → static SVG.
+
+---
+
+### Fáze V4-D — Codepen integrace (rotace + orb + reveal + grid + gooey)
+
+**Velikost:** ~3 hod
+**Entry:** V4-C done
+**Exit:** Všechny 4 stage efekty fungují
+
+**Kroky:**
+1. `bun add motion split-type`
+2. **D1 — Hero rotující text** (codepen josh, §7.1):
+   - Export array `rotatingWords` z `hero/cs.json` + `hero/en.json`
+   - Motion One y/opacity crossfade, 2400ms interval
+   - `aria-live="polite"`, prefers-reduced-motion freeze
+3. **D2 — Image grid morph** (codepen Kevin, §7.5):
+   - Sekce 2 v `[lang]/index.astro`
+   - 6 abstract feature cards (no photos): pětiosý check-in, sessions, coach board, RPE, attendance, privacy
+   - IntersectionObserver entry → Motion One stagger reveal
+4. **D3 — Gooey metaball** (codepen ahmad, §7.3):
+   - Sekce 3 (visual punctuation)
+   - SVG `<filter>` s gaussian blur + colorMatrix
+   - 3 circles s CSS keyframes float-in-ellipse
+5. **D4 — Glass orb + text rotation** (codepen giomgio, §7.4):
+   - Sekce 5
+   - CSS radial gradient orb + Motion One text crossfade
+   - Phrases: "Pro hráče." → "Pro trenéra." → "Pro klub."
+6. **D5 — Daniel Haim text reveal** (codepen Daniel, §7.6):
+   - Sekce 7 / privacy promise H2
+   - SplitType char split + Motion One stagger reveal on entry
+
+**Ověření:** každý efekt funguje izolovaně; nic nepokazí ostatní stages; reduced-motion respect.
+
+---
+
+### Fáze V4-E — Cookie consent banner (Aaron Iker style)
+
+**Velikost:** ~2 hod
+**Entry:** V4-A done
+**Exit:** Banner zobrazený first visit, 3 buttony (Accept all / Just necessary / Customize), localStorage state persists, GTM consent state mode wires up
+
+**Kroky:**
+1. Implementovat `src/scripts/consent.ts` per §7.8
+2. Vytvořit `src/components/CookieBanner.astro` per §7.8
+3. Wire do `BaseLayout` (per locale)
+4. Vytvořit `src/components/CookieSettingsLink.astro` v footeru — re-open banner pro existing users
+5. Cookie list dokument v `src/content/cookies/cs.md` + `en.md`:
+   - Necessary: cookieless CF beacon
+   - Analytics: `_ga`, `_ga_*`, `_gid`, `_gat`
+   - Marketing: `_fbp`, `_fbc`
+6. Default GTM consent state denied init script (před GTM container)
+
+**Ověření:** první visit → banner viditelný; click reject → localStorage `melveo:consent` = `{analytics: false, marketing: false}`; refresh → banner už neviditelný; footer link "Cookie nastavení" → banner znovu.
+
+---
+
+### Fáze V4-F — GTM container scaffolding (bez tagů)
+
+**Velikost:** ~30 min
+**Entry:** V4-E done (consent state machine works)
+**Exit:** GTM `<script>` v `<head>` ready ale s placeholder ID; CF Web Analytics aktivní
+
+**Kroky:**
+1. Vytvořit `src/components/GTMHead.astro` + `GTMNoScript.astro` se snippet kódem
+2. Inject do `BaseLayout` `<head>` + první `<body>`
+3. Container ID jako env var `PUBLIC_GTM_CONTAINER_ID` v `.env`, default empty (skip if empty)
+4. Cloudflare Web Analytics snippet (cookieless) — also injection do `<head>`
+5. Až user dodá GA4 + Meta + GTM IDs, jediný step: update `.env` v Cloudflare Pages dashboard
+
+**Ověření:** `<script>` tags existují s `[empty]` placeholder; žádné requesty k GA / Meta server-side; CF Web Analytics beacon vidět v DevTools Network.
+
+---
+
+### Fáze V4-G — Cloudflare Pages connect + production deploy
+
+**Velikost:** ~30 min (jakmile user dokončí CF UI)
+**Entry:** V4-F done; user dokončil CF Pages UI step (current "github je nastevn - nastavuje se")
+**Exit:** `https://melveo.app` live; AASA returns 200 application/json; sitemap + hreflang validates
+
+**Kroky:**
+1. CF Pages → Connect to Git → matk0shub/melveo-web
+2. Build settings: `bun run build`, output `dist`, Node 22.12+
+3. Custom domain: `melveo.app` + `www.melveo.app`
+4. SSL: Full (strict)
+5. `_headers` file pro AASA cache rules:
+   ```
+   /.well-known/apple-app-site-association
+     Content-Type: application/json
+     Cache-Control: no-cache, must-revalidate
+   ```
+6. Verify `curl -I https://melveo.app/.well-known/apple-app-site-association` returns 200 + `application/json`
+7. Verify `curl -I https://melveo.app/sitemap-index.xml` returns 200
+8. PageSpeed Insights audit → must pass: LCP < 2.0s, CLS < 0.05, Lighthouse Performance ≥ 95
+
+**Ověření:** all PageSpeed metrics green; web accessible at melveo.app, /cs, /en, /privacy, /terms, /checkout/success.
+
+---
+
+### Fáze post-V4 — User-driven updates
+
+Až user dodá:
+
+| Trigger | Action |
+|---------|--------|
+| Apple Developer Team ID | V4-Z1: Replace `TEAMID` v AASA → push |
+| App Store listing live | V4-Z2: Replace placeholder anchor → real `itms-apps://...` URL |
+| GA4 + Meta + GTM IDs | V4-Z3: Set CF Pages env vars; container becomes active |
+| Reálné iOS screenshoty | V4-Z4: Replace abstract feature cards / placeholder mockups |
+| DIČ (Q24 answer) | V4-Z5: Update Terms s plátce/neplátce DPH info |
+| First testimonial po pilot | V5-A: Add testimonials section |
+| EN content review feedback | V4-Z6: Refine EN copy |
+
+---
+
+### Fáze V5+ — V2 post-launch
+
+- Blog / changelog (Astro Content Collections)
+- Customer logos / social proof
+- Demo video sekce
+- Ad campaigns (LinkedIn, Meta) — depends on Q22 IDs
+
+---
+
+## 13.5. Sekvenční Day-Plan
+
+Pokud bys chtěl plnit V4 v 1 dni:
+
+| Hodina | Fáze | Co |
+|--------|------|-----|
+| 0:00 — 2:00 | V4-A | i18n routing + content collections |
+| 2:00 — 5:00 | V4-B | Privacy + Terms drafts cs + en |
+| 5:00 — 8:00 | V4-C | Three.js hero scéna |
+| 8:00 — 11:00 | V4-D | 5 codepen efektů |
+| 11:00 — 13:00 | V4-E | Cookie banner |
+| 13:00 — 13:30 | V4-F | GTM container scaffolding |
+| 13:30 — 14:00 | V4-G | CF Pages connect + DNS |
+
+**Celkem:** ~14 hod aktivní práce. Realisticky 2 dny s jednou kávou navíc na review.
+
+Pokud paralelizujeme přes worktree spawn-tasks, V4-A + V4-B + V4-E
+mohou jet současně (nezávislé). V4-C a V4-D se serializují (D závisí
+na C ready hero scaffold). V4-F a V4-G na konci.
 
 ## 14. Codepen reference catalog
 
@@ -1806,3 +2088,4 @@ Z rev. 3 jen jedna nová:
 | 2026-04-30 | **Tato doc 180/PLAN vznikla** — komplexní plán proti fey/raycast DNA + 6 codepen referencí |
 | 2026-04-30 | **Rev. 2:** user odpověděl na 18 otázek + dodal screenshot VoXelo (PRISM 3D scéna) + zvolil cookie banner ref Aaron Iker. Plán updatován: Three.js hero, i18n cs/en, full analytics stack (GA + Meta + GTM + CF), self-written legal text, cookie consent V4 critical. Nové otázky Q19-Q23 (legal entity, DPO email, EN translation, analytics IDs, logo design). |
 | 2026-04-30 | **Rev. 3:** Q19-Q23 vyřešeny. Legal entity: **QUIX Global s.r.o.** IČO 22466444, sídlo Praha 1, dat. schránka g7v78rx. DPO email = hello@melveo.app (single contact). EN content píše Claude. Analytics IDs deferred. Logo: jen wordmark "melveo", žádný mark navždy. Nová Q24 (plátce DPH? DIČ?). Připraveno k V4 implementaci. |
+| 2026-04-30 | **Rev. 4:** Audit identified 4 gaps: stale §13 roadmap, stale §7.1 + §7.5, no single TL;DR. Fixed: §13 přepsána jako V4-A→V4-G sekvenční plán + §13.5 day-plan; §7.1 očištěno; §7.5 přepsáno na finální image grid morph spec; přidána navigace TL;DR + V4 build order na top. Plán teď **fakt** krok-za-krokem, žádné placeholder TBDs. |
