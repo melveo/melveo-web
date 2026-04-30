@@ -32,75 +32,50 @@ const t = useTranslations(lang);
   </div>
 
   <!-- Secondary hero — absolute overlay, gradient bg, rotating text,
-       revealed only through radial mask centred at cursor. -->
+       revealed only through radial mask centred at cursor.
+       Phrases passed via data-attribute (JSON-encoded array) so the
+       script can run as a clean ES module without `define:vars`,
+       which had inconsistent behaviour with Astro 6 + type="module"
+       in our hosting/bundling setup. -->
   <div class="orb-hero orb-hero--secondary" aria-hidden="true" data-orb-secondary>
-    <p class="orb-heading" data-orb-rotate>
+    <p
+      class="orb-heading"
+      data-orb-rotate
+      data-orb-phrases={JSON.stringify([
+        t('orb.secondary1'),
+        t('orb.secondary2'),
+        t('orb.secondary3'),
+      ])}
+    >
       {t('orb.secondary1')}
     </p>
   </div>
 </section>
 
-<script
-  define:vars={{
-    phrases: [t('orb.secondary1'), t('orb.secondary2'), t('orb.secondary3')],
-  }}
-  type="module"
->
-  import { animate } from 'motion';
-
-  const wrapper = document.querySelector('[data-orb-wrapper]');
-  const secondary = document.querySelector('[data-orb-secondary]');
-  const text = document.querySelector('[data-orb-rotate]');
-  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-
-  if (wrapper && secondary && text) {
-    /* ── Cursor-following mask ────────────────────────────────────
-       Update --x / --y CSS variables on the secondary layer in
-       response to mousemove. Motion smoothly eases the change so the
-       circle "trails" the cursor instead of snapping. */
-    if (!reduceMotion) {
-      window.addEventListener(
-        'pointermove',
-        (event) => {
-          const x = Math.round((event.clientX / window.innerWidth) * 100);
-          const y = Math.round((event.clientY / window.innerHeight) * 100);
-          animate(
-            secondary,
-            { '--x': `${x}%`, '--y': `${y}%` },
-            { duration: 0.35, ease: [0.39, 0.575, 0.565, 1] },
-          );
-        },
-        { passive: true },
-      );
-    } else {
-      // Reduced motion: snap circle to a fixed pleasant spot.
-      secondary.style.setProperty('--x', '70%');
-      secondary.style.setProperty('--y', '50%');
-    }
-
-    /* ── Text rotation ────────────────────────────────────────────
-       Cycle the secondary headline every 3.2 s with a small fade.
-       Visible only inside the cursor mask. */
-    if (!reduceMotion) {
-      let idx = 0;
-      const interval = setInterval(async () => {
-        try {
-          await animate(text, { opacity: [1, 0], y: [0, -16] }, { duration: 0.4 }).finished;
-          idx = (idx + 1) % phrases.length;
-          text.textContent = phrases[idx];
-          await animate(text, { opacity: [0, 1], y: [16, 0] }, { duration: 0.5 }).finished;
-        } catch {
-          clearInterval(interval);
-        }
-      }, 3200);
-      document.addEventListener('visibilitychange', () => {
-        if (document.hidden) clearInterval(interval);
-      });
-    }
-  }
+<script>
+  import { mountOrbCursor } from '../scripts/orb-cursor';
+  mountOrbCursor();
 </script>
 
 <style>
+  /*
+    Register --x / --y as proper percentage typed CSS properties.
+    Without this, browsers treat them as opaque strings and can't
+    animate them — the circle would snap rather than follow the
+    cursor smoothly. With @property + transition below we get
+    native GPU-smooth interpolation without any JS lerp.
+  */
+  @property --x {
+    syntax: '<percentage>';
+    inherits: false;
+    initial-value: 70%;
+  }
+  @property --y {
+    syntax: '<percentage>';
+    inherits: false;
+    initial-value: 50%;
+  }
+
   .orb-wrapper {
     position: relative;
     width: 100%;
@@ -131,14 +106,21 @@ const t = useTranslations(lang);
     color: var(--color-bg-canvas);
 
     /* Radial mask — circle of brand-cyan tinted gradient revealed
-       through the dark canvas. Default position 70% / 50% so the
-       reveal is offset from the primary text on first paint. */
+       through the dark canvas. --x / --y are registered @property
+       above (typed as percentage) so the transition below works.
+       Default 70%/50% on first paint; pointermove updates inline. */
     --x: 70%;
     --y: 50%;
     --mask: radial-gradient(circle at var(--x) var(--y), black 22%, transparent 0);
     -webkit-mask-image: var(--mask);
     mask-image: var(--mask);
     pointer-events: none;
+
+    /* Smooth follow — browser interpolates --x / --y because they're
+       registered as <percentage> via @property. */
+    transition:
+      --x 0.35s cubic-bezier(0.39, 0.575, 0.565, 1),
+      --y 0.35s cubic-bezier(0.39, 0.575, 0.565, 1);
   }
 
   .orb-heading {
