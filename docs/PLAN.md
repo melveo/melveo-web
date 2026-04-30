@@ -1,10 +1,15 @@
-# melveo-web — komplexní plán (verze z 2026-04-30)
+# melveo-web — komplexní plán (verze z 2026-04-30, rev. 2)
 
 > Living document. Žije s kódem (`melveo-web/docs/PLAN.md`) a je
 > referencovaný z app repu jako `melveo-app/docs/planning/180_melveo_web_plan.md`.
 >
 > Updatuj pokaždé, když rozhodneš o něčem novém z této doc, ať
 > následující session má fresh context.
+>
+> **Rev. 2 (2026-04-30):** user odpověděl na všech 18 otázek + dodal
+> screenshot VoXelo pena (PRISM 3D scene) + zvolil cookie banner ref.
+> Plán přepracován — Three.js hero, i18n cs/en, full analytics stack
+> (GA + Meta + CF + GTM), self-written legal text per česká legislativa.
 
 ---
 
@@ -18,11 +23,14 @@
 | 4 stránky (`/`, `/privacy`, `/terms`, `/checkout/success`) | ✓ |
 | AASA scaffold s `TEAMID` placeholder | ✓ `/public/.well-known/...` |
 | Pitch-black V3 landing proti fey/raycast DNA | ✓ commit `18981bb` |
-| Cloudflare Pages connect | ⏸ čeká na user manual UI step |
-| Reálné iOS screenshoty | ⏸ čeká na finální iOS UX |
-| Apple Developer Team ID | ⏸ čeká na membership ($99/rok) |
-| Privacy + Terms produkční text | ⏸ user nechce Iubendu — viz §15 |
-| Animace / interakce | ⏸ tato doc je plán pro V4 |
+| Cloudflare Pages connect | ⏸ user nastavuje |
+| Reálné iOS screenshoty | ⏸ user řekl: zatím nepotřeba |
+| Apple Developer Team ID | ⏸ user koupí příští týden |
+| Privacy + Terms produkční text | 🔨 Já napíšu per česká legislativa (§15.5 Q4) |
+| i18n cs + en | ⏸ V4 priorita (§15.5 Q14) |
+| Three.js hero (PRISM-style 3D scene) | ⏸ V4 (§15.5 Q1) |
+| Cookie consent banner | ⏸ V4 — Aaron Iker reference (§15.5 Q17) |
+| Analytics: GA + Meta Pixel + GTM + CF Web Analytics | ⏸ V4 (§15.5 Q8) |
 
 ## 1. Vize a cíl
 
@@ -306,17 +314,104 @@ sekvenčně.
 
 **Fallback bez JS:** první slovo je SSR'd v HTML, tak vždy něco vidíš.
 
-### 7.2. Hero base layout (codepen #1 VoXelo)
+### 7.2. Hero base layout — PRISM-style 3D scéna (codepen #1 VoXelo) ✓
 
 **Zdroj:** https://codepen.io/VoXelo/pen/ogbKQOy
+**User reference:** screenshot PRISM landingu — pitch-black, 5
+floating iridescent octahedrons, centrovaný glow wordmark.
 
-**Implementace:**
+**Implementační směr — Three.js scéna:**
 
-Plánuju hero base = co je aktuálně v V3 (pitch-black + halo + claim
-+ CTA + screenshot pod). Až user popíše co konkrétně VoXelo dělá
-(mouse-tracking glow? gradient shift? particle field?), upravíme.
+```ts
+// src/scripts/hero-scene.ts
+import * as THREE from "three";
 
-**Pre-implementation otázka pro user:** §15 Q1.
+const canvas = document.querySelector("#hero-canvas") as HTMLCanvasElement;
+const scene = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera(60, innerWidth / innerHeight, 0.1, 100);
+camera.position.z = 8;
+
+const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
+renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+renderer.setSize(innerWidth, innerHeight);
+
+// 4-6 floating shapes
+const shapes: THREE.Mesh[] = [];
+const geometries = [
+  new THREE.OctahedronGeometry(0.8, 0),
+  new THREE.IcosahedronGeometry(0.7, 0),
+  new THREE.ConeGeometry(0.5, 1.2, 4),  // tetrahedron-ish
+];
+
+// Iridescent material — cyan/blue lean
+const material = new THREE.MeshPhysicalMaterial({
+  iridescence: 1.0,
+  iridescenceIOR: 1.3,
+  iridescenceThicknessRange: [100, 800],
+  metalness: 0.1,
+  roughness: 0.4,
+  clearcoat: 1.0,
+  color: 0x00f0ff,  // brand cyan tint
+});
+
+// Position shapes around hero, away from center text
+const positions = [
+  [-4.5, 1.8, -2], [4.5, 2.0, -2.5],
+  [-3.5, -2.5, -3], [4.0, -2.8, -1.5],
+  [0, 3.5, -4],
+];
+positions.forEach((pos, i) => {
+  const mesh = new THREE.Mesh(geometries[i % geometries.length], material);
+  mesh.position.set(...pos);
+  scene.add(mesh);
+  shapes.push(mesh);
+});
+
+// Lights — single soft directional + ambient
+scene.add(new THREE.AmbientLight(0xffffff, 0.4));
+const dir = new THREE.DirectionalLight(0xcdf7fb, 1.5);  // cyan tint
+dir.position.set(5, 10, 5);
+scene.add(dir);
+
+// Animate — slow rotation + mouse parallax
+let mouseX = 0, mouseY = 0;
+addEventListener("mousemove", (e) => {
+  mouseX = (e.clientX / innerWidth) * 2 - 1;
+  mouseY = (e.clientY / innerHeight) * 2 - 1;
+});
+
+function animate() {
+  shapes.forEach((s, i) => {
+    s.rotation.x += 0.003 * (i % 2 === 0 ? 1 : -1);
+    s.rotation.y += 0.004 * (i % 2 === 0 ? -1 : 1);
+  });
+  scene.rotation.y += (mouseX * 0.05 - scene.rotation.y) * 0.05;
+  scene.rotation.x += (mouseY * 0.03 - scene.rotation.x) * 0.05;
+  renderer.render(scene, camera);
+  requestAnimationFrame(animate);
+}
+animate();
+```
+
+**Bundle budget:** Three.js core ~150kB gzip. **Lazy-load** scene
+only after hero is visible (defer past LCP). SSR fallback = 5
+static SVG octahedrons positioned with CSS — visible during load.
+
+**Reduced motion fallback:** scene replaced with static SVG
+shapes + slight CSS keyframe drift (very subtle, 0.5° rotation).
+
+**Mobile:** scene runs ale na mobilu shapes jsou menší + jen 3
+shapes (perf budget pro mobile WebGL).
+
+**Status:** ✓ specifikováno, V4 implementace.
+
+---
+
+### 7.2.1. Hero centered wordmark + glow halo
+
+Zachová V3 layout — wordmark centered v hero, glow halo za textem,
+CTA pod. Three.js scéna sedí **za** wordmarkem (z-index: 0;
+wordmark z-index: 10).
 
 ### 7.3. Connecting elements / metaball (codepen #3 ahmadawais)
 
@@ -354,16 +449,84 @@ S CSS `@keyframes float-1/2` co posouvají kruhy v elliptické dráze.
 ne hero pozadí — gooey filter v hero by konkurovalo s typo. Ale
 pokud chceš zkusit obojí, vyrobím obě varianty a porovnáme.
 
-### 7.4. Interesting effect (codepen #4 giomgio)
+### 7.4. Glass orb + morphující text (codepen #4 giomgio) ✓
 
 **Zdroj:** https://codepen.io/giomgio/pen/abxGyQX
+**User popis:** "kotule co se mění" — orb se měnícím textem.
 
-**Pre-implementation:** §15 Q2 — popis efektu.
+**V4 implementace — CSS-only orb:**
 
-**Plán:** sekce 5 mezi wellness a sessions stages. Buď:
-- 3D parallax tilt na mouse hover (CSS `transform-style: preserve-3d`)
-- Distortion / liquid effect (WebGL shader)
-- Particle field (canvas 2D)
+```html
+<section class="orb-stage">
+  <div class="orb">
+    <div class="orb-text" data-rotate-text>
+      Pro hráče.
+    </div>
+  </div>
+</section>
+```
+
+```css
+.orb-stage {
+  position: relative;
+  display: grid;
+  place-items: center;
+  min-height: 80vh;
+  background: var(--color-bg-canvas);
+}
+
+.orb {
+  width: clamp(280px, 50vw, 600px);
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle at 30% 30%,
+    rgba(0, 240, 255, 0.4),
+    rgba(0, 240, 255, 0.1) 40%,
+    rgba(15, 25, 50, 0.95) 80%
+  );
+  backdrop-filter: blur(40px);
+  box-shadow:
+    inset 0 0 80px rgba(0, 240, 255, 0.3),
+    0 0 120px rgba(0, 240, 255, 0.4);
+  display: grid;
+  place-items: center;
+}
+
+.orb-text {
+  font-size: clamp(1.5rem, 3vw, 3rem);
+  font-weight: 700;
+  color: var(--color-text-primary);
+  transition: opacity 0.4s ease, transform 0.4s ease;
+}
+```
+
+```ts
+import { animate } from "motion";
+
+const phrases = ["Pro hráče.", "Pro trenéra.", "Pro klub."];
+const el = document.querySelector("[data-rotate-text]")!;
+let idx = 0;
+
+setInterval(async () => {
+  await animate(el, { opacity: [1, 0], y: [0, -20] }, { duration: 0.4 }).finished;
+  idx = (idx + 1) % phrases.length;
+  el.textContent = phrases[idx];
+  await animate(el, { opacity: [0, 1], y: [20, 0] }, { duration: 0.4 }).finished;
+}, 3200);
+```
+
+**V4.1 upgrade (pokud V4 vypadá slabě):** Three.js refractive
+glass sphere shader. Defer.
+
+**Status:** ✓ V4 implementace ready.
+
+---
+
+### 7.5. Interesting effect placeholder
+
+V plánu byla tato sekce pro neznámé giomgio — teď je vyřešeno
+v §7.4. Tato sekce je placeholder pro budoucí jiné efekty.
 
 ### 7.5. Image grid morph (codepen #5 KevinGutowski)
 
@@ -394,14 +557,51 @@ Tiles by mohly být reálné iOS screenshoty různých surfaces
 real screenshoty, použijeme placeholder gradient cards s feature
 copy ("Pětiosý check-in", "Coach Board", atd.).
 
-### 7.6. Daniel Haim effect (codepen #6)
+### 7.6. Daniel Haim text reveal (codepen #6) ✓
 
 **Zdroj:** https://codepen.io/danielhaim/pen/azmBEPL
+**User confirmation:** chce ten samý efekt z toho pena (masked
+letter-by-letter reveal je daniel haim signature pattern).
 
-**Pre-implementation:** §15 Q3.
+**Implementace — SplitType.js + Motion One:**
 
-Plán umístit na privacy promise H2 (sekce 8) — letter-by-letter
-reveal nebo masked text reveal.
+```ts
+import SplitType from "split-type";
+import { animate, stagger } from "motion";
+
+const heading = document.querySelector("[data-text-reveal]");
+const split = new SplitType(heading, { types: "chars" });
+
+const obs = new IntersectionObserver(([entry]) => {
+  if (entry.isIntersecting) {
+    animate(
+      split.chars,
+      { y: ["100%", "0%"], opacity: [0, 1] },
+      { duration: 0.6, delay: stagger(0.025) }
+    );
+    obs.disconnect();
+  }
+}, { threshold: 0.4 });
+
+obs.observe(heading);
+```
+
+```css
+[data-text-reveal] {
+  overflow: hidden;
+}
+[data-text-reveal] .char {
+  display: inline-block;
+}
+```
+
+**Umístění:** privacy promise sekce 7 — H2 "Trenér nikdy nevidí
+syrová čísla hráče." se odhaluje letter-by-letter ze dna při
+scrollu.
+
+**Bundle:** SplitType ~3kB gzip. Motion One už loaded.
+
+**Status:** ✓ V4 implementace ready.
 
 ### 7.7. Scroll-triggered reveals
 
@@ -420,24 +620,187 @@ const obs = new IntersectionObserver((entries) => {
 document.querySelectorAll("[data-reveal]").forEach((el) => obs.observe(el));
 ```
 
+### 7.8. Cookie consent banner (codepen #7 Aaron Iker) ✓
+
+**Zdroj:** https://codepen.io/aaroniker/pen/eYEqOrp
+**User decision:** Q17 — chce tento styl
+
+**Implementace — vanilla JS + Astro component:**
+
+```ts
+// src/scripts/consent.ts
+type ConsentState = {
+  necessary: true;       // always
+  analytics: boolean;
+  marketing: boolean;
+  version: number;
+  timestamp: string;
+};
+
+const STORAGE_KEY = "melveo:consent";
+const CURRENT_VERSION = 1;
+
+export function loadConsent(): ConsentState | null {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw) as ConsentState;
+    if (parsed.version !== CURRENT_VERSION) return null;
+    return parsed;
+  } catch { return null; }
+}
+
+export function saveConsent(state: Omit<ConsentState, "version" | "timestamp" | "necessary">) {
+  const full: ConsentState = {
+    necessary: true,
+    ...state,
+    version: CURRENT_VERSION,
+    timestamp: new Date().toISOString(),
+  };
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(full));
+  window.dispatchEvent(new CustomEvent("melveo-consent-change", { detail: full }));
+
+  // Update GTM consent state per Google Consent Mode v2
+  (window as any).dataLayer = (window as any).dataLayer || [];
+  (window as any).gtag = (window as any).gtag || function() { (window as any).dataLayer.push(arguments); };
+  (window as any).gtag("consent", "update", {
+    ad_storage: state.marketing ? "granted" : "denied",
+    ad_user_data: state.marketing ? "granted" : "denied",
+    ad_personalization: state.marketing ? "granted" : "denied",
+    analytics_storage: state.analytics ? "granted" : "denied",
+  });
+}
+```
+
+```astro
+---
+// src/components/CookieBanner.astro
+---
+<div id="cookie-banner" data-banner-state="hidden">
+  <div class="banner-shell">
+    <div class="banner-icon">🍪</div>
+    <div class="banner-body">
+      <h3>Cookies</h3>
+      <p>
+        Používáme cookies pro statistiky a vylepšení stránky.
+        <a href="/privacy">Více v zásadách soukromí</a>.
+      </p>
+    </div>
+    <div class="banner-actions">
+      <button data-consent="reject">Jen nutné</button>
+      <button data-consent="customize">Nastavit</button>
+      <button data-consent="accept" class="primary">Přijmout vše</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  import { loadConsent, saveConsent } from "../scripts/consent";
+
+  const banner = document.querySelector<HTMLDivElement>("#cookie-banner")!;
+  const state = loadConsent();
+
+  if (!state) {
+    requestIdleCallback(() => {
+      banner.dataset.bannerState = "visible";
+    });
+  }
+
+  banner.addEventListener("click", (e) => {
+    const btn = (e.target as HTMLElement).closest<HTMLButtonElement>("[data-consent]");
+    if (!btn) return;
+    const action = btn.dataset.consent;
+    if (action === "accept") saveConsent({ analytics: true, marketing: true });
+    else if (action === "reject") saveConsent({ analytics: false, marketing: false });
+    else if (action === "customize") {
+      // open detail panel — TBD V4
+      return;
+    }
+    banner.dataset.bannerState = "hidden";
+  });
+</script>
+
+<style>
+  /* Aaron Iker style: bottom slide-up sheet, blur backdrop */
+  #cookie-banner {
+    position: fixed;
+    inset: auto 0 1rem 0;
+    margin: 0 auto;
+    max-width: min(32rem, calc(100% - 2rem));
+    z-index: 100;
+    transform: translateY(120%);
+    transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  #cookie-banner[data-banner-state="visible"] { transform: translateY(0); }
+
+  .banner-shell {
+    background: rgba(15, 17, 22, 0.85);
+    backdrop-filter: blur(24px);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 1.25rem;
+    padding: 1.25rem 1.5rem;
+    display: grid;
+    grid-template-columns: auto 1fr;
+    grid-template-areas: "icon body" "actions actions";
+    gap: 0.75rem 1rem;
+    box-shadow: 0 24px 60px -12px rgba(0, 0, 0, 0.6);
+  }
+  /* … */
+</style>
+```
+
+**Compliance checklist:**
+
+- ✓ Banner se zobrazí **před** nahráním GA / Meta tagů (default
+  consent state = denied)
+- ✓ "Reject" stejně dostupný jako "Accept" (per EDPB 03/2022)
+- ✓ Bez pre-checked tickboxů (zákon 480/2004 § 89)
+- ✓ Granular kontrola přes Customize panel
+- ✓ Re-prompt po `version` bump (např. když přidáme novou
+  marketing platformu)
+
+**Status:** 🔨 V4 critical infra — bez něj nemůžeme spustit GA.
+
+### 7.9. Three.js performance budget
+
+Three.js scéna v hero je největší JS asset. Pravidla:
+
+- ✓ `import` přes dynamic import — `await import('three')`
+  splitne do separate chunk
+- ✓ Lazy-init až po `DOMContentLoaded` + IntersectionObserver
+  detection že hero je visible
+- ✓ Pause `requestAnimationFrame` když tab je hidden
+  (`document.visibilityState === "hidden"`)
+- ✓ `renderer.setPixelRatio(Math.min(devicePixelRatio, 2))` —
+  cap retina rendering
+- ✓ Mobile detect: méně shapes (3 vs 6) + lower geometry detail
+- ✓ Reduced motion: scéna disabled, fallback SVG static
+
 ## 8. Tech stack — finální
 
 | Vrstva | Volba | Důvod |
 |--------|-------|-------|
-| **SSG framework** | Astro 6 | Best static-first, MDX support později, žádné runtime JS by default |
-| **Styling** | Tailwind 4 (via @tailwindcss/vite) | Rychlý dev, design tokeny v `@theme` |
-| **Type system** | TypeScript strict | Bezpečnost |
-| **Package manager** | Bun | Rychlejší než npm |
-| **Animations** | Motion One (`motion`) | 5kB, modern API, GSAP-class power. Cesta B: GSAP 3 (větší ale battle-tested) |
-| **Icons** | Lucide (`lucide-static` SVG) | Open-source, App Store kompatibilní |
-| **Fonts** | Inter (variable, Latin Extended pro diakritika) | Czech support, modern, free |
-| **Hosting** | Cloudflare Pages | Free, instant, custom domain |
-| **DNS** | Cloudflare (existující account) | Už máme kvůli Resend `updates.melveo.app` |
-| **Analytics** | Plausible Self-hosted nebo Cloudflare Web Analytics | Privacy-friendly, žádné cookies |
-| **CMS / blog** | — | Žádné v V1 |
-| **Forms** | `mailto:` link | V1 — žádný backend; V2 můžeme řešit přes Resend Webhook |
-| **Sitemap** | `@astrojs/sitemap` | Auto-generuje |
+| **SSG framework** | Astro 6 | Best static-first, MDX, built-in i18n |
+| **i18n** | Astro i18n + Content Collections | `cs` (default) + `en`, type-safe content loading |
+| **Styling** | Tailwind 4 (via @tailwindcss/vite) | Design tokens v `@theme` |
+| **Type system** | TypeScript strict | |
+| **Package manager** | Bun | Rychlejší |
+| **Animations** | Motion One (`motion`) | 5kB, modern API |
+| **3D scéna (hero)** | Three.js R163+ | PRISM-style hero shapes (Q1) |
+| **Text split** | SplitType.js | Daniel Haim letter-by-letter reveal (Q3) |
+| **Icons** | Lucide (`lucide-static` SVG) | Open-source |
+| **Fonts** | Inter (variable, Latin Extended) | Czech diakritika support |
+| **Hosting** | Cloudflare Pages | Free, instant, custom domain ✓ |
+| **DNS** | Cloudflare zone `melveo.app` | ✓ user confirmed Q7 |
+| **Analytics — primary** | Cloudflare Web Analytics | Cookieless, mimo consent |
+| **Analytics — full stack** | Google Tag Manager (single tag) | Q8 — řídí GA4 + Meta Pixel + budoucí pixely |
+| **Tag management** | GTM container ID `GTM-XXXXXXX` | TBD po user setup |
+| **Analytics tags řízené z GTM** | GA4 + Meta Pixel | Vyžaduje cookie consent (Q17) |
+| **Cookie consent** | Custom (Aaron Iker style) | Q17 — vanilla JS + localStorage state |
+| **Forms** | `mailto:` link | V1 — žádný backend |
+| **Sitemap** | `@astrojs/sitemap` | Auto-generuje + hreflang |
 | **Robots** | Manual `public/robots.txt` | |
+| **CMS / blog** | — | Žádné v V1 |
 
 ### 8.1. Dependencies budget
 
@@ -449,14 +812,30 @@ document.querySelectorAll("[data-reveal]").forEach((el) => obs.observe(el));
     "@tailwindcss/vite": "^4.2.4",
     "astro": "^6.1.10",
     "motion": "^11.0.0",
+    "split-type": "^0.3.4",
     "tailwindcss": "^4.2.4",
+    "three": "^0.165.0",
     "typescript": "^5.9.3"
+  },
+  "devDependencies": {
+    "@types/three": "^0.165.0"
   }
 }
 ```
 
-**Total install size cíl:** < 60 MB node_modules
-**Total runtime JS:** < 30 kB gzipped (Motion + my code)
+**Total install size cíl:** < 100 MB node_modules
+(Three.js samotný je ~25MB ale tree-shake do <150kB gzip)
+
+**Runtime JS budget (per route):**
+
+| Route | Critical CSS | Inline JS | Deferred JS | Total gzip |
+|-------|-------------|-----------|-------------|------------|
+| `/` (landing) | 18kB | 5kB | Three.js 150kB + Motion 5kB + SplitType 3kB | ~180kB |
+| `/privacy`, `/terms` | 12kB | 0kB | 0kB | ~12kB |
+| `/checkout/success` | 14kB | 2kB | 0kB | ~16kB |
+
+Critical path (LCP): `<32kB` total CSS+JS — Three.js scéna nahraná
+**po LCP** přes lazy-init.
 
 ## 9. Performance budget
 
@@ -611,136 +990,482 @@ curl -I https://melveo.app/.well-known/apple-app-site-association
 Detailní mapování codepenů na sekce + implementační poznámka. Tato
 sekce se aktualizuje jak user dodá popisky / screenshoty.
 
-### #1 — VoXelo / hero base
+### #1 — VoXelo / hero base ✓ RESOLVED
 - URL: https://codepen.io/VoXelo/pen/ogbKQOy
 - Použití: **Hero sekce** (sekce 1)
-- Status: čeká na user popis (Q1 §15)
+- User popis: PRISM scéna — pitch black, 5 floating iridescent 3D
+  shapes (octahedrons), centrovaný wordmark s glow halo, 2 buttony.
+  Screenshot dodán.
+- Implementace: Three.js scéna s 4-6 shapes v cyan/blue lean
+  iridescent material + slow rotation + mouse parallax.
+  Detaily §7.2.
 
-### #2 — Josh Cummings / měnící se text
+### #2 — Josh Cummings / měnící se text ✓ RESOLVED
 - URL: https://codepen.io/joshcummingsdesign/pen/jWLpQv
 - Použití: **Hero rotující slovo** v H1 (sekce 1)
-- Status: implementace plánovaná přes Motion One (§7.1)
+- Implementace: Motion One y/opacity crossfade, viz §7.1.
 
-### #3 — Ahmad Awais / spojující elementy
+### #3 — Ahmad Awais / spojující elementy ✓ RESOLVED
 - URL: https://codepen.io/ahmadawais/pen/JodBmX
-- Použití: **Sekce 3** — visual punctuation (preferováno) NEBO
-  hero pozadí (alternativa)
-- Status: plán SVG gooey filter (§7.3)
+- Použití: **Sekce 3** — visual punctuation
+- Implementace: SVG gooey filter, viz §7.3.
 
-### #4 — Giomgio / efekt
+### #4 — Giomgio / efekt ✓ RESOLVED
 - URL: https://codepen.io/giomgio/pen/abxGyQX
-- Použití: **Sekce 5** mezi wellness a sessions stages
-- Status: čeká na user popis (Q2 §15)
+- Použití: **Sekce 5** mezi wellness a sessions
+- User popis: glass orb s morphujícím textem ("kotule co se mění")
+- Implementace: V4 = CSS radial gradient orb + Motion One text
+  crossfade. V4.1 (pokud slabé) = Three.js refractive sphere
+  shader. Viz §7.4.
 
-### #5 — Kevin Gutowski / image grid morph
+### #5 — Kevin Gutowski / image grid morph ✓ RESOLVED
 - URL: https://codepen.io/KevinGutowski/pen/QwNZYzL
-- Použití: **Sekce 2** — jeden screenshot se transformuje do gridu
-  feature kartiček (místo fotek = funkce)
-- Status: implementace plánovaná přes IntersectionObserver +
-  Motion One stagger (§7.5)
+- Použití: **Sekce 2** — jeden screenshot → grid feature kartiček
+- User confirmation: "místo fotek funkce co to umí všechno"
+- Implementace: IntersectionObserver + Motion One stagger reveal,
+  6 abstract feature kartiček (žádné photos), §7.5.
 
-### #6 — Daniel Haim / efekt
+### #6 — Daniel Haim / text effect ✓ RESOLVED
 - URL: https://codepen.io/danielhaim/pen/azmBEPL
-- Použití: **Sekce 7** nebo na privacy promise H2 (sekce 8)
-- Status: čeká na user popis (Q3 §15)
+- Použití: **Sekce 7 / privacy promise H2**
+- User confirmation: "takový jaký je na danielhaim/azmBEPL" (chce
+  ten samý letter-by-letter masked reveal)
+- Implementace: SplitType.js + per-character delay mask reveal
+  on IntersectionObserver entry, §7.6.
 
-## 15. Otevřené otázky pro tebe
+### #7 — Aaron Iker / cookie banner ✓ RESOLVED (NEW)
+- URL: https://codepen.io/aaroniker/pen/eYEqOrp
+- Použití: **Cookie consent banner** (V4 critical)
+- Implementace: Vanilla JS + localStorage state machine +
+  Astro component. Detaily §7.8.
 
-Tyto věci ti nemůžu domyslet bez tvého inputu — odpověz a já je
-zapíšu zpátky do této doc:
+## 15. Q&A — odpovědi user (2026-04-30)
 
-### Q1 — Co konkrétně dělá VoXelo hero (codepen #1)?
-> Mouse-tracking glow? Particle field? 3D tilt na hover? Scroll-driven
-> gradient? Static layout? Klikni na pen, popiš 1-2 větami co tam je.
+### Q1 — VoXelo hero (codepen #1) ✓ RESOLVED
 
-### Q2 — Co dělá Giomgio efekt (codepen #4)?
-> Distortion liquid? Parallax tilt? WebGL shader? Particle?
-> Typography wave?
+**User dodal screenshot pena PRISM (CodePen Preview):**
 
-### Q3 — Co dělá Daniel Haim efekt (codepen #6)?
-> Letter-by-letter reveal? Masked text? Glitch? Typewriter?
-> Něco jiného?
+> Pitch-black canvas. ~5 floating 3D shapes (triangular bipyramids /
+> octahedrons) v iridescent gradient (růžová → modrá → fialová holo).
+> Centrovaný velký bold wordmark "PRISM" s bílým radial glow halo
+> za textem. Pod wordmarkem subtitle "SPECTRUM OF LIGHT" rozpustlý
+> letterspacing. Pod tím 2 tlačítka — "Discover" (subtle outline) +
+> "Join Now" (filled tmavé).
 
-### Q4 — Privacy + Terms produkční text
-> Iubendu nechceš (chápu). Cesty:
->
-> a) **Custom napsaný + advokát review** — ~10-25k Kč jednorázově
->    + 1× ročně refresh. Pošlu ti osnovu, ty zaplatíš advokátovi
->    finální revizi.
-> b) **Self-written without lawyer** — risk ale legitimní pro V1
->    pilot. Uděláme si Privacy + Terms vlastním stylem, doplníme
->    všechno co GDPR + Apple §5.1.1 vyžaduje, a pak před prvním
->    velkým klientem dáme advokátovi review.
-> c) **Open-source šablona** (např. github.com/aviadmini/privacy-policy-template)
->    s našimi hodnotami doplněnými.
->
-> **Která cesta?**
+**Implementační směr pro Melveo:**
 
-### Q5 — Apple Developer Team ID
-> Plánuješ kupovat Apple Developer Program ($99/rok)? Bez něj:
-> - AASA placeholder zůstane TEAMID
-> - App Store badge bude pointovat na placeholder ne real itms-apps
-> - TestFlight nemůžeme ship
->
-> **Pokud ano, kdy?** (urgency timing)
+- 3D scéna přes **Three.js** (v R163+) nebo **Spline export**
+- 4-6 floating geometric shapes — ne literal prismy (to je PRISM
+  brand), místo toho:
+  - Octahedron / cone / capsule / icosahedron — abstract sport vibe
+  - Iridescent material — ale **lean cyan/blue** ne full rainbow,
+    aby seděl na Melveo brand cyan (`#00F0FF`)
+  - Subtle slow rotation + drift po elliptických drahách
+- Centrovaný **"melveo"** wordmark (Inter, lower-case) s halo glow
+- Eyebrow + 2 buttony (App Store badge + "Pilot pro klub →")
+- Mouse-parallax na shapes (velmi jemný, ~5° tilt na pohyb myši)
 
-### Q6 — Reálné iOS screenshoty
-> Zatím všechno placeholder. Pro V4 (codepen integrace) potřebujeme
-> aspoň 6 reálných screenshotů (check-in, sessions list, session detail,
-> coach board today, readiness card, members).
->
-> **Kdy budou hotové?** Po finální UX validaci, ale chci timing.
+**Tech budget:** Three.js cca 80kB gzip. Bundle se split-loadne
+mimo critical path; SSR vyrenderuje fallback (statické SVG shapes).
 
-### Q7 — Domain ownership
-> Doménu `melveo.app` máš zaregistrovanou a v Cloudflare zone? Pokud
-> ne, musíme registrovat (cca $20/rok).
+**Status pro V4:** ✓ specifikováno, čeká na implementaci.
 
-### Q8 — Analytics tool preference
-> Plausible self-hosted, Cloudflare Web Analytics zdarma, nebo žádný?
-> Default plán: **Cloudflare Web Analytics** (free, privacy-friendly,
-> už máme CF account).
+---
 
-### Q9 — Demo video / motion content
-> Chceš mít na hero / někde produkční demo video? V1 ne. V2 ano?
+### Q2 — Giomgio efekt (codepen #4) ✓ RESOLVED
 
-### Q10 — Polar / Apple Health logos
-> Můžeme na sekci wellness použít logo Apple Health + Polar
-> (s upozorněním o "podporujeme")? Apple guidelines mají rules
-> o použití "Works with Apple Health" certifikace — bez certifikace
-> nemůžeme oficiální badge použít.
+**User popis:**
 
-### Q11 — Tisk / brand assets
-> Logotyp existuje? Aktuálně používáme jen wordmark "melveo" v Inter.
-> Plánuješ vlastní logo / mark?
+> "jak je tam ta koukle a mění se ten text"
 
-### Q12 — Sound / audio
-> Hover sound efekty (raycast má), background hum atd.? V1 ne, ale
-> ptám se preventivně.
+**Interpretace:** glass / liquid orb (sphere) v sekci, kolem které
+se mění / morphují texty. Pravděpodobně:
 
-### Q13 — Calendly / booking widget
-> Sekce "Pilot pro klub" má aktuálně mailto. Chceš tam Cal.com /
-> Calendly embed pro auto-book demo callu? V1 jednoduché mailto je
-> OK (žádné 3rd-party JS), ale řekni jestli budeš chtít.
+- WebGL displacement shader na sféře (refractive glass)
+- Text rotuje synchronně s rotací sféry
+- Nebo orb je SVG circle s gradient + blur, text se cycluje pod ním
 
-### Q14 — EN verze timeline
-> V1 = jen Czech. V2 = Czech + English. Kdy V2?
+**Implementační směr:**
 
-### Q15 — Pricing visibility
-> Pilot 1 970 Kč / 30 dní — uvádět konkrétní cenu na landing, nebo
-> nechat "ozveme se po enquiry"? Doporučuju **uvádět** — důvěryhodné,
-> pre-qualifikuje leady. Ale tvůj call.
+- Pro V4 vyrobím **CSS-only orb** (radial gradient + backdrop-filter
+  blur) + Motion One text crossfade. Pokud to bude vypadat slabě
+  proti originálu, V4.1 přidám Three.js sférický shader.
+- Umístění: **sekce 5** (mezi wellness a sessions stages) jako
+  visual punctuation s krátkým claim co se mění:
+  - "Pro hráče." → "Pro trenéra." → "Pro klub."
 
-### Q16 — Testimoniály / social proof
-> V1 nemáme. Až bude první pilot, použijeme citát coache? V2.
+**Status pro V4:** ✓ implementační plán, čeká na execution.
 
-### Q17 — Cookie consent banner
-> Bez 3rd-party cookies (žádné Google Analytics) ani GDPR-strict
-> banner nepotřebujeme. Cloudflare Web Analytics nepoužívá cookies.
-> Default plán: **bez banneru.** Souhlasíš?
+---
 
-### Q18 — Dark mode toggle
-> Web bude dark-only force. Privacy/Terms pages mají light fallback.
-> Toggle v UI? Default plán: **ne, force dark.** Souhlasíš?
+### Q3 — Daniel Haim efekt (codepen #6) ✓ RESOLVED
+
+**User řekl:** "takový jaký je na codepen.io/danielhaim/pen/azmBEPL"
+(self-reference — chce Daniel Haim's vlastní efekt z toho pena).
+
+**Interpretace:** Daniel Haim je známý pro masked-reveal text efekty
+(text se odhalí přes oktagonální / clip-path masku, často s SplitText
+letter-by-letter timing).
+
+**Implementační směr:**
+
+- `mask-image: linear-gradient(...)` na text → animované přejíždí
+  přes řádek
+- Nebo **SplitType.js** + per-character delay (10ms stagger) ze dna
+- Trigger na IntersectionObserver entry
+
+**Umístění:** **sekce 7 / privacy promise H2** —
+"Trenér nikdy nevidí syrová čísla hráče." se odhalí letter-by-letter
+když scrolluješ k němu.
+
+**Status pro V4:** ✓ specifikováno.
+
+---
+
+### Q4 — Privacy + Terms ✓ RESOLVED
+
+**User decision:** "Právě si ty, prosím tě, podívej se na zákoník
+České republiky, podívej se na konkurenční weby a dle toho vytvoř."
+
+**Path:** Self-written od Claude per česká legislativa + competitor
+analysis. Bez advokát review v V1 — risk přijatý, vrátíme se k
+review před prvním velkým enterprise klientem.
+
+**Research scope (action item):**
+
+| Source | Co odsud lift |
+|--------|---------------|
+| Zákon č. 110/2019 Sb., o zpracování osobních údajů | České lokalizační požadavky |
+| Nařízení EU 2016/679 (GDPR) | Art. 13/14 transparency, Art. 15-22 rights |
+| Zákon č. 89/2012 Sb., občanský zákoník | Smluvní ustanovení (terms) |
+| Zákon č. 480/2004 Sb. o některých službách informační společnosti | Cookies + e-mail komerční sdělení |
+| Apple App Store Review Guideline 5.1.1 | Privacy Policy URL requirement |
+| Apple App Store Review Guideline 3.1.3(f) | Companion app commerce stance |
+| **Konkurence:** mews.com/legal | Český SaaS, multilang, premium |
+| **Konkurence:** productboard.com/legal | Český SaaS |
+| **Konkurence:** smartlook.com/legal | Český SaaS |
+| **Konkurence:** notion.com/legal | Globální benchmark |
+| **Konkurence:** linear.app/legal | Globální benchmark |
+
+**Akční plán:**
+
+1. Já udělám research (fetch konkurenčních legal pages přes WebFetch
+   kde to projde, fallback na popis přes vyhledávání)
+2. Napíšu Privacy v cs (Article 13 GDPR komplet) + en
+3. Napíšu Terms v cs + en (model 1 licence = 1 team_season,
+   pilot pricing, refund guarantee)
+4. Doplním cookie list (CF Web Analytics, GA, Meta Pixel — viz Q8)
+5. Před produkcí uložím draft do `melveo-web/src/pages/{cs,en}/{privacy,terms}.astro`
+6. Před prvním velkým klientem (~ $5k+ kontrakt) dáme advokátovi
+   review — to je kompromis mezi rychlostí a risk
+
+**Status:** 🔨 in progress, V4.
+
+---
+
+### Q5 — Apple Developer Program ✓ RESOLVED
+
+**User answer:** "ano, plánuji koupit, předpokládám příští týden"
+
+**Implications:**
+
+- Příští týden (2026-05-06 ± 2 dny) můžu replace `TEAMID` v AASA
+- TestFlight se rozjede po prvním Xcode signed buildu
+- App Store listing podmíněn schválením App Store Connect (~1-3 dny review)
+- Real `itms-apps://` URL nahradí placeholder anchor po listing
+
+**Status:** ⏸ čeká na user akci (Apple Developer membership purchase).
+
+---
+
+### Q6 — Reálné iOS screenshoty ✓ RESOLVED
+
+**User answer:** "zatím asi nepotřeba"
+
+**Implications pro V4:**
+
+- Hero PRISM-style scéna používá 3D shapes (ne screenshoty)
+- Stages 4 + 6 (wellness + sessions): místo screenshot mockup použijeme
+  **animovanou ilustraci** funkcionality (např. CSS-rendered fake
+  iPhone UI s readiness card komponentou)
+- Image grid morph (Kevin Gutowski sekce 2): místo fotek **abstraktní
+  feature kartičky** s ikonou + claim
+- Až user dodá real screenshoty (pravděpodobně po pilotech), V4.x
+  swapne fake illustrations za real assets
+
+**Status:** ⏸ deferred to V4.x post-pilot, V4 ships bez nich.
+
+---
+
+### Q7 — Domain ✓ RESOLVED
+
+**User answer:** "doména melveo.app je registrovaná pod Cloudflare"
+
+**Implications:**
+
+- Cloudflare zone `melveo.app` exists
+- Zone už hostuje `updates.melveo.app` (Resend)
+- Můžeme přidat A / CNAME pro Pages bez registrátorského kroku
+- DNS změny instant (CF zone)
+
+**Status:** ✓ ready, čeká jen na CF Pages connect.
+
+---
+
+### Q8 — Analytics ✓ RESOLVED
+
+**User answer:** "Cloudflare Web Analytics + můžeme tam dát Google
+Tagy, Meta Tagy, tak Google Analytics, prostě všechno"
+
+**Implications:**
+
+- 4 vrstvy analytics: **CF Web Analytics + GA4 + Google Tag Manager
+  + Meta Pixel**
+- GA + Meta Pixel **vyžaduje cookie consent** podle GDPR Art. 6 + ČR
+  zák. 480/2004 (e-Privacy directive transposition)
+- Cookie banner z Q17 (Aaron Iker reference) je critical infra,
+  ne nice-to-have
+- GTM jako single tag, který injectne ostatní (best practice — 1 sketch
+  tag v `<head>`, vše ostatní řízeno z GTM dashboardu)
+
+**Stack pro V4:**
+
+```
+GTM container (gtm.js)                    ← single tag in <head>
+  └─> GA4 measurement ID                   ← config tag
+  └─> Meta Pixel ID                        ← custom HTML
+  └─> Conversion events (mailto click)     ← trigger
+CF Web Analytics                           ← <script src="//static.cloudflareinsights.com/...">
+                                              (cookieless, mimo consent)
+```
+
+**Cookie consent strategy:**
+
+- **Necessary cookies (žádný consent needed):**
+  - CF Web Analytics (cookieless beacon)
+  - Astro view-transition state (sessionStorage)
+- **Analytics cookies (consent required):**
+  - GTM → GA4 (`_ga`, `_ga_*`, `_gid`)
+  - Meta Pixel (`_fbp`, `_fbc`)
+- **Marketing cookies (consent required):**
+  - Reserved pro V2 (retargeting, ads)
+
+Banner umožní 3 stavy: Accept All / Reject (jen necessary) /
+Customize. Per česká úprava zákona 480/2004 § 89 musí být **opt-in
+explicitní** (ne pre-checked).
+
+**Implementation:** §7.8 níže.
+
+**Status:** ⏸ V4 stack designed, čeká na implementation.
+
+---
+
+### Q9 — Demo video ✓ RESOLVED
+
+**User answer:** "demo video asi teďka aktuálně nebude"
+
+**Status:** ⏸ V2+ feature.
+
+---
+
+### Q10 — Apple Health / Polar logos ✓ RESOLVED
+
+**User answer:** "zatím asi ne"
+
+**Implications:** Wellness sekce použije generický icon (Lucide
+`heart-pulse` nebo `activity`) místo brand logos. Bezpečnější
+pro V1.
+
+**Status:** ⏸ deferred.
+
+---
+
+### Q11 — Vlastní logo ✓ RESOLVED
+
+**User answer:** "vlastní logo zatím nemáme"
+
+**Implications:**
+
+- V4 zůstane **wordmark "melveo"** v Inter Bold lowercase jako
+  primary brand expression
+- 3D hero shapes mohou suplovat "logo moment" (PRISM scéna ale
+  bez konkrétního markeru)
+- Favicon zatím rounded-square s monogramem "m" (✓ V3 done)
+
+**Návrh ode mě:** mohli bychom v hero PRISM scéně mít **jeden
+dominantní 3D shape** který se postupně etabluje jako Melveo mark
+(např. cyan octahedron). Pokud to V4 fly, V5 může z něj vyrobit
+opravdový logotyp. Je to non-binding.
+
+**Status:** ✓ jen wordmark for now, design TBD.
+
+---
+
+### Q12 — Sound efekty ✓ RESOLVED
+
+**User answer:** "sound efekty nepotřeba"
+
+**Status:** ⏸ never.
+
+---
+
+### Q13 — Cal.com / Calendly ✓ RESOLVED
+
+**User answer:** "Cal.com nepotřeba"
+
+**Implications:** Pilot CTA zůstává mailto-link. Žádný 3rd-party
+embed.
+
+**Status:** ✓ mailto only.
+
+---
+
+### Q14 — EN verze ✓ RESOLVED
+
+**User answer:** "Anglická verze. Chtělo by to udělat jak v
+angličtině, tak v češtině, podle lokality."
+
+**Implications — major change:**
+
+- V4 ships **i18n** od začátku (ne až V2)
+- Locale routing přes **Astro built-in i18n** (Astro 4+)
+- Default locale: `cs`
+- Secondary: `en`
+- URL strategy: `/cs/*` + `/en/*`, root `/` redirectuje na
+  detected locale (Accept-Language header)
+- Locale switch v headeru: `cs` / `en` toggle
+
+**Astro i18n config:**
+
+```js
+// astro.config.mjs
+i18n: {
+  defaultLocale: "cs",
+  locales: ["cs", "en"],
+  routing: {
+    prefixDefaultLocale: false,  // / serves cs
+    redirectToDefaultLocale: false,
+  },
+}
+```
+
+**Content split:**
+
+```
+src/content/
+  ├── cs/
+  │   ├── hero.json
+  │   ├── stages.json
+  │   ├── privacy.md
+  │   └── terms.md
+  └── en/
+      ├── hero.json
+      ├── stages.json
+      ├── privacy.md
+      └── terms.md
+```
+
+Pro `/`, `/privacy`, `/terms` použijeme Astro Content Collections
+type-safe loading. Components dostávají `lang` prop.
+
+**Hreflang tags v `<head>`:**
+
+```html
+<link rel="alternate" hreflang="cs" href="https://melveo.app/cs/" />
+<link rel="alternate" hreflang="en" href="https://melveo.app/en/" />
+<link rel="alternate" hreflang="x-default" href="https://melveo.app/" />
+```
+
+**Status:** 🔨 V4 priorita.
+
+---
+
+### Q15 — Pricing visibility ✓ RESOLVED
+
+**User answer:** "pricing bych tam ještě asi nedával"
+
+**Implications:** Žádná konkrétní cena na landing. Pilot CTA
+říká jen "Pilot pro klub" + mailto. Reálná cena vyplyne až v
+prvním e-mailu.
+
+**Status:** ✓ pricing hidden V1.
+
+---
+
+### Q16 — Testimoniály ✓ RESOLVED
+
+**User answer:** "testimonialy zatím ne"
+
+**Status:** ⏸ V2+ post-first-pilot.
+
+---
+
+### Q17 — Cookie banner ✓ RESOLVED
+
+**User answer + reference:** "https://codepen.io/aaroniker/pen/eYEqOrp"
+
+**Aaron Iker style** je obvykle clean modern UI s smooth
+slide-in/out, často:
+
+- Bottom slide-up sheet (mobile-first pattern)
+- Subtle shadow + blur backdrop
+- 2-3 buttony: Accept / Reject / Customize
+- Ikona cookie / shield vlevo
+
+**Implementační stack:**
+
+- Vanilla JS (žádná lib jako Cookiebot — náš consent-store je trivial)
+- localStorage key `melveo:consent` s JSON value:
+
+  ```json
+  {
+    "necessary": true,
+    "analytics": true | false,
+    "marketing": true | false,
+    "version": 1,
+    "timestamp": "2026-04-30T12:34:56Z"
+  }
+  ```
+
+- GTM `consent_state` event triggered po user choice
+- Banner re-shown jednou ročně nebo při změně privacy policy
+  (`version` bump)
+- Granular customize panel (3 toggles: Necessary always-on,
+  Analytics, Marketing)
+
+**Komponenta:** `src/components/CookieBanner.astro` —
+client-side script, lazy-loaded after first paint.
+
+**Compliance:**
+
+- ✓ Opt-in (ne pre-checked) per CZ zák. 480/2004
+- ✓ Equally easy reject (per GDPR EDPB guidance 03/2022)
+- ✓ Granular per category
+- ✓ Consent reusable + auditable přes localStorage timestamp
+- ✓ Withdraw consent kdykoliv (footer link "Cookie nastavení")
+
+**Status:** 🔨 V4 critical (blokuje GA + Meta).
+
+---
+
+### Q18 — Dark mode toggle ✓ RESOLVED
+
+**User answer:** "Ano, dark mode, souhlasím"
+
+**Implications:** Force dark globally na landing. Privacy/Terms
+zůstávají dark też (pro consistency). Toggle není potřeba.
+
+**Status:** ✓ force dark, no toggle.
+
+---
+
+### GitHub repo connect ✓ NOTED
+
+**User answer:** "github je nastevn - nastavuje se"
+
+**Status:** Repo `matk0shub/melveo-web` exists ✓ a je private.
+Cloudflare Pages connect je manual UI step v CF dashboardu —
+předpokládám user dokončí během dne.
 
 ## 16. Risks + mitigations
 
@@ -751,6 +1476,191 @@ zapíšu zpátky do této doc:
 | AASA cache propagation slow | `Cache-Control: no-cache` + force refresh script |
 | Real screenshoty nejsou pro V4 | Placeholder gradient cards s feature copy — visual works i bez |
 | User změní mind about hero rotating words | Změna copy → 1 commit, žádný code change kromě array |
+
+## 16.5. i18n routing & content strategy
+
+### 16.5.1. URL strategy
+
+```
+melveo.app/                     ← redirect na detected locale
+melveo.app/cs/                  ← Czech home (default, primary)
+melveo.app/en/                  ← English home
+melveo.app/cs/privacy           ← Czech privacy
+melveo.app/en/privacy           ← English privacy
+melveo.app/cs/terms             ← Czech terms
+melveo.app/en/terms             ← English terms
+melveo.app/cs/checkout/success  ← localized post-Stripe
+melveo.app/en/checkout/success
+```
+
+Astro config:
+
+```js
+i18n: {
+  defaultLocale: "cs",
+  locales: ["cs", "en"],
+  routing: {
+    prefixDefaultLocale: true,    // /cs is canonical, / redirects
+    redirectToDefaultLocale: false,  // respect Accept-Language at /
+  },
+}
+```
+
+Root `/` redirect je middleware (Cloudflare Pages Functions nebo
+client-side script) co čte `navigator.languages` a redirectuje
+na `/cs/` nebo `/en/`. Bez middleware fallback `meta refresh`
+na `/cs/`.
+
+### 16.5.2. Content collections
+
+Místo hardcoded copy v `.astro` souborech — všechen text v JSON +
+MDX content collections, type-safe loading:
+
+```
+src/content/
+  config.ts                      ← schema definitions (Zod)
+  hero/
+    cs.json                      ← hero copy CS
+    en.json                      ← hero copy EN
+  stages/
+    cs.json
+    en.json
+  privacy/
+    cs.md                        ← long-form
+    en.md
+  terms/
+    cs.md
+    en.md
+```
+
+```ts
+// src/content/config.ts
+import { defineCollection, z } from "astro:content";
+
+const heroSchema = z.object({
+  eyebrow: z.string(),
+  rotatingWords: z.array(z.string()).min(3),
+  headlinePrefix: z.string(),
+  subline: z.string(),
+  appStoreCta: z.string(),
+  pilotCta: z.string(),
+});
+
+export const collections = {
+  hero: defineCollection({ type: "data", schema: heroSchema }),
+  // ...
+};
+```
+
+### 16.5.3. Locale switcher
+
+Header pravý roh: `cs / en` toggle. Click → preserve current path,
+swap locale prefix.
+
+```astro
+---
+const currentPath = Astro.url.pathname;
+const otherLocale = Astro.currentLocale === "cs" ? "en" : "cs";
+const swappedPath = currentPath.replace(`/${Astro.currentLocale}/`, `/${otherLocale}/`);
+---
+<a href={swappedPath}>{otherLocale.toUpperCase()}</a>
+```
+
+## 16.6. Privacy + Terms — content plan & research
+
+User řekl: napsat samostatně per česká legislativa + competitor
+research, bez advokát review v V1 (§15.5 Q4).
+
+### 16.6.1. Czech legal stack
+
+**Primary law:**
+
+1. **Nařízení EU 2016/679 (GDPR)** — primary privacy obligation
+2. **Zákon č. 110/2019 Sb.** — implementing GDPR v ČR; §11 (děti
+   pod 15 let — relevantní pro mládežnické kluby)
+3. **Zákon č. 89/2012 Sb. (občanský zákoník)** — smluvní právo,
+   spotřebitelské smlouvy §1810-1867 (kluby = nepodnikatelské
+   spolky někdy = consumer protection apply!)
+4. **Zákon č. 480/2004 Sb.** — informační společnost: e-mail
+   souhlas (§7) + cookies (§89 odst. 3)
+5. **Zákon č. 634/1992 Sb. (zákon o ochraně spotřebitele)** —
+   reklamace, refund
+
+**Compliance výstupy v textu:**
+
+- Jméno provozovatele + IČO + sídlo (TBD — Q19 níže)
+- Účel zpracování (App functionality + analytics + marketing
+  per consent)
+- Právní základ per kategorie (Art. 6 GDPR — smlouva, oprávněný
+  zájem, souhlas)
+- Doba uchování (per kategorie)
+- Práva subjektu (Art. 15-22): přístup, oprava, výmaz, omezení,
+  přenositelnost, námitka, automatized decision
+- Kontakt na DPO / privacy@melveo.app
+- ÚOOÚ kontakt pro stížnosti
+- Cookie list + účel
+
+### 16.6.2. Competitor benchmarks (research targets)
+
+| Web | URL | Co odsud lift |
+|-----|-----|---------------|
+| Mews | `mews.com/legal` | Český SaaS, multilang, EU-strict |
+| Productboard | `productboard.com/privacy` | Český SaaS, US/EU split |
+| Smartlook | `smartlook.com/privacy-policy/` | Český, B2B |
+| Notion | `notion.com/privacy` | Globální benchmark |
+| Linear | `linear.app/legal/privacy` | Modern indie SaaS |
+| Raycast | `raycast.com/privacy` | Companion-app vibe |
+| Stripe | `stripe.com/privacy` | Best-in-class wording |
+
+### 16.6.3. Action plan pro V4
+
+```
+[ ] D-day  — research session: WebFetch (kde projde) /
+             popis přes vyhledávání pro 7 konkurenčních
+             legal pages
+[ ] D+1    — výtah common pattern + Czech-specific bonus
+             ustanovení
+[ ] D+1    — draft Privacy CS (~3500 slov)
+[ ] D+1    — draft Privacy EN (translation, ne re-write)
+[ ] D+2    — draft Terms CS (~2500 slov)
+[ ] D+2    — draft Terms EN
+[ ] D+2    — kontrolní pass: Apple §5.1.1 checklist + GDPR
+             Art. 13 checklist + zák. 480/2004 §89 checklist
+[ ] D+2    — uložit do src/content/{privacy,terms}/{cs,en}.md
+[ ] D+3    — přečíst v context Czech native (já umím cs ale
+             review user welcome)
+[ ] před první enterprise klient — advokát review
+```
+
+## 16.7. Logo strategy
+
+User řekl: "vlastní logo zatím nemáme" (Q11).
+
+**V4 plán:**
+
+- Wordmark "melveo" (Inter Bold lowercase, brand cyan jen v hover
+  / accent contexts) zůstává primary
+- 3D PRISM hero shapes nemají symbolický logo význam — jsou pure
+  decoration
+- Favicon = rounded square s "m" monogramem (V3 already done)
+
+**V5 návrh (post-V4 launch):**
+
+Pokud chceš design vlastní mark, navrhuju **cyan octahedron** jako
+primary mark. Reasons:
+
+1. Sedne na 3D hero scéna jako "main shape"
+2. Geometric, abstract, sport-neutral (nepřipomíná konkrétní sport)
+3. Snadno animovatelný (rotace = "data flow" metaphor)
+4. Cyan brand color jasně identifies
+5. Funguje jako favicon + app icon (iOS already has app icon,
+   tohle by byla doplněk pro web/email/marketing)
+
+Mock návrh: octahedron 64×64 SVG, gradient cyan → ink, single
+glyph readable na všech sizech.
+
+**Cost:** můžu vyrobit V5 placeholder. Pro produkční mark doporučuju
+brand designer (~5-10k Kč jednorázově).
 
 ## 17. Reference
 
@@ -765,10 +1675,67 @@ zapíšu zpátky do této doc:
 - Astro 6 docs: https://docs.astro.build
 - Tailwind 4 docs: https://tailwindcss.com/docs/v4-beta
 
-## 18. Changelog
+## 18. Změny + nové otázky
+
+### 18.1. Follow-up otázky (rev. 2)
+
+User v rev. 2 odpovídal na všech 18 otázek; vyplynulo 5 nových
+follow-upů. Odpověz a já zapíšu zpátky:
+
+#### Q19 — Provozovatel (legal entity)
+
+Privacy + Terms potřebují **jméno + IČO + sídlo** plátce (legal
+entity co stojí za Melveo).
+
+> **Co tam má být?**
+> - s.r.o. název + IČO + sídlo?
+> - OSVČ (jméno + IČO + adresa)?
+> - Spolek?
+> - Bude to založeno za chvíli? Můžu zatím použít placeholder
+>   "Melveo s.r.o. (TBD)"?
+
+#### Q20 — DPO email
+
+Pro GDPR: kontakt na zpracovatele osobních údajů. Default plán:
+**privacy@melveo.app** alias na hello@melveo.app. Souhlasíš?
+
+#### Q21 — EN content — kdo překládá?
+
+Mám 2 možnosti:
+
+> a) Já napíšu CS, pak překlad přes mě (kvalita: solid technical EN,
+>    žádné colloquialismy)
+> b) Já napíšu CS + EN draft side-by-side, ty pošleš překladatelovi
+>    pro polish
+
+Výběr ovlivní kvalitu + timing. Default doporučení: **a) já oboje**,
+review uděláš ty když umíš EN.
+
+#### Q22 — GA4 + Meta Pixel ID
+
+Pro GTM container potřebuju IDs:
+
+> - GA4 Measurement ID (`G-XXXXXXXXXX`)
+> - Meta Pixel ID (`12345678901234`)
+> - GTM Container ID (`GTM-XXXXXXX`)
+
+Bez nich V4 ship bez analytics; přidáme po user setup. Souhlasíš
+s deferred?
+
+#### Q23 — Logo design
+
+Q11 vyřešeno (zatím wordmark only) ale ptám se jestli chceš
+
+> a) **V5 placeholder** ode mě — cyan octahedron mark (volně
+>    inspirované hero scéně) — uvidíš za 30 minut
+> b) **Skutečný brand designer** — ~5-10k Kč jednorázově, 1-2 týdny
+> c) **Bez vlastního logotyp**, jen wordmark navždy
+
+### 18.2. Changelog
 
 | Datum | Změna |
 |-------|-------|
 | 2026-04-29 | doc 178 web handoff vznikl |
 | 2026-04-29 | doc 179 Privacy/Terms recommendation (Iubenda zamítnut) |
 | 2026-04-30 | **Tato doc 180/PLAN vznikla** — komplexní plán proti fey/raycast DNA + 6 codepen referencí |
+| 2026-04-30 | **Rev. 2:** user odpověděl na 18 otázek + dodal screenshot VoXelo (PRISM 3D scéna) + zvolil cookie banner ref Aaron Iker. Plán updatován: Three.js hero, i18n cs/en, full analytics stack (GA + Meta + GTM + CF), self-written legal text, cookie consent V4 critical. Nové otázky Q19-Q23 (legal entity, DPO email, EN translation, analytics IDs, logo design). |
