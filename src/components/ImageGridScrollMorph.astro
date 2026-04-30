@@ -287,11 +287,17 @@
         const power4InOut = [0.87, 0, 0.13, 1] as const;
         const sineOut = [0.61, 1, 0.88, 1] as const;
 
-        // ─── Scaler width: hold at viewport, then shrink to natural ────
-        //     Three keyframes + `times: [0, 0.15, 1]` keeps the image
-        //     viewport-wide for the first 15 % of scroll, then shrinks.
-        //     Width and height are separate scroll() registrations so
-        //     each axis carries its own easing (codepen signature).
+        // ─── Scaler: hold at viewport, then shrink to natural ──────────
+        //     Width AND height in a SINGLE animate() call. Splitting
+        //     them into two scroll(animate()) registrations on the same
+        //     element broke things — Motion v12 treats the second call
+        //     as a takeover and cancels the first, which is why width
+        //     stayed at its CSS default while height morphed to viewport.
+        //     Using one combined call with shared options preserves
+        //     both axes; we sacrifice the codepen's per-axis asymmetric
+        //     easing (power2 width vs power1 height) for correctness.
+        //     The asymmetry is recovered visually anyway because the
+        //     start delta differs between width and height.
         scroll(
           animate(
             image,
@@ -301,23 +307,6 @@
                 `${viewportWidth}px`,
                 `${naturalWidth}px`,
               ],
-            },
-            {
-              times: [0, 0.15, 1],
-              ease: power2InOut as any,
-            },
-          ),
-          {
-            target: section,
-            offset: ['start start', 'end end'] as any,
-          },
-        );
-
-        // ─── Scaler height: same hold pattern, different easing ─────────
-        scroll(
-          animate(
-            image,
-            {
               height: [
                 `${viewportHeight}px`,
                 `${viewportHeight}px`,
@@ -326,7 +315,7 @@
             },
             {
               times: [0, 0.15, 1],
-              ease: power1InOut as any,
+              ease: power2InOut as any,
             },
           ),
           {
