@@ -56,14 +56,12 @@ const t = useTranslations(lang);
         style="font-size: clamp(3rem, 8.5vw, 8.5rem); letter-spacing: -0.04em;"
       >
         {t('hero.headlinePrefix')}{' '}
-        <span class="hero-rotate-shell">
-          <span
-            class="text-[var(--color-accent-primary)] hero-rotate-word"
-            data-rotate-word
-            aria-live="polite"
-          >
-            {lang === 'cs' ? 'tréninky' : 'trainings'}
-          </span>
+        <span
+          class="text-[var(--color-accent-primary)]"
+          data-rotate-word
+          aria-live="polite"
+        >
+          {lang === 'cs' ? 'tréninky' : 'trainings'}
         </span>{t('hero.headlineSuffix')}
       </h1>
 
@@ -254,20 +252,29 @@ const t = useTranslations(lang);
 <style>
   /*
     Hero rotating word — wrap so y-translate during cycle stays within
-    the line and doesn't push surrounding text. Inline-block + overflow
-    hidden gives the slot a fixed-size box; min-width sized to the
-    longest word minimizes layout shift.
+    the line. Typewriter version (Josh Cummings codepen) writes
+    characters in-place via `el.textContent = ...`, so no slide-shell
+    needed — just a small caret to mark the typing position.
   */
-  .hero-rotate-shell {
+  [data-rotate-word] {
     display: inline-block;
-    overflow: hidden;
-    vertical-align: baseline;
-    line-height: inherit;
+    /* Trailing caret while typing (codepen used typed.js without a
+       cursor; we add a subtle blinking bar so it's clearly "typing"). */
+    border-right: 0.05em solid currentColor;
+    margin-right: -0.05em; /* keep punctuation tight against caret */
+    animation: caret-blink 1.05s steps(2) infinite;
   }
 
-  .hero-rotate-word {
-    display: inline-block;
-    will-change: transform, opacity;
+  @keyframes caret-blink {
+    50% { border-right-color: transparent; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    [data-rotate-word] {
+      animation: none;
+      border-right: 0;
+      margin-right: 0;
+    }
   }
 </style>
 

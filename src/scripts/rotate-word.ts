@@ -1,16 +1,29 @@
 /**
- * Hero rotating word — Josh Cummings codepen jWLpQv (V4-D1).
+ * Hero rotating word — typewriter (Josh Cummings codepen jWLpQv).
  *
- * Cycles through a list of nouns under a clamp-sized H1 prefix.
- * Motion One y/opacity crossfade, 2400ms interval. SSR-rendered first
- * word means the layout never shifts (CLS=0).
+ * Reproduces the typed.js mechanic from the codepen: types out a word
+ * character-by-character, pauses, then deletes character-by-character,
+ * advances to the next phrase, repeat. The codepen's options:
  *
- * Per PLAN.md §7.1.
+ *   typeSpeed:  50    — ms per character while typing
+ *   backSpeed:  10    — ms per character while deleting
+ *   backDelay:  2000  — ms hold after typing finishes
+ *   showCursor: false — no blinking cursor
+ *   loop:       false — stops on the last phrase
+ *
+ * For Melveo we keep it looping (more dynamic) and slow the speeds
+ * down a bit so the Czech diacritics are readable.
+ *
+ * SSR renders the first phrase fully so first paint shows real
+ * content (good LCP). On mount we swap into "deleting" state from
+ * that initial phrase, which makes the very first scripted action a
+ * smooth backspace — no jarring pop.
  */
 
-import { animate } from 'motion';
-
-const INTERVAL_MS = 2800;
+const TYPE_SPEED = 70;
+const BACK_SPEED = 25;
+const BACK_DELAY = 1800;
+const NEXT_DELAY = 200;
 
 const wordsByLang = {
   cs: ['tréninky', 'rozhodnutí', 'ráno', 'klub', 'sezóna'],
@@ -24,43 +37,73 @@ export function mountRotateWord() {
   if (!el) return;
 
   const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  if (reduceMotion) return;
 
-  // Detect locale from <html lang>
-  const lang = (document.documentElement.lang === 'en' ? 'en' : 'cs') as Lang;
-  const words = wordsByLang[lang];
+  const lang: Lang = document.documentElement.lang === 'en' ? 'en' : 'cs';
+  const phrases = wordsByLang[lang];
 
-  let idx = words.indexOf(el.textContent?.trim() ?? '');
-  if (idx < 0) idx = 0;
+  if (reduceMotion) {
+    // Don't cycle in reduced motion — leave the SSR-rendered word.
+    return;
+  }
 
+  // Start by treating the SSR-rendered word as already typed; the
+  // first scripted action will be backspace.
+  const initial = el.textContent?.trim() ?? phrases[0];
+  let phraseIdx = Math.max(0, phrases.indexOf(initial as (typeof phrases)[number]));
+  let charIdx = phrases[phraseIdx].length;
+  let isDeleting = true;
   let timer: number | null = null;
 
-  async function cycle() {
-    idx = (idx + 1) % words.length;
-    await animate(el!, { y: [0, -32], opacity: [1, 0] }, { duration: 0.35, easing: [0.32, 0.72, 0, 1] }).finished;
-    el!.textContent = words[idx];
-    await animate(el!, { y: [32, 0], opacity: [0, 1] }, { duration: 0.45, easing: [0.32, 0.72, 0, 1] }).finished;
-  }
-
-  function start() {
-    if (timer != null) return;
-    timer = window.setInterval(() => {
-      cycle().catch(() => {/* swallow if user nav'd away */});
-    }, INTERVAL_MS);
-  }
-
-  function stop() {
+  function clear() {
     if (timer != null) {
-      clearInterval(timer);
+      clearTimeout(timer);
       timer = null;
     }
   }
 
-  // Pause when tab not visible
-  document.addEventListener('visibilitychange', () => {
-    if (document.hidden) stop();
-    else start();
-  });
+  function tick() {
+    timer = null;
+    const phrase = phrases[phraseIdx];
 
-  start();
+    if (!isDeleting) {
+      // Typing forward
+      charIdx += 1;
+      el!.textContent = phrase.slice(0, charIdx);
+      if (charIdx >= phrase.length) {
+        // Finished typing — hold, then start deleting
+        timer = window.setTimeout(() => {
+          isDeleting = true;
+          tick();
+        }, BACK_DELAY);
+        return;
+      }
+      timer = window.setTimeout(tick, TYPE_SPEED);
+    } else {
+      // Deleting backwards
+      charIdx -= 1;
+      el!.textContent = phrase.slice(0, Math.max(0, charIdx));
+      if (charIdx <= 0) {
+        // Finished deleting — advance to next phrase
+        isDeleting = false;
+        phraseIdx = (phraseIdx + 1) % phrases.length;
+        charIdx = 0;
+        timer = window.setTimeout(tick, NEXT_DELAY);
+        return;
+      }
+      timer = window.setTimeout(tick, BACK_SPEED);
+    }
+  }
+
+  // Initial pause matching the codepen's first-paint dwell, so the
+  // user has time to read the SSR phrase before deletion starts.
+  timer = window.setTimeout(tick, BACK_DELAY);
+
+  // Pause when tab is hidden, resume when visible
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden) {
+      clear();
+    } else if (timer == null) {
+      tick();
+    }
+  });
 }

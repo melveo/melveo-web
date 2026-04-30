@@ -51,12 +51,12 @@ export const ui = {
     'wellness.tag': 'Doc 174 §3 — privacy contract',
 
     // Stage 5 — cursor-mask (Giomgio codepen abxGyQX). Two layered
-    // headlines: primary on dark canvas, secondary revealed through a
-    // radial cursor-following circle.
-    'orb.primary': 'Připravíme tým.',
-    'orb.secondary1': 'Pro hráče.',
-    'orb.secondary2': 'Pro trenéra.',
-    'orb.secondary3': 'Pro klub.',
+    // static headlines per the codepen ("Have a nice day!" + "It will
+    // be sunny" pattern). Outside the cursor circle = primary; inside
+    // the circle = secondary. No JS rotation — the only "change" is
+    // the cursor sweeping across.
+    'orb.primary': 'Pro celý klub.',
+    'orb.secondary': 'Pro každého hráče.',
 
     // Stage 6 — sessions + coach board
     'sessions.eyebrow': 'TRÉNINK · ROZHODNUTÍ',
@@ -116,10 +116,8 @@ export const ui = {
       "Players rate energy, sleep, soreness, mood, motivation. Coach sees the team — never an individual's raw numbers.",
     'wellness.tag': 'Doc 174 §3 — privacy contract',
 
-    'orb.primary': 'Ready your team.',
-    'orb.secondary1': 'For players.',
-    'orb.secondary2': 'For coaches.',
-    'orb.secondary3': 'For clubs.',
+    'orb.primary': 'For the whole club.',
+    'orb.secondary': 'For every player.',
 
     'sessions.eyebrow': 'TRAINING · DECISIONS',
     'sessions.headline': 'Sessions and coach board.',

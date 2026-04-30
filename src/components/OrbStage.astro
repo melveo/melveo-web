@@ -1,18 +1,18 @@
 ---
 /**
- * OrbStage — Giomgio codepen abxGyQX (V4-D4 v2).
+ * OrbStage — Giomgio codepen abxGyQX, 1:1 port.
  *
- * Re-implementation per user 2026-04-30: two stacked hero blocks at
- * 100vh, both centred. Primary block sits on the dark canvas with the
- * primary headline. Secondary block is absolutely overlaid on top
- * with a brand-cyan tinted gradient background and a different
- * headline; a radial-gradient mask reveals it only inside a circle
- * that follows the cursor.
+ * Two stacked hero blocks. Primary on dark canvas with primary
+ * heading; secondary absolutely overlaid with a brand-cyan gradient
+ * background and a different heading. A radial-gradient mask reveals
+ * the secondary block only inside a circle that follows the cursor.
  *
- * Original codepen used GSAP. We use Motion (already loaded) for the
- * smooth easing of the --x / --y CSS variables tied to the mask
- * position. Phrases rotate every few seconds so the secondary headline
- * cycles through "Pro hráče. / Pro trenéra. / Pro klub." (or EN).
+ * No text rotation — per user 2026-04-30. The "change" comes from
+ * the cursor sweeping across the static secondary text.
+ *
+ * Smooth interpolation handled natively via @property + CSS transition
+ * (codepen used GSAP for the lerp). See `src/scripts/orb-cursor.ts`
+ * for the pointermove → --x / --y wiring.
  */
 
 import { useTranslations, type Lang } from '../i18n/ui';
@@ -26,29 +26,15 @@ const t = useTranslations(lang);
 ---
 
 <section class="orb-wrapper" data-orb-wrapper>
-  <!-- Primary hero — dark canvas, primary text -->
+  <!-- Primary hero — dark canvas, white primary text -->
   <div class="orb-hero">
     <h2 class="orb-heading">{t('orb.primary')}</h2>
   </div>
 
-  <!-- Secondary hero — absolute overlay, gradient bg, rotating text,
-       revealed only through radial mask centred at cursor.
-       Phrases passed via data-attribute (JSON-encoded array) so the
-       script can run as a clean ES module without `define:vars`,
-       which had inconsistent behaviour with Astro 6 + type="module"
-       in our hosting/bundling setup. -->
+  <!-- Secondary hero — absolute overlay, cyan gradient bg, dark text,
+       revealed only through radial mask centred at cursor. -->
   <div class="orb-hero orb-hero--secondary" aria-hidden="true" data-orb-secondary>
-    <p
-      class="orb-heading"
-      data-orb-rotate
-      data-orb-phrases={JSON.stringify([
-        t('orb.secondary1'),
-        t('orb.secondary2'),
-        t('orb.secondary3'),
-      ])}
-    >
-      {t('orb.secondary1')}
-    </p>
+    <p class="orb-heading">{t('orb.secondary')}</p>
   </div>
 </section>
 
@@ -59,11 +45,10 @@ const t = useTranslations(lang);
 
 <style>
   /*
-    Register --x / --y as proper percentage typed CSS properties.
-    Without this, browsers treat them as opaque strings and can't
-    animate them — the circle would snap rather than follow the
-    cursor smoothly. With @property + transition below we get
-    native GPU-smooth interpolation without any JS lerp.
+    Register --x / --y as proper percentage typed CSS properties so
+    the browser can transition them smoothly. Without @property the
+    custom-property values are opaque strings and the circle would
+    snap rather than follow the cursor.
   */
   @property --x {
     syntax: '<percentage>';
@@ -79,7 +64,6 @@ const t = useTranslations(lang);
   .orb-wrapper {
     position: relative;
     width: 100%;
-    /* Border-top to keep section bands consistent with siblings. */
     border-top: 1px solid var(--color-stroke-base);
   }
 
@@ -99,28 +83,48 @@ const t = useTranslations(lang);
     width: 100%;
     height: 100%;
 
-    /* Brand-leaning gradient. Codepen used violet→mint→white; we
-       lean into Melveo's cyan + a sandy warm so the reveal still feels
-       distinct from the rest of the page (which is mostly cyan-on-black). */
-    background: linear-gradient(45deg, #00f0ff, #b0702e, #ffffff);
+    /*
+      Brand-cyan ramp. Codepen used a violet→mint→white gradient;
+      we lean fully into the Melveo cyan palette so the reveal feels
+      on-brand instead of off-key against the rest of the page.
+      Three stops: deep cyan accent → mid cyan tint → near-white so
+      the reveal still has visual depth.
+    */
+    background: linear-gradient(
+      45deg,
+      var(--color-accent-primary),
+      var(--color-accent-primary-subtle),
+      #ffffff
+    );
+
+    /*
+      Dark text inside the circle. Codepen uses canvas-dark
+      (rgb(9, 14, 23)); we use our canvas variable so it tracks if
+      the brand canvas changes.
+    */
     color: var(--color-bg-canvas);
 
-    /* Radial mask — circle of brand-cyan tinted gradient revealed
-       through the dark canvas. --x / --y are registered @property
-       above (typed as percentage) so the transition below works.
-       Default 70%/50% on first paint; pointermove updates inline. */
+    /*
+      Radial mask — codepen uses `black 25%` (full opacity in inner
+      25% of the gradient, transparent outside). Default position
+      70% / 50% before pointermove kicks in.
+    */
     --x: 70%;
     --y: 50%;
-    --mask: radial-gradient(circle at var(--x) var(--y), black 22%, transparent 0);
+    --mask: radial-gradient(circle at var(--x) var(--y), black 25%, transparent 0);
     -webkit-mask-image: var(--mask);
     mask-image: var(--mask);
+
+    /* Overlay shouldn't capture cursor events; pointermove lives on
+       window. */
     pointer-events: none;
 
     /* Smooth follow — browser interpolates --x / --y because they're
-       registered as <percentage> via @property. */
+       registered as <percentage> via @property. Codepen used GSAP's
+       0.3s sine.out; we mirror with cubic-bezier. */
     transition:
-      --x 0.35s cubic-bezier(0.39, 0.575, 0.565, 1),
-      --y 0.35s cubic-bezier(0.39, 0.575, 0.565, 1);
+      --x 0.3s cubic-bezier(0.39, 0.575, 0.565, 1),
+      --y 0.3s cubic-bezier(0.39, 0.575, 0.565, 1);
   }
 
   .orb-heading {
@@ -131,22 +135,11 @@ const t = useTranslations(lang);
     letter-spacing: -0.02em;
     font-size: clamp(2rem, 5vw, 8rem);
     line-height: 1;
-    /* Limit horizontal width so long Czech phrases stay on one line
-       inside the cursor circle. */
+    /* Limit horizontal width so the headline stays on one line
+       inside the cursor circle (codepen uses max-width: fit-content
+       + auto margins). */
     max-width: fit-content;
     margin-left: auto;
     margin-right: auto;
-  }
-
-  .orb-hero--secondary .orb-heading {
-    /* Force colour to canvas dark — readable against the gradient
-       inside the cursor circle. */
-    color: var(--color-bg-canvas);
-  }
-
-  @media (prefers-reduced-motion: reduce) {
-    .orb-heading {
-      transition: none;
-    }
   }
 </style>
