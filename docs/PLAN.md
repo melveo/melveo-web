@@ -1,4 +1,4 @@
-# melveo-web — komplexní plán (verze z 2026-04-30, rev. 2)
+# melveo-web — komplexní plán (verze z 2026-04-30, rev. 3)
 
 > Living document. Žije s kódem (`melveo-web/docs/PLAN.md`) a je
 > referencovaný z app repu jako `melveo-app/docs/planning/180_melveo_web_plan.md`.
@@ -10,6 +10,11 @@
 > screenshot VoXelo pena (PRISM 3D scene) + zvolil cookie banner ref.
 > Plán přepracován — Three.js hero, i18n cs/en, full analytics stack
 > (GA + Meta + CF + GTM), self-written legal text per česká legislativa.
+>
+> **Rev. 3 (2026-04-30):** user dodal legal entity (QUIX Global s.r.o.,
+> IČO 22466444, sídlo Praha 1) + DPO = hello@melveo.app + EN bude
+> psát Claude + analytics IDs deferred + logo zůstává jen wordmark.
+> Q19-Q23 vyřešeno; nová Q24 (plátce DPH?). Připraveno k V4 implementaci.
 
 ---
 
@@ -26,11 +31,16 @@
 | Cloudflare Pages connect | ⏸ user nastavuje |
 | Reálné iOS screenshoty | ⏸ user řekl: zatím nepotřeba |
 | Apple Developer Team ID | ⏸ user koupí příští týden |
-| Privacy + Terms produkční text | 🔨 Já napíšu per česká legislativa (§15.5 Q4) |
-| i18n cs + en | ⏸ V4 priorita (§15.5 Q14) |
-| Three.js hero (PRISM-style 3D scene) | ⏸ V4 (§15.5 Q1) |
-| Cookie consent banner | ⏸ V4 — Aaron Iker reference (§15.5 Q17) |
-| Analytics: GA + Meta Pixel + GTM + CF Web Analytics | ⏸ V4 (§15.5 Q8) |
+| **Legal entity** | ✓ QUIX Global s.r.o., IČO 22466444 (rev.3 Q19) |
+| **Kontakt / DPO** | ✓ hello@melveo.app (rev.3 Q20) |
+| **EN content authoring** | ✓ Claude píše obě verze (rev.3 Q21) |
+| **Logo** | ✓ Jen wordmark "melveo", žádný symbol (rev.3 Q23) |
+| Privacy + Terms produkční text | 🔨 Já napíšu (V4 critical) |
+| i18n cs + en | ⏸ V4 priorita |
+| Three.js hero (PRISM-style 3D scene) | ⏸ V4 |
+| Cookie consent banner | ⏸ V4 — Aaron Iker reference |
+| Analytics: CF Web Analytics aktivní; GA/Meta/GTM IDs deferred | ⏸ V4 ship bez tags, container ready (rev.3 Q22) |
+| DIČ + plátce DPH | ⏸ Q24 nový — TBD |
 
 ## 1. Vize a cíl
 
@@ -1588,7 +1598,12 @@ research, bez advokát review v V1 (§15.5 Q4).
 
 **Compliance výstupy v textu:**
 
-- Jméno provozovatele + IČO + sídlo (TBD — Q19 níže)
+- ✓ **Provozovatel:** QUIX Global s.r.o., IČO 22466444, sídlo
+  Příčná 1892/4, 110 00 Praha 1, zapsaná u MS v Praze, oddíl C,
+  vložka 416432 (datová schránka g7v78rx)
+- ✓ **Kontakt:** hello@melveo.app (jediný kontaktní bod, plní
+  funkci DPO i běžného supportu)
+- ✓ **Plátce DPH:** TBD (Q24)
 - Účel zpracování (App functionality + analytics + marketing
   per consent)
 - Právní základ per kategorie (Art. 6 GDPR — smlouva, oprávněný
@@ -1596,9 +1611,26 @@ research, bez advokát review v V1 (§15.5 Q4).
 - Doba uchování (per kategorie)
 - Práva subjektu (Art. 15-22): přístup, oprava, výmaz, omezení,
   přenositelnost, námitka, automatized decision
-- Kontakt na DPO / privacy@melveo.app
-- ÚOOÚ kontakt pro stížnosti
-- Cookie list + účel
+- Adresát stížnosti: **Úřad pro ochranu osobních údajů**
+  (Pplk. Sochora 27, 170 00 Praha 7, www.uoou.cz)
+- Cookie list + účel (po implementaci §7.8 banner)
+- Apple §5.1.1 — privacy policy URL link v App Store Connect
+
+### 16.6.1.1. Boilerplate header pro Privacy + Terms
+
+```
+Provozovatel webu a aplikace Melveo:
+
+QUIX Global s.r.o.
+IČO: 22466444
+Sídlo: Příčná 1892/4, Nové Město, 110 00 Praha 1
+Datová schránka: g7v78rx
+Spisová značka: C 416432 vedená u Městského soudu v Praze
+
+Kontakt: hello@melveo.app
+```
+
+(Stejný blok v cs i en, jen labels translated.)
 
 ### 16.6.2. Competitor benchmarks (research targets)
 
@@ -1632,35 +1664,24 @@ research, bez advokát review v V1 (§15.5 Q4).
 [ ] před první enterprise klient — advokát review
 ```
 
-## 16.7. Logo strategy
+## 16.7. Logo strategy ✓ RESOLVED (rev. 3)
 
-User řekl: "vlastní logo zatím nemáme" (Q11).
+**User decision (Q23):** "zkusme jen melveo prostě bez loga"
 
-**V4 plán:**
+**Plán je pevně:**
 
-- Wordmark "melveo" (Inter Bold lowercase, brand cyan jen v hover
-  / accent contexts) zůstává primary
-- 3D PRISM hero shapes nemají symbolický logo význam — jsou pure
-  decoration
-- Favicon = rounded square s "m" monogramem (V3 already done)
+- **Wordmark "melveo"** (Inter Bold lowercase) je single brand
+  expression. Primary, secondary i marketing.
+- **Žádný geometric mark.** 3D PRISM hero scéna je dekorace, ne
+  brand identity.
+- **Favicon:** rounded square `m` monogram (V3 done) — single
+  exception kde wordmark nepasuje (16×16 favicon size).
+- **App Store / iOS app icon:** vyrábí app side (`melveo-app`),
+  není zodpovědnost web repu.
 
-**V5 návrh (post-V4 launch):**
-
-Pokud chceš design vlastní mark, navrhuju **cyan octahedron** jako
-primary mark. Reasons:
-
-1. Sedne na 3D hero scéna jako "main shape"
-2. Geometric, abstract, sport-neutral (nepřipomíná konkrétní sport)
-3. Snadno animovatelný (rotace = "data flow" metaphor)
-4. Cyan brand color jasně identifies
-5. Funguje jako favicon + app icon (iOS already has app icon,
-   tohle by byla doplněk pro web/email/marketing)
-
-Mock návrh: octahedron 64×64 SVG, gradient cyan → ink, single
-glyph readable na všech sizech.
-
-**Cost:** můžu vyrobit V5 placeholder. Pro produkční mark doporučuju
-brand designer (~5-10k Kč jednorázově).
+**Hero scéna a mark:** 3D shapes v hero jsou abstract decoration,
+nemají žádný brand-symbolic význam. To je důležité — uživatel je
+vnímá jako "wow moment", ne jako logo.
 
 ## 17. Reference
 
@@ -1677,59 +1698,104 @@ brand designer (~5-10k Kč jednorázově).
 
 ## 18. Změny + nové otázky
 
-### 18.1. Follow-up otázky (rev. 2)
+### 18.1. Follow-up otázky Q19-Q23 ✓ ALL RESOLVED (rev. 3, 2026-04-30)
 
-User v rev. 2 odpovídal na všech 18 otázek; vyplynulo 5 nových
-follow-upů. Odpověz a já zapíšu zpátky:
+#### Q19 — Provozovatel (legal entity) ✓ RESOLVED
 
-#### Q19 — Provozovatel (legal entity)
+**User dodal kompletní výpis z OR:**
 
-Privacy + Terms potřebují **jméno + IČO + sídlo** plátce (legal
-entity co stojí za Melveo).
+| Pole | Hodnota |
+|------|---------|
+| Obchodní firma | **QUIX Global s.r.o.** |
+| IČO | **22466444** |
+| Sídlo | **Příčná 1892/4, Nové Město, 110 00 Praha 1** |
+| Datová schránka | **g7v78rx** |
+| Spisová značka | C 416432/MSPH Městský soud v Praze |
+| Datum vzniku | 14. leden 2025 |
+| Z. kapitál | 1 000 Kč |
+| Právní forma | Společnost s ručením omezeným |
 
-> **Co tam má být?**
-> - s.r.o. název + IČO + sídlo?
-> - OSVČ (jméno + IČO + adresa)?
-> - Spolek?
-> - Bude to založeno za chvíli? Můžu zatím použít placeholder
->   "Melveo s.r.o. (TBD)"?
+**Použití v textu:**
 
-#### Q20 — DPO email
+- Privacy Policy header: "Provozovatel: **QUIX Global s.r.o.**, IČO
+  22466444, se sídlem Příčná 1892/4, 110 00 Praha 1, zapsaná v
+  obchodním rejstříku vedeném Městským soudem v Praze, oddíl C,
+  vložka 416432."
+- Terms header: stejné
+- Footer: "© 2026 QUIX Global s.r.o."
+- Datová schránka uvedena v Privacy v sekci "Kontaktní údaje"
+  pro úřední korespondenci
 
-Pro GDPR: kontakt na zpracovatele osobních údajů. Default plán:
-**privacy@melveo.app** alias na hello@melveo.app. Souhlasíš?
+**Action item — DIČ check:**
 
-#### Q21 — EN content — kdo překládá?
+User nedodal DIČ. Pro:
+- Privacy: není potřeba (DIČ není osobní údaj plátce)
+- Terms: doplnit pokud existuje (= jste plátci DPH)
+- Invoicing: ano, potřeba
 
-Mám 2 možnosti:
+> **Q24 (NOVÝ):** Je QUIX Global plátce DPH? Pokud ano, DIČ?
+> Pokud ne, do Terms vložím "Není plátcem DPH."
 
-> a) Já napíšu CS, pak překlad přes mě (kvalita: solid technical EN,
->    žádné colloquialismy)
-> b) Já napíšu CS + EN draft side-by-side, ty pošleš překladatelovi
->    pro polish
+#### Q20 — DPO email ✓ RESOLVED
 
-Výběr ovlivní kvalitu + timing. Default doporučení: **a) já oboje**,
-review uděláš ty když umíš EN.
+**User answer:** "dej tam hello@melveo.app"
 
-#### Q22 — GA4 + Meta Pixel ID
+**Implications:** Žádný separátní `privacy@` alias. Všechny GDPR
+záležitosti půjdou přes `hello@melveo.app`.
 
-Pro GTM container potřebuju IDs:
+V Privacy text:
+> "Veškeré dotazy ohledně zpracování osobních údajů, žádosti o
+> přístup, opravu, výmaz a další práva subjektu údajů zasílejte na
+> hello@melveo.app."
 
-> - GA4 Measurement ID (`G-XXXXXXXXXX`)
-> - Meta Pixel ID (`12345678901234`)
-> - GTM Container ID (`GTM-XXXXXXX`)
+#### Q21 — EN content ✓ RESOLVED
 
-Bez nich V4 ship bez analytics; přidáme po user setup. Souhlasíš
-s deferred?
+**User answer:** "en i cs udělej ty" → option (a)
 
-#### Q23 — Logo design
+**Implications:** Já napíšu obě verze. Plán:
 
-Q11 vyřešeno (zatím wordmark only) ale ptám se jestli chceš
+1. CS first (per česká legislativa, primary jurisdiction)
+2. EN translation (mirror, ne re-write)
+3. User reviewuje EN ad-hoc když má čas
 
-> a) **V5 placeholder** ode mě — cyan octahedron mark (volně
->    inspirované hero scéně) — uvidíš za 30 minut
-> b) **Skutečný brand designer** — ~5-10k Kč jednorázově, 1-2 týdny
-> c) **Bez vlastního logotyp**, jen wordmark navždy
+#### Q22 — Analytics IDs ✓ DEFERRED
+
+**User answer:** "udelame později"
+
+**Implications:**
+
+- V4 ship **bez aktivovaných GA / Meta tagů**
+- GTM container code v `<head>` zůstane (single tag), ale s
+  empty container — nic neměří
+- Cookie banner spuštěn ode dne 1 (legitimuje budoucí enable
+  bez re-prompt všech existujících users)
+- Až user dodá IDs (`G-…`, `12345…`, `GTM-…`), tag-by-tag config
+  v GTM dashboardu — zero code change in repo
+
+#### Q23 — Logo ✓ RESOLVED
+
+**User answer:** "zkusme jen melveo prostě bez loga"
+
+**Implications:**
+
+- Wordmark "melveo" (Inter Bold lowercase) navždy primary brand
+- Žádný geometric mark
+- Favicon zůstává rounded square s "m" monogram (V3 done)
+- 3D PRISM hero scene = pure decoration, nemá logo význam
+- §16.7 logo strategy odebrána z roadmap; bod uzavřen.
+
+### 18.2. Otevřené otázky pro tebe (rev. 3)
+
+Z rev. 3 jen jedna nová:
+
+#### Q24 — DIČ + plátce DPH?
+
+> Je **QUIX Global s.r.o.** plátce DPH? Pokud ano, jaké je DIČ?
+> (Tvar `CZ22466444` typically.)
+>
+> Default fallback: "Není plátcem DPH." do Terms (per české zvyklosti
+> u nově založených s.r.o. s 1000 Kč kapitálem to často nebývá až do
+> obratu 2 mil. Kč ročně).
 
 ### 18.2. Changelog
 
@@ -1739,3 +1805,4 @@ Q11 vyřešeno (zatím wordmark only) ale ptám se jestli chceš
 | 2026-04-29 | doc 179 Privacy/Terms recommendation (Iubenda zamítnut) |
 | 2026-04-30 | **Tato doc 180/PLAN vznikla** — komplexní plán proti fey/raycast DNA + 6 codepen referencí |
 | 2026-04-30 | **Rev. 2:** user odpověděl na 18 otázek + dodal screenshot VoXelo (PRISM 3D scéna) + zvolil cookie banner ref Aaron Iker. Plán updatován: Three.js hero, i18n cs/en, full analytics stack (GA + Meta + GTM + CF), self-written legal text, cookie consent V4 critical. Nové otázky Q19-Q23 (legal entity, DPO email, EN translation, analytics IDs, logo design). |
+| 2026-04-30 | **Rev. 3:** Q19-Q23 vyřešeny. Legal entity: **QUIX Global s.r.o.** IČO 22466444, sídlo Praha 1, dat. schránka g7v78rx. DPO email = hello@melveo.app (single contact). EN content píše Claude. Analytics IDs deferred. Logo: jen wordmark "melveo", žádný mark navždy. Nová Q24 (plátce DPH? DIČ?). Připraveno k V4 implementaci. |
