@@ -1,311 +1,335 @@
 ---
 /**
- * ImageGridScrollMorph — Kevin Gutowski codepen QwNZYzL (V4-D2 v2).
+ * ImageGridScrollMorph — Kevin Gutowski codepen QwNZYzL.
  *
- * The proper scroll-linked effect (re-implemented after V4-D shipped
- * the wrong "feature cards reveal" version). Per user clarification
- * with screenshots:
+ * Direct re-implementation of the codepen source after the V4-D draft
+ * missed the architecture. The trick is:
  *
- *   1. Sekce 2 = single hero photo at full size
- *   2. As user scrolls into sekce 3, the photo shrinks + 14 other
- *      photos fade/scale in around it as a 5×3 grid
+ *   1. A 240vh-tall section with sticky inner content (.content)
+ *      pinned at top:0 — gives 140vh of scroll runway while the
+ *      grid stays visible.
+ *   2. The grid is 5 columns × 3 rows (3 cols on mobile). Cells are
+ *      placed via CSS subgrid on three "layer" wrappers + one absolute
+ *      ".scaler" element at the centre cell.
+ *   3. The scaler image animates `width` and `height` in PIXELS from
+ *      viewport size DOWN to its natural grid-cell size as the user
+ *      scrolls — different easings per axis (power2 width, power1
+ *      height) for the codepen's signature asymmetric feel.
+ *   4. Each layer has TWO scroll-linked animations:
+ *        - opacity: holds at 0 until 55 % scroll, then 0 → 1
+ *        - scale:   holds at 0 until 30 % scroll, then 0 → 1
+ *      using progressively more aggressive easings per layer
+ *      (power1, power3, power4) — outer edges feel slower, inner
+ *      cells punch in.
  *
- * Tech:
- *   - Section is 200vh tall to give the scroll-linked animation
- *     a runway
- *   - Inner sticky frame stays pinned at top:0 while user scrolls
- *   - Motion's scroll() function maps scroll progress to animation
- *     timeline; works without RAF, GPU-accelerated, automatically
- *     handles scroll-up reverse
+ * No headline above the grid (per user 2026-04-30 — "ten text pojme
+ * scrollovat dej pryč"). The grid is the whole effect.
  *
- * Per PLAN.md §7.5 (re-spec'd).
+ * Photos are the codepen's original Unsplash URLs as a starting set.
+ * Swap to real Melveo iOS screenshots when available (Q6 deferred).
  */
-
-import { useTranslations, type Lang } from '../i18n/ui';
-
-interface Props {
-  lang: Lang;
-}
-
-const { lang } = Astro.props;
-const t = useTranslations(lang);
-
-/**
- * 15 placeholder photos via Picsum (stable seed → stable image).
- * Replace with real Melveo iOS screenshots once available (Q6 deferred).
- * The center cell (index 7 in a 5×3 = 0..14 layout) is the "scaler"
- * that starts huge and shrinks.
- */
-const SCALER_INDEX = 7;
-const SEEDS = [
-  'melveo-team',         // 0  top-left
-  'melveo-court',        // 1
-  'melveo-stadium',      // 2  top-center
-  'melveo-locker',       // 3
-  'melveo-training',     // 4  top-right
-  'melveo-pitch',        // 5
-  'melveo-warmup',       // 6
-  'melveo-feature',      // 7  CENTER (scaler)
-  'melveo-board',        // 8
-  'melveo-running',      // 9
-  'melveo-stretch',      // 10 bottom-left
-  'melveo-strategy',     // 11
-  'melveo-readiness',    // 12 bottom-center
-  'melveo-recovery',     // 13
-  'melveo-game',         // 14 bottom-right
-];
 ---
 
-<section class="grid-morph-section" data-grid-morph-section>
-  <div class="grid-morph-sticky">
-    <!-- Headline above the grid -->
-    <header class="grid-morph-header">
-      <h2
-        class="grid-morph-headline"
-        style="font-size: clamp(2.5rem, 8vw, 7rem); letter-spacing: -0.04em;"
-      >
-        {t('gridMorph.headlineLine1')}<br />
-        <span class="text-[var(--color-accent-primary)]">
-          {t('gridMorph.headlineLine2')}
-        </span>
-      </h2>
-    </header>
+<section class="image-grid-section" data-grid-section>
+  <div class="content">
+    <div class="grid">
+      <!-- Layer 1: Outer edges (6 images, 3 left + 3 right) -->
+      <div class="layer">
+        <div>
+          <img src="https://images.unsplash.com/photo-1463100099107-aa0980c362e6?w=800&auto=format&fit=crop&q=60&ixlib=rb-4.0.3" alt="" loading="lazy" decoding="async" />
+        </div>
+        <div>
+          <img src="https://images.unsplash.com/photo-1556304044-0699e31c6a34?w=800&auto=format&fit=crop&q=60&ixlib=rb-4.0.3" alt="" loading="lazy" decoding="async" />
+        </div>
+        <div>
+          <img src="https://images.unsplash.com/photo-1590330297626-d7aff25a0431?w=800&auto=format&fit=crop&q=60&ixlib=rb-4.0.3" alt="" loading="lazy" decoding="async" />
+        </div>
+        <div>
+          <img src="https://images.unsplash.com/photo-1487222477894-8943e31ef7b2?w=800&auto=format&fit=crop&q=60&ixlib=rb-4.0.3" alt="" loading="lazy" decoding="async" />
+        </div>
+        <div>
+          <img src="https://images.unsplash.com/photo-1488161628813-04466f872be2?w=800&auto=format&fit=crop&q=60&ixlib=rb-4.0.3" alt="" loading="lazy" decoding="async" />
+        </div>
+        <div>
+          <img src="https://images.unsplash.com/photo-1565321590372-09331b9dd1eb?w=800&auto=format&fit=crop&q=60&ixlib=rb-4.0.3" alt="" loading="lazy" decoding="async" />
+        </div>
+      </div>
 
-    <!-- 15-cell grid; center is the scaler -->
-    <div class="grid-morph-frame" data-grid-morph-frame>
-      {
-        SEEDS.map((seed, i) => {
-          const isScaler = i === SCALER_INDEX;
-          return (
-            <div
-              class:list={['grid-morph-cell', isScaler && 'is-scaler']}
-              data-grid-cell={i}
-              data-scaler={isScaler ? '' : undefined}
-            >
-              <img
-                src={`https://picsum.photos/seed/${seed}/600/800`}
-                alt=""
-                width="600"
-                height="800"
-                loading={isScaler ? 'eager' : 'lazy'}
-                decoding="async"
-              />
-            </div>
-          );
-        })
-      }
+      <!-- Layer 2: Inner columns (6 images) -->
+      <div class="layer">
+        <div>
+          <img src="https://images.unsplash.com/photo-1531525645387-7f14be1bdbbd?w=800&auto=format&fit=crop&q=60&ixlib=rb-4.0.3" alt="" loading="lazy" decoding="async" />
+        </div>
+        <div>
+          <img src="https://images.unsplash.com/photo-1637414165749-9b3cd88b8271?w=800&auto=format&fit=crop&q=60&ixlib=rb-4.0.3" alt="" loading="lazy" decoding="async" />
+        </div>
+        <div>
+          <img src="https://images.unsplash.com/photo-1699911251220-8e0de3b5ce88?w=800&auto=format&fit=crop&q=60&ixlib=rb-4.0.3" alt="" loading="lazy" decoding="async" />
+        </div>
+        <div>
+          <img src="https://images.unsplash.com/photo-1667483629944-6414ad0648c5?w=800&auto=format&fit=crop&q=60&ixlib=rb-4.0.3" alt="" loading="lazy" decoding="async" />
+        </div>
+        <div>
+          <img src="https://plus.unsplash.com/premium_photo-1706078438060-d76ced26d8d5?w=800&auto=format&fit=crop&q=60&ixlib=rb-4.0.3" alt="" loading="lazy" decoding="async" />
+        </div>
+        <div>
+          <img src="https://images.unsplash.com/photo-1525385444278-b7968e7e28dc?w=800&auto=format&fit=crop&q=60&ixlib=rb-4.0.3" alt="" loading="lazy" decoding="async" />
+        </div>
+      </div>
+
+      <!-- Layer 3: Center column top + bottom (2 images) -->
+      <div class="layer">
+        <div>
+          <img src="https://images.unsplash.com/reserve/LJIZlzHgQ7WPSh5KVTCB_Typewriter.jpg?w=800&auto=format&fit=crop&q=60&ixlib=rb-4.0.3" alt="" loading="lazy" decoding="async" />
+        </div>
+        <div>
+          <img src="https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=800&auto=format&fit=crop&q=60&ixlib=rb-4.0.3" alt="" loading="lazy" decoding="async" />
+        </div>
+      </div>
+
+      <!-- Scaler: starts viewport-sized, shrinks into the centre cell -->
+      <div class="scaler">
+        <img src="https://assets.codepen.io/605876/model-shades.jpg?format=auto&quality=100" alt="" decoding="async" />
+      </div>
     </div>
   </div>
 </section>
 
 <style>
-  .grid-morph-section {
-    /* 200vh runway gives the scroll-linked animation enough scroll
-       distance to play out smoothly without feeling rushed. */
+  /*
+    Subgrid trick + sticky content — direct port from the codepen.
+    Comments mark anywhere we deviated.
+  */
+
+  .image-grid-section {
+    /* 240vh runway — 1× viewport pinned + 140vh scroll budget for the
+       morph to play out. Mobile gets a touch more height for the
+       3-col layout. */
     position: relative;
     width: 100%;
-    height: 220vh;
+    min-height: 240vh;
     background: var(--color-bg-canvas);
     border-top: 1px solid var(--color-stroke-base);
+    overflow: clip;
   }
 
-  .grid-morph-sticky {
+  .image-grid-section .content {
+    min-height: 100vh;
+    width: 100vw;
     position: sticky;
     top: 0;
-    height: 100vh;
-    width: 100%;
     overflow: hidden;
-    display: grid;
-    grid-template-rows: auto 1fr;
-    align-items: center;
-    justify-items: center;
-    padding: 4rem 1rem 2rem;
+    display: flex;
+    place-items: center;
+    align-content: center;
   }
 
-  .grid-morph-header {
-    text-align: center;
-    z-index: 1;
-    padding-bottom: 2rem;
-  }
+  .image-grid-section .grid {
+    --offset: 0;
+    --container-width: 1600px;
+    --gap: clamp(10px, 7.35vw, 80px);
+    --gutter: 2rem;
 
-  .grid-morph-headline {
-    font-weight: 700;
-    line-height: 0.95;
-    color: var(--color-text-primary);
-    margin: 0;
-    text-wrap: balance;
-  }
-
-  /* The 5×3 grid frame */
-  .grid-morph-frame {
+    width: var(--container-width);
+    max-width: calc(100% - (2 * var(--gutter)));
     display: grid;
     grid-template-columns: repeat(5, 1fr);
-    grid-template-rows: repeat(3, 1fr);
-    gap: clamp(0.5rem, 1.2vw, 1.25rem);
-    width: min(95vw, 1500px);
-    height: 100%;
-    max-height: 70vh;
-    align-self: center;
+    grid-template-rows: repeat(3, auto);
+    gap: var(--gap);
+    margin: 0 auto;
+    align-content: center;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    translate: -50% -50%;
   }
 
-  .grid-morph-cell {
-    position: relative;
-    border-radius: clamp(0.75rem, 1.5vw, 1.5rem);
-    overflow: hidden;
-    background: var(--color-bg-surface-elevated);
-    border: 1px solid var(--color-stroke-base);
-    aspect-ratio: 3 / 4;
-    will-change: transform, opacity;
+  @media (max-width: 600px) {
+    .image-grid-section .grid {
+      --gutter: 1rem;
+      grid-template-columns: repeat(3, 1fr);
+      --offset: -1;
+    }
+    /* Hide outer edges on mobile (3-col layout has no room for them) */
+    .image-grid-section .grid > .layer:nth-of-type(1) {
+      display: none;
+    }
   }
 
-  .grid-morph-cell img {
+  /* Layers spread across the full 5×3 (or 3×3 mobile) grid via subgrid */
+  .image-grid-section .grid > .layer {
+    display: grid;
+    grid-column: 1 / -1;
+    grid-row: 1 / -1;
+    grid-template-columns: subgrid;
+    grid-template-rows: subgrid;
+  }
+
+  /* Layer 1: outer edges — odd children → col 1, even → col -2 */
+  .image-grid-section .grid > .layer:nth-of-type(1) > div:nth-of-type(odd) {
+    grid-column: 1;
+  }
+  .image-grid-section .grid > .layer:nth-of-type(1) > div:nth-of-type(even) {
+    grid-column: -2;
+  }
+
+  /* Layer 2: inner columns — odd → col 2, even → col -3
+     (offset shifts by -1 on mobile so col indexing collapses cleanly) */
+  .image-grid-section .grid > .layer:nth-of-type(2) > div:nth-of-type(odd) {
+    grid-column: calc(2 + var(--offset));
+  }
+  .image-grid-section .grid > .layer:nth-of-type(2) > div:nth-of-type(even) {
+    grid-column: calc(-3 - var(--offset));
+  }
+
+  /* Layer 3: center column top + bottom rows */
+  .image-grid-section .grid > .layer:nth-of-type(3) > div:first-of-type {
+    grid-column: calc(3 + var(--offset));
+    grid-row: 1;
+  }
+  .image-grid-section .grid > .layer:nth-of-type(3) > div:last-of-type {
+    grid-column: calc(3 + var(--offset));
+    grid-row: -1;
+  }
+
+  .image-grid-section .grid img {
     width: 100%;
-    height: 100%;
+    aspect-ratio: 4 / 5;
     object-fit: cover;
+    border-radius: 1rem;
     display: block;
   }
 
-  /* Non-scaler cells start hidden — JS will fade them in via Motion's
-     scroll() function as user scrolls through the section. */
-  .grid-morph-cell:not(.is-scaler) {
-    opacity: 0;
-    transform: scale(0.5);
-  }
-
-  /* Scaler starts big enough to fill the visible viewport, then shrinks
-     down to its grid cell as user scrolls. The exact starting scale is
-     applied by Motion's scroll() animation; CSS just sets the visual
-     baseline (no border, full coverage). */
-  .grid-morph-cell.is-scaler {
+  /* Scaler container occupies the centre cell of the grid; its <img>
+     is absolutely positioned so we can animate width/height in pixels
+     while keeping the image perfectly centred. */
+  .image-grid-section .grid .scaler {
+    position: relative;
+    grid-area: 2 / calc(3 + var(--offset));
     z-index: 2;
-    border: 1px solid var(--color-stroke-emphasized);
-    box-shadow: 0 30px 80px -16px rgba(0, 240, 255, 0.25);
-    transform-origin: center center;
-    /* Initial scale set in JS — depends on viewport size */
+    width: 100%;
+    height: 100%;
   }
 
-  /* Mobile: 3×5 grid (taller than wide is OK since photos are portrait) */
-  @media (max-width: 768px) {
-    .grid-morph-section {
-      height: 240vh;
-    }
-    .grid-morph-frame {
-      grid-template-columns: repeat(3, 1fr);
-      grid-template-rows: repeat(5, 1fr);
-      gap: 0.5rem;
-      max-height: 78vh;
-    }
-    /* Center of 3×5 is index 7 too (row 3, col 2) — same scaler */
+  .image-grid-section .scaler img {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    translate: -50% -50%;
+    object-fit: cover;
+    border-radius: 1rem;
+    width: 100%;
+    height: 100%;
   }
 
-  /* Reduced motion: no scaler, just show grid statically */
+  /* Reduced-motion: drop the sticky/scroll dance. Show every cell in
+     its final position, statically. */
   @media (prefers-reduced-motion: reduce) {
-    .grid-morph-section {
-      height: auto;
+    .image-grid-section {
+      min-height: auto;
     }
-    .grid-morph-sticky {
+    .image-grid-section .content {
       position: relative;
-      height: auto;
       min-height: 80vh;
     }
-    .grid-morph-cell:not(.is-scaler) {
-      opacity: 1;
-      transform: none;
-    }
-    .grid-morph-cell.is-scaler {
-      transform: none;
+    .image-grid-section .grid {
+      position: relative;
+      top: auto;
+      left: auto;
+      translate: none;
     }
   }
 </style>
 
 <script>
-  import { animate, scroll, stagger } from 'motion';
+  import { animate, scroll } from 'motion';
 
   const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  const section = document.querySelector<HTMLElement>('[data-grid-morph-section]');
-  const scaler = section?.querySelector<HTMLElement>('[data-scaler]');
-  const otherCells = section?.querySelectorAll<HTMLElement>(
-    '.grid-morph-cell:not(.is-scaler)',
-  );
 
-  if (section && scaler && otherCells && !reduceMotion) {
-    /*
-      Compute starting scale for the scaler so it visually fills the
-      viewport at scroll progress 0. Cell aspect is 3:4 portrait; we
-      want height ≈ 80vh, so scale = 80vh / current cell height.
-      We re-measure on resize for responsive correctness.
-    */
-    function computeStartScale(): number {
-      const cellHeight = scaler!.offsetHeight || 1;
-      const targetHeight = window.innerHeight * 0.78;
-      return Math.max(2, targetHeight / cellHeight);
+  if (!reduceMotion) {
+    const section = document.querySelector<HTMLElement>('[data-grid-section]');
+    const image = section?.querySelector<HTMLImageElement>('.scaler img');
+    const layers = section?.querySelectorAll<HTMLElement>('.grid > .layer');
+
+    if (section && image && layers && layers.length > 0) {
+      // Wait one frame so layout has settled and offsetWidth/Height
+      // measure the image at its natural grid-cell size.
+      requestAnimationFrame(() => {
+        const naturalWidth = image.offsetWidth;
+        const naturalHeight = image.offsetHeight;
+        const viewportWidth = window.innerWidth;
+        const viewportHeight = window.innerHeight;
+
+        // Cubic-bezier control points (Motion accepts [x1,y1,x2,y2]).
+        // Names match GSAP power easings used in the original codepen.
+        const power1InOut = [0.42, 0, 0.58, 1] as const;
+        const power2InOut = [0.65, 0, 0.35, 1] as const;
+        const power3InOut = [0.76, 0, 0.24, 1] as const;
+        const power4InOut = [0.87, 0, 0.13, 1] as const;
+        const sineOut = [0.61, 1, 0.88, 1] as const;
+
+        // ----- Scaler: shrink width/height from viewport → natural -----
+        scroll(
+          animate(
+            image,
+            {
+              width: [`${viewportWidth}px`, `${naturalWidth}px`],
+              height: [`${viewportHeight}px`, `${naturalHeight}px`],
+            },
+            {
+              width: { ease: power2InOut as any },
+              height: { ease: power1InOut as any },
+            } as any,
+          ),
+          {
+            target: section,
+            // Animation maps to scroll progress through the section.
+            offset: ['start start', 'end end'] as any,
+          },
+        );
+
+        // ----- Each layer: opacity (hold→fade) + scale (hold→reveal) -----
+        const scaleEasings = [power1InOut, power3InOut, power4InOut];
+
+        layers.forEach((layer, index) => {
+          // End point shifts slightly per layer so they don't all
+          // finish at exactly the same scroll position (the codepen
+          // does this for a subtle layered cascade).
+          const endOffset = `${1 - index * 0.05} end`;
+
+          // Opacity: held at 0 until 55 % progress, then 0 → 1
+          scroll(
+            animate(
+              layer,
+              { opacity: [0, 0, 1] },
+              {
+                offset: [0, 0.55, 1],
+                ease: sineOut as any,
+              } as any,
+            ),
+            {
+              target: section,
+              offset: ['start start', endOffset] as any,
+            },
+          );
+
+          // Scale: held at 0 until 30 % progress, then 0 → 1
+          scroll(
+            animate(
+              layer,
+              { scale: [0, 0, 1] },
+              {
+                offset: [0, 0.3, 1],
+                ease: scaleEasings[index] as any,
+              } as any,
+            ),
+            {
+              target: section,
+              offset: ['start start', endOffset] as any,
+            },
+          );
+        });
+      });
     }
-
-    let startScale = computeStartScale();
-
-    /*
-      Set initial transform so first paint matches what the scroll()
-      animation will produce at progress=0. Otherwise there's a flash
-      of the small scaler before JS kicks in.
-    */
-    scaler.style.transform = `scale(${startScale})`;
-
-    /*
-      Phase 1: scaler shrinks from startScale → 1 across the whole
-      section's scroll range.
-    */
-    scroll(
-      animate(
-        scaler,
-        { scale: [startScale, 1] },
-        { ease: 'linear' as any },
-      ),
-      {
-        target: section,
-        offset: ['start start', 'end end'],
-      },
-    );
-
-    /*
-      Phase 2: other cells fade + scale in. Stagger inside scroll-linked
-      animation distributes each cell's progress across the timeline:
-      first cells appear early, last ones later.
-    */
-    scroll(
-      animate(
-        Array.from(otherCells),
-        { opacity: [0, 1], scale: [0.55, 1] },
-        {
-          ease: 'linear' as any,
-          delay: stagger(0.04, { from: 'center' }),
-        },
-      ),
-      {
-        target: section,
-        // Start fading tiles in once user has scrolled ~25% into the
-        // section; finish before the section ends so the final state
-        // is held briefly before the next stage begins.
-        offset: ['25% start', '90% end'] as any,
-      },
-    );
-
-    /*
-      Recompute on resize so the scaler still fills viewport at
-      different sizes / orientation changes.
-    */
-    let resizeTimeout: number | null = null;
-    window.addEventListener('resize', () => {
-      if (resizeTimeout) clearTimeout(resizeTimeout);
-      resizeTimeout = window.setTimeout(() => {
-        const newStart = computeStartScale();
-        if (Math.abs(newStart - startScale) > 0.2) {
-          startScale = newStart;
-          // Re-bind by reloading — Motion doesn't easily support
-          // dynamic offset reconfiguration. For viewport changes
-          // mid-scroll this is rare enough to warrant a full reset.
-          scaler.style.transform = `scale(${startScale})`;
-        }
-      }, 200);
-    });
   }
 </script>
