@@ -1,0 +1,128 @@
+---
+/**
+ * HeroScene — Three.js canvas + SSR fallback shapes.
+ *
+ * Behavior:
+ *   - SSR renders 5 absolutely-positioned SVG octahedra (visible on
+ *     first paint + reduced-motion + JS-disabled clients).
+ *   - On client, after IntersectionObserver fires + reduced-motion
+ *     check passes, dynamic-imports hero-scene.ts and mounts a
+ *     Three.js scene over the canvas. SVG fallback fades out on mount.
+ *   - Per PLAN.md §7.9: pause RAF on document.hidden, cap pixel ratio,
+ *     mobile uses 3 shapes vs 6 desktop, reduce-motion stays SVG only.
+ *
+ * Bundle impact: Three.js ~150kB gzip lazy-loaded; SVG fallback inline
+ * (~1kB).
+ */
+---
+
+<div class="hero-scene-wrap" aria-hidden="true">
+  <!-- SSR fallback — visible until JS mounts the scene -->
+  <svg
+    class="hero-fallback"
+    viewBox="0 0 100 100"
+    preserveAspectRatio="xMidYMid slice"
+    role="presentation"
+  >
+    <defs>
+      <linearGradient id="iridescent" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0%" stop-color="#cdf7fb" stop-opacity="0.7"/>
+        <stop offset="50%" stop-color="#00f0ff" stop-opacity="0.5"/>
+        <stop offset="100%" stop-color="#1ad6e6" stop-opacity="0.3"/>
+      </linearGradient>
+    </defs>
+    <!-- 5 octahedra positioned around center -->
+    <polygon points="14,28 18,22 22,28 18,36" fill="url(#iridescent)" opacity="0.6"/>
+    <polygon points="78,18 84,12 90,18 84,28" fill="url(#iridescent)" opacity="0.7"/>
+    <polygon points="20,72 24,68 28,72 24,80" fill="url(#iridescent)" opacity="0.5"/>
+    <polygon points="76,76 80,70 86,76 80,84" fill="url(#iridescent)" opacity="0.6"/>
+    <polygon points="48,8 52,3 58,8 52,16" fill="url(#iridescent)" opacity="0.4"/>
+  </svg>
+
+  <!-- Three.js canvas (mounted client-side) -->
+  <canvas class="hero-canvas" data-hero-canvas></canvas>
+</div>
+
+<style>
+  .hero-scene-wrap {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .hero-fallback,
+  .hero-canvas {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    transition: opacity 0.6s ease;
+  }
+
+  .hero-canvas {
+    opacity: 0;
+  }
+
+  .hero-canvas[data-mounted="true"] {
+    opacity: 1;
+  }
+
+  .hero-canvas[data-mounted="true"] + .hero-fallback,
+  .hero-scene-wrap[data-mounted="true"] .hero-fallback {
+    opacity: 0;
+  }
+
+  /* Static SVG keyframe drift for fallback / reduced-motion */
+  @keyframes drift {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .hero-fallback polygon {
+      animation: drift 8s ease-in-out infinite;
+    }
+    .hero-fallback polygon:nth-child(2) { animation-delay: -1.5s; }
+    .hero-fallback polygon:nth-child(3) { animation-delay: -3s; }
+    .hero-fallback polygon:nth-child(4) { animation-delay: -4.5s; }
+    .hero-fallback polygon:nth-child(5) { animation-delay: -6s; }
+  }
+</style>
+
+<script>
+  import { mountHeroScene, prefersReducedMotion } from '../scripts/hero-scene';
+
+  const wrap = document.querySelector<HTMLDivElement>('.hero-scene-wrap');
+  const canvas = document.querySelector<HTMLCanvasElement>('[data-hero-canvas]');
+
+  if (wrap && canvas && !prefersReducedMotion()) {
+    // Lazy-init only after the hero is in viewport (avoid Three.js
+    // mount before LCP). On a /cs/ root visit this fires immediately.
+    const obs = new IntersectionObserver((entries) => {
+      const entry = entries[0];
+      if (!entry?.isIntersecting) return;
+      obs.disconnect();
+
+      // Defer to idle to avoid LCP impact
+      const start = () => {
+        const handle = mountHeroScene({ canvas });
+        canvas.setAttribute('data-mounted', 'true');
+        wrap.setAttribute('data-mounted', 'true');
+        // Expose dispose for HMR (Vite calls this on hot reload)
+        if (import.meta.hot) {
+          import.meta.hot.dispose(() => handle.dispose());
+        }
+      };
+
+      if ('requestIdleCallback' in window) {
+        (window as any).requestIdleCallback(start, { timeout: 1500 });
+      } else {
+        setTimeout(start, 100);
+      }
+    });
+
+    obs.observe(wrap);
+  }
+</script>
