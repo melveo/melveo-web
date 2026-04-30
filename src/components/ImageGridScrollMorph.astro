@@ -220,6 +220,16 @@
     border-radius: 1rem;
     width: 100%;
     height: 100%;
+    /*
+      CRITICAL: Tailwind preflight applies `img { max-width: 100% }`
+      which would clamp the scaler to its grid-cell parent (~256px)
+      even when JS sets inline width: 1700px. The animation looked
+      like only height was working — width inline was being silently
+      capped. Explicit override here lets the JS-driven pixel sizing
+      run free across the whole viewport.
+    */
+    max-width: none;
+    max-height: none;
   }
 
   /* Reduced-motion: drop the sticky/scroll dance. Show every cell in
