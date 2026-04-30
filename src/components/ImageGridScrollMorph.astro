@@ -102,20 +102,33 @@
   */
 
   .image-grid-section {
-    /* 480vh runway — 1× viewport pinned + 380vh scroll budget. The
-       extra height stretches the scaler's shrink phase across more
-       scroll, so the user has to keep scrolling for longer to see
-       the morph from full-bleed photo to grid (per user feedback —
-       the transition felt rushed at 320vh). Combined with the
-       `'70% end'` scroll offset (animation completes at 70 % of
-       section), this leaves the last ~144vh as rest where the
-       fully formed grid sits before the next section arrives. */
+    /* 480vh desktop runway — 1× viewport pinned + 380vh scroll
+       budget. The extra height stretches the scaler's shrink phase
+       across more scroll, so the user has to keep scrolling for
+       longer to see the morph from full-bleed photo to grid.
+       Combined with the `'70% end'` scroll offset (animation
+       completes at 70 % of section), this leaves the last ~144vh
+       as rest where the fully formed grid sits before the next
+       section arrives.
+
+       Mobile gets a shorter runway (340vh) because:
+         a) Each "vh" on mobile is a smaller absolute pixel count,
+            so 480vh of scroll feels endless on a 6.5" screen.
+         b) Mobile only has 9 cells visible (3 cols × 3 rows; the
+            outer-edge layer is hidden by media query), so there's
+            less to "fade in" — animation can finish sooner. */
     position: relative;
     width: 100%;
     min-height: 480vh;
     background: var(--color-bg-canvas);
     border-top: 1px solid var(--color-stroke-base);
     overflow: clip;
+  }
+
+  @media (max-width: 768px) {
+    .image-grid-section {
+      min-height: 340vh;
+    }
   }
 
   .image-grid-section .content {
