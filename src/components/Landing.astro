@@ -13,6 +13,9 @@
 
 import BaseLayout from '../layouts/BaseLayout.astro';
 import HeroScene from './HeroScene.astro';
+import FeatureGridReveal from './FeatureGridReveal.astro';
+import GooeyStage from './GooeyStage.astro';
+import OrbStage from './OrbStage.astro';
 import { useTranslations, type Lang } from '../i18n/ui';
 
 interface Props {
@@ -52,16 +55,16 @@ const t = useTranslations(lang);
         class="text-balance font-bold leading-[0.95] tracking-tight text-[var(--color-text-primary)]"
         style="font-size: clamp(3rem, 8.5vw, 8.5rem); letter-spacing: -0.04em;"
       >
-        {t('hero.headlinePrefix')}
-        {' '}
-        <span
-          class="text-[var(--color-accent-primary)]"
-          data-rotate-word
-          aria-live="polite"
-        >
-          {lang === 'cs' ? 'tréninky' : 'trainings'}
-        </span>
-        {t('hero.headlineSuffix')}
+        {t('hero.headlinePrefix')}{' '}
+        <span class="hero-rotate-shell">
+          <span
+            class="text-[var(--color-accent-primary)] hero-rotate-word"
+            data-rotate-word
+            aria-live="polite"
+          >
+            {lang === 'cs' ? 'tréninky' : 'trainings'}
+          </span>
+        </span>{t('hero.headlineSuffix')}
       </h1>
 
       <p class="mx-auto mt-10 max-w-xl text-pretty text-lg text-[var(--color-text-secondary)] sm:text-xl">
@@ -103,6 +106,16 @@ const t = useTranslations(lang);
   </section>
 
   <!-- ============================================================== -->
+  <!-- STAGE 2 — Feature reveal (Kevin Gutowski codepen)               -->
+  <!-- ============================================================== -->
+  <FeatureGridReveal lang={lang} />
+
+  <!-- ============================================================== -->
+  <!-- STAGE 3 — Gooey metaball (Ahmad Awais codepen)                  -->
+  <!-- ============================================================== -->
+  <GooeyStage lang={lang} />
+
+  <!-- ============================================================== -->
   <!-- STAGE 4 — Wellness                                              -->
   <!-- ============================================================== -->
   <section class="relative isolate w-full overflow-hidden border-t border-[var(--color-stroke-base)] bg-[var(--color-bg-surface)]">
@@ -137,6 +150,11 @@ const t = useTranslations(lang);
       </div>
     </div>
   </section>
+
+  <!-- ============================================================== -->
+  <!-- STAGE 5 — Glass orb + rotating text (Giomgio codepen)           -->
+  <!-- ============================================================== -->
+  <OrbStage lang={lang} />
 
   <!-- ============================================================== -->
   <!-- STAGE 6 — Sessions + Coach Board                                -->
@@ -187,6 +205,7 @@ const t = useTranslations(lang);
       <h2
         class="text-balance font-bold leading-[1.05] tracking-tight text-[var(--color-text-primary)]"
         style="font-size: clamp(2.5rem, 6vw, 6rem); letter-spacing: -0.04em;"
+        data-text-reveal
       >
         {t('privacy.headlineLine1')}<br />
         <span class="text-[var(--color-accent-primary)]">
@@ -230,3 +249,40 @@ const t = useTranslations(lang);
     </div>
   </section>
 </BaseLayout>
+
+<style>
+  /*
+    Hero rotating word — wrap so y-translate during cycle stays within
+    the line and doesn't push surrounding text. Inline-block + overflow
+    hidden gives the slot a fixed-size box; min-width sized to the
+    longest word minimizes layout shift.
+  */
+  .hero-rotate-shell {
+    display: inline-block;
+    overflow: hidden;
+    vertical-align: baseline;
+    line-height: inherit;
+  }
+
+  .hero-rotate-word {
+    display: inline-block;
+    will-change: transform, opacity;
+  }
+</style>
+
+<script>
+  import { mountRotateWord } from '../scripts/rotate-word';
+  import { mountTextReveal } from '../scripts/text-reveal';
+
+  // Defer to idle so hero LCP is unaffected
+  function init() {
+    mountRotateWord();
+    mountTextReveal();
+  }
+
+  if ('requestIdleCallback' in window) {
+    (window as any).requestIdleCallback(init, { timeout: 1500 });
+  } else {
+    setTimeout(init, 200);
+  }
+</script>

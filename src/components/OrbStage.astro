@@ -1,0 +1,142 @@
+---
+/**
+ * OrbStage — Giomgio codepen abxGyQX (V4-D4).
+ *
+ * Glass-orb sphere with text that morphs through 3 phrases. CSS-only
+ * orb (radial gradient + inset glow + drop shadow); Motion One drives
+ * the text crossfade.
+ *
+ * Per PLAN.md §7.4.
+ */
+
+import { useTranslations, type Lang } from '../i18n/ui';
+
+interface Props {
+  lang: Lang;
+}
+
+const { lang } = Astro.props;
+const t = useTranslations(lang);
+---
+
+<section class="relative isolate w-full overflow-hidden border-t border-[var(--color-stroke-base)] bg-[var(--color-bg-canvas)]">
+  <div class="relative z-10 flex min-h-[80vh] items-center justify-center px-6 py-24 sm:py-32">
+    <div class="orb-stage">
+      <div class="orb">
+        <div class="orb-text" data-orb-rotate aria-live="polite">
+          {t('orb.phrase1')}
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<script
+  define:vars={{
+    phrases: [t('orb.phrase1'), t('orb.phrase2'), t('orb.phrase3')],
+  }}
+  type="module"
+>
+  import { animate } from 'motion';
+
+  const el = document.querySelector('[data-orb-rotate]');
+  if (el) {
+    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (!reduceMotion) {
+      let idx = 0;
+      const interval = setInterval(async () => {
+        try {
+          await animate(el, { opacity: [1, 0], y: [0, -16] }, { duration: 0.4, easing: [0.32, 0.72, 0, 1] }).finished;
+          idx = (idx + 1) % phrases.length;
+          el.textContent = phrases[idx];
+          await animate(el, { opacity: [0, 1], y: [16, 0] }, { duration: 0.5, easing: [0.32, 0.72, 0, 1] }).finished;
+        } catch {
+          clearInterval(interval);
+        }
+      }, 3200);
+
+      document.addEventListener('visibilitychange', () => {
+        if (document.hidden) clearInterval(interval);
+      });
+    }
+  }
+</script>
+
+<style>
+  .orb-stage {
+    position: relative;
+    display: grid;
+    place-items: center;
+  }
+
+  .orb {
+    width: clamp(280px, 55vmin, 600px);
+    height: clamp(280px, 55vmin, 600px);
+    border-radius: 50%;
+    display: grid;
+    place-items: center;
+    position: relative;
+
+    background:
+      radial-gradient(
+        circle at 30% 25%,
+        rgba(205, 247, 251, 0.3) 0%,
+        rgba(0, 240, 255, 0.18) 30%,
+        rgba(15, 25, 50, 0.85) 70%,
+        rgba(5, 6, 8, 0.95) 100%
+      );
+
+    box-shadow:
+      inset -40px -60px 100px rgba(0, 0, 0, 0.5),
+      inset 30px 40px 80px rgba(0, 240, 255, 0.18),
+      0 0 80px rgba(0, 240, 255, 0.25),
+      0 0 200px rgba(0, 240, 255, 0.15);
+
+    /* Subtle continuous rotation gives "alive" feel even when text static */
+    animation: orb-rotate 30s linear infinite;
+  }
+
+  /* Inner highlight (specular) */
+  .orb::before {
+    content: '';
+    position: absolute;
+    inset: 8% 12% 50% 18%;
+    border-radius: 50%;
+    background: radial-gradient(
+      ellipse at center top,
+      rgba(255, 255, 255, 0.15) 0%,
+      transparent 60%
+    );
+    filter: blur(20px);
+    pointer-events: none;
+  }
+
+  .orb-text {
+    position: relative;
+    z-index: 1;
+    font-size: clamp(1.5rem, 3.5vw, 3rem);
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    color: var(--color-text-primary);
+    text-shadow: 0 2px 20px rgba(0, 0, 0, 0.6);
+    /* Counter-rotate so text stays upright */
+    animation: orb-rotate-counter 30s linear infinite;
+  }
+
+  @keyframes orb-rotate {
+    from { transform: rotate(0deg); }
+    to   { transform: rotate(360deg); }
+  }
+
+  @keyframes orb-rotate-counter {
+    from { transform: rotate(0deg); }
+    to   { transform: rotate(-360deg); }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .orb,
+    .orb-text {
+      animation: none;
+    }
+  }
+</style>

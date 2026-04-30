@@ -1,0 +1,106 @@
+---
+/**
+ * GooeyStage — Ahmad Awais codepen JodBmX (V4-D3).
+ *
+ * SVG gooey filter — three cyan circles drift in elliptical orbits and
+ * merge as they approach. Visual punctuation between feature reveal
+ * and wellness stages.
+ *
+ * Per PLAN.md §7.3.
+ */
+
+import { useTranslations, type Lang } from '../i18n/ui';
+
+interface Props {
+  lang: Lang;
+}
+
+const { lang } = Astro.props;
+const t = useTranslations(lang);
+---
+
+<section class="relative isolate w-full overflow-hidden border-t border-[var(--color-stroke-base)] bg-[var(--color-bg-canvas)]">
+  <div class="halo-cyan" style="opacity: 0.35; inset: -30% 0 auto 50%;"></div>
+
+  <div class="relative z-10 flex min-h-[60vh] flex-col items-center justify-center px-6 py-24 text-center sm:py-32">
+    <svg class="gooey-svg" viewBox="-200 -100 400 200" preserveAspectRatio="xMidYMid meet" aria-hidden="true">
+      <defs>
+        <filter id="gooey-filter">
+          <feGaussianBlur in="SourceGraphic" stdDeviation="14"></feGaussianBlur>
+          <feColorMatrix
+            values="
+              1 0 0 0 0
+              0 1 0 0 0
+              0 0 1 0 0
+              0 0 0 22 -10"
+          ></feColorMatrix>
+        </filter>
+        <radialGradient id="gooey-cyan" cx="50%" cy="50%" r="50%">
+          <stop offset="0%" stop-color="#00f0ff" stop-opacity="0.95"></stop>
+          <stop offset="100%" stop-color="#00f0ff" stop-opacity="0.6"></stop>
+        </radialGradient>
+      </defs>
+
+      <g filter="url(#gooey-filter)">
+        <circle class="ball ball-1" cx="0" cy="0" r="38" fill="url(#gooey-cyan)"></circle>
+        <circle class="ball ball-2" cx="0" cy="0" r="34" fill="url(#gooey-cyan)"></circle>
+        <circle class="ball ball-3" cx="0" cy="0" r="30" fill="url(#gooey-cyan)"></circle>
+      </g>
+    </svg>
+
+    <h2
+      class="relative z-10 mt-12 text-balance font-bold tracking-tight text-[var(--color-text-primary)]"
+      style="font-size: clamp(2rem, 5vw, 4rem); letter-spacing: -0.03em;"
+    >
+      {t('gooey.headline')}
+    </h2>
+  </div>
+</section>
+
+<style>
+  .gooey-svg {
+    width: clamp(260px, 50vw, 600px);
+    height: auto;
+  }
+
+  /*
+    Three balls trace separate elliptic paths, intersecting near origin.
+    The gooey filter merges them when overlap > threshold.
+  */
+  @keyframes orbit-1 {
+    0% { transform: translate(-110px, -40px); }
+    25% { transform: translate(-30px, 50px); }
+    50% { transform: translate(70px, 20px); }
+    75% { transform: translate(30px, -55px); }
+    100% { transform: translate(-110px, -40px); }
+  }
+
+  @keyframes orbit-2 {
+    0% { transform: translate(120px, 30px); }
+    25% { transform: translate(40px, -50px); }
+    50% { transform: translate(-60px, -20px); }
+    75% { transform: translate(-20px, 50px); }
+    100% { transform: translate(120px, 30px); }
+  }
+
+  @keyframes orbit-3 {
+    0% { transform: translate(0, 60px); }
+    25% { transform: translate(80px, 0); }
+    50% { transform: translate(0, -55px); }
+    75% { transform: translate(-80px, 0); }
+    100% { transform: translate(0, 60px); }
+  }
+
+  .ball-1 { animation: orbit-1 9s ease-in-out infinite; }
+  .ball-2 { animation: orbit-2 11s ease-in-out infinite; }
+  .ball-3 { animation: orbit-3 13s ease-in-out infinite; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .ball-1, .ball-2, .ball-3 {
+      animation: none;
+    }
+    .ball-1 { transform: translate(-60px, 0); }
+    .ball-2 { transform: translate(60px, 0); }
+    .ball-3 { transform: translate(0, 0); }
+  }
+</style>
