@@ -244,6 +244,19 @@
 <script>
   import { animate, scroll } from 'motion';
 
+  /*
+    Motion v12 keyframe-timing API note:
+      - For keyframe positions within an animate() call use `times: [...]`,
+        NOT `offset: [...]` (offset is reserved for scroll() target config).
+      - Easing key is `ease`, NOT `easing` (Motion v11 used `easing`; the
+        codepen we're porting from uses v11).
+    Earlier versions of this file used the v11 names which Motion v12
+    silently ignored, so the hold-pattern keyframes were treated as
+    equally spaced and the per-axis easings dropped to defaults — that's
+    why the scaler appeared to shrink immediately on scroll instead of
+    holding at viewport size.
+  */
+
   const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
   if (!reduceMotion) {
@@ -252,37 +265,33 @@
     const layers = section?.querySelectorAll<HTMLElement>('.grid > .layer');
 
     if (section && image && layers && layers.length > 0) {
-      // Wait one frame so layout has settled and offsetWidth/Height
-      // measure the image at its natural grid-cell size.
+      // Wait one frame so layout has settled and the natural cell size is
+      // measurable from a sibling layer image (which retains its CSS
+      // 100%-of-cell sizing — the scaler image gets sized to viewport
+      // immediately so we can't measure it ourselves).
       requestAnimationFrame(() => {
-        const naturalWidth = image.offsetWidth;
-        const naturalHeight = image.offsetHeight;
+        // Natural cell width = same for all 15 cells (5-col grid). Use
+        // any layer img as a measurement proxy for the scaler.
+        const sample = section.querySelector<HTMLImageElement>('.layer img');
+        const naturalWidth = sample?.offsetWidth ?? 280;
+        const naturalHeight = sample?.offsetHeight ?? 350;
+
         const viewportWidth = window.innerWidth;
         const viewportHeight = window.innerHeight;
 
-        // ─── Set initial inline size to viewport BEFORE Motion takes over.
-        //     Without this, the image renders at its CSS natural size
-        //     (small grid cell) on first paint and only "jumps" to
-        //     viewport size when scroll() registers. We want the user
-        //     to see a full-bleed image immediately upon reaching this
-        //     section, before any morphing starts. (User feedback
-        //     2026-04-30: "tento obrazek musí byt přes celou obrazovku
-        //     a šířku a výšku, než se začne scrollovat".)
-        image.style.width = `${viewportWidth}px`;
-        image.style.height = `${viewportHeight}px`;
-
-        // Cubic-bezier control points (Motion accepts [x1,y1,x2,y2]).
-        // Names match GSAP power easings used in the original codepen.
+        // Cubic-bezier control points. Names match GSAP power easings
+        // referenced by the codepen.
         const power1InOut = [0.42, 0, 0.58, 1] as const;
         const power2InOut = [0.65, 0, 0.35, 1] as const;
         const power3InOut = [0.76, 0, 0.24, 1] as const;
         const power4InOut = [0.87, 0, 0.13, 1] as const;
         const sineOut = [0.61, 1, 0.88, 1] as const;
 
-        // ─── Scaler: hold at viewport size for the first ~15 % of scroll,
-        //     then shrink to natural cell size. The 3-keyframe + `times`
-        //     pattern gives the user a moment to register the full-bleed
-        //     image before the morph begins.
+        // ─── Scaler width: hold at viewport, then shrink to natural ────
+        //     Three keyframes + `times: [0, 0.15, 1]` keeps the image
+        //     viewport-wide for the first 15 % of scroll, then shrinks.
+        //     Width and height are separate scroll() registrations so
+        //     each axis carries its own easing (codepen signature).
         scroll(
           animate(
             image,
@@ -292,6 +301,23 @@
                 `${viewportWidth}px`,
                 `${naturalWidth}px`,
               ],
+            },
+            {
+              times: [0, 0.15, 1],
+              ease: power2InOut as any,
+            },
+          ),
+          {
+            target: section,
+            offset: ['start start', 'end end'] as any,
+          },
+        );
+
+        // ─── Scaler height: same hold pattern, different easing ─────────
+        scroll(
+          animate(
+            image,
+            {
               height: [
                 `${viewportHeight}px`,
                 `${viewportHeight}px`,
@@ -299,41 +325,32 @@
               ],
             },
             {
-              width: {
-                times: [0, 0.15, 1],
-                ease: power2InOut as any,
-              },
-              height: {
-                times: [0, 0.15, 1],
-                ease: power1InOut as any,
-              },
-            } as any,
+              times: [0, 0.15, 1],
+              ease: power1InOut as any,
+            },
           ),
           {
             target: section,
-            // Animation maps to scroll progress through the section.
             offset: ['start start', 'end end'] as any,
           },
         );
 
-        // ----- Each layer: opacity (hold→fade) + scale (hold→reveal) -----
+        // ─── Each layer: opacity (hold→fade) + scale (hold→reveal) ─────
         const scaleEasings = [power1InOut, power3InOut, power4InOut];
 
         layers.forEach((layer, index) => {
-          // End point shifts slightly per layer so they don't all
-          // finish at exactly the same scroll position (the codepen
-          // does this for a subtle layered cascade).
+          // Endpoint shifts per layer for a subtle cascade as in codepen.
           const endOffset = `${1 - index * 0.05} end`;
 
-          // Opacity: held at 0 until 55 % progress, then 0 → 1
+          // Opacity: invisible until 55 % progress, then fades 0 → 1
           scroll(
             animate(
               layer,
               { opacity: [0, 0, 1] },
               {
-                offset: [0, 0.55, 1],
+                times: [0, 0.55, 1],
                 ease: sineOut as any,
-              } as any,
+              },
             ),
             {
               target: section,
@@ -341,15 +358,15 @@
             },
           );
 
-          // Scale: held at 0 until 30 % progress, then 0 → 1
+          // Scale: held at 0 until 30 % progress, then springs to 1
           scroll(
             animate(
               layer,
               { scale: [0, 0, 1] },
               {
-                offset: [0, 0.3, 1],
+                times: [0, 0.3, 1],
                 ease: scaleEasings[index] as any,
-              } as any,
+              },
             ),
             {
               target: section,
