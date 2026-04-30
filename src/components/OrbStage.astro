@@ -119,12 +119,26 @@ const t = useTranslations(lang);
        window. */
     pointer-events: none;
 
-    /* Smooth follow — browser interpolates --x / --y because they're
-       registered as <percentage> via @property. Codepen used GSAP's
-       0.3s sine.out; we mirror with cubic-bezier. */
+    /*
+      Smoothness budget:
+        - --x / --y are typed @property values so the browser can
+          actually transition them (untyped custom props would snap)
+        - cubic-bezier matches GSAP's sine.out feel from codepen
+        - 0.4s reads as smoother than 0.3s when the underlying
+          movement is sample-throttled to one rAF per frame
+        - will-change: mask-image promotes this layer to its own
+          compositor surface so mask updates don't re-paint the
+          surrounding section
+        - translate3d is the canonical "force GPU layer" hack for
+          older WebKit (otherwise mask repaints can jank)
+        - backface-visibility hidden helps Safari coalesce layers
+    */
     transition:
-      --x 0.3s cubic-bezier(0.39, 0.575, 0.565, 1),
-      --y 0.3s cubic-bezier(0.39, 0.575, 0.565, 1);
+      --x 0.4s cubic-bezier(0.39, 0.575, 0.565, 1),
+      --y 0.4s cubic-bezier(0.39, 0.575, 0.565, 1);
+    will-change: mask-image, -webkit-mask-image;
+    transform: translate3d(0, 0, 0);
+    backface-visibility: hidden;
   }
 
   .orb-heading {
