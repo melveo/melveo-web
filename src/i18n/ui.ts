@@ -33,22 +33,10 @@ export const ui = {
     'hero.cta.pilot': 'Pilot pro klub →',
     'hero.beta': 'TestFlight beta · brzy',
 
-    // Stage 2 — product reveal
-    'reveal.eyebrow': 'V JEDNÉ APLIKACI',
-    'reveal.headline': 'Vše co tým potřebuje.',
-    'reveal.subline': 'Bez Excelu, bez WhatsAppu, bez prokrastinace.',
-    'reveal.feature1.title': 'Pětiosý ranní check-in',
-    'reveal.feature1.body': 'Hráč vyplní za 30 sekund.',
-    'reveal.feature2.title': 'Plánování sessions',
-    'reveal.feature2.body': 'Tréninky, zápasy, regenerace.',
-    'reveal.feature3.title': 'Coach Board',
-    'reveal.feature3.body': 'Připravený předem, jeden pohled.',
-    'reveal.feature4.title': 'Post-session RPE',
-    'reveal.feature4.body': 'Subjektivní zátěž od hráčů.',
-    'reveal.feature5.title': 'Aggregate readiness',
-    'reveal.feature5.body': 'Trenér vidí tým, ne čísla hráče.',
-    'reveal.feature6.title': 'Privacy by default',
-    'reveal.feature6.body': 'Co je hráčovo, zůstává hráčovo.',
+    // Stage 2+3 — scroll-linked image grid morph (Kevin Gutowski codepen)
+    'gridMorph.headlineLine1': 'Pojďme',
+    'gridMorph.headlineLine2': 'scrollovat.',
+    'gridMorph.subline': 'Tým, trenér, zázemí — všechno v jedné aplikaci.',
 
     // Stage 3 — gooey punctuation
     'gooey.headline': 'Trenér + hráč. Synced.',
@@ -110,21 +98,9 @@ export const ui = {
     'hero.cta.pilot': 'Pilot for your club →',
     'hero.beta': 'TestFlight beta · soon',
 
-    'reveal.eyebrow': 'ALL IN ONE APP',
-    'reveal.headline': 'Everything a team needs.',
-    'reveal.subline': 'No Excel, no WhatsApp, no procrastination.',
-    'reveal.feature1.title': '5-axis morning check-in',
-    'reveal.feature1.body': 'Players fill in 30 seconds.',
-    'reveal.feature2.title': 'Session planning',
-    'reveal.feature2.body': 'Training, matches, recovery.',
-    'reveal.feature3.title': 'Coach Board',
-    'reveal.feature3.body': 'Ready before practice, one glance.',
-    'reveal.feature4.title': 'Post-session RPE',
-    'reveal.feature4.body': 'Subjective load from players.',
-    'reveal.feature5.title': 'Aggregate readiness',
-    'reveal.feature5.body': 'Coach sees the team, never raw numbers.',
-    'reveal.feature6.title': 'Privacy by default',
-    'reveal.feature6.body': "What's player's stays player's.",
+    'gridMorph.headlineLine1': "Let's",
+    'gridMorph.headlineLine2': 'scroll.',
+    'gridMorph.subline': 'Team, coach, ops — all in one app.',
 
     'gooey.headline': 'Coach + player. Synced.',
 

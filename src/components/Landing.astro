@@ -13,7 +13,7 @@
 
 import BaseLayout from '../layouts/BaseLayout.astro';
 import HeroScene from './HeroScene.astro';
-import FeatureGridReveal from './FeatureGridReveal.astro';
+import ImageGridScrollMorph from './ImageGridScrollMorph.astro';
 import GooeyStage from './GooeyStage.astro';
 import OrbStage from './OrbStage.astro';
 import { useTranslations, type Lang } from '../i18n/ui';
@@ -106,12 +106,13 @@ const t = useTranslations(lang);
   </section>
 
   <!-- ============================================================== -->
-  <!-- STAGE 2 — Feature reveal (Kevin Gutowski codepen)               -->
+  <!-- STAGE 2 + 3 — Scroll-linked image grid morph                    -->
+  <!--               (Kevin Gutowski codepen QwNZYzL)                  -->
   <!-- ============================================================== -->
-  <FeatureGridReveal lang={lang} />
+  <ImageGridScrollMorph lang={lang} />
 
   <!-- ============================================================== -->
-  <!-- STAGE 3 — Gooey metaball (Ahmad Awais codepen)                  -->
+  <!-- STAGE 3.5 — Gooey metaball (Ahmad Awais codepen)                -->
   <!-- ============================================================== -->
   <GooeyStage lang={lang} />
 

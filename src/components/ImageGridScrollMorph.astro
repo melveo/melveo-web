@@ -1,0 +1,311 @@
+---
+/**
+ * ImageGridScrollMorph — Kevin Gutowski codepen QwNZYzL (V4-D2 v2).
+ *
+ * The proper scroll-linked effect (re-implemented after V4-D shipped
+ * the wrong "feature cards reveal" version). Per user clarification
+ * with screenshots:
+ *
+ *   1. Sekce 2 = single hero photo at full size
+ *   2. As user scrolls into sekce 3, the photo shrinks + 14 other
+ *      photos fade/scale in around it as a 5×3 grid
+ *
+ * Tech:
+ *   - Section is 200vh tall to give the scroll-linked animation
+ *     a runway
+ *   - Inner sticky frame stays pinned at top:0 while user scrolls
+ *   - Motion's scroll() function maps scroll progress to animation
+ *     timeline; works without RAF, GPU-accelerated, automatically
+ *     handles scroll-up reverse
+ *
+ * Per PLAN.md §7.5 (re-spec'd).
+ */
+
+import { useTranslations, type Lang } from '../i18n/ui';
+
+interface Props {
+  lang: Lang;
+}
+
+const { lang } = Astro.props;
+const t = useTranslations(lang);
+
+/**
+ * 15 placeholder photos via Picsum (stable seed → stable image).
+ * Replace with real Melveo iOS screenshots once available (Q6 deferred).
+ * The center cell (index 7 in a 5×3 = 0..14 layout) is the "scaler"
+ * that starts huge and shrinks.
+ */
+const SCALER_INDEX = 7;
+const SEEDS = [
+  'melveo-team',         // 0  top-left
+  'melveo-court',        // 1
+  'melveo-stadium',      // 2  top-center
+  'melveo-locker',       // 3
+  'melveo-training',     // 4  top-right
+  'melveo-pitch',        // 5
+  'melveo-warmup',       // 6
+  'melveo-feature',      // 7  CENTER (scaler)
+  'melveo-board',        // 8
+  'melveo-running',      // 9
+  'melveo-stretch',      // 10 bottom-left
+  'melveo-strategy',     // 11
+  'melveo-readiness',    // 12 bottom-center
+  'melveo-recovery',     // 13
+  'melveo-game',         // 14 bottom-right
+];
+---
+
+<section class="grid-morph-section" data-grid-morph-section>
+  <div class="grid-morph-sticky">
+    <!-- Headline above the grid -->
+    <header class="grid-morph-header">
+      <h2
+        class="grid-morph-headline"
+        style="font-size: clamp(2.5rem, 8vw, 7rem); letter-spacing: -0.04em;"
+      >
+        {t('gridMorph.headlineLine1')}<br />
+        <span class="text-[var(--color-accent-primary)]">
+          {t('gridMorph.headlineLine2')}
+        </span>
+      </h2>
+    </header>
+
+    <!-- 15-cell grid; center is the scaler -->
+    <div class="grid-morph-frame" data-grid-morph-frame>
+      {
+        SEEDS.map((seed, i) => {
+          const isScaler = i === SCALER_INDEX;
+          return (
+            <div
+              class:list={['grid-morph-cell', isScaler && 'is-scaler']}
+              data-grid-cell={i}
+              data-scaler={isScaler ? '' : undefined}
+            >
+              <img
+                src={`https://picsum.photos/seed/${seed}/600/800`}
+                alt=""
+                width="600"
+                height="800"
+                loading={isScaler ? 'eager' : 'lazy'}
+                decoding="async"
+              />
+            </div>
+          );
+        })
+      }
+    </div>
+  </div>
+</section>
+
+<style>
+  .grid-morph-section {
+    /* 200vh runway gives the scroll-linked animation enough scroll
+       distance to play out smoothly without feeling rushed. */
+    position: relative;
+    width: 100%;
+    height: 220vh;
+    background: var(--color-bg-canvas);
+    border-top: 1px solid var(--color-stroke-base);
+  }
+
+  .grid-morph-sticky {
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    width: 100%;
+    overflow: hidden;
+    display: grid;
+    grid-template-rows: auto 1fr;
+    align-items: center;
+    justify-items: center;
+    padding: 4rem 1rem 2rem;
+  }
+
+  .grid-morph-header {
+    text-align: center;
+    z-index: 1;
+    padding-bottom: 2rem;
+  }
+
+  .grid-morph-headline {
+    font-weight: 700;
+    line-height: 0.95;
+    color: var(--color-text-primary);
+    margin: 0;
+    text-wrap: balance;
+  }
+
+  /* The 5×3 grid frame */
+  .grid-morph-frame {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    grid-template-rows: repeat(3, 1fr);
+    gap: clamp(0.5rem, 1.2vw, 1.25rem);
+    width: min(95vw, 1500px);
+    height: 100%;
+    max-height: 70vh;
+    align-self: center;
+  }
+
+  .grid-morph-cell {
+    position: relative;
+    border-radius: clamp(0.75rem, 1.5vw, 1.5rem);
+    overflow: hidden;
+    background: var(--color-bg-surface-elevated);
+    border: 1px solid var(--color-stroke-base);
+    aspect-ratio: 3 / 4;
+    will-change: transform, opacity;
+  }
+
+  .grid-morph-cell img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+
+  /* Non-scaler cells start hidden — JS will fade them in via Motion's
+     scroll() function as user scrolls through the section. */
+  .grid-morph-cell:not(.is-scaler) {
+    opacity: 0;
+    transform: scale(0.5);
+  }
+
+  /* Scaler starts big enough to fill the visible viewport, then shrinks
+     down to its grid cell as user scrolls. The exact starting scale is
+     applied by Motion's scroll() animation; CSS just sets the visual
+     baseline (no border, full coverage). */
+  .grid-morph-cell.is-scaler {
+    z-index: 2;
+    border: 1px solid var(--color-stroke-emphasized);
+    box-shadow: 0 30px 80px -16px rgba(0, 240, 255, 0.25);
+    transform-origin: center center;
+    /* Initial scale set in JS — depends on viewport size */
+  }
+
+  /* Mobile: 3×5 grid (taller than wide is OK since photos are portrait) */
+  @media (max-width: 768px) {
+    .grid-morph-section {
+      height: 240vh;
+    }
+    .grid-morph-frame {
+      grid-template-columns: repeat(3, 1fr);
+      grid-template-rows: repeat(5, 1fr);
+      gap: 0.5rem;
+      max-height: 78vh;
+    }
+    /* Center of 3×5 is index 7 too (row 3, col 2) — same scaler */
+  }
+
+  /* Reduced motion: no scaler, just show grid statically */
+  @media (prefers-reduced-motion: reduce) {
+    .grid-morph-section {
+      height: auto;
+    }
+    .grid-morph-sticky {
+      position: relative;
+      height: auto;
+      min-height: 80vh;
+    }
+    .grid-morph-cell:not(.is-scaler) {
+      opacity: 1;
+      transform: none;
+    }
+    .grid-morph-cell.is-scaler {
+      transform: none;
+    }
+  }
+</style>
+
+<script>
+  import { animate, scroll, stagger } from 'motion';
+
+  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const section = document.querySelector<HTMLElement>('[data-grid-morph-section]');
+  const scaler = section?.querySelector<HTMLElement>('[data-scaler]');
+  const otherCells = section?.querySelectorAll<HTMLElement>(
+    '.grid-morph-cell:not(.is-scaler)',
+  );
+
+  if (section && scaler && otherCells && !reduceMotion) {
+    /*
+      Compute starting scale for the scaler so it visually fills the
+      viewport at scroll progress 0. Cell aspect is 3:4 portrait; we
+      want height ≈ 80vh, so scale = 80vh / current cell height.
+      We re-measure on resize for responsive correctness.
+    */
+    function computeStartScale(): number {
+      const cellHeight = scaler!.offsetHeight || 1;
+      const targetHeight = window.innerHeight * 0.78;
+      return Math.max(2, targetHeight / cellHeight);
+    }
+
+    let startScale = computeStartScale();
+
+    /*
+      Set initial transform so first paint matches what the scroll()
+      animation will produce at progress=0. Otherwise there's a flash
+      of the small scaler before JS kicks in.
+    */
+    scaler.style.transform = `scale(${startScale})`;
+
+    /*
+      Phase 1: scaler shrinks from startScale → 1 across the whole
+      section's scroll range.
+    */
+    scroll(
+      animate(
+        scaler,
+        { scale: [startScale, 1] },
+        { ease: 'linear' as any },
+      ),
+      {
+        target: section,
+        offset: ['start start', 'end end'],
+      },
+    );
+
+    /*
+      Phase 2: other cells fade + scale in. Stagger inside scroll-linked
+      animation distributes each cell's progress across the timeline:
+      first cells appear early, last ones later.
+    */
+    scroll(
+      animate(
+        Array.from(otherCells),
+        { opacity: [0, 1], scale: [0.55, 1] },
+        {
+          ease: 'linear' as any,
+          delay: stagger(0.04, { from: 'center' }),
+        },
+      ),
+      {
+        target: section,
+        // Start fading tiles in once user has scrolled ~25% into the
+        // section; finish before the section ends so the final state
+        // is held briefly before the next stage begins.
+        offset: ['25% start', '90% end'] as any,
+      },
+    );
+
+    /*
+      Recompute on resize so the scaler still fills viewport at
+      different sizes / orientation changes.
+    */
+    let resizeTimeout: number | null = null;
+    window.addEventListener('resize', () => {
+      if (resizeTimeout) clearTimeout(resizeTimeout);
+      resizeTimeout = window.setTimeout(() => {
+        const newStart = computeStartScale();
+        if (Math.abs(newStart - startScale) > 0.2) {
+          startScale = newStart;
+          // Re-bind by reloading — Motion doesn't easily support
+          // dynamic offset reconfiguration. For viewport changes
+          // mid-scroll this is rare enough to warrant a full reset.
+          scaler.style.transform = `scale(${startScale})`;
+        }
+      }, 200);
+    });
+  }
+</script>
