@@ -21,6 +21,8 @@
 import { useTranslations, type Lang, ui } from '../i18n/ui';
 import LocaleSwitcher from '../components/LocaleSwitcher.astro';
 import CookieBanner from '../components/CookieBanner.astro';
+import AnalyticsHead from '../components/AnalyticsHead.astro';
+import AnalyticsBody from '../components/AnalyticsBody.astro';
 
 interface Props {
   title: string;
@@ -97,8 +99,11 @@ const altUrls = {
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content={fullTitle} />
     <meta name="twitter:description" content={finalDescription} />
+
+    <AnalyticsHead />
   </head>
   <body class="min-h-screen bg-[var(--color-bg-canvas)] text-[var(--color-text-primary)]">
+    <AnalyticsBody />
     <slot />
     <CookieBanner lang={lang} />
 

@@ -1,0 +1,25 @@
+---
+/**
+ * AnalyticsBody — V4-F.
+ *
+ * Renders the GTM <noscript> iframe right after <body> opens, so
+ * tags fire even with JS disabled. Only present if PUBLIC_GTM_CONTAINER_ID
+ * env var is set.
+ */
+
+const gtmId = import.meta.env.PUBLIC_GTM_CONTAINER_ID ?? '';
+---
+
+{
+  gtmId && (
+    <noscript>
+      <iframe
+        src={`https://www.googletagmanager.com/ns.html?id=${gtmId}`}
+        height="0"
+        width="0"
+        style="display:none;visibility:hidden"
+        title="Google Tag Manager"
+      />
+    </noscript>
+  )
+}

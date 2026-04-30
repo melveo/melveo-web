@@ -1,0 +1,56 @@
+---
+/**
+ * AnalyticsHead — V4-F.
+ *
+ * Goes inside <head>. Renders:
+ *   1. Google Consent Mode v2 default state (denied) — must run BEFORE
+ *      GTM container so deferred tags respect consent.
+ *   2. GTM container snippet — only if PUBLIC_GTM_CONTAINER_ID env var
+ *      is set. Empty during V4-F (Q22 deferred); becomes active when
+ *      user provides the ID and re-deploys.
+ *   3. Cloudflare Web Analytics beacon — cookieless, doesn't need
+ *      consent. Token from PUBLIC_CF_ANALYTICS_TOKEN env var.
+ *
+ * Order matters: gtag('consent','default',...) must execute before
+ * GTM loads any tags. We hand-author the snippet for that reason.
+ */
+
+const gtmId = import.meta.env.PUBLIC_GTM_CONTAINER_ID ?? '';
+const cfToken = import.meta.env.PUBLIC_CF_ANALYTICS_TOKEN ?? '';
+---
+
+{/* Google Consent Mode v2 — default denied. Must run before GTM. */}
+<script is:inline>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){ dataLayer.push(arguments); }
+  gtag('consent', 'default', {
+    ad_storage: 'denied',
+    ad_user_data: 'denied',
+    ad_personalization: 'denied',
+    analytics_storage: 'denied',
+    wait_for_update: 500,
+  });
+  gtag('set', 'ads_data_redaction', true);
+</script>
+
+{
+  gtmId && (
+    <script is:inline define:vars={{ gtmId }}>
+      {`(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+      new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+      j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+      'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+      })(window,document,'script','dataLayer','${gtmId}');`}
+    </script>
+  )
+}
+
+{
+  cfToken && (
+    <script
+      defer
+      src="https://static.cloudflareinsights.com/beacon.min.js"
+      data-cf-beacon={`{"token": "${cfToken}"}`}
+    />
+  )
+}
