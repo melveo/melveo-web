@@ -1,0 +1,98 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import PageHeader from '../../components/PageHeader.astro';
+
+/**
+ * Privacy policy EN — placeholder. V4-B will replace with the full
+ * text aligned with GDPR Art. 13, Czech Act 110/2019, and Apple §5.1.1.
+ */
+---
+
+<BaseLayout
+  title="Privacy"
+  description="How Melveo handles personal data — transparently, per GDPR and Czech law."
+  lang="en"
+>
+  <PageHeader lang="en" />
+  <article class="mx-auto max-w-3xl px-6 py-20">
+    <p class="mb-4 text-sm font-semibold uppercase tracking-widest text-[var(--color-accent-primary)]">
+      Placeholder version · 2026-04-30
+    </p>
+    <h1 class="text-balance text-4xl font-bold tracking-tight sm:text-5xl">
+      Privacy
+    </h1>
+    <p class="mt-6 text-lg text-[var(--color-text-secondary)]">
+      This page is a development-stage summary. Final binding text will be
+      available before the paid release.
+    </p>
+
+    <hr class="my-12 border-[var(--color-stroke-base)]" />
+
+    <h2 class="mt-12 text-2xl font-semibold">Operator</h2>
+    <p class="mt-4 text-[var(--color-text-secondary)]">
+      <strong>QUIX Global s.r.o.</strong>, IČO 22466444, registered office:
+      Příčná 1892/4, 110 00 Prague 1, Czech Republic; entered in the
+      Commercial Register kept by the Municipal Court in Prague, section C,
+      file 416432. Data box: <code>g7v78rx</code>. Contact:
+      <a href="mailto:hello@melveo.app" class="text-[var(--color-accent-primary)]">
+        hello@melveo.app</a>.
+    </p>
+
+    <h2 class="mt-10 text-2xl font-semibold">Data we process</h2>
+    <ul class="mt-4 space-y-3 text-[var(--color-text-secondary)]">
+      <li>
+        <strong>Identifiers:</strong> name, email, club role (player / coach /
+        management).
+      </li>
+      <li>
+        <strong>Wellness check-ins:</strong> daily values for energy, sleep,
+        soreness, mood, motivation (1–5). Coach sees only aggregates —
+        never individual values.
+      </li>
+      <li>
+        <strong>Training sessions:</strong> attendance, RPE (perceived load).
+      </li>
+      <li>
+        <strong>Devices:</strong> Apple Health (only with player consent),
+        Polar (optional).
+      </li>
+    </ul>
+
+    <h2 class="mt-10 text-2xl font-semibold">Your rights (GDPR Art. 15–22)</h2>
+    <ul class="mt-4 space-y-3 text-[var(--color-text-secondary)]">
+      <li>
+        <strong>Access &amp; export</strong> — download your full history as
+        JSON anytime in the app's Account section.
+      </li>
+      <li>
+        <strong>Account deletion</strong> — irreversible, in the Account
+        section.
+      </li>
+      <li>
+        <strong>Objection, restriction, correction</strong> — write to
+        <a href="mailto:hello@melveo.app" class="text-[var(--color-accent-primary)]">
+          hello@melveo.app</a>.
+      </li>
+      <li>
+        <strong>Complaints</strong> — Office for Personal Data Protection
+        (Úřad pro ochranu osobních údajů), Pplk. Sochora 27, 170 00 Prague 7,
+        www.uoou.cz.
+      </li>
+    </ul>
+
+    <h2 class="mt-10 text-2xl font-semibold">Processors</h2>
+    <ul class="mt-4 space-y-3 text-[var(--color-text-secondary)]">
+      <li>Supabase / self-hosted in the EU (database, auth).</li>
+      <li>Stripe (club payments, never players).</li>
+      <li>Resend (transactional email).</li>
+      <li>Cloudflare (CDN, static site, Web Analytics).</li>
+      <li>With consent: Google Analytics, Meta Pixel.</li>
+    </ul>
+
+    <p class="mt-12 rounded-xl border border-[var(--color-stroke-emphasized)] bg-[var(--color-bg-surface)] p-6 text-sm text-[var(--color-text-secondary)]">
+      <strong>Dev note:</strong> this page will be replaced with the full
+      legally compliant text in V4-B (per GDPR Art. 13, Czech Act 110/2019,
+      and Apple App Store §5.1.1).
+    </p>
+  </article>
+</BaseLayout>

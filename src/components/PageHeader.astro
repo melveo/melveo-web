@@ -1,15 +1,23 @@
 ---
+import type { Lang } from '../i18n/ui';
+
 /**
  * PageHeader — minimal wordmark top-left for non-landing pages.
  * The landing renders its own header inside the hero, so it doesn't
  * use this component.
  */
+
+interface Props {
+  lang: Lang;
+}
+
+const { lang } = Astro.props;
 ---
 
 <header class="border-b border-[var(--color-stroke-base)]/60">
   <div class="px-6 py-6 sm:px-10 sm:py-8">
     <a
-      href="/"
+      href={`/${lang}/`}
       class="inline-block text-xl font-semibold tracking-tight text-[var(--color-text-primary)]"
     >
       melveo

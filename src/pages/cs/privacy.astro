@@ -1,28 +1,23 @@
 ---
-import BaseLayout from "../layouts/BaseLayout.astro";
-import PageHeader from "../components/PageHeader.astro";
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import PageHeader from '../../components/PageHeader.astro';
 
 /**
- * Privacy policy — placeholder. Real copy must be reviewed by legal
- * counsel and aligned with:
- *   - GDPR Art. 13 + 14 (transparent information)
- *   - Apple App Store Review Guideline 5.1.1 (privacy policy required)
- *   - Czech ÚOOÚ guidance for sport-club data
- *
- * The bullet points below are accurate per the current product but
- * are NOT a substitute for a vetted legal document. Replace before
- * production launch.
+ * Privacy policy CS — placeholder. V4-B nahradí finálním textem
+ * per zák. č. 110/2019 Sb., GDPR, zák. 480/2004 Sb., zák. 89/2012 Sb.
+ * a Apple §5.1.1.
  */
 ---
 
 <BaseLayout
   title="Ochrana soukromí"
-  description="Jak Melveo zpracovává osobní údaje. Nakládáme s daty hráčů a trenérů transparentně, podle GDPR."
+  description="Jak Melveo zpracovává osobní údaje hráčů a klubů — transparentně, podle GDPR a české legislativy."
+  lang="cs"
 >
-  <PageHeader />
+  <PageHeader lang="cs" />
   <article class="mx-auto max-w-3xl px-6 py-20">
     <p class="mb-4 text-sm font-semibold uppercase tracking-widest text-[var(--color-accent-primary)]">
-      Verze placeholder · 2026-04-29
+      Verze placeholder · 2026-04-30
     </p>
     <h1 class="text-balance text-4xl font-bold tracking-tight sm:text-5xl">
       Ochrana soukromí
@@ -34,13 +29,14 @@ import PageHeader from "../components/PageHeader.astro";
 
     <hr class="my-12 border-[var(--color-stroke-base)]" />
 
-    <h2 class="mt-12 text-2xl font-semibold">Kdo jsme</h2>
+    <h2 class="mt-12 text-2xl font-semibold">Provozovatel</h2>
     <p class="mt-4 text-[var(--color-text-secondary)]">
-      Melveo je aplikace pro správu sportovních klubů, vytvořená v Česku.
-      Provozovatelem je <strong>[doplnit IČO + sídlo]</strong>. Kontakt:
-      <a href="mailto:privacy@melveo.app" class="text-[var(--color-accent-primary)]">
-        privacy@melveo.app</a
-      >.
+      <strong>QUIX Global s.r.o.</strong>, IČO 22466444, se sídlem Příčná
+      1892/4, 110 00 Praha 1, zapsaná v obchodním rejstříku vedeném
+      Městským soudem v Praze, oddíl C, vložka 416432. Datová schránka:
+      <code>g7v78rx</code>. Kontakt:
+      <a href="mailto:hello@melveo.app" class="text-[var(--color-accent-primary)]">
+        hello@melveo.app</a>.
     </p>
 
     <h2 class="mt-10 text-2xl font-semibold">Jaké údaje zpracováváme</h2>
@@ -63,7 +59,7 @@ import PageHeader from "../components/PageHeader.astro";
       </li>
     </ul>
 
-    <h2 class="mt-10 text-2xl font-semibold">Vaše práva</h2>
+    <h2 class="mt-10 text-2xl font-semibold">Vaše práva (Art. 15-22 GDPR)</h2>
     <ul class="mt-4 space-y-3 text-[var(--color-text-secondary)]">
       <li>
         <strong>Přístup a export</strong> — v aplikaci v sekci Účet můžete
@@ -75,9 +71,12 @@ import PageHeader from "../components/PageHeader.astro";
       </li>
       <li>
         <strong>Námitka, omezení, oprava</strong> — pište na
-        <a href="mailto:privacy@melveo.app" class="text-[var(--color-accent-primary)]">
-          privacy@melveo.app</a
-        >.
+        <a href="mailto:hello@melveo.app" class="text-[var(--color-accent-primary)]">
+          hello@melveo.app</a>.
+      </li>
+      <li>
+        <strong>Stížnost</strong> — Úřad pro ochranu osobních údajů,
+        Pplk. Sochora 27, 170 00 Praha 7, www.uoou.cz.
       </li>
     </ul>
 
@@ -86,13 +85,14 @@ import PageHeader from "../components/PageHeader.astro";
       <li>Supabase / vlastní hosting v EU (databáze, autentizace).</li>
       <li>Stripe (zpracování plateb klubů, nikdy hráčů).</li>
       <li>Resend (transakční e-maily).</li>
-      <li>Cloudflare (CDN, statický web).</li>
+      <li>Cloudflare (CDN, statický web, Web Analytics).</li>
+      <li>Po souhlasu: Google Analytics, Meta Pixel.</li>
     </ul>
 
     <p class="mt-12 rounded-xl border border-[var(--color-stroke-emphasized)] bg-[var(--color-bg-surface)] p-6 text-sm text-[var(--color-text-secondary)]">
-      <strong>Poznámka pro vývoj:</strong> tato stránka projde právní revizí a
-      bude doplněna o úplné znění závazků dle GDPR Art. 13 + Apple App Store
-      review §5.1.1 před prvním placeným klientem.
+      <strong>Poznámka pro vývoj:</strong> tato stránka projde právní revizí
+      a bude doplněna o úplné znění závazků dle GDPR Art. 13 + Apple App Store
+      review §5.1.1 v rámci V4-B fáze.
     </p>
   </article>
 </BaseLayout>

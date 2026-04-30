@@ -1,0 +1,53 @@
+---
+import { ui, type Lang } from '../i18n/ui';
+
+interface Props {
+  current: Lang;
+  /** Path to swap locale on. Default: current page path. */
+  pathname?: string;
+}
+
+const { current, pathname = Astro.url.pathname } = Astro.props;
+
+/**
+ * Build the swapped path. Rules:
+ *   - /cs/foo  → /en/foo
+ *   - /en/foo  → /cs/foo
+ *   - /        → /<other>/  (root redirect handled separately)
+ */
+function swap(path: string, fromLocale: Lang, toLocale: Lang): string {
+  const prefix = `/${fromLocale}/`;
+  if (path === `/${fromLocale}` || path === prefix.slice(0, -1)) {
+    return `/${toLocale}/`;
+  }
+  if (path.startsWith(prefix)) {
+    return `/${toLocale}/${path.slice(prefix.length)}`;
+  }
+  return `/${toLocale}/`;
+}
+
+const locales = Object.keys(ui) as Lang[];
+---
+
+<nav class="flex items-center gap-1 text-sm" aria-label="Language">
+  {
+    locales.map((locale) => {
+      const isCurrent = locale === current;
+      const href = swap(pathname, current, locale);
+      return (
+        <a
+          href={href}
+          aria-current={isCurrent ? 'true' : undefined}
+          class:list={[
+            'px-2 py-1 rounded-md transition-colors',
+            isCurrent
+              ? 'text-[var(--color-text-primary)]'
+              : 'text-[var(--color-text-tertiary)] hover:text-[var(--color-text-secondary)]',
+          ]}
+        >
+          {locale.toUpperCase()}
+        </a>
+      );
+    })
+  }
+</nav>

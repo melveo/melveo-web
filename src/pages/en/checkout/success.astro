@@ -1,0 +1,68 @@
+---
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import PageHeader from '../../../components/PageHeader.astro';
+
+const sessionId = Astro.url.searchParams.get('session_id') ?? null;
+---
+
+<BaseLayout
+  title="Thank you"
+  description="Pilot payment received. Open the Melveo app and start your first training."
+  canonical="/en/checkout/success/"
+  lang="en"
+>
+  <PageHeader lang="en" />
+  <section class="mx-auto max-w-2xl px-6 py-24 text-center">
+    <div class="mx-auto mb-8 inline-flex h-20 w-20 items-center justify-center rounded-full bg-[var(--color-feedback-success)]/15 text-[var(--color-feedback-success)]">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" class="h-10 w-10">
+        <polyline points="20 6 9 17 4 12"></polyline>
+      </svg>
+    </div>
+
+    <h1 class="text-balance text-4xl font-bold tracking-tight sm:text-5xl">Thank you!</h1>
+    <p class="mt-6 text-pretty text-lg text-[var(--color-text-secondary)]">
+      Your pilot is active. Open the Melveo app on your iPhone or iPad —
+      access appears immediately after refresh.
+    </p>
+
+    {
+      sessionId && (
+        <p class="mt-4 text-xs text-[var(--color-text-tertiary)]">
+          Reference: <code class="rounded bg-[var(--color-bg-surface)] px-2 py-1">{sessionId}</code>
+        </p>
+      )
+    }
+
+    <div class="mt-10 flex flex-wrap items-center justify-center gap-4">
+      <a href="melveo://billing/refresh" class="inline-flex items-center justify-center rounded-xl bg-[var(--color-accent-primary)] px-6 py-3 text-base font-semibold text-[var(--color-accent-primary-cta-fg)] transition hover:bg-[var(--color-accent-primary-hover)]">
+        Open Melveo
+      </a>
+      <a href="/en/" class="text-base font-medium text-[var(--color-text-primary)] hover:text-[var(--color-accent-primary)]">
+        Back to homepage
+      </a>
+    </div>
+
+    <div class="mt-16 rounded-2xl border border-[var(--color-stroke-base)] bg-[var(--color-bg-surface)] p-8 text-left">
+      <h2 class="text-lg font-semibold">What now?</h2>
+      <ol class="mt-4 space-y-3 text-[var(--color-text-secondary)]">
+        <li class="flex gap-3">
+          <span class="mt-0.5 inline-flex h-6 w-6 flex-none items-center justify-center rounded-full bg-[var(--color-accent-primary-subtle)] text-sm font-bold text-[var(--color-accent-primary-cta-fg)]">1</span>
+          <span>Open the app. The access gate disappears within seconds (webhook syncs the subscription).</span>
+        </li>
+        <li class="flex gap-3">
+          <span class="mt-0.5 inline-flex h-6 w-6 flex-none items-center justify-center rounded-full bg-[var(--color-accent-primary-subtle)] text-sm font-bold text-[var(--color-accent-primary-cta-fg)]">2</span>
+          <span>Invite players via invite code or QR — from the "Members" section.</span>
+        </li>
+        <li class="flex gap-3">
+          <span class="mt-0.5 inline-flex h-6 w-6 flex-none items-center justify-center rounded-full bg-[var(--color-accent-primary-subtle)] text-sm font-bold text-[var(--color-accent-primary-cta-fg)]">3</span>
+          <span>Schedule your first training and check morning readiness.</span>
+        </li>
+      </ol>
+    </div>
+
+    <p class="mt-12 text-sm text-[var(--color-text-secondary)]">
+      Something off?
+      <a href="mailto:hello@melveo.app" class="text-[var(--color-accent-primary)] hover:underline">hello@melveo.app</a>
+    </p>
+  </section>
+</BaseLayout>

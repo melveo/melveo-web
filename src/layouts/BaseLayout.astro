@@ -1,11 +1,16 @@
 ---
 /**
- * BaseLayout — fullwidth, indie-iOS-app style.
+ * BaseLayout — fullwidth, indie-iOS-app style, locale-aware.
  *
  * No max-width container; pages render edge-to-edge. Content padding
  * is handled per-section. Header is intentionally absent on the
  * landing — the wordmark sits inside the hero. Privacy/Terms pages
  * use their own constrained article width.
+ *
+ * Locale-aware: takes `lang` prop, renders correct hreflang + footer
+ * + canonical with locale prefix. URL strategy per PLAN.md §16.5:
+ * /cs/ canonical for Czech, /en/ for English, root / is a client-side
+ * redirect that reads navigator.language.
  *
  * Apple App Store discipline (docs/planning/15 §"Apple-safe"):
  * the iOS companion app must never see Buy/Subscribe CTAs. The web
@@ -13,9 +18,14 @@
  * pilot enquiry email, and legal pages.
  */
 
+import { useTranslations, type Lang, ui } from '../i18n/ui';
+import LocaleSwitcher from '../components/LocaleSwitcher.astro';
+
 interface Props {
   title: string;
   description?: string;
+  /** Locale of the page. Required so footer + hreflang render correctly. */
+  lang: Lang;
   /** Path-only URL used for canonical + OG tags. Trailing slash optional. */
   canonical?: string;
   /** Override the default OG image. */
@@ -27,20 +37,39 @@ interface Props {
 
 const {
   title,
-  description = "Melveo — chytřejší tréninky a zdravější hráči pro kluby, trenéry i hráče.",
+  description,
+  lang,
   canonical,
-  ogImage = "/og-default.png",
+  ogImage = '/og-default.png',
   showLandingFooter = true,
 } = Astro.props;
 
-const fullTitle = title === "Melveo" ? title : `${title} — Melveo`;
+const t = useTranslations(lang);
+
+const defaultDescription =
+  lang === 'cs'
+    ? 'Melveo — chytřejší tréninky a zdravější hráči pro kluby, trenéry i hráče.'
+    : 'Melveo — smarter trainings and healthier players. App for sports clubs.';
+
+const finalDescription = description ?? defaultDescription;
+
+const fullTitle = title === 'Melveo' ? title : `${title} — Melveo`;
 const canonicalUrl = canonical
   ? new URL(canonical, Astro.site).toString()
   : new URL(Astro.url.pathname, Astro.site).toString();
+
+// hreflang alternates — derived from current path
+const otherLang: Lang = lang === 'cs' ? 'en' : 'cs';
+const currentPathWithoutLocale = Astro.url.pathname.replace(/^\/(cs|en)/, '') || '/';
+const altUrls = {
+  cs: new URL(`/cs${currentPathWithoutLocale}`, Astro.site).toString(),
+  en: new URL(`/en${currentPathWithoutLocale}`, Astro.site).toString(),
+  default: new URL('/', Astro.site).toString(),
+};
 ---
 
 <!doctype html>
-<html lang="cs">
+<html lang={lang === 'cs' ? 'cs' : 'en'}>
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -48,18 +77,25 @@ const canonicalUrl = canonical
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="canonical" href={canonicalUrl} />
 
+    <!-- Hreflang alternates -->
+    <link rel="alternate" hreflang="cs" href={altUrls.cs} />
+    <link rel="alternate" hreflang="en" href={altUrls.en} />
+    <link rel="alternate" hreflang="x-default" href={altUrls.default} />
+
     <title>{fullTitle}</title>
-    <meta name="description" content={description} />
+    <meta name="description" content={finalDescription} />
 
     <!-- OG / Twitter -->
     <meta property="og:title" content={fullTitle} />
-    <meta property="og:description" content={description} />
+    <meta property="og:description" content={finalDescription} />
     <meta property="og:url" content={canonicalUrl} />
     <meta property="og:image" content={new URL(ogImage, Astro.site).toString()} />
     <meta property="og:type" content="website" />
+    <meta property="og:locale" content={lang === 'cs' ? 'cs_CZ' : 'en_US'} />
+    <meta property="og:locale:alternate" content={otherLang === 'cs' ? 'cs_CZ' : 'en_US'} />
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content={fullTitle} />
-    <meta name="twitter:description" content={description} />
+    <meta name="twitter:description" content={finalDescription} />
   </head>
   <body class="min-h-screen bg-[var(--color-bg-canvas)] text-[var(--color-text-primary)]">
     <slot />
@@ -67,8 +103,8 @@ const canonicalUrl = canonical
     {
       showLandingFooter && (
         <footer class="border-t border-[var(--color-stroke-base)]/60">
-          <div class="flex flex-col items-center gap-4 px-6 py-10 text-center text-sm text-[var(--color-text-tertiary)] sm:flex-row sm:justify-center sm:gap-8">
-            <span>© 2026 Melveo</span>
+          <div class="flex flex-col items-center gap-4 px-6 py-10 text-center text-sm text-[var(--color-text-tertiary)] sm:flex-row sm:flex-wrap sm:justify-center sm:gap-x-8 sm:gap-y-4">
+            <span>{t('footer.copyright')}</span>
             <a
               href="mailto:hello@melveo.app"
               class="transition-colors hover:text-[var(--color-text-primary)]"
@@ -76,17 +112,18 @@ const canonicalUrl = canonical
               hello@melveo.app
             </a>
             <a
-              href="/privacy"
+              href={`/${lang}/privacy`}
               class="transition-colors hover:text-[var(--color-text-primary)]"
             >
-              Ochrana soukromí
+              {t('footer.privacy')}
             </a>
             <a
-              href="/terms"
+              href={`/${lang}/terms`}
               class="transition-colors hover:text-[var(--color-text-primary)]"
             >
-              Podmínky
+              {t('footer.terms')}
             </a>
+            <LocaleSwitcher current={lang} />
           </div>
         </footer>
       )

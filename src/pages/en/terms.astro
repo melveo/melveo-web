@@ -1,0 +1,67 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import PageHeader from '../../components/PageHeader.astro';
+---
+
+<BaseLayout
+  title="Terms"
+  description="Terms of use for Melveo. Clubs pay, players never."
+  lang="en"
+>
+  <PageHeader lang="en" />
+  <article class="mx-auto max-w-3xl px-6 py-20">
+    <p class="mb-4 text-sm font-semibold uppercase tracking-widest text-[var(--color-accent-primary)]">
+      Placeholder version · 2026-04-30
+    </p>
+    <h1 class="text-balance text-4xl font-bold tracking-tight sm:text-5xl">
+      Terms of use
+    </h1>
+    <p class="mt-6 text-lg text-[var(--color-text-secondary)]">
+      Provisional. Binding text becomes effective before the first paid
+      licence.
+    </p>
+
+    <hr class="my-12 border-[var(--color-stroke-base)]" />
+
+    <h2 class="mt-12 text-2xl font-semibold">Operator</h2>
+    <p class="mt-4 text-[var(--color-text-secondary)]">
+      <strong>QUIX Global s.r.o.</strong>, IČO 22466444, registered office:
+      Příčná 1892/4, 110 00 Prague 1, Czech Republic; Commercial Register
+      kept by the Municipal Court in Prague, section C, file 416432. Data
+      box: <code>g7v78rx</code>.
+    </p>
+
+    <h2 class="mt-10 text-2xl font-semibold">Licensing model</h2>
+    <p class="mt-4 text-[var(--color-text-secondary)]">
+      <strong>1 licence = 1 team × 1 season.</strong> The payer is always
+      the club (legal entity or statutory representative). Players and
+      coaches never pay for the app directly — access is granted via
+      club invitation.
+    </p>
+
+    <h2 class="mt-10 text-2xl font-semibold">Payments</h2>
+    <p class="mt-4 text-[var(--color-text-secondary)]">
+      Payments are processed by Stripe Inc. Card or invoice accepted.
+      The iOS app is a <em>companion app</em> per Apple App Store
+      §3.1.3(f) — all commerce happens on the web, never in iOS.
+    </p>
+
+    <h2 class="mt-10 text-2xl font-semibold">Liability &amp; limitations</h2>
+    <ul class="mt-4 space-y-3 text-[var(--color-text-secondary)]">
+      <li>
+        Melveo is not a medical device. Wellness check-ins serve sports
+        training, not medical decisions.
+      </li>
+      <li>
+        The club is responsible for ensuring player consent (incl. minors
+        via legal guardian).
+      </li>
+    </ul>
+
+    <p class="mt-12 rounded-xl border border-[var(--color-stroke-emphasized)] bg-[var(--color-bg-surface)] p-6 text-sm text-[var(--color-text-secondary)]">
+      <strong>Dev note:</strong> final terms will be added in V4-B, including
+      jurisdiction, dispute resolution, and operator details after legal
+      review.
+    </p>
+  </article>
+</BaseLayout>
