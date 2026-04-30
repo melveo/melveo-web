@@ -1,0 +1,35 @@
+# Cloudflare Pages headers config — V4-G
+# Reference: https://developers.cloudflare.com/pages/configuration/headers/
+
+# AASA file MUST be served as application/json + uncached (Apple AASA
+# verifier rejects HTML / text). Cloudflare Pages defaults to a wrong
+# MIME for files without extension, so we force it here.
+/.well-known/apple-app-site-association
+  Content-Type: application/json
+  Cache-Control: no-cache, must-revalidate
+  X-Robots-Tag: noindex
+
+# Security baseline for all pages
+/*
+  X-Content-Type-Options: nosniff
+  X-Frame-Options: SAMEORIGIN
+  Referrer-Policy: strict-origin-when-cross-origin
+  Permissions-Policy: camera=(), microphone=(), geolocation=(), interest-cohort=()
+  Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
+
+# Static assets — long cache + immutable
+/assets/*
+  Cache-Control: public, max-age=31536000, immutable
+
+/badges/*
+  Cache-Control: public, max-age=86400
+
+# OG image — moderate cache so we can refresh without bust
+/og-default.png
+  Cache-Control: public, max-age=86400
+
+# Sitemap should refresh frequently
+/sitemap-index.xml
+  Cache-Control: public, max-age=3600
+/sitemap-*.xml
+  Cache-Control: public, max-age=3600

@@ -100,6 +100,40 @@ const altUrls = {
     <meta name="twitter:title" content={fullTitle} />
     <meta name="twitter:description" content={finalDescription} />
 
+    {/* JSON-LD — SoftwareApplication schema for App Store discoverability */}
+    <script
+      type="application/ld+json"
+      set:html={JSON.stringify({
+        '@context': 'https://schema.org',
+        '@type': 'SoftwareApplication',
+        name: 'Melveo',
+        applicationCategory: 'SportsApplication',
+        operatingSystem: 'iOS, iPadOS',
+        description: finalDescription,
+        offers: {
+          '@type': 'Offer',
+          price: '0',
+          priceCurrency: 'CZK',
+        },
+        publisher: {
+          '@type': 'Organization',
+          name: 'QUIX Global s.r.o.',
+          identifier: '22466444',
+          address: {
+            '@type': 'PostalAddress',
+            streetAddress: 'Příčná 1892/4',
+            addressLocality: 'Praha',
+            postalCode: '11000',
+            addressCountry: 'CZ',
+          },
+          email: 'hello@melveo.app',
+          url: 'https://melveo.app',
+        },
+        inLanguage: lang === 'cs' ? 'cs-CZ' : 'en-US',
+        url: canonicalUrl,
+      })}
+    />
+
     <AnalyticsHead />
   </head>
   <body class="min-h-screen bg-[var(--color-bg-canvas)] text-[var(--color-text-primary)]">
