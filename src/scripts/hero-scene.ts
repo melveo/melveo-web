@@ -1,41 +1,110 @@
 /**
- * Hero scene — floating iridescent prism shapes (V4-C, refined).
+ * Hero scene — CodePen-inspired WebGL metaballs background.
  *
- * Inspired visually by the VoXelo PRISM codepen (custom WebGL shader)
- * but implemented from scratch with Three.js's built-in
- * MeshPhysicalMaterial.iridescence so we don't ship a custom GLSL
- * pipeline. Brand-cyan-leaning material parameters keep the look
- * on-brand instead of full rainbow.
- *
- * Shape variety: octahedron, icosahedron, tetrahedron, low-poly cone
- * (triangular bipyramid). Cluster positioned in two rings around the
- * centre — outer ring at the hero corners, inner ring closer to the
- * wordmark — so the user reads the title against an interesting
- * (but not crowded) backdrop.
- *
- * Implementation rules (per docs/PLAN.md §7.2 + §7.9):
- *   - Lazy-loaded after LCP via dynamic import (mountHeroScene)
- *   - Pause RAF when document is hidden
- *   - Cap pixel ratio at 2
- *   - Mobile (<768px): smaller scene + fewer shapes + antialias off
- *   - prefers-reduced-motion: don't mount, leave SSR SVG fallback
- *   - Cleanup function returned for HMR / nav
+ * Source reference: TC5550 / "Metaballs - WebGL".
+ * The implementation keeps the same idea: moving circles are sent to a
+ * fragment shader as vec3 uniforms and the shader renders the combined
+ * metaball field. It is adapted for Melveo's darker brand palette and
+ * for the site's lazy-mounted hero canvas.
  */
-
-import * as THREE from 'three';
 
 interface MountOptions {
   canvas: HTMLCanvasElement;
 }
 
 interface SceneHandle {
-  /** Stop the animation loop and release GPU resources. */
   dispose: () => void;
 }
 
-const BRAND_CYAN = 0x00f0ff;
-const BRAND_CYAN_TINT = 0xcdf7fb;
-const BRAND_CYAN_DEEP = 0x14b8c4;
+interface Metaball {
+  x: number;
+  y: number;
+  vx: number;
+  vy: number;
+  radius: number;
+  seed: number;
+}
+
+const METABALL_COUNT = 28;
+const MOBILE_METABALL_COUNT = 20;
+
+const VERTEX_SHADER = `
+attribute vec2 position;
+
+void main() {
+  gl_Position = vec4(position, 0.0, 1.0);
+}
+`;
+
+function fragmentShaderSource(count: number): string {
+  return `
+precision highp float;
+
+uniform vec2 uResolution;
+uniform float uTime;
+uniform vec3 uMetaballs[${count}];
+
+const vec3 BRAND_CYAN = vec3(0.0, 0.941176, 1.0);
+const vec3 BRAND_ICE = vec3(0.45, 0.86, 0.90);
+const vec3 BRAND_TEAL = vec3(0.05, 0.56, 0.62);
+const vec3 BRAND_DEEP = vec3(0.0, 0.13, 0.16);
+
+float hash(vec2 p) {
+  return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453123);
+}
+
+void main() {
+  vec2 p = gl_FragCoord.xy;
+  vec2 uv = p / uResolution;
+  vec2 centered = uv - 0.5;
+  centered.x *= uResolution.x / max(uResolution.y, 1.0);
+
+  float field = 0.0;
+  float weightedDepth = 0.0;
+
+  for (int i = 0; i < ${count}; i++) {
+    vec3 metaball = uMetaballs[i];
+    vec2 delta = metaball.xy - p;
+    float distSq = max(dot(delta, delta), 32.0);
+    float strength = (metaball.z * metaball.z) / distSq;
+    field += strength;
+    weightedDepth += strength * metaball.z;
+  }
+
+  float mass = smoothstep(0.92, 1.08, field);
+  float body = smoothstep(0.98, 1.22, field);
+  float edge = smoothstep(0.88, 1.0, field) * (1.0 - smoothstep(1.12, 1.36, field));
+  float glow = smoothstep(0.2, 1.12, field) * (1.0 - body);
+
+  float depth = clamp(weightedDepth / max(field, 0.001) / max(uResolution.y, 1.0), 0.0, 0.32);
+  float grain = hash(floor(p * 0.55) + vec2(uTime * 18.0, -uTime * 9.0));
+
+  vec3 background = mix(BRAND_DEEP * 0.2, BRAND_DEEP * 0.62, 1.0 - uv.y);
+  background += BRAND_TEAL * 0.045 * smoothstep(0.82, 0.0, length(centered + vec2(0.18, -0.08)));
+  background += BRAND_CYAN * 0.025 * smoothstep(1.05, 0.0, length(centered - vec2(0.34, 0.18)));
+
+  vec3 cool = mix(BRAND_TEAL, BRAND_CYAN, clamp(uv.x * 0.72 + uv.y * 0.28, 0.0, 1.0));
+  vec3 surface = mix(BRAND_DEEP * 0.52 + BRAND_TEAL * 0.2, cool, 0.48 + depth);
+  surface += BRAND_ICE * edge * 0.36;
+  surface += BRAND_CYAN * pow(max(field - 1.0, 0.0), 0.7) * 0.1;
+
+  vec3 color = background;
+  color += BRAND_CYAN * glow * 0.08;
+  color = mix(color, surface, mass * 0.92);
+  color += edge * BRAND_CYAN * 0.16;
+
+  float centerQuiet = smoothstep(0.08, 0.74, length(centered * vec2(0.86, 1.42)));
+  color = mix(background * 0.72 + color * 0.08, color, centerQuiet);
+
+  float vignette = smoothstep(0.88, 0.24, length(centered));
+  color *= 0.55 + vignette * 0.55;
+  color += (grain - 0.5) * 0.012;
+  color = pow(max(color, vec3(0.0)), vec3(0.92));
+
+  gl_FragColor = vec4(color, 1.0);
+}
+`;
+}
 
 export function prefersReducedMotion(): boolean {
   return (
@@ -44,216 +113,302 @@ export function prefersReducedMotion(): boolean {
   );
 }
 
-interface ShapeConfig {
-  geo: THREE.BufferGeometry;
-  position: [number, number, number];
-  scale: number;
-  ringIndex: 0 | 1; // 0 = outer (slow), 1 = inner (faster)
+function createSeededRandom(seed = 88421): () => number {
+  let state = seed >>> 0;
+
+  return () => {
+    state = (state * 1664525 + 1013904223) >>> 0;
+    return state / 4294967296;
+  };
 }
 
-function buildShapes(isMobile: boolean): ShapeConfig[] {
-  /*
-    Two concentric rings of shapes around the hero centre. Outer ring
-    sits at the page corners, inner ring closer to the wordmark for
-    depth. Y-positions deliberately offset so they don't all line up
-    on the same horizon line.
-  */
+function randomRange(random: () => number, min: number, max: number): number {
+  return min + random() * (max - min);
+}
 
-  const outerRing: ShapeConfig[] = [
-    { geo: new THREE.OctahedronGeometry(0.95, 0), position: [-5.6, 2.8, -2.0], scale: 1.0, ringIndex: 0 },
-    { geo: new THREE.IcosahedronGeometry(0.85, 0), position: [5.4, 3.0, -2.5], scale: 1.0, ringIndex: 0 },
-    { geo: new THREE.OctahedronGeometry(0.7, 0), position: [-4.4, -3.0, -3.0], scale: 1.0, ringIndex: 0 },
-    { geo: new THREE.TetrahedronGeometry(1.0, 0), position: [5.0, -2.7, -1.8], scale: 1.0, ringIndex: 0 },
-  ];
+function createShader(
+  gl: WebGLRenderingContext,
+  type: number,
+  source: string,
+): WebGLShader | null {
+  const shader = gl.createShader(type);
+  if (!shader) return null;
 
-  const innerRing: ShapeConfig[] = [
-    { geo: new THREE.ConeGeometry(0.55, 1.1, 4), position: [-2.8, 1.4, -1.0], scale: 1.0, ringIndex: 1 },
-    { geo: new THREE.OctahedronGeometry(0.45, 0), position: [3.0, -1.8, -0.8], scale: 1.0, ringIndex: 1 },
-    { geo: new THREE.IcosahedronGeometry(0.4, 0), position: [0.4, 3.6, -3.5], scale: 1.0, ringIndex: 1 },
-    { geo: new THREE.TetrahedronGeometry(0.55, 0), position: [-0.8, -3.4, -2.5], scale: 1.0, ringIndex: 1 },
-  ];
+  gl.shaderSource(shader, source);
+  gl.compileShader(shader);
 
-  if (isMobile) {
-    /* Mobile: keep 2 outer + 2 inner so the scene reads on small
-       screens without crowding the headline. */
-    return [outerRing[0], outerRing[3], innerRing[0], innerRing[1]];
+  if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
+    console.error('Hero shader compile error:', gl.getShaderInfoLog(shader));
+    gl.deleteShader(shader);
+    return null;
   }
 
-  return [...outerRing, ...innerRing];
+  return shader;
 }
 
-export function mountHeroScene({ canvas }: MountOptions): SceneHandle {
-  const isMobile = window.matchMedia('(max-width: 768px)').matches;
+function createProgram(
+  gl: WebGLRenderingContext,
+  vertexShader: WebGLShader,
+  fragmentShader: WebGLShader,
+): WebGLProgram | null {
+  const program = gl.createProgram();
+  if (!program) return null;
 
-  const scene = new THREE.Scene();
-  const camera = new THREE.PerspectiveCamera(
-    60,
-    canvas.clientWidth / canvas.clientHeight,
-    0.1,
-    100,
-  );
-  camera.position.z = 9;
+  gl.attachShader(program, vertexShader);
+  gl.attachShader(program, fragmentShader);
+  gl.linkProgram(program);
 
-  const renderer = new THREE.WebGLRenderer({
-    canvas,
-    alpha: true,
-    antialias: !isMobile,
-    powerPreference: 'low-power',
-  });
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-  renderer.setSize(canvas.clientWidth, canvas.clientHeight, false);
+  if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
+    console.error('Hero shader link error:', gl.getProgramInfoLog(program));
+    gl.deleteProgram(program);
+    return null;
+  }
 
-  /*
-    Material — single shared instance for all shapes. The iridescence
-    feature in MeshPhysicalMaterial gives us the rainbow-shifting look
-    without writing a custom shader; we pin the base colour to brand
-    cyan so the shifts stay in the cyan→white→ice family rather than
-    going full PRISM rainbow.
-  */
-  const material = new THREE.MeshPhysicalMaterial({
-    color: BRAND_CYAN,
-    iridescence: 1.0,
-    iridescenceIOR: 1.35,
-    iridescenceThicknessRange: [120, 720],
-    metalness: 0.18,
-    roughness: 0.32,
-    clearcoat: 1.0,
-    clearcoatRoughness: 0.08,
-    transmission: 0.45,
-    thickness: 0.6,
-    ior: 1.5,
-  });
+  return program;
+}
 
-  const configs = buildShapes(isMobile);
-
-  type Floater = {
-    mesh: THREE.Mesh;
-    rotSpeed: THREE.Vector3;
-    bobAmp: number;
-    bobPhase: number;
-    bobBase: number;
-    ringIndex: number;
+export function mountHeroScene({ canvas }: MountOptions): SceneHandle | null {
+  const contextOptions: WebGLContextAttributes = {
+    alpha: false,
+    antialias: false,
+    depth: false,
+    stencil: false,
+    preserveDrawingBuffer: false,
+    powerPreference: 'high-performance',
   };
 
-  const floaters: Floater[] = configs.map((cfg) => {
-    const mesh = new THREE.Mesh(cfg.geo, material);
-    const [x, y, z] = cfg.position;
-    mesh.position.set(x, y, z);
-    mesh.scale.setScalar(cfg.scale);
-    mesh.rotation.set(
-      Math.random() * Math.PI,
-      Math.random() * Math.PI,
-      Math.random() * Math.PI,
-    );
-    scene.add(mesh);
+  const context = (canvas.getContext('webgl', contextOptions) ??
+    canvas.getContext('experimental-webgl', contextOptions)) as WebGLRenderingContext | null;
 
-    /* Inner ring rotates a touch faster + bobs less than outer; gives
-       the parallax sense of "closer to camera, twitchier". */
-    const rotSpeedScale = cfg.ringIndex === 1 ? 1.4 : 1.0;
-    const bobScale = cfg.ringIndex === 1 ? 0.6 : 1.0;
+  if (!context) return null;
+  const gl: WebGLRenderingContext = context;
+  const isMobile = window.innerWidth < 768;
+  const metaballCount = isMobile ? MOBILE_METABALL_COUNT : METABALL_COUNT;
 
-    return {
-      mesh,
-      rotSpeed: new THREE.Vector3(
-        (Math.random() - 0.5) * 0.005 * rotSpeedScale,
-        (Math.random() - 0.5) * 0.006 * rotSpeedScale,
-        (Math.random() - 0.5) * 0.003 * rotSpeedScale,
-      ),
-      bobAmp: (0.15 + Math.random() * 0.18) * bobScale,
-      bobPhase: Math.random() * Math.PI * 2,
-      bobBase: y,
-      ringIndex: cfg.ringIndex,
-    };
-  });
+  const vertexShader = createShader(gl, gl.VERTEX_SHADER, VERTEX_SHADER);
+  const fragmentShader = createShader(gl, gl.FRAGMENT_SHADER, fragmentShaderSource(metaballCount));
 
-  /*
-    Lighting: ambient + cyan-tinted key light + cool rim. The
-    iridescence does most of the visual work; lights just sketch
-    the silhouette.
-  */
-  scene.add(new THREE.AmbientLight(0xffffff, 0.4));
-  const keyLight = new THREE.DirectionalLight(BRAND_CYAN_TINT, 1.45);
-  keyLight.position.set(5, 8, 5);
-  scene.add(keyLight);
-  const fillLight = new THREE.DirectionalLight(BRAND_CYAN_DEEP, 0.55);
-  fillLight.position.set(-6, -3, 2);
-  scene.add(fillLight);
-  const rimLight = new THREE.DirectionalLight(0xffffff, 0.35);
-  rimLight.position.set(0, -8, -5);
-  scene.add(rimLight);
+  if (!vertexShader || !fragmentShader) {
+    if (vertexShader) gl.deleteShader(vertexShader);
+    if (fragmentShader) gl.deleteShader(fragmentShader);
+    return null;
+  }
 
-  /* Mouse parallax — very subtle (5° max tilt at edges of viewport). */
-  const mouse = new THREE.Vector2(0, 0);
-  const targetRotation = new THREE.Vector2(0, 0);
+  const program = createProgram(gl, vertexShader, fragmentShader);
+  if (!program) {
+    gl.deleteShader(vertexShader);
+    gl.deleteShader(fragmentShader);
+    return null;
+  }
+
+  const positionLocation = gl.getAttribLocation(program, 'position');
+  const uResolution = gl.getUniformLocation(program, 'uResolution');
+  const uTime = gl.getUniformLocation(program, 'uTime');
+  const uMetaballs = gl.getUniformLocation(program, 'uMetaballs');
+
+  if (positionLocation < 0 || !uResolution || !uTime || !uMetaballs) {
+    gl.deleteProgram(program);
+    gl.deleteShader(vertexShader);
+    gl.deleteShader(fragmentShader);
+    return null;
+  }
+
+  const positions = new Float32Array([
+    -1, -1,
+    1, -1,
+    -1, 1,
+    1, 1,
+  ]);
+
+  const positionBuffer = gl.createBuffer();
+  if (!positionBuffer) {
+    gl.deleteProgram(program);
+    gl.deleteShader(vertexShader);
+    gl.deleteShader(fragmentShader);
+    return null;
+  }
+
+  gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
+  gl.bufferData(gl.ARRAY_BUFFER, positions, gl.STATIC_DRAW);
+
+  const random = createSeededRandom();
+  const metaballs: Metaball[] = [];
+  const metaballData = new Float32Array(metaballCount * 3);
+  const pixelRatio = Math.min(window.devicePixelRatio || 1, isMobile ? 0.9 : 1.15);
+
+  let width = 1;
+  let height = 1;
+  let running = true;
+  let canvasInView = true;
+  let rafId = 0;
+  let mouseX = 0.5;
+  let mouseY = 0.5;
+  let targetMouseX = 0.5;
+  let targetMouseY = 0.5;
+
+  function resetMetaballs() {
+    metaballs.length = 0;
+    const minSide = Math.min(width, height);
+    const baseRadius = minSide * (isMobile ? 0.08 : 0.052);
+
+    for (let i = 0; i < metaballCount; i += 1) {
+      const radius = randomRange(random, baseRadius * 0.55, baseRadius * 1.45);
+      metaballs.push({
+        x: randomRange(random, radius, width - radius),
+        y: randomRange(random, radius, height - radius),
+        vx: randomRange(random, -0.22, 0.22) * (isMobile ? 0.8 : 1),
+        vy: randomRange(random, -0.18, 0.18) * (isMobile ? 0.8 : 1),
+        radius,
+        seed: randomRange(random, 0, Math.PI * 2),
+      });
+    }
+  }
+
+  function resizeCanvas() {
+    const rect = canvas.getBoundingClientRect();
+    const nextWidth = Math.max(1, Math.floor(rect.width * pixelRatio));
+    const nextHeight = Math.max(1, Math.floor(rect.height * pixelRatio));
+    const changed = canvas.width !== nextWidth || canvas.height !== nextHeight;
+
+    if (changed) {
+      canvas.width = nextWidth;
+      canvas.height = nextHeight;
+      width = nextWidth;
+      height = nextHeight;
+      resetMetaballs();
+    }
+
+    gl.viewport(0, 0, nextWidth, nextHeight);
+  }
 
   function onPointerMove(event: PointerEvent) {
-    mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
-    mouse.y = (event.clientY / window.innerHeight) * 2 - 1;
-  }
-  window.addEventListener('pointermove', onPointerMove, { passive: true });
+    const rect = canvas.getBoundingClientRect();
+    if (rect.width <= 0 || rect.height <= 0) return;
 
-  /* Resize handler */
-  function onResize() {
-    const w = canvas.clientWidth;
-    const h = canvas.clientHeight;
-    renderer.setSize(w, h, false);
-    camera.aspect = w / h;
-    camera.updateProjectionMatrix();
+    targetMouseX = (event.clientX - rect.left) / rect.width;
+    targetMouseY = (event.clientY - rect.top) / rect.height;
   }
-  const resizeObserver = new ResizeObserver(onResize);
+
+  function stopFrame() {
+    if (!rafId) return;
+    cancelAnimationFrame(rafId);
+    rafId = 0;
+  }
+
+  function scheduleFrame() {
+    if (rafId || !running || !canvasInView) return;
+    rafId = requestAnimationFrame(render);
+  }
+
+  function updateMetaballs(time: number) {
+    mouseX += (targetMouseX - mouseX) * 0.035;
+    mouseY += (targetMouseY - mouseY) * 0.035;
+
+    const driftX = (mouseX - 0.5) * width * 0.0012;
+    const driftY = (mouseY - 0.5) * height * 0.0012;
+
+    for (let i = 0; i < metaballCount; i += 1) {
+      const metaball = metaballs[i];
+      if (!metaball) continue;
+
+      metaball.x += metaball.vx + Math.sin(time * 0.24 + metaball.seed) * 0.055 + driftX;
+      metaball.y += metaball.vy + Math.cos(time * 0.2 + metaball.seed) * 0.05 - driftY;
+
+      if (metaball.x < metaball.radius) {
+        metaball.x = metaball.radius;
+        metaball.vx = Math.abs(metaball.vx);
+      } else if (metaball.x > width - metaball.radius) {
+        metaball.x = width - metaball.radius;
+        metaball.vx = -Math.abs(metaball.vx);
+      }
+
+      if (metaball.y < metaball.radius) {
+        metaball.y = metaball.radius;
+        metaball.vy = Math.abs(metaball.vy);
+      } else if (metaball.y > height - metaball.radius) {
+        metaball.y = height - metaball.radius;
+        metaball.vy = -Math.abs(metaball.vy);
+      }
+
+      const dataIndex = i * 3;
+      metaballData[dataIndex] = metaball.x;
+      metaballData[dataIndex + 1] = metaball.y;
+      metaballData[dataIndex + 2] = metaball.radius;
+    }
+  }
+
+  const startTime = performance.now();
+
+  function render(now: number) {
+    rafId = 0;
+    if (!running || !canvasInView) return;
+
+    const time = (now - startTime) * 0.001;
+    updateMetaballs(time);
+
+    gl.clearColor(0, 0, 0, 1);
+    gl.clear(gl.COLOR_BUFFER_BIT);
+    gl.useProgram(program);
+    gl.uniform2f(uResolution, width, height);
+    gl.uniform1f(uTime, time);
+    gl.uniform3fv(uMetaballs, metaballData);
+
+    gl.enableVertexAttribArray(positionLocation);
+    gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
+    gl.vertexAttribPointer(positionLocation, 2, gl.FLOAT, false, 0, 0);
+    gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+
+    scheduleFrame();
+  }
+
+  resizeCanvas();
+  window.addEventListener('pointermove', onPointerMove, { passive: true });
+  window.addEventListener('resize', resizeCanvas, { passive: true });
+
+  const resizeObserver = new ResizeObserver(resizeCanvas);
   resizeObserver.observe(canvas);
 
-  /* Animation loop with visibility pause */
-  let rafId = 0;
-  const startTime = performance.now();
-  let running = true;
+  const viewportObserver =
+    'IntersectionObserver' in window
+      ? new IntersectionObserver((entries) => {
+          const entry = entries[0];
+          canvasInView = Boolean(entry?.isIntersecting);
 
-  function tick() {
-    if (!running) return;
-    const t = (performance.now() - startTime) / 1000;
+          if (canvasInView) {
+            scheduleFrame();
+          } else {
+            stopFrame();
+          }
+        })
+      : null;
 
-    floaters.forEach((f) => {
-      f.mesh.rotation.x += f.rotSpeed.x;
-      f.mesh.rotation.y += f.rotSpeed.y;
-      f.mesh.rotation.z += f.rotSpeed.z;
-      const bobSpeed = f.ringIndex === 1 ? 0.85 : 0.55;
-      f.mesh.position.y = f.bobBase + Math.sin(t * bobSpeed + f.bobPhase) * f.bobAmp;
-    });
-
-    /* Smooth follow toward mouse target */
-    targetRotation.x += (mouse.y * 0.08 - targetRotation.x) * 0.04;
-    targetRotation.y += (mouse.x * 0.12 - targetRotation.y) * 0.04;
-    scene.rotation.x = targetRotation.x;
-    scene.rotation.y = targetRotation.y;
-
-    renderer.render(scene, camera);
-    rafId = requestAnimationFrame(tick);
-  }
-  rafId = requestAnimationFrame(tick);
+  viewportObserver?.observe(canvas);
 
   function onVisibilityChange() {
     if (document.hidden) {
       running = false;
-      cancelAnimationFrame(rafId);
+      stopFrame();
     } else if (!running) {
       running = true;
-      rafId = requestAnimationFrame(tick);
+      scheduleFrame();
     }
   }
+
   document.addEventListener('visibilitychange', onVisibilityChange);
+  scheduleFrame();
 
   function dispose() {
     running = false;
-    cancelAnimationFrame(rafId);
+    stopFrame();
     window.removeEventListener('pointermove', onPointerMove);
+    window.removeEventListener('resize', resizeCanvas);
     document.removeEventListener('visibilitychange', onVisibilityChange);
     resizeObserver.disconnect();
-    floaters.forEach((f) => {
-      scene.remove(f.mesh);
-    });
-    configs.forEach((c) => c.geo.dispose());
-    material.dispose();
-    renderer.dispose();
+    viewportObserver?.disconnect();
+    gl.deleteBuffer(positionBuffer);
+    gl.deleteProgram(program);
+    gl.deleteShader(vertexShader);
+    gl.deleteShader(fragmentShader);
   }
 
   return { dispose };

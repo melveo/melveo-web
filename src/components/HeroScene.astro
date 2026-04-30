@@ -1,18 +1,18 @@
 ---
 /**
- * HeroScene — Three.js canvas + SSR fallback shapes.
+ * HeroScene — WebGL metaballs shader + SSR fallback shapes.
  *
  * Behavior:
- *   - SSR renders 5 absolutely-positioned SVG octahedra (visible on
+ *   - SSR renders a static SVG metaball field (visible on
  *     first paint + reduced-motion + JS-disabled clients).
  *   - On client, after IntersectionObserver fires + reduced-motion
- *     check passes, dynamic-imports hero-scene.ts and mounts a
- *     Three.js scene over the canvas. SVG fallback fades out on mount.
+ *     check passes, mounts the custom metaballs shader over the canvas.
+ *     SVG fallback fades out on mount.
  *   - Per PLAN.md §7.9: pause RAF on document.hidden, cap pixel ratio,
- *     mobile uses 3 shapes vs 6 desktop, reduce-motion stays SVG only.
+ *     reduce-motion stays SVG only.
  *
- * Bundle impact: Three.js ~150kB gzip lazy-loaded; SVG fallback inline
- * (~1kB).
+ * Bundle impact: no 3D runtime dependency in the hero; SVG fallback is
+ * inline (~1kB).
  */
 ---
 
@@ -25,21 +25,36 @@
     role="presentation"
   >
     <defs>
-      <linearGradient id="iridescent" x1="0" y1="0" x2="1" y2="1">
-        <stop offset="0%" stop-color="#cdf7fb" stop-opacity="0.7"/>
-        <stop offset="50%" stop-color="#00f0ff" stop-opacity="0.5"/>
-        <stop offset="100%" stop-color="#1ad6e6" stop-opacity="0.3"/>
-      </linearGradient>
+      <radialGradient id="metaball-fill" cx="42%" cy="34%" r="68%">
+        <stop offset="0%" stop-color="#cdf7fb" stop-opacity="0.86"/>
+        <stop offset="44%" stop-color="#00f0ff" stop-opacity="0.44"/>
+        <stop offset="100%" stop-color="#07383f" stop-opacity="0.12"/>
+      </radialGradient>
+      <filter id="metaball-soften" x="-20%" y="-20%" width="140%" height="140%">
+        <feGaussianBlur in="SourceGraphic" stdDeviation="2.8" result="blur"/>
+        <feColorMatrix
+          in="blur"
+          mode="matrix"
+          values="
+            1 0 0 0 0
+            0 1 0 0 0
+            0 0 1 0 0
+            0 0 0 16 -6"
+        />
+      </filter>
     </defs>
-    <!-- 5 octahedra positioned around center -->
-    <polygon points="14,28 18,22 22,28 18,36" fill="url(#iridescent)" opacity="0.6"/>
-    <polygon points="78,18 84,12 90,18 84,28" fill="url(#iridescent)" opacity="0.7"/>
-    <polygon points="20,72 24,68 28,72 24,80" fill="url(#iridescent)" opacity="0.5"/>
-    <polygon points="76,76 80,70 86,76 80,84" fill="url(#iridescent)" opacity="0.6"/>
-    <polygon points="48,8 52,3 58,8 52,16" fill="url(#iridescent)" opacity="0.4"/>
+    <rect width="100" height="100" fill="#00090a"/>
+    <g filter="url(#metaball-soften)" fill="url(#metaball-fill)">
+      <circle cx="24" cy="28" r="12" opacity="0.5"/>
+      <circle cx="38" cy="36" r="17" opacity="0.62"/>
+      <circle cx="55" cy="30" r="13" opacity="0.46"/>
+      <circle cx="68" cy="49" r="20" opacity="0.52"/>
+      <circle cx="37" cy="68" r="19" opacity="0.36"/>
+      <circle cx="82" cy="74" r="13" opacity="0.32"/>
+    </g>
   </svg>
 
-  <!-- Three.js canvas (mounted client-side) -->
+  <!-- WebGL metaballs canvas (mounted client-side) -->
   <canvas class="hero-canvas" data-hero-canvas></canvas>
 </div>
 
@@ -81,33 +96,35 @@
   }
 
   @media (prefers-reduced-motion: no-preference) {
-    .hero-fallback polygon {
+    .hero-fallback circle {
       animation: drift 8s ease-in-out infinite;
     }
-    .hero-fallback polygon:nth-child(2) { animation-delay: -1.5s; }
-    .hero-fallback polygon:nth-child(3) { animation-delay: -3s; }
-    .hero-fallback polygon:nth-child(4) { animation-delay: -4.5s; }
-    .hero-fallback polygon:nth-child(5) { animation-delay: -6s; }
+    .hero-fallback circle:nth-child(2) { animation-delay: -1.5s; }
+    .hero-fallback circle:nth-child(3) { animation-delay: -3s; }
+    .hero-fallback circle:nth-child(4) { animation-delay: -4.5s; }
+    .hero-fallback circle:nth-child(5) { animation-delay: -6s; }
+    .hero-fallback circle:nth-child(6) { animation-delay: -7.5s; }
   }
 </style>
 
 <script>
-  import { mountHeroScene, prefersReducedMotion } from '../scripts/hero-scene';
-
   const wrap = document.querySelector<HTMLDivElement>('.hero-scene-wrap');
   const canvas = document.querySelector<HTMLCanvasElement>('[data-hero-canvas]');
+  const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-  if (wrap && canvas && !prefersReducedMotion()) {
-    // Lazy-init only after the hero is in viewport (avoid Three.js
-    // mount before LCP). On a /cs/ root visit this fires immediately.
+  if (wrap && canvas && !prefersReducedMotion) {
+    // Lazy-init only after the hero is in viewport. On a /cs/ root visit
+    // this fires immediately, then waits for idle before loading WebGL.
     const obs = new IntersectionObserver((entries) => {
       const entry = entries[0];
       if (!entry?.isIntersecting) return;
       obs.disconnect();
 
       // Defer to idle to avoid LCP impact
-      const start = () => {
+      const start = async () => {
+        const { mountHeroScene } = await import('../scripts/hero-scene');
         const handle = mountHeroScene({ canvas });
+        if (!handle) return;
         canvas.setAttribute('data-mounted', 'true');
         wrap.setAttribute('data-mounted', 'true');
         // Expose dispose for HMR (Vite calls this on hot reload)
