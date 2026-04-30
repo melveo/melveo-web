@@ -25,8 +25,8 @@ interface Metaball {
   seed: number;
 }
 
-const METABALL_COUNT = 28;
-const MOBILE_METABALL_COUNT = 20;
+const METABALL_COUNT = 24;
+const MOBILE_METABALL_COUNT = 16;
 
 const VERTEX_SHADER = `
 attribute vec2 position;
@@ -60,7 +60,6 @@ void main() {
   centered.x *= uResolution.x / max(uResolution.y, 1.0);
 
   float field = 0.0;
-  float weightedDepth = 0.0;
 
   for (int i = 0; i < ${count}; i++) {
     vec3 metaball = uMetaballs[i];
@@ -68,30 +67,28 @@ void main() {
     float distSq = max(dot(delta, delta), 32.0);
     float strength = (metaball.z * metaball.z) / distSq;
     field += strength;
-    weightedDepth += strength * metaball.z;
   }
 
-  float mass = smoothstep(0.92, 1.08, field);
-  float body = smoothstep(0.98, 1.22, field);
-  float edge = smoothstep(0.88, 1.0, field) * (1.0 - smoothstep(1.12, 1.36, field));
-  float glow = smoothstep(0.2, 1.12, field) * (1.0 - body);
-
-  float depth = clamp(weightedDepth / max(field, 0.001) / max(uResolution.y, 1.0), 0.0, 0.32);
+  float mass = smoothstep(0.9, 1.08, field);
+  float interior = smoothstep(1.02, 1.22, field);
+  float rim = smoothstep(0.84, 1.0, field) * (1.0 - smoothstep(1.08, 1.34, field));
+  float outerGlow = smoothstep(0.22, 0.92, field) * (1.0 - interior);
+  float innerShade = 1.0 - smoothstep(1.15, 3.2, field);
   float grain = hash(floor(p * 0.55) + vec2(uTime * 18.0, -uTime * 9.0));
 
   vec3 background = mix(BRAND_DEEP * 0.2, BRAND_DEEP * 0.62, 1.0 - uv.y);
   background += BRAND_TEAL * 0.045 * smoothstep(0.82, 0.0, length(centered + vec2(0.18, -0.08)));
   background += BRAND_CYAN * 0.025 * smoothstep(1.05, 0.0, length(centered - vec2(0.34, 0.18)));
 
-  vec3 cool = mix(BRAND_TEAL, BRAND_CYAN, clamp(uv.x * 0.72 + uv.y * 0.28, 0.0, 1.0));
-  vec3 surface = mix(BRAND_DEEP * 0.52 + BRAND_TEAL * 0.2, cool, 0.48 + depth);
-  surface += BRAND_ICE * edge * 0.36;
-  surface += BRAND_CYAN * pow(max(field - 1.0, 0.0), 0.7) * 0.1;
+  vec3 cool = mix(BRAND_TEAL, BRAND_CYAN, clamp(uv.x * 0.5 + uv.y * 0.18, 0.0, 1.0));
+  vec3 surface = mix(BRAND_DEEP * 0.72 + BRAND_TEAL * 0.16, cool * 0.56, 0.34);
+  surface = mix(surface * 0.82, surface, innerShade);
+  surface += BRAND_ICE * rim * 0.2;
 
   vec3 color = background;
-  color += BRAND_CYAN * glow * 0.08;
-  color = mix(color, surface, mass * 0.92);
-  color += edge * BRAND_CYAN * 0.16;
+  color += BRAND_CYAN * outerGlow * 0.045;
+  color = mix(color, surface, mass * 0.78);
+  color += rim * BRAND_CYAN * 0.12;
 
   float centerQuiet = smoothstep(0.08, 0.74, length(centered * vec2(0.86, 1.42)));
   color = mix(background * 0.72 + color * 0.08, color, centerQuiet);
@@ -249,10 +246,10 @@ export function mountHeroScene({ canvas }: MountOptions): SceneHandle | null {
   function resetMetaballs() {
     metaballs.length = 0;
     const minSide = Math.min(width, height);
-    const baseRadius = minSide * (isMobile ? 0.08 : 0.052);
+    const baseRadius = minSide * (isMobile ? 0.078 : 0.052);
 
     for (let i = 0; i < metaballCount; i += 1) {
-      const radius = randomRange(random, baseRadius * 0.55, baseRadius * 1.45);
+      const radius = randomRange(random, baseRadius * 0.72, baseRadius * 1.55);
       metaballs.push({
         x: randomRange(random, radius, width - radius),
         y: randomRange(random, radius, height - radius),
