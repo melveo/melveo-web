@@ -20,6 +20,7 @@
 
 import { useTranslations, type Lang, ui } from '../i18n/ui';
 import LocaleSwitcher from '../components/LocaleSwitcher.astro';
+import CookieBanner from '../components/CookieBanner.astro';
 
 interface Props {
   title: string;
@@ -99,6 +100,7 @@ const altUrls = {
   </head>
   <body class="min-h-screen bg-[var(--color-bg-canvas)] text-[var(--color-text-primary)]">
     <slot />
+    <CookieBanner lang={lang} />
 
     {
       showLandingFooter && (
@@ -123,6 +125,13 @@ const altUrls = {
             >
               {t('footer.terms')}
             </a>
+            <button
+              type="button"
+              data-cookie-reopen
+              class="bg-transparent border-0 cursor-pointer text-[var(--color-text-tertiary)] transition-colors hover:text-[var(--color-text-primary)] p-0 font-inherit text-inherit"
+            >
+              {t('footer.cookieSettings')}
+            </button>
             <LocaleSwitcher current={lang} />
           </div>
         </footer>
@@ -134,3 +143,12 @@ const altUrls = {
 <style is:global>
   @import "../styles/global.css";
 </style>
+
+<script>
+  // Footer "Cookie nastavení" → re-open banner.
+  import { reopenBanner } from '../scripts/consent';
+
+  document.querySelectorAll<HTMLButtonElement>('[data-cookie-reopen]').forEach((btn) => {
+    btn.addEventListener('click', () => reopenBanner());
+  });
+</script>
