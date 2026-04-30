@@ -260,6 +260,17 @@
         const viewportWidth = window.innerWidth;
         const viewportHeight = window.innerHeight;
 
+        // ─── Set initial inline size to viewport BEFORE Motion takes over.
+        //     Without this, the image renders at its CSS natural size
+        //     (small grid cell) on first paint and only "jumps" to
+        //     viewport size when scroll() registers. We want the user
+        //     to see a full-bleed image immediately upon reaching this
+        //     section, before any morphing starts. (User feedback
+        //     2026-04-30: "tento obrazek musí byt přes celou obrazovku
+        //     a šířku a výšku, než se začne scrollovat".)
+        image.style.width = `${viewportWidth}px`;
+        image.style.height = `${viewportHeight}px`;
+
         // Cubic-bezier control points (Motion accepts [x1,y1,x2,y2]).
         // Names match GSAP power easings used in the original codepen.
         const power1InOut = [0.42, 0, 0.58, 1] as const;
@@ -268,17 +279,34 @@
         const power4InOut = [0.87, 0, 0.13, 1] as const;
         const sineOut = [0.61, 1, 0.88, 1] as const;
 
-        // ----- Scaler: shrink width/height from viewport → natural -----
+        // ─── Scaler: hold at viewport size for the first ~15 % of scroll,
+        //     then shrink to natural cell size. The 3-keyframe + `times`
+        //     pattern gives the user a moment to register the full-bleed
+        //     image before the morph begins.
         scroll(
           animate(
             image,
             {
-              width: [`${viewportWidth}px`, `${naturalWidth}px`],
-              height: [`${viewportHeight}px`, `${naturalHeight}px`],
+              width: [
+                `${viewportWidth}px`,
+                `${viewportWidth}px`,
+                `${naturalWidth}px`,
+              ],
+              height: [
+                `${viewportHeight}px`,
+                `${viewportHeight}px`,
+                `${naturalHeight}px`,
+              ],
             },
             {
-              width: { ease: power2InOut as any },
-              height: { ease: power1InOut as any },
+              width: {
+                times: [0, 0.15, 1],
+                ease: power2InOut as any,
+              },
+              height: {
+                times: [0, 0.15, 1],
+                ease: power1InOut as any,
+              },
             } as any,
           ),
           {
