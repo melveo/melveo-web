@@ -52,7 +52,10 @@ const t = useTranslations(lang);
       class="relative z-10 mt-12 text-balance font-bold tracking-tight text-[var(--color-text-primary)]"
       style="font-size: clamp(2rem, 5vw, 4rem); letter-spacing: -0.03em;"
     >
-      {t('gooey.headline')}
+      {t('gooey.headlinePrefix')}{' '}
+      <span class="text-[var(--color-accent-primary)]">
+        {t('gooey.headlineAccent')}
+      </span>
     </h2>
   </div>
 </section>

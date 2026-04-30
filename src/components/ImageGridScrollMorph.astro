@@ -102,14 +102,17 @@
   */
 
   .image-grid-section {
-    /* 320vh runway — 1× viewport pinned + 220vh scroll budget so the
-       morph plays out unhurriedly. Combined with `'85% end'` scroll
-       offset (in JS), the animation completes at ~187vh of scroll,
-       leaving ~33vh of "rest" where the grid sits at its final state
-       before the next section arrives. */
+    /* 480vh runway — 1× viewport pinned + 380vh scroll budget. The
+       extra height stretches the scaler's shrink phase across more
+       scroll, so the user has to keep scrolling for longer to see
+       the morph from full-bleed photo to grid (per user feedback —
+       the transition felt rushed at 320vh). Combined with the
+       `'70% end'` scroll offset (animation completes at 70 % of
+       section), this leaves the last ~144vh as rest where the
+       fully formed grid sits before the next section arrives. */
     position: relative;
     width: 100%;
-    min-height: 320vh;
+    min-height: 480vh;
     background: var(--color-bg-canvas);
     border-top: 1px solid var(--color-stroke-base);
     overflow: clip;

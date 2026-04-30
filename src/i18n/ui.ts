@@ -38,8 +38,10 @@ export const ui = {
     'gridMorph.headlineLine2': 'scrollovat.',
     'gridMorph.subline': 'Tým, trenér, zázemí — všechno v jedné aplikaci.',
 
-    // Stage 3 — gooey punctuation
-    'gooey.headline': 'Trenér + hráč. Synced.',
+    // Stage 3 — gooey punctuation. Split into two parts so the
+    // "Synced." word can be coloured with brand cyan.
+    'gooey.headlinePrefix': 'Trenér + hráč.',
+    'gooey.headlineAccent': 'Synced.',
 
     // Stage 4 — wellness
     'wellness.eyebrow': 'RÁNO · 30 SEKUND',
@@ -48,10 +50,13 @@ export const ui = {
       'Hráč rychle ohodnotí energii, spánek, bolestivost, náladu a motivaci. Trenér vidí tým — nikdy syrová čísla jednotlivce.',
     'wellness.tag': 'Doc 174 §3 — privacy contract',
 
-    // Stage 5 — orb
-    'orb.phrase1': 'Pro hráče.',
-    'orb.phrase2': 'Pro trenéra.',
-    'orb.phrase3': 'Pro klub.',
+    // Stage 5 — cursor-mask (Giomgio codepen abxGyQX). Two layered
+    // headlines: primary on dark canvas, secondary revealed through a
+    // radial cursor-following circle.
+    'orb.primary': 'Připravíme tým.',
+    'orb.secondary1': 'Pro hráče.',
+    'orb.secondary2': 'Pro trenéra.',
+    'orb.secondary3': 'Pro klub.',
 
     // Stage 6 — sessions + coach board
     'sessions.eyebrow': 'TRÉNINK · ROZHODNUTÍ',
@@ -102,7 +107,8 @@ export const ui = {
     'gridMorph.headlineLine2': 'scroll.',
     'gridMorph.subline': 'Team, coach, ops — all in one app.',
 
-    'gooey.headline': 'Coach + player. Synced.',
+    'gooey.headlinePrefix': 'Coach + player.',
+    'gooey.headlineAccent': 'Synced.',
 
     'wellness.eyebrow': 'MORNING · 30 SECONDS',
     'wellness.headline': '5-axis check-in.',
@@ -110,9 +116,10 @@ export const ui = {
       "Players rate energy, sleep, soreness, mood, motivation. Coach sees the team — never an individual's raw numbers.",
     'wellness.tag': 'Doc 174 §3 — privacy contract',
 
-    'orb.phrase1': 'For players.',
-    'orb.phrase2': 'For coaches.',
-    'orb.phrase3': 'For clubs.',
+    'orb.primary': 'Ready your team.',
+    'orb.secondary1': 'For players.',
+    'orb.secondary2': 'For coaches.',
+    'orb.secondary3': 'For clubs.',
 
     'sessions.eyebrow': 'TRAINING · DECISIONS',
     'sessions.headline': 'Sessions and coach board.',

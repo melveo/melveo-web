@@ -51,7 +51,13 @@
   --font-sans: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
   --font-display: "Inter", -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
 
-  /* Spacing scale — 4px base, mirrors SwiftUI .spacing* tokens */
+  /* Spacing scale — 4px base, mirrors SwiftUI .spacing* tokens.
+     NOTE: Tailwind 4 derives max-w-* / w-* / etc. from `--spacing-*`
+     when the named keys (xl, 2xl, …) aren't redefined elsewhere, so
+     setting `--spacing-xl: 32px` had the side-effect of breaking
+     `max-w-xl` (became 32px instead of 36rem) and broke long-form
+     paragraph wrapping in the hero. Explicit max-width + container
+     tokens below restore the canonical Tailwind scale. */
   --spacing-2xs: 4px;
   --spacing-xs: 8px;
   --spacing-s: 12px;
@@ -59,6 +65,23 @@
   --spacing-l: 24px;
   --spacing-xl: 32px;
   --spacing-2xl: 48px;
+
+  /* Container / max-width scale — restored Tailwind 4 defaults so
+     `max-w-xl`, `max-w-2xl` etc. continue to mean what every Tailwind
+     codebase expects (36rem, 42rem, …). */
+  --container-3xs: 16rem;
+  --container-2xs: 18rem;
+  --container-xs: 20rem;
+  --container-sm: 24rem;
+  --container-md: 28rem;
+  --container-lg: 32rem;
+  --container-xl: 36rem;
+  --container-2xl: 42rem;
+  --container-3xl: 48rem;
+  --container-4xl: 56rem;
+  --container-5xl: 64rem;
+  --container-6xl: 72rem;
+  --container-7xl: 80rem;
 
   /* Radii */
   --radius-s: 8px;

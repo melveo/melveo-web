@@ -1,12 +1,18 @@
 ---
 /**
- * OrbStage — Giomgio codepen abxGyQX (V4-D4).
+ * OrbStage — Giomgio codepen abxGyQX (V4-D4 v2).
  *
- * Glass-orb sphere with text that morphs through 3 phrases. CSS-only
- * orb (radial gradient + inset glow + drop shadow); Motion One drives
- * the text crossfade.
+ * Re-implementation per user 2026-04-30: two stacked hero blocks at
+ * 100vh, both centred. Primary block sits on the dark canvas with the
+ * primary headline. Secondary block is absolutely overlaid on top
+ * with a brand-cyan tinted gradient background and a different
+ * headline; a radial-gradient mask reveals it only inside a circle
+ * that follows the cursor.
  *
- * Per PLAN.md §7.4.
+ * Original codepen used GSAP. We use Motion (already loaded) for the
+ * smooth easing of the --x / --y CSS variables tied to the mask
+ * position. Phrases rotate every few seconds so the secondary headline
+ * cycles through "Pro hráče. / Pro trenéra. / Pro klub." (or EN).
  */
 
 import { useTranslations, type Lang } from '../i18n/ui';
@@ -19,42 +25,74 @@ const { lang } = Astro.props;
 const t = useTranslations(lang);
 ---
 
-<section class="relative isolate w-full overflow-hidden border-t border-[var(--color-stroke-base)] bg-[var(--color-bg-canvas)]">
-  <div class="relative z-10 flex min-h-[80vh] items-center justify-center px-6 py-24 sm:py-32">
-    <div class="orb-stage">
-      <div class="orb">
-        <div class="orb-text" data-orb-rotate aria-live="polite">
-          {t('orb.phrase1')}
-        </div>
-      </div>
-    </div>
+<section class="orb-wrapper" data-orb-wrapper>
+  <!-- Primary hero — dark canvas, primary text -->
+  <div class="orb-hero">
+    <h2 class="orb-heading">{t('orb.primary')}</h2>
+  </div>
+
+  <!-- Secondary hero — absolute overlay, gradient bg, rotating text,
+       revealed only through radial mask centred at cursor. -->
+  <div class="orb-hero orb-hero--secondary" aria-hidden="true" data-orb-secondary>
+    <p class="orb-heading" data-orb-rotate>
+      {t('orb.secondary1')}
+    </p>
   </div>
 </section>
 
 <script
   define:vars={{
-    phrases: [t('orb.phrase1'), t('orb.phrase2'), t('orb.phrase3')],
+    phrases: [t('orb.secondary1'), t('orb.secondary2'), t('orb.secondary3')],
   }}
   type="module"
 >
   import { animate } from 'motion';
 
-  const el = document.querySelector('[data-orb-rotate]');
-  if (el) {
-    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const wrapper = document.querySelector('[data-orb-wrapper]');
+  const secondary = document.querySelector('[data-orb-secondary]');
+  const text = document.querySelector('[data-orb-rotate]');
+  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  if (wrapper && secondary && text) {
+    /* ── Cursor-following mask ────────────────────────────────────
+       Update --x / --y CSS variables on the secondary layer in
+       response to mousemove. Motion smoothly eases the change so the
+       circle "trails" the cursor instead of snapping. */
+    if (!reduceMotion) {
+      window.addEventListener(
+        'pointermove',
+        (event) => {
+          const x = Math.round((event.clientX / window.innerWidth) * 100);
+          const y = Math.round((event.clientY / window.innerHeight) * 100);
+          animate(
+            secondary,
+            { '--x': `${x}%`, '--y': `${y}%` },
+            { duration: 0.35, ease: [0.39, 0.575, 0.565, 1] },
+          );
+        },
+        { passive: true },
+      );
+    } else {
+      // Reduced motion: snap circle to a fixed pleasant spot.
+      secondary.style.setProperty('--x', '70%');
+      secondary.style.setProperty('--y', '50%');
+    }
+
+    /* ── Text rotation ────────────────────────────────────────────
+       Cycle the secondary headline every 3.2 s with a small fade.
+       Visible only inside the cursor mask. */
     if (!reduceMotion) {
       let idx = 0;
       const interval = setInterval(async () => {
         try {
-          await animate(el, { opacity: [1, 0], y: [0, -16] }, { duration: 0.4, easing: [0.32, 0.72, 0, 1] }).finished;
+          await animate(text, { opacity: [1, 0], y: [0, -16] }, { duration: 0.4 }).finished;
           idx = (idx + 1) % phrases.length;
-          el.textContent = phrases[idx];
-          await animate(el, { opacity: [0, 1], y: [16, 0] }, { duration: 0.5, easing: [0.32, 0.72, 0, 1] }).finished;
+          text.textContent = phrases[idx];
+          await animate(text, { opacity: [0, 1], y: [16, 0] }, { duration: 0.5 }).finished;
         } catch {
           clearInterval(interval);
         }
       }, 3200);
-
       document.addEventListener('visibilitychange', () => {
         if (document.hidden) clearInterval(interval);
       });
@@ -63,80 +101,70 @@ const t = useTranslations(lang);
 </script>
 
 <style>
-  .orb-stage {
+  .orb-wrapper {
     position: relative;
-    display: grid;
-    place-items: center;
+    width: 100%;
+    /* Border-top to keep section bands consistent with siblings. */
+    border-top: 1px solid var(--color-stroke-base);
   }
 
-  .orb {
-    width: clamp(280px, 55vmin, 600px);
-    height: clamp(280px, 55vmin, 600px);
-    border-radius: 50%;
-    display: grid;
-    place-items: center;
-    position: relative;
-
-    background:
-      radial-gradient(
-        circle at 30% 25%,
-        rgba(205, 247, 251, 0.3) 0%,
-        rgba(0, 240, 255, 0.18) 30%,
-        rgba(15, 25, 50, 0.85) 70%,
-        rgba(5, 6, 8, 0.95) 100%
-      );
-
-    box-shadow:
-      inset -40px -60px 100px rgba(0, 0, 0, 0.5),
-      inset 30px 40px 80px rgba(0, 240, 255, 0.18),
-      0 0 80px rgba(0, 240, 255, 0.25),
-      0 0 200px rgba(0, 240, 255, 0.15);
-
-    /* Subtle continuous rotation gives "alive" feel even when text static */
-    animation: orb-rotate 30s linear infinite;
+  .orb-hero {
+    min-height: 100vh;
+    padding: clamp(1rem, 2vw, 5rem);
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
 
-  /* Inner highlight (specular) */
-  .orb::before {
-    content: '';
+  .orb-hero--secondary {
+    /* Position-locked overlay over the primary block. */
     position: absolute;
-    inset: 8% 12% 50% 18%;
-    border-radius: 50%;
-    background: radial-gradient(
-      ellipse at center top,
-      rgba(255, 255, 255, 0.15) 0%,
-      transparent 60%
-    );
-    filter: blur(20px);
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+
+    /* Brand-leaning gradient. Codepen used violet→mint→white; we
+       lean into Melveo's cyan + a sandy warm so the reveal still feels
+       distinct from the rest of the page (which is mostly cyan-on-black). */
+    background: linear-gradient(45deg, #00f0ff, #b0702e, #ffffff);
+    color: var(--color-bg-canvas);
+
+    /* Radial mask — circle of brand-cyan tinted gradient revealed
+       through the dark canvas. Default position 70% / 50% so the
+       reveal is offset from the primary text on first paint. */
+    --x: 70%;
+    --y: 50%;
+    --mask: radial-gradient(circle at var(--x) var(--y), black 22%, transparent 0);
+    -webkit-mask-image: var(--mask);
+    mask-image: var(--mask);
     pointer-events: none;
   }
 
-  .orb-text {
-    position: relative;
-    z-index: 1;
-    font-size: clamp(1.5rem, 3.5vw, 3rem);
+  .orb-heading {
+    margin: 0;
+    text-align: center;
     font-weight: 700;
+    text-transform: uppercase;
     letter-spacing: -0.02em;
-    color: var(--color-text-primary);
-    text-shadow: 0 2px 20px rgba(0, 0, 0, 0.6);
-    /* Counter-rotate so text stays upright */
-    animation: orb-rotate-counter 30s linear infinite;
+    font-size: clamp(2rem, 5vw, 8rem);
+    line-height: 1;
+    /* Limit horizontal width so long Czech phrases stay on one line
+       inside the cursor circle. */
+    max-width: fit-content;
+    margin-left: auto;
+    margin-right: auto;
   }
 
-  @keyframes orb-rotate {
-    from { transform: rotate(0deg); }
-    to   { transform: rotate(360deg); }
-  }
-
-  @keyframes orb-rotate-counter {
-    from { transform: rotate(0deg); }
-    to   { transform: rotate(-360deg); }
+  .orb-hero--secondary .orb-heading {
+    /* Force colour to canvas dark — readable against the gradient
+       inside the cursor circle. */
+    color: var(--color-bg-canvas);
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .orb,
-    .orb-text {
-      animation: none;
+    .orb-heading {
+      transition: none;
     }
   }
 </style>
