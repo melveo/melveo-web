@@ -206,7 +206,7 @@ const steps = content.steps;
             <span></span>
           </div>
 
-          <div class="club-flow-stage__cards">
+          <div class="club-flow-stage__cards" data-club-flow-cards>
             {
               steps.map((step, index) => (
                 <article
@@ -251,6 +251,20 @@ const steps = content.steps;
                 </article>
               ))
             }
+          </div>
+
+          {/*
+            Mobile-only carousel pagination — hidden on desktop where
+            the sticky scroll-driven flow handles its own dots inside
+            the media HUD. Below the carousel row so the user sees
+            "card 1 of 4 · swipe →" feedback as they scroll horizontally.
+            Active state is updated by JS via scroll-position observer
+            on the cards rail.
+          */}
+          <div class="club-flow-stage__mobile-dots" aria-hidden="true">
+            {steps.map((_, index) => (
+              <span data-club-flow-mobile-dot class:list={{ 'is-active': index === 0 }}></span>
+            ))}
           </div>
         </div>
       </div>
@@ -646,6 +660,14 @@ const steps = content.steps;
     display: none;
   }
 
+  /* Hidden on desktop — only the mobile carousel needs pagination dots
+     (desktop uses the sticky scroll-driven flow + HUD dots inside the
+     media frame). The block below the breakpoint un-hides + styles
+     them for the horizontal swipe layout. */
+  .club-flow-stage__mobile-dots {
+    display: none;
+  }
+
   /*
     Premium step layout — number + kicker top row, then a hairline
     cyan divider, then title, then a single confident sentence.
@@ -742,7 +764,11 @@ const steps = content.steps;
     .club-flow-stage__scroll {
       height: auto;
       min-height: 0;
-      padding: 0 clamp(0.75rem, 2.4vw, 1.25rem) clamp(3rem, 10vw, 5rem);
+      /* Carousel needs the rail to bleed to the screen edges so cards
+         can snap with peek; padding handled INSIDE the rail via
+         scroll-padding + per-card flex-basis math. Section keeps a
+         small bottom pad for the dots. */
+      padding: 0 0 clamp(3rem, 10vw, 5rem);
     }
 
     .club-flow-stage__pin {
@@ -754,7 +780,6 @@ const steps = content.steps;
     .club-flow-stage__layout {
       display: block;
       width: 100%;
-      max-width: 78rem;
       margin: 0 auto;
       min-height: 0;
     }
@@ -769,16 +794,57 @@ const steps = content.steps;
       min-height: 0;
     }
 
+    /*
+      Apple-style horizontal snap carousel (user request 2026-05-01:
+      "slidovani doprava a doleva mezi těmi kartami... vždy jedna karta
+      vidět celá a té další třeba 1/4"). Rail bleeds to screen edges so
+      cards can fully fill the viewport while the next card peeks on
+      the right edge.
+
+      Layout math:
+        - Rail padding-inline: 1rem on each side
+        - Card flex-basis: 78% of rail content-box
+        - Gap: 1rem between cards
+        - Result at 100vw: visible card ≈ 78vw - 1.5rem,
+          next card peeks ≈ 22vw - 0.4rem (the "there's more" cue)
+        - scroll-snap-align: start + scroll-padding-inline-start: 1rem
+          so each card snaps with the leading edge at 1rem from the
+          screen edge — same visual rest position whichever card is
+          centred. Apple App Store / Music featured shelf behaviour.
+    */
     .club-flow-stage__cards {
-      display: grid;
-      grid-template-columns: minmax(0, 1fr);
-      gap: clamp(0.9rem, 3vw, 1.15rem);
+      display: flex;
+      flex-direction: row;
+      gap: 1rem;
       min-height: 0;
+      padding-inline: 1rem;
+      overflow-x: auto;
+      overflow-y: hidden;
+      scroll-snap-type: x mandatory;
+      scroll-padding-inline-start: 1rem;
+      scroll-behavior: smooth;
+      /* iOS momentum scrolling — without this the swipe feels stiff
+         compared to native iOS carousels. */
+      -webkit-overflow-scrolling: touch;
+      /* Hide native scrollbar (App Store / Apple Music don't show one
+         under the rail). */
+      scrollbar-width: none;
+      -ms-overflow-style: none;
+      /* Rail still needs vertical headroom for the cards' shadow + the
+         active-card cyan glow; without it the bottom shadow gets clipped
+         by overflow:hidden. */
+      padding-block: 0.5rem clamp(1.5rem, 4vw, 2rem);
+    }
+    .club-flow-stage__cards::-webkit-scrollbar {
+      display: none;
     }
 
     .club-flow-stage__card {
       position: relative;
       inset: auto;
+      flex: 0 0 78%;
+      scroll-snap-align: start;
+      scroll-snap-stop: always;
       border-radius: clamp(1.25rem, 5vw, 1.65rem);
       opacity: 1 !important;
       transform: none !important;
@@ -920,6 +986,39 @@ const steps = content.steps;
       line-height: 1.55;
       color: color-mix(in srgb, var(--color-text-secondary) 88%, var(--color-text-primary));
     }
+
+    /*
+      Mobile pagination dots — sit below the carousel rail. Each dot
+      maps to one step. The active dot stretches into a cyan pill +
+      glows; the rest are quiet white dots at low opacity. JS updates
+      .is-active based on which card sits closest to the rail centre.
+    */
+    .club-flow-stage__mobile-dots {
+      display: inline-flex;
+      gap: 0.5rem;
+      justify-content: center;
+      align-items: center;
+      width: 100%;
+      margin-top: clamp(1rem, 3vw, 1.5rem);
+      padding-inline: 1rem;
+    }
+
+    .club-flow-stage__mobile-dots span {
+      width: 0.45rem;
+      height: 0.45rem;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.22);
+      transition:
+        width 260ms cubic-bezier(0.4, 0, 0.2, 1),
+        background 260ms ease,
+        box-shadow 260ms ease;
+    }
+
+    .club-flow-stage__mobile-dots span.is-active {
+      width: 1.4rem;
+      background: var(--color-accent-primary);
+      box-shadow: 0 0 14px color-mix(in srgb, var(--color-accent-primary) 64%, transparent);
+    }
   }
 
   @media (min-width: 700px) and (max-width: 1179px) {
@@ -927,8 +1026,21 @@ const steps = content.steps;
       max-width: 78rem;
     }
 
+    /*
+      Tablet carousel — wider rail can fit a larger card at 60% with
+      ~40% peek of the next, so two cards feel "almost both visible"
+      while preserving the swipe-to-reveal motion. Inline rail padding
+      bumped to 1.5rem so cards don't touch the screen edges on iPad
+      portrait.
+    */
     .club-flow-stage__cards {
-      grid-template-columns: repeat(2, minmax(0, 1fr));
+      padding-inline: 1.5rem;
+      scroll-padding-inline-start: 1.5rem;
+      gap: 1.25rem;
+    }
+
+    .club-flow-stage__card {
+      flex: 0 0 60%;
     }
 
     .club-flow-stage__card-panel {
@@ -984,11 +1096,61 @@ const steps = content.steps;
     const cards = Array.from(stage.querySelectorAll<HTMLElement>('[data-club-flow-card]'));
     const images = Array.from(stage.querySelectorAll<HTMLElement>('[data-club-flow-image]'));
     const dots = Array.from(stage.querySelectorAll<HTMLElement>('[data-club-flow-dot]'));
+    const mobileDots = Array.from(stage.querySelectorAll<HTMLElement>('[data-club-flow-mobile-dot]'));
+    const cardsRail = stage.querySelector<HTMLElement>('[data-club-flow-cards]');
     const progressBar = stage.querySelector<HTMLElement>('.club-flow-stage__progress span');
     const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
     const desktop = window.matchMedia('(min-width: 1180px)');
 
     if (!scrollArea || cards.length === 0) return;
+
+    /*
+      Mobile carousel pagination. Listen to the cards rail's horizontal
+      scroll position and pick the card whose centre is closest to the
+      rail's centre — that's the "active" one. Only runs while the
+      mobile carousel layout is engaged (rail has overflow-x: auto on
+      ≤ 1179 px). On desktop the rail is just a positioning context for
+      the absolute-stacked cards and the scroll listener has nothing
+      to do, so we cheaply early-exit when desktop matches.
+    */
+    let mobileFrame = 0;
+    let mobileActiveIndex = 0;
+
+    const updateMobileDots = () => {
+      mobileFrame = 0;
+      if (desktop.matches || !cardsRail || mobileDots.length === 0) return;
+
+      const railRect = cardsRail.getBoundingClientRect();
+      const railCentre = railRect.left + railRect.width / 2;
+
+      let closestIndex = 0;
+      let closestDistance = Infinity;
+      cards.forEach((card, index) => {
+        const cardRect = card.getBoundingClientRect();
+        const cardCentre = cardRect.left + cardRect.width / 2;
+        const distance = Math.abs(cardCentre - railCentre);
+        if (distance < closestDistance) {
+          closestDistance = distance;
+          closestIndex = index;
+        }
+      });
+
+      if (closestIndex !== mobileActiveIndex) {
+        mobileActiveIndex = closestIndex;
+        mobileDots.forEach((dot, index) =>
+          dot.classList.toggle('is-active', index === closestIndex),
+        );
+      }
+    };
+
+    const scheduleMobileDots = () => {
+      if (mobileFrame) return;
+      mobileFrame = window.requestAnimationFrame(updateMobileDots);
+    };
+
+    if (cardsRail) {
+      cardsRail.addEventListener('scroll', scheduleMobileDots, { passive: true });
+    }
 
     let frame = 0;
     let activeIndex = -1;
@@ -1072,9 +1234,12 @@ const steps = content.steps;
 
     window.addEventListener('scroll', schedule, { passive: true });
     window.addEventListener('resize', schedule);
+    window.addEventListener('resize', scheduleMobileDots);
     reduceMotion.addEventListener?.('change', schedule);
     desktop.addEventListener?.('change', schedule);
+    desktop.addEventListener?.('change', scheduleMobileDots);
     schedule();
+    scheduleMobileDots();
   }
 
   function mountClubFlowStages() {
