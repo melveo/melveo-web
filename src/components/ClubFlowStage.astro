@@ -899,9 +899,17 @@ const steps = content.steps;
       cards.forEach((card, index) => {
         const delta = index - cursor;
         const distance = Math.abs(delta);
-        const y = clamp(delta * 64, -46, 84);
-        const scale = 1 - Math.min(distance * 0.075, 0.18);
-        const opacity = distance > 1.7 ? 0 : 1 - Math.min(distance * 0.54, 0.86);
+        // Tighter Y travel + harder opacity falloff (per user feedback
+        // 2026-05-01: "chtělo by to aby ty karty dříve disappear").
+        // Previously cards faded gently (distance·0.54 with cliff at
+        // 1.7) so 2 cards above + 2 below the active one were still
+        // readable, making the stack look noisy. Now: linear fade
+        // multiplied by 1.6 with a hard cliff at 0.7 distance — only
+        // the active card and a brief crossfade with the next/prev
+        // are visible at any moment.
+        const y = clamp(delta * 52, -38, 64);
+        const scale = 1 - Math.min(distance * 0.06, 0.14);
+        const opacity = distance > 0.7 ? 0 : Math.max(0, 1 - distance * 1.6);
 
         card.style.setProperty('--card-y', `${y}%`);
         card.style.setProperty('--card-scale', `${scale}`);
