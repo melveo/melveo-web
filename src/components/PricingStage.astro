@@ -154,8 +154,8 @@ const plans: Plan[] = [
   {
     id: 'live',
     name: 'Team Live',
-    badge: t('pricing.popular'),
-    popular: true,
+    badge: null,
+    popular: false,
     free: false,
     priceMonthly: 2990,
     priceYearly: 29900,
@@ -242,18 +242,69 @@ const currencyShort = lang === 'cs' ? 'Kč' : 'CZK';
       </div>
     </header>
 
+    {/*
+      SVG displacement filter — referenced by .glass-filter on each
+      pricing card. Sourced from the wprod codepen raVpwJL (glass
+      morphism recipe) per user request 2026-05-01: "tak se na to
+      podívej a zkus to napodobit jen prostě u nas v těch tmavých
+      barvách". The filter feeds the filter input through a Gaussian
+      blur of the alpha channel and then displaces source pixels by
+      that blur — producing the "real glass" refraction halo at the
+      edges of the card. Hidden so it never paints itself.
+    */}
+    <svg
+      class="pricing-lens-defs"
+      xmlns="http://www.w3.org/2000/svg"
+      style="position:absolute;width:0;height:0;pointer-events:none;"
+      aria-hidden="true"
+    >
+      <filter
+        id="pricing-lens"
+        x="0%"
+        y="0%"
+        width="100%"
+        height="100%"
+        filterUnits="objectBoundingBox"
+      >
+        <feComponentTransfer in="SourceAlpha" result="alpha">
+          <feFuncA type="identity" />
+        </feComponentTransfer>
+        <feGaussianBlur in="alpha" stdDeviation="50" result="blur" />
+        <feDisplacementMap
+          in="SourceGraphic"
+          in2="blur"
+          scale="40"
+          xChannelSelector="A"
+          yChannelSelector="A"
+        />
+      </filter>
+    </svg>
+
     <ul class="pricing-cards">
       {
         plans.map((plan) => (
           <li
             class:list={[
               'pricing-card',
-              plan.popular && 'pricing-card--popular',
               plan.free && 'pricing-card--free',
             ]}
             data-plan-id={plan.id}
           >
-            {plan.badge && <span class="pricing-card-badge">{plan.badge}</span>}
+            {/*
+              4-layer liquid-glass stack (wprod codepen recipe, dark-theme
+              adapted):
+                glass-filter   — backdrop-blur + url(#pricing-lens)
+                                 displacement, refracts what's behind
+                glass-overlay  — a translucent tint on top of the filter
+                glass-specular — inset highlights for the rim "shine"
+                glass-content  — the actual card body (header, price, CTA…)
+              All four layers absolute-positioned and stacked via z-index;
+              .glass-content is the only one that takes flow space.
+            */}
+            <span class="glass-filter" aria-hidden="true" />
+            <span class="glass-overlay" aria-hidden="true" />
+            <span class="glass-specular" aria-hidden="true" />
+            <div class="glass-content">
 
             <header class="pricing-card-header">
               <h3 class="pricing-card-name">{plan.name}</h3>
@@ -330,6 +381,7 @@ const currencyShort = lang === 'cs' ? 'Kč' : 'CZK';
                 </li>
               ))}
             </ul>
+            </div>{/* /.glass-content */}
           </li>
         ))
       }
@@ -540,150 +592,107 @@ const currencyShort = lang === 'cs' ? 'Kč' : 'CZK';
     }
   }
 
+  /*
+    ─── Liquid-glass card (4-layer recipe, dark-theme adapted) ─────
+    Adapted from wprod codepen raVpwJL (the wallet-screenshot widget
+    where the "search" / "home" pills look like real refracting glass).
+    We use the same 4-layer stack:
+      .glass-filter   — backdrop blur + url(#pricing-lens) displacement
+                        (the SVG filter blurs alpha then uses it to
+                        warp source pixels — gives the "real glass"
+                        edge halo without a heavy WebGL backend).
+      .glass-overlay  — translucent tint on top of the filter
+      .glass-specular — inset rim highlights ("shine")
+      .glass-content  — actual card body, sits on top via z-index
+    The .pricing-card host is just a transparent rounded box that
+    holds the four layers + sets the shadow envelope. */
   .pricing-card {
-    /*
-      Liquid-glass card — same family as the hero ghost pill but
-      richer because it's a larger surface:
-        - frosted body (rgba white + backdrop-blur with saturate)
-        - top inner highlight (mimics light catching the rim)
-        - bottom drop shadow + subtle cyan undertone
-        - thin top sheen via ::before
-        - cyan glow halo on hover via ::after
-    */
     position: relative;
     display: flex;
     flex-direction: column;
-    padding: 1.75rem 1.5rem 1.5rem;
     border-radius: 1.75rem;
-    background: linear-gradient(
-      180deg,
-      rgba(255, 255, 255, 0.06) 0%,
-      rgba(255, 255, 255, 0.025) 50%,
-      rgba(255, 255, 255, 0.015) 100%
-    );
-    backdrop-filter: blur(22px) saturate(170%);
-    -webkit-backdrop-filter: blur(22px) saturate(170%);
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    box-shadow:
-      inset 0 1px 0 rgba(255, 255, 255, 0.1),
-      inset 0 -1px 0 rgba(255, 255, 255, 0.02),
-      0 22px 60px -28px rgba(0, 0, 0, 0.6),
-      0 1px 2px rgba(0, 0, 0, 0.3);
+    background: transparent;
     color: var(--color-text-primary);
+    overflow: hidden;
+    /* Dual shadow per codepen — close drop shadow + soft far halo. */
+    box-shadow:
+      0 6px 6px rgba(0, 0, 0, 0.28),
+      0 0 24px rgba(0, 0, 0, 0.18);
     transition:
-      transform 0.3s cubic-bezier(0.39, 0.575, 0.565, 1),
-      border-color 0.3s ease,
-      box-shadow 0.3s ease;
+      transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 2.2),
+      box-shadow 0.4s ease;
     isolation: isolate;
   }
 
-  /* Top edge sheen — narrow horizontal highlight that reads as
-     "light catching the curved glass". */
-  .pricing-card::before {
-    content: '';
+  /* Layers all share the same rounded inset — they tile the card. */
+  .pricing-card .glass-filter,
+  .pricing-card .glass-overlay,
+  .pricing-card .glass-specular {
     position: absolute;
-    inset: 0 0 auto 0;
-    height: 50%;
-    border-radius: 1.75rem 1.75rem 0 0;
-    background: linear-gradient(
-      180deg,
-      rgba(255, 255, 255, 0.05),
-      transparent 100%
-    );
-    pointer-events: none;
-    z-index: 0;
-  }
-
-  /* Cyan halo behind card on hover — soft outer aura, not an outline */
-  .pricing-card::after {
-    content: '';
-    position: absolute;
-    inset: -1px;
+    inset: 0;
     border-radius: inherit;
     pointer-events: none;
-    background: radial-gradient(
-      ellipse at top,
-      rgba(0, 240, 255, 0.18),
-      transparent 65%
-    );
-    opacity: 0;
-    transition: opacity 0.3s ease;
-    z-index: -1;
   }
+
+  .pricing-card .glass-filter {
+    z-index: 0;
+    backdrop-filter: blur(8px) saturate(160%);
+    -webkit-backdrop-filter: blur(8px) saturate(160%);
+    /* Apple-style "lens" — referenced from <svg id="pricing-lens">.
+       feDisplacementMap warps source pixels by alpha-blurred amount
+       so card edges get the glass-edge halo. Kept paired with a
+       small brightness boost so the subtle Melveo cyan glow behind
+       the cards reads through the glass. */
+    filter: url(#pricing-lens) brightness(1.06);
+  }
+
+  .pricing-card .glass-overlay {
+    z-index: 1;
+    /* On dark canvas the codepen's white 0.25 tint is too aggressive
+       (cards look chalky). Drop to a faint white-with-cyan tint that
+       barely exists but still reads as "frosted". */
+    background: linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.05) 0%,
+      rgba(255, 255, 255, 0.018) 60%,
+      rgba(0, 240, 255, 0.012) 100%
+    );
+  }
+
+  .pricing-card .glass-specular {
+    z-index: 2;
+    /* Top-left rim catches imaginary light → 1px white inset.
+       Soft 6 px inner glow rounds the rim so it doesn't look like a
+       hard outline. Both lighter than the codepen's 0.75 highlight
+       because we're on a dark canvas — full 0.75 white reads as a
+       harsh outline, not a glass shine. */
+    box-shadow:
+      inset 1px 1px 0 rgba(255, 255, 255, 0.22),
+      inset 0 0 6px rgba(255, 255, 255, 0.1),
+      inset -1px -1px 0 rgba(255, 255, 255, 0.04);
+  }
+
+  .pricing-card .glass-content {
+    position: relative;
+    z-index: 3;
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    padding: 1.75rem 1.5rem 1.5rem;
+  }
+
   .pricing-card:hover {
     transform: translateY(-4px);
-    border-color: rgba(0, 240, 255, 0.32);
     box-shadow:
-      inset 0 1px 0 rgba(255, 255, 255, 0.16),
-      inset 0 -1px 0 rgba(255, 255, 255, 0.02),
-      0 28px 70px -22px rgba(0, 240, 255, 0.18),
-      0 1px 2px rgba(0, 0, 0, 0.3);
+      0 10px 12px rgba(0, 0, 0, 0.32),
+      0 24px 60px -16px rgba(0, 240, 255, 0.22),
+      0 0 32px rgba(0, 0, 0, 0.18);
   }
-  .pricing-card:hover::after {
-    opacity: 1;
-  }
-
-  .pricing-card--popular {
-    /*
-      Popular card — stronger cyan presence:
-        - cyan-tinted top sheen (replaces the white sheen)
-        - cyan ring around card
-        - permanent cyan halo (no longer hover-only)
-        - inner cyan rim glow on the top edge
-    */
-    border-color: rgba(0, 240, 255, 0.45);
-    background: linear-gradient(
-      180deg,
-      rgba(0, 240, 255, 0.12) 0%,
-      rgba(0, 240, 255, 0.04) 40%,
-      rgba(255, 255, 255, 0.025) 100%
-    );
+  .pricing-card:hover .glass-specular {
     box-shadow:
-      inset 0 1px 0 rgba(0, 240, 255, 0.32),
-      inset 0 0 0 1px rgba(0, 240, 255, 0.18),
-      0 26px 72px -16px rgba(0, 240, 255, 0.42),
-      0 0 0 1px rgba(0, 240, 255, 0.4);
-  }
-  .pricing-card--popular::before {
-    background: linear-gradient(
-      180deg,
-      rgba(0, 240, 255, 0.18),
-      transparent 100%
-    );
-  }
-  .pricing-card--popular::after {
-    /* Permanent halo on the popular card so it always pulls the eye */
-    opacity: 1;
-    background: radial-gradient(
-      ellipse at top,
-      rgba(0, 240, 255, 0.32),
-      transparent 70%
-    );
-  }
-  .pricing-card--popular:hover {
-    transform: translateY(-4px);
-  }
-
-  /* Make sure card content sits above the ::before sheen */
-  .pricing-card > * {
-    position: relative;
-    z-index: 1;
-  }
-
-  .pricing-card-badge {
-    position: absolute;
-    top: -12px;
-    left: 50%;
-    transform: translateX(-50%);
-    padding: 0.3rem 0.85rem;
-    border-radius: 9999px;
-    background: var(--color-accent-primary);
-    color: var(--color-accent-primary-cta-fg);
-    font-size: 0.7rem;
-    font-weight: 700;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    box-shadow: 0 6px 22px -8px rgba(0, 240, 255, 0.55);
+      inset 1px 1px 0 rgba(255, 255, 255, 0.32),
+      inset 0 0 6px rgba(0, 240, 255, 0.22),
+      inset -1px -1px 0 rgba(255, 255, 255, 0.06);
   }
 
   .pricing-card-header {
@@ -739,9 +748,6 @@ const currencyShort = lang === 'cs' ? 'Kč' : 'CZK';
     line-height: 1;
     letter-spacing: -0.03em;
     color: var(--color-text-primary);
-  }
-  .pricing-card--popular .pricing-price-day {
-    color: var(--color-accent-primary);
   }
   .pricing-price-suffix {
     font-size: 0.95rem;
