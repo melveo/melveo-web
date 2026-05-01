@@ -80,17 +80,18 @@ const altUrls = {
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="canonical" href={canonicalUrl} />
 
-    {/* Display wordmark font — Open Sans (round, friendly humanist
-        sans, picked per user feedback 2026-05-01 specifically for the
-        rounded lowercase 'm'). Used today only by
-        .grid-intro__wordmark via --font-wordmark in global.css; the
-        rest of the site keeps Inter. To swap families, change BOTH
-        the URL family param + the CSS var. */}
+    {/* Brand wordmark font — Quicksand (rounded geometric sans, every
+        terminal is a soft circle including the lowercase 'm').
+        Picked over Inter / Outfit / Open Sans per user feedback
+        2026-05-01: "asi bych šel do toho Quicksand fontu na všech
+        názvech melveo". Applied via --font-wordmark in global.css to
+        every visible "melveo" mark across the site (header logo,
+        intro overlay wordmark, index page wordmark). */}
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
       rel="stylesheet"
-      href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@600;700;800&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Quicksand:wght@500;600;700&display=swap"
     />
 
     <!-- Hreflang alternates -->
