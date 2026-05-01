@@ -772,6 +772,17 @@ const steps = content.steps;
     }
 
     .club-flow-stage__pin {
+      /*
+        CRITICAL: must override `display: grid` from the desktop rule.
+        Without this override the grid keeps a default auto-sized column
+        which expands to its content's intrinsic width — and the
+        carousel rail's children (cards × flex-basis var) want a much
+        wider track than the viewport. The grid happily overflows,
+        making the layout wider than the viewport and pushing the
+        carousel off-screen. Switching to display: block constrains the
+        layout to the pin's actual width.
+      */
+      display: block;
       position: relative;
       min-height: 0;
       padding: 0;
@@ -780,18 +791,26 @@ const steps = content.steps;
     .club-flow-stage__layout {
       display: block;
       width: 100%;
+      max-width: 100%;
       margin: 0 auto;
+      min-height: 0;
+      min-width: 0;
+    }
+
+    .club-flow-stage__right {
+      /* Same reason as the pin override above — without min-width: 0
+         flex/grid intrinsic-min-content would let the rail's wide
+         flex children expand the right column. */
+      display: block;
+      width: 100%;
+      max-width: 100%;
+      min-width: 0;
       min-height: 0;
     }
 
     .club-flow-stage__media-shell,
     .club-flow-stage__progress {
       display: none;
-    }
-
-    .club-flow-stage__right {
-      display: block;
-      min-height: 0;
     }
 
     /*

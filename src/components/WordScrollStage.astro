@@ -166,15 +166,23 @@ const hueStep = (hueEnd - hueStart) / Math.max(1, words.length - 1);
   }
 
   /*
-    List is absolutely positioned inside the 1.25em viewport. The
-    active item lands centred on the viewport's vertical centre by
-    translating up `-0.625em - active_index * 1.25em` (half the
-    item height + one item height per index). With the viewport
-    itself flex-centred next to the prefix, this guarantees the
-    active word's baseline lines up with the prefix baseline.
+    List stays `position: relative` so it contributes to the viewport's
+    intrinsic width (white-space: nowrap + width: max-content makes
+    it size to the longest item). If we used position: absolute here
+    the viewport would collapse to width 0 — its `flex: 0 0 auto`
+    basis can't read the list's intrinsic size from absolute children.
+
+    Vertical centring math:
+      - viewport is 1.25em tall, flex-centred against the prefix
+      - list is at top: 50% (= 0.625em from viewport top)
+      - translateY shifts the list up by half-item + active_index items
+      - active item lands with its centre at 0.625em from viewport top
+        = exact viewport vertical centre
+      - Items above + below the active one are visible because the
+        viewport's overflow stays `visible`.
   */
   .word-scroll-stage__list {
-    position: absolute;
+    position: relative;
     top: 50%;
     left: 0;
     width: max-content;
