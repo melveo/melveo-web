@@ -89,6 +89,8 @@ interface Puff {
   alpha: number;
   /** Hue mix — 0 = pure cyan, 1 = teal-shifted. Tints subtle variety. */
   hueShift: number;
+  /** Random phase so the breathing scale isn't synchronised across puffs. */
+  phase: number;
 }
 
 interface Handle {
@@ -104,10 +106,16 @@ function makePuff(width: number, height: number): Puff {
     scale: 0.6 + Math.random() * 1.0,
     rotation: Math.random() * Math.PI * 2,
     rotationSpeed: (Math.random() * 0.15 + 0.08) * (Math.random() < 0.5 ? -1 : 1),
-    vx: (Math.random() - 0.5) * 6, // px/sec
-    vy: (Math.random() - 0.5) * 4,
+    // Slow drift in random directions — bumped from ±3 to ±9 px/sec so
+    // the eye actually registers movement (radial-symmetric sprites
+    // make the rotation invisible, so movement has to come from
+    // translation + scale-pulse). Plus a small upward bias (-2 px/sec
+    // baseline on vy) to give the field a "rising smoke" feel.
+    vx: (Math.random() - 0.5) * 18,
+    vy: (Math.random() - 0.5) * 10 - 2,
     alpha: 0.22 + Math.random() * 0.32,
     hueShift: Math.random(),
+    phase: Math.random() * Math.PI * 2,
   };
 }
 
@@ -178,7 +186,11 @@ function mount(section: HTMLElement): Handle | null {
       if (p.y > height + margin) p.y = -margin;
 
       const sprite = p.hueShift < 0.5 ? cyan : teal;
-      const size = SPRITE_SIZE * p.scale;
+      // Breathing scale — each puff slowly inhales/exhales between
+      // 0.94× and 1.06× its base scale, with a per-puff phase so the
+      // field doesn't pulse in unison. ~7 sec period feels organic.
+      const breath = 1 + Math.sin(now * 0.0009 + p.phase) * 0.06;
+      const size = SPRITE_SIZE * p.scale * breath;
       ctx.save();
       ctx.translate(p.x, p.y);
       ctx.rotate(p.rotation);
