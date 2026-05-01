@@ -594,54 +594,74 @@ const t = useTranslations(lang);
 
   /* ─── Mobile layout (≤ 700 CSS px) ─────────────────────────────
      Same sticky-pin morph as desktop, just rotated to a 3 × 5 grid
-     so all 15 cells stay visible (per user 2026-05-01: "musí tam
-     být i ta fotka s nadpisem melveo, jen prostě bude do první
-     nebo druhé řady"). The scaler photo morphs from full-bleed to
-     row 2 col 2 — upper-middle of the 3 × 5 grid — so when the
-     morph completes the user sees row 1 above the photo and rows
-     3-5 below, the same cascading reveal as the 5 × 3 desktop.
+     so all 15 cells stay visible. The scaler sits at row 3 col 2
+     (geometric centre of 3 × 5) — that's the only position where
+     the full-bleed start state (img at 100 vw × 100 vh centred on
+     the scaler container) actually fills the viewport without
+     clipping at the top.
 
      Layer mapping (15 cells = 14 photos/cards + 1 scaler):
-       Layer 3 (2 children, closest reveal)  → row 2 col 1 + col 3
+       Layer 3 (2 children, closest reveal)  → row 3 col 1 + col 3
                                                  (flanking scaler)
-       Layer 2 (6 children, mid)             → row 1 cols 1-3
-                                              + row 3 cols 1-3
-                                                 (above + just below)
-       Layer 1 (6 children, farthest)        → row 4 cols 1-3
+       Layer 2 (6 children, mid)             → row 2 cols 1-3
+                                              + row 4 cols 1-3
+                                                 (one row above +
+                                                  one below scaler)
+       Layer 1 (6 children, farthest)        → row 1 cols 1-3
                                               + row 5 cols 1-3
-                                                 (bottom band)
-       Scaler                                → row 2 col 2
+                                                 (top + bottom bands)
+       Scaler                                → row 3 col 2
   */
   @media (max-width: 700px) {
     .image-grid-section .grid {
       --gutter: 1rem;
       --gap: clamp(8px, 2vw, 14px);
       grid-template-columns: repeat(3, 1fr);
+      /* Cap the grid to viewport height (minus a small safe inset on
+         both sides) so all 5 rows fit on phones — 4/5-aspect cells
+         on a 3 × 5 grid otherwise overflowed top + bottom of viewport
+         and clipped rows 1 and 5 (user feedback 2026-05-01: "horní
+         karty jsou ořezané"). With explicit height + 5 × 1fr rows,
+         each cell is `(viewport_h - 2 × inset - 4 × gap) / 5` tall,
+         and the cell aspect-ratio rule is overridden below. */
+      height: calc(100vh - 4rem);
       grid-template-rows: repeat(5, 1fr);
     }
+    /* Drop the 4/5 aspect on mobile — height is dictated by the
+       grid track, not the cell content. Cells naturally fill their
+       row height. */
+    .image-grid-section .grid-photo,
+    .image-grid-section .tech-card {
+      aspect-ratio: auto;
+      height: 100%;
+    }
+    .image-grid-section .grid .scaler {
+      width: 100%;
+      height: 100%;
+    }
 
-    /* Layer 1 → bottom band (rows 4 + 5) */
-    .image-grid-section .grid > .layer:nth-of-type(1) > div:nth-child(1) { grid-area: 4 / 1; }
-    .image-grid-section .grid > .layer:nth-of-type(1) > div:nth-child(2) { grid-area: 4 / 2; }
-    .image-grid-section .grid > .layer:nth-of-type(1) > div:nth-child(3) { grid-area: 4 / 3; }
+    /* Layer 1 → outer top + bottom bands (rows 1 and 5) */
+    .image-grid-section .grid > .layer:nth-of-type(1) > div:nth-child(1) { grid-area: 1 / 1; }
+    .image-grid-section .grid > .layer:nth-of-type(1) > div:nth-child(2) { grid-area: 1 / 2; }
+    .image-grid-section .grid > .layer:nth-of-type(1) > div:nth-child(3) { grid-area: 1 / 3; }
     .image-grid-section .grid > .layer:nth-of-type(1) > div:nth-child(4) { grid-area: 5 / 1; }
     .image-grid-section .grid > .layer:nth-of-type(1) > div:nth-child(5) { grid-area: 5 / 2; }
     .image-grid-section .grid > .layer:nth-of-type(1) > div:nth-child(6) { grid-area: 5 / 3; }
 
-    /* Layer 2 → row 1 (above scaler) + row 3 (just below scaler) */
-    .image-grid-section .grid > .layer:nth-of-type(2) > div:nth-child(1) { grid-area: 1 / 1; }
-    .image-grid-section .grid > .layer:nth-of-type(2) > div:nth-child(2) { grid-area: 1 / 2; }
-    .image-grid-section .grid > .layer:nth-of-type(2) > div:nth-child(3) { grid-area: 1 / 3; }
-    .image-grid-section .grid > .layer:nth-of-type(2) > div:nth-child(4) { grid-area: 3 / 1; }
-    .image-grid-section .grid > .layer:nth-of-type(2) > div:nth-child(5) { grid-area: 3 / 2; }
-    .image-grid-section .grid > .layer:nth-of-type(2) > div:nth-child(6) { grid-area: 3 / 3; }
+    /* Layer 2 → inner rows (row 2 above scaler, row 4 below scaler) */
+    .image-grid-section .grid > .layer:nth-of-type(2) > div:nth-child(1) { grid-area: 2 / 1; }
+    .image-grid-section .grid > .layer:nth-of-type(2) > div:nth-child(2) { grid-area: 2 / 2; }
+    .image-grid-section .grid > .layer:nth-of-type(2) > div:nth-child(3) { grid-area: 2 / 3; }
+    .image-grid-section .grid > .layer:nth-of-type(2) > div:nth-child(4) { grid-area: 4 / 1; }
+    .image-grid-section .grid > .layer:nth-of-type(2) > div:nth-child(5) { grid-area: 4 / 2; }
+    .image-grid-section .grid > .layer:nth-of-type(2) > div:nth-child(6) { grid-area: 4 / 3; }
 
-    /* Layer 3 → row 2 left + right (flanking the scaler at row 2 col 2) */
+    /* Layer 3 → row 3 left + right (flanking the centred scaler) */
     .image-grid-section .grid > .layer:nth-of-type(3) > div:first-of-type {
-      grid-area: 2 / 1;
+      grid-area: 3 / 1;
     }
     .image-grid-section .grid > .layer:nth-of-type(3) > div:last-of-type {
-      grid-area: 2 / 3;
+      grid-area: 3 / 3;
     }
   }
 
@@ -817,12 +837,19 @@ const t = useTranslations(lang);
      is absolutely positioned so we can animate width/height in pixels
      while keeping the image perfectly centred.
 
-     Desktop: row 2 col 3 (centre of 5 × 3).
-     Mobile (≤ 700 px): row 2 col 2 (upper-middle of 3 × 5) — per
-     user 2026-05-01: "ale bude to prostě že pude do první nebo
-     druhé řady aby to vyšlo". Lands above the visual centre so
-     scrolled-in cells reveal both above (row 1) and below
-     (rows 3-5). */
+     IMPORTANT: must sit at the GEOMETRIC CENTRE of the grid so the
+     full-bleed start state (img at 100 vw × 100 vh, centred on the
+     scaler container) actually fills the viewport. The grid itself
+     is absolute-centred inside the sticky 100 vh content, so when
+     the scaler container is at the grid centre, the img centre =
+     viewport centre.
+       Desktop 5 × 3: row 2 col 3.
+       Mobile  3 × 5: row 3 col 2.
+     User 2026-05-01 asked to land the photo at "row 1 or 2"; an
+     earlier pass tried row 2 / col 2 (upper-middle) and broke the
+     start state — the img was off-centre and clipped against the
+     viewport top. Geometric centre is the only place this morph
+     mathematically works. */
   .image-grid-section .grid .scaler {
     position: relative;
     grid-area: 2 / 3;
@@ -832,7 +859,7 @@ const t = useTranslations(lang);
   }
   @media (max-width: 700px) {
     .image-grid-section .grid .scaler {
-      grid-area: 2 / 2;
+      grid-area: 3 / 2;
     }
   }
 
@@ -917,13 +944,8 @@ const t = useTranslations(lang);
 
     if (section && image && layers && layers.length > 0) {
       // Wait one frame so layout has settled and we can measure the
-      // .scaler container itself — it's `width:100%; height:100%` of
-      // its grid cell, so its offsetWidth/Height equal the natural
-      // cell dimensions exactly. Earlier versions measured a sibling
-      // `.layer img` which could be at scale(0) by the time we ran
-      // (Motion's scroll() pre-applies keyframe[0] on registration);
-      // that gave wrong fallbacks and the scaler ended up oversized
-      // relative to its neighbours.
+      // .scaler container itself — its offsetWidth/Height equal the
+      // grid cell size after layout commits.
       requestAnimationFrame(() => {
         const scalerEl = section.querySelector<HTMLElement>('.scaler');
         const naturalWidth = scalerEl?.offsetWidth ?? 280;
@@ -931,6 +953,15 @@ const t = useTranslations(lang);
 
         const viewportWidth = window.innerWidth;
         const viewportHeight = window.innerHeight;
+
+        // Force the start state directly — Motion v12's scroll() pre-
+        // applies the first keyframe value on mount, but in some
+        // configurations the inline write happens after first paint,
+        // showing a brief frame of the natural cell size before the
+        // observer fires. Setting inline width/height eagerly here
+        // means full-bleed from the first paint.
+        image.style.width = `${viewportWidth}px`;
+        image.style.height = `${viewportHeight}px`;
 
         // Cubic-bezier control points. Names match GSAP power easings
         // referenced by the codepen.
