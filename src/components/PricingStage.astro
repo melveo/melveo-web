@@ -212,7 +212,13 @@ const currencyShort = lang === 'cs' ? 'Kč' : 'CZK';
       </h2>
       <p class="pricing-subline">{t('pricing.subline')}</p>
 
-      {/* Glass pill toggle — same visual language as hero buttons */}
+      {/*
+        Twin-pill toggle — each button is its own glass pill that flips
+        between the hero ghost-pill style (inactive) and the hero
+        filled-cyan style (active). No sliding thumb to mis-align with
+        unequal button widths (the −17 % badge made "Ročně" wider than
+        "Měsíčně", and a 50 %-width thumb clipped the wider label).
+      */}
       <div class="pricing-toggle" role="tablist" aria-label="Billing period">
         <button
           type="button"
@@ -230,10 +236,9 @@ const currencyShort = lang === 'cs' ? 'Kč' : 'CZK';
           aria-selected="true"
           class="pricing-toggle-btn pricing-toggle-btn--active"
         >
-          {t('pricing.toggleYearly')}
+          <span class="pricing-toggle-label">{t('pricing.toggleYearly')}</span>
           <span class="pricing-toggle-savings">{t('pricing.toggleSavings')}</span>
         </button>
-        <span class="pricing-toggle-thumb" aria-hidden="true"></span>
       </div>
     </header>
 
@@ -417,55 +422,78 @@ const currencyShort = lang === 'cs' ? 'Kč' : 'CZK';
     }
   }
 
-  /* ─── Toggle pill (same family as hero buttons) ──────────────── */
+  /* ─── Twin-pill toggle ─────────────────────────────────────────
+     Each button is its own glass pill. Active state inherits the
+     hero-pill--filled cyan look; inactive inherits hero-pill--ghost.
+     No sliding thumb so unequal button widths (the −17 % badge makes
+     "Ročně" wider than "Měsíčně") can't clip the active label. */
 
   .pricing-toggle {
-    --thumb-x: 50%;
-    position: relative;
     display: inline-flex;
     align-items: stretch;
+    gap: 0.5rem;
     margin-top: 2rem;
-    padding: 4px;
+    padding: 5px;
     border-radius: 9999px;
-    background: rgba(255, 255, 255, 0.04);
-    backdrop-filter: blur(14px);
-    -webkit-backdrop-filter: blur(14px);
-    border: 1px solid rgba(0, 240, 255, 0.22);
+    background: rgba(255, 255, 255, 0.025);
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    border: 1px solid rgba(255, 255, 255, 0.07);
     box-shadow:
-      inset 0 1px 0 rgba(255, 255, 255, 0.08),
-      0 6px 22px -10px rgba(0, 0, 0, 0.4);
-    isolation: isolate;
+      inset 0 1px 0 rgba(255, 255, 255, 0.06),
+      0 8px 28px -14px rgba(0, 0, 0, 0.5);
   }
 
   .pricing-toggle-btn {
-    position: relative;
-    z-index: 1;
     display: inline-flex;
     align-items: center;
-    gap: 0.5rem;
-    padding: 0.625rem 1.25rem;
+    gap: 0.45rem;
+    padding: 0.55rem 1.1rem;
     border-radius: 9999px;
     background: transparent;
-    border: 0;
+    border: 1px solid transparent;
     color: var(--color-text-secondary);
     font: inherit;
     font-weight: 600;
-    font-size: 0.875rem;
+    font-size: 0.9rem;
     cursor: pointer;
-    transition: color 0.25s ease;
     white-space: nowrap;
+    transition:
+      background-color 0.25s ease,
+      border-color 0.25s ease,
+      color 0.25s ease,
+      box-shadow 0.25s ease,
+      transform 0.2s ease;
   }
   .pricing-toggle-btn:hover {
     color: var(--color-text-primary);
+    background: rgba(0, 240, 255, 0.06);
   }
-  .pricing-toggle-btn--active {
+
+  /* Active = filled cyan (matches .hero-pill--filled) */
+  .pricing-toggle-btn--active,
+  .pricing-toggle-btn[aria-selected='true'] {
+    background: var(--color-accent-primary);
     color: var(--color-accent-primary-cta-fg);
+    border-color: rgba(0, 240, 255, 0.6);
+    box-shadow:
+      0 8px 26px -10px rgba(0, 240, 255, 0.5),
+      0 0 0 1px rgba(0, 240, 255, 0.35);
+  }
+  .pricing-toggle-btn--active:hover,
+  .pricing-toggle-btn[aria-selected='true']:hover {
+    background: var(--color-accent-primary-hover);
+    color: var(--color-accent-primary-cta-fg);
+  }
+
+  .pricing-toggle-label {
+    font-size: inherit;
   }
 
   .pricing-toggle-savings {
     display: inline-flex;
     align-items: center;
-    padding: 0.125rem 0.5rem;
+    padding: 0.15rem 0.5rem;
     border-radius: 9999px;
     font-size: 0.7rem;
     font-weight: 700;
@@ -473,28 +501,12 @@ const currencyShort = lang === 'cs' ? 'Kč' : 'CZK';
     background: rgba(0, 240, 255, 0.18);
     color: var(--color-accent-primary);
   }
-  .pricing-toggle-btn--active .pricing-toggle-savings {
-    background: rgba(0, 16, 20, 0.16);
+  /* On the active (filled) variant the badge needs darker fill so
+     it's still readable on the cyan button. */
+  .pricing-toggle-btn--active .pricing-toggle-savings,
+  .pricing-toggle-btn[aria-selected='true'] .pricing-toggle-savings {
+    background: rgba(0, 16, 20, 0.18);
     color: var(--color-accent-primary-cta-fg);
-  }
-
-  .pricing-toggle-thumb {
-    position: absolute;
-    top: 4px;
-    bottom: 4px;
-    left: 4px;
-    width: calc(50% - 4px);
-    border-radius: 9999px;
-    background: var(--color-accent-primary);
-    box-shadow:
-      0 6px 22px -8px rgba(0, 240, 255, 0.45),
-      0 0 0 1px rgba(0, 240, 255, 0.4);
-    transform: translateX(0);
-    transition: transform 0.35s cubic-bezier(0.39, 0.575, 0.565, 1);
-    z-index: 0;
-  }
-  [data-pricing-section][data-period='yearly'] .pricing-toggle-thumb {
-    transform: translateX(100%);
   }
 
   /* ─── Cards grid ─────────────────────────────────────────────── */
@@ -522,43 +534,133 @@ const currencyShort = lang === 'cs' ? 'Kč' : 'CZK';
   }
 
   .pricing-card {
+    /*
+      Liquid-glass card — same family as the hero ghost pill but
+      richer because it's a larger surface:
+        - frosted body (rgba white + backdrop-blur with saturate)
+        - top inner highlight (mimics light catching the rim)
+        - bottom drop shadow + subtle cyan undertone
+        - thin top sheen via ::before
+        - cyan glow halo on hover via ::after
+    */
     position: relative;
     display: flex;
     flex-direction: column;
     padding: 1.75rem 1.5rem 1.5rem;
-    border-radius: 1.5rem;
-    background: rgba(255, 255, 255, 0.03);
-    backdrop-filter: blur(14px);
-    -webkit-backdrop-filter: blur(14px);
+    border-radius: 1.75rem;
+    background: linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.06) 0%,
+      rgba(255, 255, 255, 0.025) 50%,
+      rgba(255, 255, 255, 0.015) 100%
+    );
+    backdrop-filter: blur(22px) saturate(170%);
+    -webkit-backdrop-filter: blur(22px) saturate(170%);
     border: 1px solid rgba(255, 255, 255, 0.08);
     box-shadow:
-      inset 0 1px 0 rgba(255, 255, 255, 0.04),
-      0 18px 50px -22px rgba(0, 0, 0, 0.55);
+      inset 0 1px 0 rgba(255, 255, 255, 0.1),
+      inset 0 -1px 0 rgba(255, 255, 255, 0.02),
+      0 22px 60px -28px rgba(0, 0, 0, 0.6),
+      0 1px 2px rgba(0, 0, 0, 0.3);
     color: var(--color-text-primary);
     transition:
-      transform 0.25s ease,
-      border-color 0.25s ease,
-      box-shadow 0.25s ease;
+      transform 0.3s cubic-bezier(0.39, 0.575, 0.565, 1),
+      border-color 0.3s ease,
+      box-shadow 0.3s ease;
+    isolation: isolate;
+  }
+
+  /* Top edge sheen — narrow horizontal highlight that reads as
+     "light catching the curved glass". */
+  .pricing-card::before {
+    content: '';
+    position: absolute;
+    inset: 0 0 auto 0;
+    height: 50%;
+    border-radius: 1.75rem 1.75rem 0 0;
+    background: linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.05),
+      transparent 100%
+    );
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* Cyan halo behind card on hover — soft outer aura, not an outline */
+  .pricing-card::after {
+    content: '';
+    position: absolute;
+    inset: -1px;
+    border-radius: inherit;
+    pointer-events: none;
+    background: radial-gradient(
+      ellipse at top,
+      rgba(0, 240, 255, 0.18),
+      transparent 65%
+    );
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    z-index: -1;
   }
   .pricing-card:hover {
-    transform: translateY(-3px);
-    border-color: rgba(0, 240, 255, 0.28);
+    transform: translateY(-4px);
+    border-color: rgba(0, 240, 255, 0.32);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.16),
+      inset 0 -1px 0 rgba(255, 255, 255, 0.02),
+      0 28px 70px -22px rgba(0, 240, 255, 0.18),
+      0 1px 2px rgba(0, 0, 0, 0.3);
+  }
+  .pricing-card:hover::after {
+    opacity: 1;
   }
 
   .pricing-card--popular {
-    /* Highlight in cyan, like the filled hero pill — but keep it as
-       a card (rectangular), not a pill. */
-    border-color: rgba(0, 240, 255, 0.42);
+    /*
+      Popular card — stronger cyan presence:
+        - cyan-tinted top sheen (replaces the white sheen)
+        - cyan ring around card
+        - permanent cyan halo (no longer hover-only)
+        - inner cyan rim glow on the top edge
+    */
+    border-color: rgba(0, 240, 255, 0.45);
     background: linear-gradient(
       180deg,
-      rgba(0, 240, 255, 0.08) 0%,
-      rgba(0, 240, 255, 0.02) 60%,
-      rgba(255, 255, 255, 0.02) 100%
+      rgba(0, 240, 255, 0.12) 0%,
+      rgba(0, 240, 255, 0.04) 40%,
+      rgba(255, 255, 255, 0.025) 100%
     );
     box-shadow:
-      inset 0 1px 0 rgba(0, 240, 255, 0.18),
-      0 18px 60px -16px rgba(0, 240, 255, 0.35),
-      0 0 0 1px rgba(0, 240, 255, 0.32);
+      inset 0 1px 0 rgba(0, 240, 255, 0.32),
+      inset 0 0 0 1px rgba(0, 240, 255, 0.18),
+      0 26px 72px -16px rgba(0, 240, 255, 0.42),
+      0 0 0 1px rgba(0, 240, 255, 0.4);
+  }
+  .pricing-card--popular::before {
+    background: linear-gradient(
+      180deg,
+      rgba(0, 240, 255, 0.18),
+      transparent 100%
+    );
+  }
+  .pricing-card--popular::after {
+    /* Permanent halo on the popular card so it always pulls the eye */
+    opacity: 1;
+    background: radial-gradient(
+      ellipse at top,
+      rgba(0, 240, 255, 0.32),
+      transparent 70%
+    );
+  }
+  .pricing-card--popular:hover {
+    transform: translateY(-4px);
+  }
+
+  /* Make sure card content sits above the ::before sheen */
+  .pricing-card > * {
+    position: relative;
+    z-index: 1;
   }
 
   .pricing-card-badge {
@@ -645,44 +747,66 @@ const currencyShort = lang === 'cs' ? 'Kč' : 'CZK';
     color: var(--color-text-tertiary);
   }
 
-  /* ─── CTA inside card — share pill family with hero ──────────── */
+  /* ─── CTA inside card — full hero pill family ────────────────── */
 
   .pricing-card-cta {
+    position: relative;
     display: inline-flex;
     align-items: center;
     justify-content: center;
     margin-bottom: 1.5rem;
-    padding: 0.75rem 1.25rem;
+    padding: 0.85rem 1.25rem;
     border-radius: 9999px;
     font-size: 0.95rem;
     font-weight: 600;
     text-decoration: none;
+    background: linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.08) 0%,
+      rgba(255, 255, 255, 0.03) 100%
+    );
+    backdrop-filter: blur(14px) saturate(160%);
+    -webkit-backdrop-filter: blur(14px) saturate(160%);
+    color: var(--color-text-primary);
+    border: 1px solid rgba(0, 240, 255, 0.3);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.12),
+      0 8px 24px -10px rgba(0, 0, 0, 0.4);
     transition:
       transform 0.2s cubic-bezier(0.39, 0.575, 0.565, 1),
-      background-color 0.2s ease,
-      border-color 0.2s ease,
+      background-color 0.25s ease,
+      border-color 0.25s ease,
       box-shadow 0.25s ease;
-    background: rgba(255, 255, 255, 0.05);
-    color: var(--color-text-primary);
-    border: 1px solid rgba(0, 240, 255, 0.28);
-    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06);
   }
   .pricing-card-cta:hover {
-    background: rgba(0, 240, 255, 0.1);
-    border-color: rgba(0, 240, 255, 0.5);
+    background: linear-gradient(
+      180deg,
+      rgba(0, 240, 255, 0.18) 0%,
+      rgba(0, 240, 255, 0.06) 100%
+    );
+    border-color: rgba(0, 240, 255, 0.55);
     transform: translateY(-1px);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.18),
+      0 14px 36px -10px rgba(0, 240, 255, 0.35);
   }
 
+  /* Popular card's CTA = filled cyan (matches .hero-pill--filled) */
   .pricing-card--popular .pricing-card-cta {
     background: var(--color-accent-primary);
     color: var(--color-accent-primary-cta-fg);
-    border-color: rgba(0, 240, 255, 0.6);
+    border-color: rgba(0, 240, 255, 0.65);
     box-shadow:
-      0 10px 32px -10px rgba(0, 240, 255, 0.5),
-      0 0 0 1px rgba(0, 240, 255, 0.35);
+      inset 0 1px 0 rgba(255, 255, 255, 0.3),
+      0 12px 36px -10px rgba(0, 240, 255, 0.55),
+      0 0 0 1px rgba(0, 240, 255, 0.4);
   }
   .pricing-card--popular .pricing-card-cta:hover {
     background: var(--color-accent-primary-hover);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.35),
+      0 16px 44px -10px rgba(0, 240, 255, 0.65),
+      0 0 0 1px rgba(0, 240, 255, 0.55);
   }
 
   /* ─── Features list ─────────────────────────────────────────── */
@@ -739,12 +863,48 @@ const currencyShort = lang === 'cs' ? 'Kč' : 'CZK';
     }
   }
   .pricing-extra {
-    padding: 1.25rem 1.5rem;
-    border-radius: 1.25rem;
-    border: 1px solid rgba(255, 255, 255, 0.06);
-    background: rgba(255, 255, 255, 0.02);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
+    position: relative;
+    padding: 1.5rem 1.75rem;
+    border-radius: 1.5rem;
+    border: 1px solid rgba(255, 255, 255, 0.07);
+    background: linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.05) 0%,
+      rgba(255, 255, 255, 0.018) 100%
+    );
+    backdrop-filter: blur(18px) saturate(160%);
+    -webkit-backdrop-filter: blur(18px) saturate(160%);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.08),
+      0 14px 40px -22px rgba(0, 0, 0, 0.55);
+    transition:
+      border-color 0.25s ease,
+      box-shadow 0.25s ease,
+      transform 0.25s ease;
+  }
+  .pricing-extra::before {
+    content: '';
+    position: absolute;
+    inset: 0 0 auto 0;
+    height: 50%;
+    border-radius: 1.5rem 1.5rem 0 0;
+    background: linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.04),
+      transparent 100%
+    );
+    pointer-events: none;
+  }
+  .pricing-extra:hover {
+    border-color: rgba(0, 240, 255, 0.24);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.12),
+      0 18px 44px -20px rgba(0, 240, 255, 0.18);
+    transform: translateY(-1px);
+  }
+  .pricing-extra > * {
+    position: relative;
+    z-index: 1;
   }
   .pricing-extra h4 {
     margin: 0 0 0.4rem;
