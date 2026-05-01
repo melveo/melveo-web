@@ -21,13 +21,23 @@
  *      using progressively more aggressive easings per layer
  *      (power1, power3, power4) — outer edges feel slower, inner
  *      cells punch in.
- *
- * No headline above the grid (per user 2026-04-30 — "ten text pojme
- * scrollovat dej pryč"). The grid is the whole effect.
+ *   5. Intro overlay (added 2026-05-01): brand wordmark + scroll-hint
+ *      pill on top of the full-bleed scaler, fades out as scroll
+ *      progresses. Tells the user "this is the start, scroll for
+ *      more". Lives at z-index 3 above the grid.
  *
  * Photos are local Melveo sports/club assets; the center scaler keeps
  * the latest wide team briefing image as the primary visual.
  */
+
+import { useTranslations, type Lang } from '../i18n/ui';
+
+interface Props {
+  lang: Lang;
+}
+
+const { lang } = Astro.props;
+const t = useTranslations(lang);
 ---
 
 <section
@@ -45,6 +55,42 @@
   <canvas class="glass-smoke" data-glass-smoke-canvas aria-hidden="true"></canvas>
 
   <div class="content">
+    {/*
+      Intro overlay — sits on top of the full-bleed scaler photo for
+      the first ~22 % of section scroll, fading out as the morph
+      starts. Tells the user "this is the start, scroll for more".
+      Brand wordmark + scroll-hint pill (same .hero-pill recipe as
+      the App Store + Pricing CTAs). Smooth-scrolls past the section
+      on click.
+    */}
+    <div class="grid-intro" data-grid-intro>
+      <p class="grid-intro__eyebrow">{t('gridMorph.subline')}</p>
+      <h2 class="grid-intro__wordmark" aria-label="Melveo">Melveo</h2>
+      <button
+        type="button"
+        class="hero-pill grid-intro__pill"
+        data-grid-intro-scroll
+        aria-label={t('gridMorph.scrollHint')}
+      >
+        <span class="hero-pill-shimmer" aria-hidden="true"></span>
+        <span class="hero-pill-content">
+          {t('gridMorph.scrollHint')}
+          <svg
+            class="grid-intro__chevron"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            aria-hidden="true"
+          >
+            <path d="M6 9l6 6 6-6" />
+          </svg>
+        </span>
+      </button>
+    </div>
+
     <div class="grid">
       <!-- Layer 1: Outer edges (photos + tech cards, 3 left + 3 right) -->
       <div class="layer">
@@ -327,6 +373,93 @@
      z-index. */
   .image-grid-section .content {
     z-index: 1;
+  }
+
+  /* ─── Intro overlay ─────────────────────────────────────────────
+     Brand wordmark + scroll-hint button on top of the full-bleed
+     scaler photo. Pinned to the centre of the sticky .content,
+     above the grid (z-index 3 — grid layers + scaler are at z-index
+     0–2). Faded out by Motion as the section scrolls past 22 %. */
+  .image-grid-section .grid-intro {
+    position: absolute;
+    inset: 0;
+    z-index: 3;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: clamp(1.5rem, 3vw, 2.5rem);
+    padding: clamp(1rem, 4vw, 3rem);
+    text-align: center;
+    pointer-events: none; /* re-enabled on the pill below */
+    /* Soft vertical vignette behind the text/pill so they stay
+       readable over the photo regardless of which frame the photo
+       lands on. */
+    background: radial-gradient(
+      ellipse at center,
+      rgba(0, 0, 0, 0.55) 0%,
+      rgba(0, 0, 0, 0.35) 30%,
+      transparent 65%
+    );
+  }
+
+  .image-grid-section .grid-intro__eyebrow {
+    margin: 0;
+    max-width: 32rem;
+    font-size: clamp(0.95rem, 1.6vw, 1.2rem);
+    line-height: 1.5;
+    color: var(--color-text-secondary);
+    text-wrap: balance;
+    text-shadow: 0 2px 12px rgba(0, 0, 0, 0.7);
+  }
+
+  .image-grid-section .grid-intro__wordmark {
+    margin: 0;
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: clamp(4rem, 14vw, 11rem);
+    line-height: 0.9;
+    letter-spacing: -0.05em;
+    color: var(--color-text-primary);
+    /* Cyan halo behind the wordmark — same family as the icon glow
+       on the tech cards. Drop shadow first for legibility on busy
+       photos, then two cyan layers for emission. */
+    text-shadow:
+      0 4px 24px rgba(0, 0, 0, 0.55),
+      0 0 18px rgba(0, 240, 255, 0.18),
+      0 0 60px rgba(0, 240, 255, 0.12);
+  }
+
+  .image-grid-section .grid-intro__pill {
+    pointer-events: auto;
+    /* hero-pill min-width 12rem is right; just tighten the padding
+       a touch so the chevron sits comfortably next to the label. */
+    padding-inline: 1.75rem;
+    border: none;
+    cursor: pointer;
+    font: inherit;
+  }
+
+  .image-grid-section .grid-intro__chevron {
+    width: 1.1rem;
+    height: 1.1rem;
+    flex-shrink: 0;
+    color: var(--color-accent-primary);
+    /* Bobbing animation hints "scroll downward" without copy. The
+       motion is small (3 px) and slow (1.4 s) so it reads as a
+       subtle nudge, not a distraction. */
+    animation: grid-intro-chevron-bob 1.4s ease-in-out infinite;
+  }
+
+  @keyframes grid-intro-chevron-bob {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(3px); }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .image-grid-section .grid-intro__chevron {
+      animation: none;
+    }
   }
 
   .image-grid-section .content {
@@ -778,7 +911,76 @@
             },
           );
         });
+
+        // ─── Intro overlay: hold full → fade out + drift up ─────────────
+        //     Wordmark + scroll-pill stay at full opacity for the first
+        //     ~8 % of the overlay's mapped scroll range (a hold pattern,
+        //     mirroring the scaler's 18 % hold), then fade + drift up.
+        //     Mapped scroll range is just the first 22 % of the section
+        //     (offset 'start start' → '22% start'), so the full hold-and-
+        //     fade plays inside that window and the overlay is invisible
+        //     by the time the grid reveal kicks in.
+        //
+        //     Earlier version used times [0, 0.08, 0.22] across the full
+        //     section scroll. Motion v12 didn't fully apply opacity when
+        //     the times array stopped short of 1 — y animated to its
+        //     final value but opacity stayed at 1. Standard 0..1 times
+        //     plus a tighter scroll() offset works correctly.
+        const intro = section.querySelector<HTMLElement>('[data-grid-intro]');
+        if (intro) {
+          scroll(
+            animate(
+              intro,
+              { opacity: [1, 1, 0] },
+              {
+                times: [0, 0.36, 1],
+                ease: power1InOut as any,
+              },
+            ),
+            {
+              target: section,
+              offset: ['start start', '22% start'] as any,
+            },
+          );
+          scroll(
+            animate(
+              intro,
+              { y: ['0px', '0px', '-24px'] },
+              {
+                times: [0, 0.36, 1],
+                ease: power1InOut as any,
+              },
+            ),
+            {
+              target: section,
+              offset: ['start start', '22% start'] as any,
+            },
+          );
+        }
       });
     }
+  }
+
+  // Click handler for the scroll-hint pill — smooth-scroll past the
+  // section so the user immediately sees the grid morph kick in.
+  // Wired regardless of reduceMotion (the button is also a UX hint
+  // about scroll direction, not just decorative).
+  const introBtn = document.querySelector<HTMLButtonElement>('[data-grid-intro-scroll]');
+  const sectionForBtn = document.querySelector<HTMLElement>('[data-grid-section]');
+  if (introBtn && sectionForBtn) {
+    introBtn.addEventListener('click', () => {
+      // Scroll one viewport down — far enough that the scaler is well
+      // into its shrink phase and the user can see "scrolling does
+      // something". Don't jump to end-of-section: the user came here
+      // to see the morph, not skip it.
+      const targetY =
+        sectionForBtn.getBoundingClientRect().top +
+        window.scrollY +
+        window.innerHeight * 1.2;
+      window.scrollTo({
+        top: targetY,
+        behavior: 'smooth',
+      });
+    });
   }
 </script>

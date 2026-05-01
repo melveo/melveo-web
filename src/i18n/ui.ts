@@ -37,6 +37,7 @@ export const ui = {
     'gridMorph.headlineLine1': 'Pojďme',
     'gridMorph.headlineLine2': 'scrollovat.',
     'gridMorph.subline': 'Tým, trenér, zázemí — všechno v jedné aplikaci.',
+    'gridMorph.scrollHint': 'Scrolovat',
 
     // Stage 3 — gooey punctuation. Split into two parts so the
     // "Synced." word can be coloured with brand cyan.
@@ -46,9 +47,9 @@ export const ui = {
     // Stage 3.75 — scroll-timeline word highlight (Daniel Haim codepen)
     'wordScroll.prefix': 'Spojí',
     'wordScroll.screenReader':
-      'Spojí check-iny, hráče, trenéry, sessions, docházku, zátěž, coach board, rozhodnutí a celý klub.',
+      'Spojí check-iny, hráče, trenéry, sessions, docházku, zátěž, RPE, wellness, coach board, rozhodnutí, plán, komunikaci, sezónu, data a celý klub.',
     'wordScroll.words':
-      'check-iny.|hráče.|trenéry.|sessions.|docházku.|zátěž.|coach board.|rozhodnutí.|celý klub.',
+      'check-iny.|hráče.|trenéry.|sessions.|docházku.|zátěž.|RPE.|wellness.|coach board.|rozhodnutí.|plán.|komunikaci.|sezónu.|data.|celý klub.',
 
     // Stage 4 — wellness
     'wellness.eyebrow': 'RÁNO · 30 SEKUND',
@@ -145,15 +146,16 @@ export const ui = {
     'gridMorph.headlineLine1': "Let's",
     'gridMorph.headlineLine2': 'scroll.',
     'gridMorph.subline': 'Team, coach, ops — all in one app.',
+    'gridMorph.scrollHint': 'Scroll',
 
     'gooey.headlinePrefix': 'Coach + player.',
     'gooey.headlineAccent': 'Synced.',
 
     'wordScroll.prefix': 'Connects',
     'wordScroll.screenReader':
-      'Connects check-ins, players, coaches, sessions, attendance, load, coach board, decisions, and the whole club.',
+      'Connects check-ins, players, coaches, sessions, attendance, load, RPE, wellness, coach board, decisions, planning, communication, season, data, and the whole club.',
     'wordScroll.words':
-      'check-ins.|players.|coaches.|sessions.|attendance.|load.|coach board.|decisions.|the whole club.',
+      'check-ins.|players.|coaches.|sessions.|attendance.|load.|RPE.|wellness.|coach board.|decisions.|planning.|communication.|season.|data.|the whole club.',
 
     'wellness.eyebrow': 'MORNING · 30 SECONDS',
     'wellness.headline': '5-axis check-in.',
