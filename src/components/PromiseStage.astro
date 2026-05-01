@@ -99,27 +99,52 @@ const t = useTranslations(lang);
 
   /*
     Endpoints — anchored at ±130 in viewBox space. The cx attribute
-    on each <circle> already places them; we just add a subtle
-    breathing scale via transform so they don't feel frozen between
-    shuttle visits. transform-origin must be the circle's own centre
-    (not 0,0) so the scale doesn't drift them across the canvas.
-    The two endpoints breathe counter-phased (0% / 50%) so they
-    don't pulse in lockstep — reads as two independent clients.
+    on each <circle> already places them; we add a scale animation
+    SYNCED to the shuttle's 1.8 s round trip so each endpoint visibly
+    "absorbs" the shuttle: pulses up the moment the shuttle docks,
+    then pulls back slightly as it leaves (elastic recoil), then
+    settles to idle while the shuttle's away on the other side.
+    User feedback 2026-05-01.
+
+    transform-box: fill-box pins transform-origin to the circle's own
+    centre — without it, transforms reference the SVG's 0,0 and the
+    blob drifts across the canvas instead of scaling in place.
+
+    The right endpoint runs the same keyframes with a -0.9 s phase
+    offset (= half the cycle) so its peak hits exactly when the
+    shuttle reaches the right dock at the 50 % mark of the shuttle's
+    cycle.
   */
   .promise-ball--left {
     transform-box: fill-box;
     transform-origin: center;
-    animation: promise-breathe 3.2s ease-in-out infinite;
+    animation: promise-absorb 1.8s ease-in-out infinite;
   }
   .promise-ball--right {
     transform-box: fill-box;
     transform-origin: center;
-    animation: promise-breathe 3.2s ease-in-out -1.6s infinite;
+    animation: promise-absorb 1.8s ease-in-out -0.9s infinite;
   }
 
-  @keyframes promise-breathe {
-    0%, 100% { transform: scale(1); }
-    50% { transform: scale(1.06); }
+  /*
+    promise-absorb keyframes (1.8 s cycle, matches shuttle):
+      0 %    → 1.12  (shuttle docks — peak absorption pulse)
+      10 %   → 1.10  (briefly hold the peak)
+      25 %   → 0.94  (shuttle leaves — elastic recoil shrink)
+      45 %   → 1.00  (recovered to idle)
+      85 %   → 1.00  (still idle, shuttle on the other side)
+      100 %  → 1.12  (shuttle docks again — cycle restarts)
+
+    The 0 %/100 % values must match (animation loops) — both at peak.
+    The recoil dip (0.94) at 25 % is what gives the "data leaves"
+    feel; without it the endpoint would just deflate, not recoil.
+  */
+  @keyframes promise-absorb {
+    0%, 100% { transform: scale(1.12); }
+    10% { transform: scale(1.10); }
+    25% { transform: scale(0.94); }
+    45% { transform: scale(1.00); }
+    85% { transform: scale(1.00); }
   }
 
   /*
