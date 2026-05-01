@@ -40,12 +40,19 @@ export const ui = {
     'gridMorph.scrollHint': 'Scrolovat',
 
     // Stage 2/3 — tech-card labels overlaid on the photo grid
+    // Each card maps to a concrete Melveo product feature (user
+    // feedback 2026-05-01: previous generic labels could've been on
+    // any SaaS — these are Melveo-specific). 8 cards covering the
+    // full daily flow: morning ritual → training → coach reaction →
+    // billing/privacy promise.
+    'gridCard.checkin': '5osý check-in',
+    'gridCard.sessions': 'Sessions',
     'gridCard.attendance': 'Docházka',
-    'gridCard.communication': 'Komunikace',
-    'gridCard.security': 'Bezpečnost',
-    'gridCard.schedule': 'Plán',
-    'gridCard.stats': 'Statistiky',
-    'gridCard.team': 'Tým',
+    'gridCard.load': 'Zátěž & RPE',
+    'gridCard.coachBoard': 'Coach board',
+    'gridCard.recovery': 'Regenerace',
+    'gridCard.decisions': 'Rozhodnutí',
+    'gridCard.privacy': 'Privacy hráče',
 
     // Stage 3 — gooey punctuation. Split into two parts so the
     // "Synced." word can be coloured with brand cyan.
@@ -73,8 +80,6 @@ export const ui = {
     // the cursor sweeping across.
     'orb.primary': 'Pro celý klub.',
     'orb.secondary': 'Pro každého hráče.',
-    'orb.tiltCta': 'Aktivovat náklon →',
-    'orb.tiltActive': 'Náklon aktivní · náhni telefonem',
 
     // Stage 5.5 — particle statement after the club/player reveal.
     'particles.eyebrow': 'JEDEN SYSTÉM',
@@ -166,12 +171,15 @@ export const ui = {
     'gridMorph.subline': 'Team, coach, ops — all in one app.',
     'gridMorph.scrollHint': 'Scroll',
 
+    // 8 Melveo-specific feature cards (matches CS keys above)
+    'gridCard.checkin': '5-axis check-in',
+    'gridCard.sessions': 'Sessions',
     'gridCard.attendance': 'Attendance',
-    'gridCard.communication': 'Messaging',
-    'gridCard.security': 'Security',
-    'gridCard.schedule': 'Schedule',
-    'gridCard.stats': 'Stats',
-    'gridCard.team': 'Team',
+    'gridCard.load': 'Load & RPE',
+    'gridCard.coachBoard': 'Coach board',
+    'gridCard.recovery': 'Recovery',
+    'gridCard.decisions': 'Decisions',
+    'gridCard.privacy': 'Player privacy',
 
     'gooey.headlinePrefix': 'Coach + player.',
     'gooey.headlineAccent': 'Synced.',
@@ -190,8 +198,6 @@ export const ui = {
 
     'orb.primary': 'For the whole club.',
     'orb.secondary': 'For every player.',
-    'orb.tiltCta': 'Enable tilt →',
-    'orb.tiltActive': 'Tilt active · move your phone',
 
     'particles.eyebrow': 'ONE SYSTEM',
     'particles.headlinePrefix': 'Everything for',
