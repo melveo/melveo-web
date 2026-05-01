@@ -142,15 +142,39 @@ const hueStep = (hueEnd - hueStart) / Math.max(1, words.length - 1);
     text-shadow: 0 14px 28px rgba(0, 0, 0, 0.34);
   }
 
+  /*
+    Viewport is sized to ONE line-height — this is the alignment
+    anchor for the active word. We let the parent flex container's
+    `align-items: center` line up the viewport with the prefix
+    directly, so the two never drift apart regardless of how iOS
+    Safari resolves the sticky pin's `100vh` against its dynamic
+    visual viewport (URL-bar collapse on production caused the old
+    `height: 100%; top: 50%` pattern to misalign the active word
+    above the prefix baseline — fix 2026-05-01).
+
+    Items above + below the active one still need to be visible
+    (faded list flowing through the centre), so overflow stays
+    `visible`.
+  */
   .word-scroll-stage__list-viewport {
     position: relative;
     flex: 0 0 auto;
-    height: 100%;
+    height: 1.25em;
+    align-self: center;
     min-width: 0;
+    overflow: visible;
   }
 
+  /*
+    List is absolutely positioned inside the 1.25em viewport. The
+    active item lands centred on the viewport's vertical centre by
+    translating up `-0.625em - active_index * 1.25em` (half the
+    item height + one item height per index). With the viewport
+    itself flex-centred next to the prefix, this guarantees the
+    active word's baseline lines up with the prefix baseline.
+  */
   .word-scroll-stage__list {
-    position: relative;
+    position: absolute;
     top: 50%;
     left: 0;
     width: max-content;
