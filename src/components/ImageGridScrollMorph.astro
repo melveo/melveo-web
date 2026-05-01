@@ -63,9 +63,25 @@ const t = useTranslations(lang);
       the App Store + Pricing CTAs). Smooth-scrolls past the section
       on click.
     */}
+    {/* Black scroll-reveal layer — sits above the scaler photo and
+        below the wordmark. Starts opaque-ish, fades to 0 across the
+        first ~22 % of section scroll, so the photo "develops in" as
+        the user scrolls. */}
+    <div class="grid-intro-darken" data-grid-intro-darken aria-hidden="true"></div>
+
     <div class="grid-intro" data-grid-intro>
-      <p class="grid-intro__eyebrow">{t('gridMorph.subline')}</p>
-      <h2 class="grid-intro__wordmark" aria-label="Melveo">Melveo</h2>
+      <div class="grid-intro__center">
+        <p class="grid-intro__eyebrow">{t('gridMorph.subline')}</p>
+        {/* Brand wordmark — always lowercase visually
+            (text-transform on the CSS rule + lowercase string).
+            Two stacked spans so we can layer a soft cyan-tinted blur
+            behind a sharper foreground for a "liquid glass etched
+            cyan" feel. */}
+        <h2 class="grid-intro__wordmark" aria-label="Melveo">
+          <span class="grid-intro__wordmark-blur" aria-hidden="true">melveo</span>
+          <span class="grid-intro__wordmark-fill">melveo</span>
+        </h2>
+      </div>
       <button
         type="button"
         class="hero-pill grid-intro__pill"
@@ -376,10 +392,21 @@ const t = useTranslations(lang);
   }
 
   /* ─── Intro overlay ─────────────────────────────────────────────
-     Brand wordmark + scroll-hint button on top of the full-bleed
-     scaler photo. Pinned to the centre of the sticky .content,
-     above the grid (z-index 3 — grid layers + scaler are at z-index
-     0–2). Faded out by Motion as the section scrolls past 22 %. */
+     Pinned to the centre of the sticky .content. Stacking inside
+     .content (which is z-index 1):
+       .grid                  → z-index 1 (default)
+       .grid-intro-darken     → z-index 2 (black layer over photo)
+       .grid-intro            → z-index 3 (wordmark + pill on top)
+     All three faded by Motion across the first 22 % of section scroll. */
+
+  .image-grid-section .grid-intro-darken {
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    background: rgba(0, 0, 0, 0.72);
+    pointer-events: none;
+  }
+
   .image-grid-section .grid-intro {
     position: absolute;
     inset: 0;
@@ -388,52 +415,113 @@ const t = useTranslations(lang);
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: clamp(1.5rem, 3vw, 2.5rem);
     padding: clamp(1rem, 4vw, 3rem);
     text-align: center;
     pointer-events: none; /* re-enabled on the pill below */
-    /* Soft vertical vignette behind the text/pill so they stay
-       readable over the photo regardless of which frame the photo
-       lands on. */
-    background: radial-gradient(
-      ellipse at center,
-      rgba(0, 0, 0, 0.55) 0%,
-      rgba(0, 0, 0, 0.35) 30%,
-      transparent 65%
-    );
+  }
+
+  /* Eyebrow + wordmark cluster — stays vertically centred even when
+     the pill moves to the bottom (per user request 2026-05-01:
+     "tlačítko scrollovat bych dal jakoby dolů doprostřed"). */
+  .image-grid-section .grid-intro__center {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: clamp(0.75rem, 1.6vw, 1.5rem);
+    max-width: min(92vw, 1400px);
   }
 
   .image-grid-section .grid-intro__eyebrow {
     margin: 0;
-    max-width: 32rem;
+    max-width: 38rem;
     font-size: clamp(0.95rem, 1.6vw, 1.2rem);
     line-height: 1.5;
+    letter-spacing: 0.01em;
     color: var(--color-text-secondary);
     text-wrap: balance;
-    text-shadow: 0 2px 12px rgba(0, 0, 0, 0.7);
+    text-shadow: 0 2px 14px rgba(0, 0, 0, 0.65);
   }
 
+  /*
+    Wordmark — half-section size, cyan-gradient fill, glass-etched
+    feel. Two stacked spans:
+      .__wordmark-blur — sits behind, blurred + cyan-tinted, gives
+                         the "halo emission" beneath the glyphs
+      .__wordmark-fill — sharp foreground, cyan→white→cyan vertical
+                         gradient via background-clip:text, plus a
+                         hairline white text-stroke that reads as a
+                         glass etch on the rim
+    Always lowercase per user request 2026-05-01: "ten nadpis melveo
+    musí být vždy všechno malé písmo".
+  */
   .image-grid-section .grid-intro__wordmark {
+    position: relative;
     margin: 0;
     font-family: var(--font-display);
-    font-weight: 700;
-    font-size: clamp(4rem, 14vw, 11rem);
-    line-height: 0.9;
-    letter-spacing: -0.05em;
-    color: var(--color-text-primary);
-    /* Cyan halo behind the wordmark — same family as the icon glow
-       on the tech cards. Drop shadow first for legibility on busy
-       photos, then two cyan layers for emission. */
-    text-shadow:
-      0 4px 24px rgba(0, 0, 0, 0.55),
-      0 0 18px rgba(0, 240, 255, 0.18),
-      0 0 60px rgba(0, 240, 255, 0.12);
+    font-weight: 800;
+    /* Half-the-section size per user request 2026-05-01 ("hodně
+       větší, klidně přes půl sekce"). 30vw lands the lowercase
+       glyphs at ~50 % of viewport height on most ratios. */
+    font-size: clamp(7rem, 30vw, 24rem);
+    line-height: 0.85;
+    letter-spacing: -0.07em;
+    text-transform: lowercase;
+    /* Reset display for the spans we layer on top */
+    display: inline-grid;
   }
 
+  .image-grid-section .grid-intro__wordmark-blur,
+  .image-grid-section .grid-intro__wordmark-fill {
+    grid-column: 1;
+    grid-row: 1;
+    display: block;
+  }
+
+  .image-grid-section .grid-intro__wordmark-blur {
+    color: rgba(0, 240, 255, 0.55);
+    filter: blur(22px);
+    transform: translateY(2px);
+    /* Stronger cyan presence in the blurred backing. */
+    text-shadow:
+      0 0 30px rgba(0, 240, 255, 0.45),
+      0 0 90px rgba(0, 240, 255, 0.28);
+  }
+
+  .image-grid-section .grid-intro__wordmark-fill {
+    /* Vertical gradient: brighter cyan-white at top, deeper cyan at
+       middle, dim teal at bottom — reads as a curved glass surface
+       catching light. */
+    background: linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.9) 0%,
+      var(--color-accent-primary-subtle) 22%,
+      var(--color-accent-primary) 55%,
+      color-mix(in srgb, var(--color-accent-primary) 65%, var(--color-bg-canvas)) 100%
+    );
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    /* Hairline white outline — the "etch" on the rim of the glass. */
+    -webkit-text-stroke: 0.5px rgba(255, 255, 255, 0.22);
+    /* Drop-shadow chain works through background-clip:text where
+       text-shadow doesn't. Tight inner halo + broad atmospheric
+       cyan + dark separator for contrast against the photo+darken. */
+    filter:
+      drop-shadow(0 0 14px rgba(0, 240, 255, 0.5))
+      drop-shadow(0 0 42px rgba(0, 240, 255, 0.3))
+      drop-shadow(0 12px 30px rgba(0, 0, 0, 0.55));
+  }
+
+  /* Scroll-hint pill anchored to the bottom-centre of the overlay
+     (was below the wordmark — moved per user request 2026-05-01).
+     Pointer-events re-enabled here only; the rest of .grid-intro
+     ignores clicks so the user can keep scrolling through it. */
   .image-grid-section .grid-intro__pill {
+    position: absolute;
+    bottom: clamp(2rem, 7vh, 5rem);
+    left: 50%;
+    transform: translateX(-50%);
     pointer-events: auto;
-    /* hero-pill min-width 12rem is right; just tighten the padding
-       a touch so the chevron sits comfortably next to the label. */
     padding-inline: 1.75rem;
     border: none;
     cursor: pointer;
@@ -954,6 +1042,28 @@ const t = useTranslations(lang);
             {
               target: section,
               offset: ['start start', '22% start'] as any,
+            },
+          );
+        }
+
+        // ─── Black scroll-reveal: photo "develops in" ──────────────────
+        //     The .grid-intro-darken layer sits over the scaler photo
+        //     and fades from its initial 0.72 opacity down to 0. We
+        //     stretch the fade across 0–28 % of the section (a touch
+        //     longer than the wordmark's 22 %) so the photo keeps
+        //     brightening for a moment after the wordmark has cleared
+        //     — gives the morph a "reveal then shrink" rhythm.
+        const darken = section.querySelector<HTMLElement>('[data-grid-intro-darken]');
+        if (darken) {
+          scroll(
+            animate(
+              darken,
+              { opacity: [1, 0] },
+              { ease: power1InOut as any },
+            ),
+            {
+              target: section,
+              offset: ['start start', '28% start'] as any,
             },
           );
         }
