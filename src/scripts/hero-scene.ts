@@ -1,12 +1,15 @@
 /**
  * Hero scene — TC5550 CodePen metaballs port.
  *
- * This intentionally mirrors the supplied CodePen logic:
+ * This keeps the supplied CodePen metaball mechanics:
  * - internal canvas resolution is viewport * 0.75
  * - 30 metaballs
  * - radius/velocity formulas match the pen
- * - fragment shader color and threshold logic match the pen
+ * - fragment shader threshold logic matches the pen
  * - mouse coordinates are not used for motion
+ *
+ * The color ramp is remapped to Melveo's cyan/teal palette and the
+ * animation speed toggles on hero-background click.
  */
 
 interface MountOptions {
@@ -44,6 +47,11 @@ const float HEIGHT = ${height >> 0}.0;
 
 uniform vec3 metaballs[${NUM_METABALLS}];
 
+const vec3 BRAND_CYAN = vec3(0.0, 0.941176, 1.0);
+const vec3 BRAND_ICE = vec3(0.45, 0.86, 0.90);
+const vec3 BRAND_TEAL = vec3(0.05, 0.56, 0.62);
+const vec3 BRAND_DEEP = vec3(0.0, 0.08, 0.1);
+
 void main() {
   float x = gl_FragCoord.x;
   float y = gl_FragCoord.y;
@@ -59,9 +67,11 @@ void main() {
   }
 
   if (sum >= 0.99) {
+    vec3 brandRamp = mix(BRAND_TEAL, BRAND_CYAN, x / WIDTH);
+    brandRamp = mix(brandRamp, BRAND_ICE, (y / HEIGHT) * 0.28);
     gl_FragColor = vec4(
       mix(
-        vec3(x / WIDTH, y / HEIGHT, 1.0),
+        brandRamp,
         vec3(0.0, 0.0, 0.0),
         max(0.0, 1.0 - (sum - 0.99) * 100.0)
       ),
@@ -70,7 +80,13 @@ void main() {
     return;
   }
 
-  gl_FragColor = vec4(0.0, 0.0, 0.0, 1.0);
+  vec2 uv = vec2(x / WIDTH, y / HEIGHT);
+  vec2 centered = uv - 0.5;
+  centered.x *= WIDTH / HEIGHT;
+  float ambient = smoothstep(0.18, 0.99, sum);
+  float radial = smoothstep(0.82, 0.0, length(centered + vec2(0.22, -0.08)));
+  vec3 glow = BRAND_DEEP * 0.35 + BRAND_TEAL * radial * 0.07 + BRAND_CYAN * ambient * 0.035;
+  gl_FragColor = vec4(glow, 1.0);
 }
 `;
 }
@@ -139,8 +155,8 @@ export function mountHeroScene({ canvas }: MountOptions): SceneHandle | null {
   if (!context) return null;
   const gl: WebGLRenderingContext = context;
 
-  const width = Math.max(1, window.innerWidth * 0.75);
-  const height = Math.max(1, window.innerHeight * 0.75);
+  let width = Math.max(1, window.innerWidth * 0.75);
+  let height = Math.max(1, window.innerHeight * 0.75);
   canvas.width = width;
   canvas.height = height;
   gl.viewport(0, 0, canvas.width, canvas.height);
@@ -159,7 +175,7 @@ export function mountHeroScene({ canvas }: MountOptions): SceneHandle | null {
   }
 
   const vertexShader = createShader(gl, gl.VERTEX_SHADER, VERTEX_SHADER);
-  const fragmentShader = createShader(gl, gl.FRAGMENT_SHADER, fragmentShaderSource(width, height));
+  let fragmentShader = createShader(gl, gl.FRAGMENT_SHADER, fragmentShaderSource(width, height));
 
   if (!vertexShader || !fragmentShader) {
     if (vertexShader) gl.deleteShader(vertexShader);
@@ -167,7 +183,7 @@ export function mountHeroScene({ canvas }: MountOptions): SceneHandle | null {
     return null;
   }
 
-  const program = createProgram(gl, vertexShader, fragmentShader);
+  let program = createProgram(gl, vertexShader, fragmentShader);
   if (!program) {
     gl.deleteShader(vertexShader);
     gl.deleteShader(fragmentShader);
@@ -193,7 +209,7 @@ export function mountHeroScene({ canvas }: MountOptions): SceneHandle | null {
   gl.bindBuffer(gl.ARRAY_BUFFER, vertexDataBuffer);
   gl.bufferData(gl.ARRAY_BUFFER, vertexData, gl.STATIC_DRAW);
 
-  const positionHandle = gl.getAttribLocation(program, 'position');
+  let positionHandle = gl.getAttribLocation(program, 'position');
   if (positionHandle < 0) {
     gl.deleteBuffer(vertexDataBuffer);
     gl.deleteProgram(program);
@@ -212,7 +228,7 @@ export function mountHeroScene({ canvas }: MountOptions): SceneHandle | null {
     0,
   );
 
-  const metaballsHandle = gl.getUniformLocation(program, 'metaballs');
+  let metaballsHandle = gl.getUniformLocation(program, 'metaballs');
   if (!metaballsHandle) {
     gl.deleteBuffer(vertexDataBuffer);
     gl.deleteProgram(program);
@@ -224,6 +240,73 @@ export function mountHeroScene({ canvas }: MountOptions): SceneHandle | null {
   let running = true;
   let rafId = 0;
   let canvasInView = true;
+  let targetSpeed = 1;
+  let speed = 1;
+  const dataToSendToGPU = new Float32Array(3 * NUM_METABALLS);
+
+  function rebuildProgramForSize() {
+    const nextWidth = Math.max(1, window.innerWidth * 0.75);
+    const nextHeight = Math.max(1, window.innerHeight * 0.75);
+
+    if (Math.abs(nextWidth - width) < 1 && Math.abs(nextHeight - height) < 1) return;
+
+    width = nextWidth;
+    height = nextHeight;
+    canvas.width = width;
+    canvas.height = height;
+    gl.viewport(0, 0, canvas.width, canvas.height);
+
+    const nextFragmentShader = createShader(gl, gl.FRAGMENT_SHADER, fragmentShaderSource(width, height));
+    if (!nextFragmentShader) return;
+
+    const nextProgram = createProgram(gl, vertexShader, nextFragmentShader);
+    if (!nextProgram) {
+      gl.deleteShader(nextFragmentShader);
+      return;
+    }
+
+    const nextPositionHandle = gl.getAttribLocation(nextProgram, 'position');
+    const nextMetaballsHandle = gl.getUniformLocation(nextProgram, 'metaballs');
+    if (nextPositionHandle < 0 || !nextMetaballsHandle) {
+      gl.deleteProgram(nextProgram);
+      gl.deleteShader(nextFragmentShader);
+      return;
+    }
+
+    gl.deleteProgram(program);
+    gl.deleteShader(fragmentShader);
+    fragmentShader = nextFragmentShader;
+    program = nextProgram;
+    positionHandle = nextPositionHandle;
+    metaballsHandle = nextMetaballsHandle;
+    gl.useProgram(program);
+
+    gl.enableVertexAttribArray(nextPositionHandle);
+    gl.bindBuffer(gl.ARRAY_BUFFER, vertexDataBuffer);
+    gl.vertexAttribPointer(nextPositionHandle, 2, gl.FLOAT, false, 2 * 4, 0);
+
+    for (const metaball of metaballs) {
+      metaball.x = Math.min(Math.max(metaball.x, metaball.r), width - metaball.r);
+      metaball.y = Math.min(Math.max(metaball.y, metaball.r), height - metaball.r);
+    }
+  }
+
+  function onPointerDown(event: PointerEvent) {
+    const target = event.target;
+    if (target instanceof Element && target.closest('a, button, input, textarea, select, label')) {
+      return;
+    }
+
+    const rect = canvas.getBoundingClientRect();
+    const insideHero =
+      event.clientX >= rect.left &&
+      event.clientX <= rect.right &&
+      event.clientY >= rect.top &&
+      event.clientY <= rect.bottom;
+
+    if (!insideHero) return;
+    targetSpeed = targetSpeed > 1 ? 1 : 2.8;
+  }
 
   function stopFrame() {
     if (!rafId) return;
@@ -240,12 +323,14 @@ export function mountHeroScene({ canvas }: MountOptions): SceneHandle | null {
     rafId = 0;
     if (!running || !canvasInView) return;
 
+    speed += (targetSpeed - speed) * 0.08;
+
     for (let i = 0; i < NUM_METABALLS; i += 1) {
       const metaball = metaballs[i];
       if (!metaball) continue;
 
-      metaball.x += metaball.vx;
-      metaball.y += metaball.vy;
+      metaball.x += metaball.vx * speed;
+      metaball.y += metaball.vy * speed;
 
       if (metaball.x < metaball.r || metaball.x > width - metaball.r) {
         metaball.vx *= -1;
@@ -255,7 +340,6 @@ export function mountHeroScene({ canvas }: MountOptions): SceneHandle | null {
       }
     }
 
-    const dataToSendToGPU = new Float32Array(3 * NUM_METABALLS);
     for (let i = 0; i < NUM_METABALLS; i += 1) {
       const baseIndex = 3 * i;
       const metaball = metaballs[i];
@@ -271,6 +355,9 @@ export function mountHeroScene({ canvas }: MountOptions): SceneHandle | null {
 
     scheduleFrame();
   }
+
+  window.addEventListener('resize', rebuildProgramForSize, { passive: true });
+  window.addEventListener('pointerdown', onPointerDown, { passive: true });
 
   const viewportObserver =
     'IntersectionObserver' in window
@@ -304,6 +391,8 @@ export function mountHeroScene({ canvas }: MountOptions): SceneHandle | null {
   function dispose() {
     running = false;
     stopFrame();
+    window.removeEventListener('resize', rebuildProgramForSize);
+    window.removeEventListener('pointerdown', onPointerDown);
     document.removeEventListener('visibilitychange', onVisibilityChange);
     viewportObserver?.disconnect();
     gl.deleteBuffer(vertexDataBuffer);
