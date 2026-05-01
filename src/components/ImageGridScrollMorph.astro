@@ -48,10 +48,24 @@
       <!-- Layer 1: Outer edges (photos + tech cards, 3 left + 3 right) -->
       <div class="layer">
         <div>
-          <img src="/images/melveo-grid/coach-player-wide-crop.jpg" alt="" loading="lazy" decoding="async" />
+          <figure class="grid-photo glass-card">
+            <span class="glass-filter" aria-hidden="true" />
+            <span class="glass-overlay" aria-hidden="true" />
+            <span class="glass-specular" aria-hidden="true" />
+            <div class="glass-content">
+              <img src="/images/melveo-grid/coach-player-wide-crop.jpg" alt="" loading="lazy" decoding="async" />
+            </div>
+          </figure>
         </div>
         <div>
-          <img src="/images/melveo-grid/team-sideline-wide.jpg" alt="" loading="lazy" decoding="async" />
+          <figure class="grid-photo glass-card">
+            <span class="glass-filter" aria-hidden="true" />
+            <span class="glass-overlay" aria-hidden="true" />
+            <span class="glass-specular" aria-hidden="true" />
+            <div class="glass-content">
+              <img src="/images/melveo-grid/team-sideline-wide.jpg" alt="" loading="lazy" decoding="async" />
+            </div>
+          </figure>
         </div>
         <div>
           <article class="tech-card glass-card" aria-label="Docházka">
@@ -73,10 +87,24 @@
           </article>
         </div>
         <div>
-          <img src="/images/melveo-grid/player-mobile.jpg" alt="" loading="lazy" decoding="async" />
+          <figure class="grid-photo glass-card">
+            <span class="glass-filter" aria-hidden="true" />
+            <span class="glass-overlay" aria-hidden="true" />
+            <span class="glass-specular" aria-hidden="true" />
+            <div class="glass-content">
+              <img src="/images/melveo-grid/player-mobile.jpg" alt="" loading="lazy" decoding="async" />
+            </div>
+          </figure>
         </div>
         <div>
-          <img src="/images/melveo-grid/equipment-detail.jpg" alt="" loading="lazy" decoding="async" />
+          <figure class="grid-photo glass-card">
+            <span class="glass-filter" aria-hidden="true" />
+            <span class="glass-overlay" aria-hidden="true" />
+            <span class="glass-specular" aria-hidden="true" />
+            <div class="glass-content">
+              <img src="/images/melveo-grid/equipment-detail.jpg" alt="" loading="lazy" decoding="async" />
+            </div>
+          </figure>
         </div>
         <div>
           <article class="tech-card glass-card" aria-label="Komunikace">
@@ -119,10 +147,24 @@
           </article>
         </div>
         <div>
-          <img src="/images/melveo-grid/coach-player-review.jpg" alt="" loading="lazy" decoding="async" />
+          <figure class="grid-photo glass-card">
+            <span class="glass-filter" aria-hidden="true" />
+            <span class="glass-overlay" aria-hidden="true" />
+            <span class="glass-specular" aria-hidden="true" />
+            <div class="glass-content">
+              <img src="/images/melveo-grid/coach-player-review.jpg" alt="" loading="lazy" decoding="async" />
+            </div>
+          </figure>
         </div>
         <div>
-          <img src="/images/melveo-grid/coach-field-tablet.jpg" alt="" loading="lazy" decoding="async" />
+          <figure class="grid-photo glass-card">
+            <span class="glass-filter" aria-hidden="true" />
+            <span class="glass-overlay" aria-hidden="true" />
+            <span class="glass-specular" aria-hidden="true" />
+            <div class="glass-content">
+              <img src="/images/melveo-grid/coach-field-tablet.jpg" alt="" loading="lazy" decoding="async" />
+            </div>
+          </figure>
         </div>
         <div>
           <article class="tech-card tech-card--schedule glass-card" aria-label="Schedule">
@@ -148,10 +190,24 @@
           </article>
         </div>
         <div>
-          <img src="/images/melveo-grid/team-huddle.jpg" alt="" loading="lazy" decoding="async" />
+          <figure class="grid-photo glass-card">
+            <span class="glass-filter" aria-hidden="true" />
+            <span class="glass-overlay" aria-hidden="true" />
+            <span class="glass-specular" aria-hidden="true" />
+            <div class="glass-content">
+              <img src="/images/melveo-grid/team-huddle.jpg" alt="" loading="lazy" decoding="async" />
+            </div>
+          </figure>
         </div>
         <div>
-          <img src="/images/melveo-grid/coach-player-close.jpg" alt="" loading="lazy" decoding="async" />
+          <figure class="grid-photo glass-card">
+            <span class="glass-filter" aria-hidden="true" />
+            <span class="glass-overlay" aria-hidden="true" />
+            <span class="glass-specular" aria-hidden="true" />
+            <div class="glass-content">
+              <img src="/images/melveo-grid/coach-player-close.jpg" alt="" loading="lazy" decoding="async" />
+            </div>
+          </figure>
         </div>
       </div>
 
@@ -361,69 +417,50 @@
     grid-row: -1;
   }
 
-  .image-grid-section .grid img,
+  /* Both photos and tech cards are now .glass-card hosts → identical
+     recipe (4 layers + dual drop shadow + specular rim). The radius
+     is inherited from .glass-card (1.75 rem, same as pricing cards)
+     per user request 2026-05-01: "úplně stejně jako v pricingu".
+     The cell-fitting rules just give them their grid aspect ratio. */
+  .image-grid-section .grid-photo,
   .image-grid-section .tech-card {
     width: 100%;
     aspect-ratio: 4 / 5;
-    border-radius: 1rem;
     display: block;
   }
 
-  /* ─── Photo glass-frame ─────────────────────────────────────────
-     The grid photos pick up the same liquid-glass language as the
-     tech cards by way of a 1 px white inset rim + soft drop shadow +
-     a pale cyan halo. Lighter than a full 4-layer glass-card host
-     because <img> is opaque content — we just need a frame. */
-  .image-grid-section .grid img {
-    object-fit: cover;
-    box-shadow:
-      inset 0 0 0 1px rgba(255, 255, 255, 0.16),
-      inset 1px 1px 0 rgba(255, 255, 255, 0.18),
-      0 6px 6px rgba(0, 0, 0, 0.28),
-      0 18px 44px -22px rgba(0, 240, 255, 0.22);
-  }
-
-  /* Tech cards inherit .glass-card from global.css (4-layer recipe).
-     We round the radius down to 1rem so it fits the grid cell, drop
-     the global hover transform (the cards live inside the scroll-
-     animated grid where individual hover is awkward), and override
-     the .glass-content padding/centering so the icon + title + body
-     stack reads cleanly. */
-  .image-grid-section .tech-card {
-    border-radius: 1rem;
-  }
+  /* Glass cards in the grid don't lift on hover — they live inside
+     the scroll-driven scale + opacity animation, so individual hover
+     fires inconsistently and the lift conflicts with Motion's transform
+     keyframes. Override the global .glass-card:hover to a no-op. */
+  .image-grid-section .grid-photo.glass-card:hover,
   .image-grid-section .tech-card.glass-card:hover {
     transform: none;
   }
 
+  /* Photo content is the <img> filling the .glass-content. Inherit
+     border-radius so the image clips exactly to the card rim, and
+     the .glass-content has no padding (photo is the frame). */
+  .image-grid-section .grid-photo .glass-content {
+    padding: 0;
+    overflow: hidden;
+    border-radius: inherit;
+  }
+  .image-grid-section .grid-photo img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+
+  /* Tech card content layout — the icon + title + body stack centred
+     inside .glass-content. */
   .image-grid-section .tech-card .glass-content {
     align-items: center;
     justify-content: center;
     text-align: center;
     gap: clamp(0.85rem, 1.3vw, 1.15rem);
     padding: clamp(1rem, 1.8vw, 1.55rem);
-  }
-
-  /* Permanent cyan halo at the bottom-right of each card — separate
-     from the global recipe (which doesn't anchor a halo) because the
-     tech cards animate in/out with the grid, so hover-only effects
-     barely register. The halo lives on the host (z-index above the
-     four glass layers but below .glass-content thanks to inset). */
-  .image-grid-section .tech-card.glass-card::after {
-    content: '';
-    position: absolute;
-    right: -28%;
-    bottom: -22%;
-    width: 78%;
-    aspect-ratio: 1;
-    border-radius: 999px;
-    background: radial-gradient(
-      circle,
-      rgba(0, 240, 255, 0.18),
-      transparent 65%
-    );
-    pointer-events: none;
-    z-index: 0;
   }
 
   /*
@@ -519,8 +556,12 @@
   }
 
   @media (max-width: 640px) {
+    /* On mobile cells are ~ 1/3 viewport wide, so 1.75 rem (28 px)
+       reads as too round. Drop both photo + tech cards to 1.25 rem
+       (still glassy, fits the smaller cell). */
+    .image-grid-section .grid-photo,
     .image-grid-section .tech-card {
-      border-radius: 0.85rem;
+      border-radius: 1.25rem;
     }
 
     .image-grid-section .tech-card .glass-content {
@@ -560,7 +601,9 @@
     left: 50%;
     translate: -50% -50%;
     object-fit: cover;
-    border-radius: 1rem;
+    /* Match the .glass-card radius so the scaler photo lands cleanly
+       into the grid frame at the end of the morph. */
+    border-radius: 1.75rem;
     width: 100%;
     height: 100%;
     /*
