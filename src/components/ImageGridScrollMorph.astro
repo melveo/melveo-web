@@ -64,7 +64,15 @@
             <span class="glass-overlay" aria-hidden="true" />
             <span class="glass-specular" aria-hidden="true" />
             <div class="glass-content">
-              <img src="/images/melveo-grid/team-sideline-wide.jpg" alt="" loading="lazy" decoding="async" />
+              {/* Was team-sideline-wide.jpg (1672×941 landscape) but
+                  cropped to 4:5 it showed only a narrow slice — looked
+                  broken (user feedback 2026-05-01). Swapped for
+                  team-huddle.jpg which is 1122×1402 portrait and fits
+                  the cell cleanly. team-huddle does also appear in
+                  Layer 2 row 5; the two slots sit on opposite layers
+                  + opposite columns so the duplication isn't visually
+                  jarring during the scroll-morph reveal. */}
+              <img src="/images/melveo-grid/team-huddle.jpg" alt="" loading="lazy" decoding="async" />
             </div>
           </figure>
         </div>
@@ -404,12 +412,18 @@
      recipe (4 layers + dual drop shadow + specular rim). The radius
      is inherited from .glass-card (1.75 rem, same as pricing cards)
      per user request 2026-05-01: "úplně stejně jako v pricingu".
-     The cell-fitting rules just give them their grid aspect ratio. */
+     The cell-fitting rules just give them their grid aspect ratio.
+
+     NB: do NOT override `display` here. The global .glass-card rule
+     sets `display: flex; flex-direction: column` so .glass-content
+     (flex: 1) can fill the card and centre its children. An earlier
+     `display: block` here clobbered that and pinned the icon+title
+     to the top of the card (user feedback 2026-05-01: "není to na
+     středu"). */
   .image-grid-section .grid-photo,
   .image-grid-section .tech-card {
     width: 100%;
     aspect-ratio: 4 / 5;
-    display: block;
   }
 
   /* Glass cards in the grid don't lift on hover — they live inside
