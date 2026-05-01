@@ -170,7 +170,7 @@ export function mountHeroScene({ canvas }: MountOptions): SceneHandle | null {
       y: Math.random() * (height - 2 * radius) + radius,
       vx: (Math.random() - 0.5) * 3,
       vy: (Math.random() - 0.5) * 3,
-      r: radius * 0.75,
+      r: radius * 0.78,
     });
   }
 
