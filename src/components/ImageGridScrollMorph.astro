@@ -683,6 +683,27 @@ const t = useTranslations(lang);
     aspect-ratio: 4 / 5;
   }
 
+  /* On phones the grid is height-constrained to the viewport — cells
+     fill their grid track height instead of enforcing the 4/5 aspect.
+     Placed AFTER the base rule above so the cascade resolves to the
+     mobile values when the media query matches. min-height: 0 on the
+     grid cells lets the 1fr rows actually distribute equally — without
+     it, default min-height: auto prevents rows from shrinking below
+     the cell's intrinsic content size. */
+  @media (max-width: 700px) {
+    .image-grid-section .grid > .layer > div,
+    .image-grid-section .grid > .scaler {
+      min-height: 0;
+      height: 100%;
+    }
+    .image-grid-section .grid-photo,
+    .image-grid-section .tech-card {
+      aspect-ratio: auto;
+      height: 100%;
+      min-height: 0;
+    }
+  }
+
   /* Glass cards in the grid don't lift on hover — they live inside
      the scroll-driven scale + opacity animation, so individual hover
      fires inconsistently and the lift conflicts with Motion's transform
