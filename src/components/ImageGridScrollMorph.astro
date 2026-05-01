@@ -135,7 +135,7 @@ const t = useTranslations(lang);
           </figure>
         </div>
         <div>
-          <article class="tech-card glass-card" aria-label="Docházka">
+          <article class="tech-card glass-card" aria-label={t('gridCard.attendance')}>
             <span class="glass-filter" aria-hidden="true" />
             <span class="glass-overlay" aria-hidden="true" />
             <span class="glass-specular" aria-hidden="true" />
@@ -146,7 +146,7 @@ const t = useTranslations(lang);
                 <path d="M8.5 12.5l2 2 4-4.5" />
                 <path d="M8.5 17.5h7" />
               </svg>
-              <h3>Docházka</h3>
+              <h3>{t('gridCard.attendance')}</h3>
             </div>
           </article>
         </div>
@@ -171,7 +171,7 @@ const t = useTranslations(lang);
           </figure>
         </div>
         <div>
-          <article class="tech-card glass-card" aria-label="Komunikace">
+          <article class="tech-card glass-card" aria-label={t('gridCard.communication')}>
             <span class="glass-filter" aria-hidden="true" />
             <span class="glass-overlay" aria-hidden="true" />
             <span class="glass-specular" aria-hidden="true" />
@@ -180,7 +180,7 @@ const t = useTranslations(lang);
                 <path d="M5 5h14a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2h-8l-4 3.5V17H5a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2z" />
                 <path d="M8 9.5h8M8 12.5h5" />
               </svg>
-              <h3>Komunikace</h3>
+              <h3>{t('gridCard.communication')}</h3>
             </div>
           </article>
         </div>
@@ -189,7 +189,7 @@ const t = useTranslations(lang);
       <!-- Layer 2: Inner columns (mixed photos + tech cards) -->
       <div class="layer">
         <div>
-          <article class="tech-card tech-card--security glass-card" aria-label="Bezpečnost">
+          <article class="tech-card tech-card--security glass-card" aria-label={t('gridCard.security')}>
             <span class="glass-filter" aria-hidden="true" />
             <span class="glass-overlay" aria-hidden="true" />
             <span class="glass-specular" aria-hidden="true" />
@@ -200,7 +200,7 @@ const t = useTranslations(lang);
                 <circle class="security-lock__pin" cx="12" cy="14.7" r="1.1" />
                 <path d="M12 15.8v2.4" />
               </svg>
-              <h3>Bezpečnost</h3>
+              <h3>{t('gridCard.security')}</h3>
             </div>
           </article>
         </div>
@@ -225,7 +225,7 @@ const t = useTranslations(lang);
           </figure>
         </div>
         <div>
-          <article class="tech-card tech-card--schedule glass-card" aria-label="Schedule">
+          <article class="tech-card tech-card--schedule glass-card" aria-label={t('gridCard.schedule')}>
             <span class="glass-filter" aria-hidden="true" />
             <span class="glass-overlay" aria-hidden="true" />
             <span class="glass-specular" aria-hidden="true" />
@@ -240,7 +240,7 @@ const t = useTranslations(lang);
                 <circle cx="8.4" cy="17" r="0.9" fill="currentColor" stroke="none" />
                 <circle cx="12" cy="17" r="0.9" fill="currentColor" stroke="none" />
               </svg>
-              <h3>Schedule</h3>
+              <h3>{t('gridCard.schedule')}</h3>
             </div>
           </article>
         </div>
@@ -269,7 +269,7 @@ const t = useTranslations(lang);
       <!-- Layer 3: Center column top + bottom cards -->
       <div class="layer">
         <div>
-          <article class="tech-card glass-card" aria-label="Statistiky">
+          <article class="tech-card glass-card" aria-label={t('gridCard.stats')}>
             <span class="glass-filter" aria-hidden="true" />
             <span class="glass-overlay" aria-hidden="true" />
             <span class="glass-specular" aria-hidden="true" />
@@ -280,12 +280,12 @@ const t = useTranslations(lang);
                 <rect x="16.9" y="10" width="3.6" height="10.5" rx="1.1" />
                 <path d="M3 20.5h18" stroke-width="1.4" />
               </svg>
-              <h3>Statistiky</h3>
+              <h3>{t('gridCard.stats')}</h3>
             </div>
           </article>
         </div>
         <div>
-          <article class="tech-card glass-card" aria-label="Tým">
+          <article class="tech-card glass-card" aria-label={t('gridCard.team')}>
             <span class="glass-filter" aria-hidden="true" />
             <span class="glass-overlay" aria-hidden="true" />
             <span class="glass-specular" aria-hidden="true" />
@@ -297,7 +297,7 @@ const t = useTranslations(lang);
                 <path d="M7.5 19c.6-2.6 2.4-4 4.5-4s3.9 1.4 4.5 4" />
                 <path d="M2 18c.5-2 1.8-3 3.6-3M22 18c-.5-2-1.8-3-3.6-3" />
               </svg>
-              <h3>Tým</h3>
+              <h3>{t('gridCard.team')}</h3>
             </div>
           </article>
         </div>

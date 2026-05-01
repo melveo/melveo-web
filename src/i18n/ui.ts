@@ -39,6 +39,14 @@ export const ui = {
     'gridMorph.subline': 'Tým, trenér, zázemí — všechno v jedné aplikaci.',
     'gridMorph.scrollHint': 'Scrolovat',
 
+    // Stage 2/3 — tech-card labels overlaid on the photo grid
+    'gridCard.attendance': 'Docházka',
+    'gridCard.communication': 'Komunikace',
+    'gridCard.security': 'Bezpečnost',
+    'gridCard.schedule': 'Plán',
+    'gridCard.stats': 'Statistiky',
+    'gridCard.team': 'Tým',
+
     // Stage 3 — gooey punctuation. Split into two parts so the
     // "Synced." word can be coloured with brand cyan.
     'gooey.headlinePrefix': 'Trenér + hráč.',
@@ -65,8 +73,8 @@ export const ui = {
     // the cursor sweeping across.
     'orb.primary': 'Pro celý klub.',
     'orb.secondary': 'Pro každého hráče.',
-    'orb.tiltCta': 'Hni telefonem',
-    'orb.tiltActive': 'Náhni telefon',
+    'orb.tiltCta': 'Aktivovat náklon →',
+    'orb.tiltActive': 'Náklon aktivní · náhni telefonem',
 
     // Stage 5.5 — particle statement after the club/player reveal.
     'particles.eyebrow': 'JEDEN SYSTÉM',
@@ -158,6 +166,13 @@ export const ui = {
     'gridMorph.subline': 'Team, coach, ops — all in one app.',
     'gridMorph.scrollHint': 'Scroll',
 
+    'gridCard.attendance': 'Attendance',
+    'gridCard.communication': 'Communication',
+    'gridCard.security': 'Security',
+    'gridCard.schedule': 'Schedule',
+    'gridCard.stats': 'Stats',
+    'gridCard.team': 'Team',
+
     'gooey.headlinePrefix': 'Coach + player.',
     'gooey.headlineAccent': 'Synced.',
 
@@ -175,8 +190,8 @@ export const ui = {
 
     'orb.primary': 'For the whole club.',
     'orb.secondary': 'For every player.',
-    'orb.tiltCta': 'Tilt your phone',
-    'orb.tiltActive': 'Tilt to move',
+    'orb.tiltCta': 'Enable tilt →',
+    'orb.tiltActive': 'Tilt active · move your phone',
 
     'particles.eyebrow': 'ONE SYSTEM',
     'particles.headlinePrefix': 'Everything for',

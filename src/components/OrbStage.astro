@@ -199,11 +199,16 @@ const t = useTranslations(lang);
   }
 
   /*
-    Mobile-only tilt CTA — small frosted-glass pill anchored to the
-    bottom of the orb section. Hidden on cursor devices (mouse can
-    just hover); shown on coarse pointer (phones, tablets). Once the
-    user grants orientation access, the button sticks around as a
-    subtle "Tilt to move" pip so they remember the interaction model.
+    Mobile-only tilt CTA — solid cyan pill anchored at the bottom of
+    the orb section. Without permission grant the gyroscope feature
+    silently fails on iOS, so the button needs to be unmissable.
+    User feedback 2026-05-01: "lidi donutit, aby tam klikli". Now:
+      - Filled cyan (matches hero filled pill, not a quiet ghost)
+      - Larger pill (44 px tap target + a bit more) with bold copy
+      - Breathing-glow animation drawing the eye every 2.4 s
+      - Phone-icon wiggle still runs while off
+    After tap: filled-cyan goes ghost-cyan, copy shifts to
+    confirmation, animations stop.
   */
   .orb-tilt-button {
     display: none;
@@ -213,59 +218,91 @@ const t = useTranslations(lang);
     .orb-tilt-button {
       display: inline-flex;
       align-items: center;
-      gap: 0.55rem;
+      gap: 0.6rem;
       position: absolute;
-      bottom: clamp(1.5rem, 5vh, 3rem);
+      bottom: clamp(1.5rem, 6vh, 3rem);
       left: 50%;
       transform: translateX(-50%);
       z-index: 2;
-      padding: 0.7rem 1.2rem;
-      border: 1px solid rgba(0, 240, 255, 0.32);
+      min-height: 48px;
+      padding: 0.85rem 1.4rem;
+      border: 1px solid rgba(0, 240, 255, 0.7);
       border-radius: 9999px;
-      background: linear-gradient(
-        180deg,
-        rgba(0, 240, 255, 0.16) 0%,
-        rgba(0, 240, 255, 0.05) 55%,
-        rgba(255, 255, 255, 0.02) 100%
-      );
-      backdrop-filter: blur(14px) saturate(170%);
-      -webkit-backdrop-filter: blur(14px) saturate(170%);
+      background: var(--color-accent-primary);
+      color: var(--color-accent-primary-cta-fg);
       box-shadow:
-        inset 0 1px 0 rgba(255, 255, 255, 0.18),
-        inset 0 0 0 1px rgba(0, 240, 255, 0.12),
-        0 8px 22px -10px rgba(0, 240, 255, 0.4);
-      color: var(--color-text-primary);
+        inset 0 1px 0 rgba(255, 255, 255, 0.4),
+        0 14px 36px -10px rgba(0, 240, 255, 0.7),
+        0 0 0 1px rgba(0, 240, 255, 0.45);
       font: inherit;
-      font-size: 0.85rem;
-      font-weight: 600;
+      font-size: 0.95rem;
+      font-weight: 700;
       letter-spacing: 0.01em;
       cursor: pointer;
       -webkit-tap-highlight-color: transparent;
+      animation: orb-tilt-pulse 2.4s ease-in-out infinite;
     }
+    /* After permission granted: switch to ghost glass treatment so
+       it reads as a confirmation, not a CTA still asking for action. */
     .orb-tilt-button[data-state='on'] {
-      opacity: 0.7;
+      background: linear-gradient(
+        180deg,
+        rgba(0, 240, 255, 0.12) 0%,
+        rgba(0, 240, 255, 0.04) 60%,
+        rgba(255, 255, 255, 0.02) 100%
+      );
+      backdrop-filter: blur(14px) saturate(160%);
+      -webkit-backdrop-filter: blur(14px) saturate(160%);
+      color: var(--color-text-primary);
+      border-color: rgba(0, 240, 255, 0.32);
+      box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.16),
+        0 6px 18px -10px rgba(0, 240, 255, 0.3);
+      animation: none;
+      font-weight: 600;
     }
     .orb-tilt-button:active {
       transform: translateX(-50%) scale(0.96);
     }
   }
 
+  /* Breathing glow — subtle scale + box-shadow pulse so the button
+     "asks" to be tapped without animating constantly hard. */
+  @keyframes orb-tilt-pulse {
+    0%, 100% {
+      box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.4),
+        0 14px 36px -10px rgba(0, 240, 255, 0.7),
+        0 0 0 1px rgba(0, 240, 255, 0.45);
+    }
+    50% {
+      box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.5),
+        0 18px 50px -10px rgba(0, 240, 255, 0.85),
+        0 0 0 4px rgba(0, 240, 255, 0.18);
+    }
+  }
+
   .orb-tilt-button__icon {
     display: inline-flex;
-    width: 1rem;
-    height: 1rem;
-    color: var(--color-accent-primary);
-    /* Gentle wiggle so the user reads "tilt me" — only when off. */
-    animation: orb-tilt-wiggle 1.6s ease-in-out infinite;
+    width: 1.1rem;
+    height: 1.1rem;
+    color: var(--color-accent-primary-cta-fg);
+    /* Wiggle-rotate so the user reads "tilt me" — only while off.
+       Color matches the dark CTA fg for filled state, switches to
+       cyan when ghost (on state). */
+    animation: orb-tilt-wiggle 1.4s ease-in-out infinite;
   }
   .orb-tilt-button[data-state='on'] .orb-tilt-button__icon {
+    color: var(--color-accent-primary);
     animation: none;
   }
   @keyframes orb-tilt-wiggle {
-    0%, 100% { transform: rotate(-12deg); }
-    50% { transform: rotate(12deg); }
+    0%, 100% { transform: rotate(-15deg); }
+    50% { transform: rotate(15deg); }
   }
   @media (prefers-reduced-motion: reduce) {
+    .orb-tilt-button { animation: none !important; }
     .orb-tilt-button__icon { animation: none; }
   }
 </style>

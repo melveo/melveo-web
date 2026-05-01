@@ -1,0 +1,30 @@
+#:schema https://raw.githubusercontent.com/cloudflare/workers-sdk/main/packages/wrangler/config-schema.json
+#
+# Workers + Static Assets config for the melveo.app marketing site.
+#
+# Deployed to a Cloudflare Worker named `melveo-web` with the static
+# build output (dist/) bound as ASSETS, plus the bindings codex set up
+# for runtime use (Cloudflare Images + KV session store).
+#
+# Auto-deploy is wired through Workers Builds — every push to main on
+# the matk0shub/melveo-web GitHub repo runs `bun install && bun run
+# build && bunx wrangler deploy`. See dashboard → melveo-web → Settings
+# → Builds for the connection.
+
+name = "melveo-web"
+compatibility_date = "2026-05-01"
+compatibility_flags = ["global_fetch_strictly_public"]
+
+# Static asset serving — the Astro build output goes here. Workers
+# Static Assets respects /public/_headers and /public/_redirects
+# (which Astro copies to dist/), so cache + security headers + the
+# locale-redirect rules ship with the deploy.
+#
+# This is an assets-only Worker (no `main` script, no bindings).
+# Cloudflare's runtime serves files from `directory` directly. If we
+# ever want runtime KV / Images / dynamic routes, add a Worker entry
+# point + the binding back here.
+[assets]
+directory = "./dist"
+not_found_handling = "404-page"
+html_handling = "auto-trailing-slash"

@@ -155,24 +155,32 @@ export function mountHeroScene({ canvas }: MountOptions): SceneHandle | null {
   if (!context) return null;
   const gl: WebGLRenderingContext = context;
 
-  let width = Math.max(1, window.innerWidth * 0.75);
-  let height = Math.max(1, window.innerHeight * 0.75);
+  // DPR-aware canvas backing — without this, canvas runs at CSS-pixel
+  // size and gets stretched on retina mobile, producing the blocky /
+  // pixelated metaballs the user noticed (feedback 2026-05-01:
+  // "bubliny v pozadí jsou neúplně ostré, jako kdyby byly
+  // rozpixelované na mobilním zařízení"). Cap at 2× so a 3× iPhone
+  // screen doesn't quadruple the shader workload.
+  const dpr = Math.min(window.devicePixelRatio || 1, 2);
+
+  let width = Math.max(1, Math.floor(window.innerWidth * 0.75 * dpr));
+  let height = Math.max(1, Math.floor(window.innerHeight * 0.75 * dpr));
   canvas.width = width;
   canvas.height = height;
   gl.viewport(0, 0, canvas.width, canvas.height);
 
-  // Viewport-aware radius scale — desktop shows 30 balls in their full
-  // 10-70 px radius range, but on phones that fills the canvas with
-  // overlapping blobs (user feedback 2026-05-01: "ta hero sekce je
-  // těmi partikly nasycená... asi bychom to měli dávkovat dle velikosti
-  // zařízení nebo velikost těch koulí"). Below 768 CSS px we scale the
-  // radius down linearly to ~50 % at 360 CSS px so the hero feels
+  // Viewport-aware radius scale — multiplied by DPR so the metaballs
+  // keep their visible CSS-pixel size when canvas backing scales up.
+  // Desktop shows 30 balls in their full 10-70 px radius range; below
+  // 768 CSS px we shrink to 0.5× at 360 CSS px so the hero feels
   // breezy on phones rather than packed.
   function radiusScale(): number {
     const w = window.innerWidth;
-    if (w >= 768) return 1;
-    if (w <= 360) return 0.5;
-    return 0.5 + (w - 360) * (0.5 / (768 - 360));
+    let base: number;
+    if (w >= 768) base = 1;
+    else if (w <= 360) base = 0.5;
+    else base = 0.5 + (w - 360) * (0.5 / (768 - 360));
+    return base * dpr;
   }
 
   const metaballs: Metaball[] = [];
@@ -262,8 +270,9 @@ export function mountHeroScene({ canvas }: MountOptions): SceneHandle | null {
   const dataToSendToGPU = new Float32Array(3 * NUM_METABALLS);
 
   function rebuildProgramForSize() {
-    const nextWidth = Math.max(1, window.innerWidth * 0.75);
-    const nextHeight = Math.max(1, window.innerHeight * 0.75);
+    const nextDpr = Math.min(window.devicePixelRatio || 1, 2);
+    const nextWidth = Math.max(1, Math.floor(window.innerWidth * 0.75 * nextDpr));
+    const nextHeight = Math.max(1, Math.floor(window.innerHeight * 0.75 * nextDpr));
 
     if (Math.abs(nextWidth - width) < 1 && Math.abs(nextHeight - height) < 1) return;
 
