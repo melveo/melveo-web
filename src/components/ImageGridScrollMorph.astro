@@ -465,7 +465,15 @@ const t = useTranslations(lang);
     letter-spacing: -0.03em;
     text-transform: lowercase;
     color: var(--color-accent-primary);
-    -webkit-text-stroke: 0.5px rgba(255, 255, 255, 0.22);
+    /* Faux extra-bold via cyan-on-cyan text-stroke (Quicksand caps at
+       700 on Google Fonts; user 2026-05-01 asked for chunkier glyphs).
+       Stroke extends ~half its width outside the glyph outline, so a
+       2.5 px cyan stroke matched to the fill effectively thickens
+       every limb of the 700 weight by ~1.2 px. paint-order keeps the
+       stroke under the fill so the inner glyph stays sharp at the
+       brand-cyan it should be. */
+    -webkit-text-stroke: 2.5px var(--color-accent-primary);
+    paint-order: stroke fill;
     /* Glass relief: tiny white catch on the top edge + tiny dark
        on the bottom. Reads as a curved glass face without any halo. */
     text-shadow:
