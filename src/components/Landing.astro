@@ -209,17 +209,20 @@ const feedbackItems =
 
       <div class="feedback-stage__flow" aria-label={lang === 'cs' ? 'Vstupy a výstupy v Melveo' : 'Inputs and outputs in Melveo'}>
         {feedbackItems.map((item) => (
-          <article class="feedback-card glass-card glass-card--compact">
+          <article class="feedback-card glass-card">
             <span class="glass-filter" aria-hidden="true"></span>
             <span class="glass-overlay" aria-hidden="true"></span>
             <span class="glass-specular" aria-hidden="true"></span>
             <div class="glass-content">
               <span class="feedback-card__label">
-                {lang === 'cs' ? 'VSTUP' : 'INPUT'}
+                {lang === 'cs' ? 'Vstup' : 'Input'}
               </span>
-              <h3>{item.input}</h3>
-              <span class="feedback-card__arrow" aria-hidden="true">→</span>
-              <p>{item.output}</p>
+              <h3 class="feedback-card__input">{item.input}</h3>
+              <span class="feedback-card__divider" aria-hidden="true"></span>
+              <span class="feedback-card__label feedback-card__label--out">
+                {lang === 'cs' ? 'Výstup' : 'Output'}
+              </span>
+              <p class="feedback-card__output">{item.output}</p>
             </div>
           </article>
         ))}
@@ -230,7 +233,16 @@ const feedbackItems =
   <!-- ============================================================== -->
   <!-- STAGE 9 — Pilot CTA                                             -->
   <!-- ============================================================== -->
-  <section class="pilot-cta-stage">
+  <section
+    class="pilot-cta-stage"
+    data-glass-smoke
+    data-glass-smoke-density="0.7"
+  >
+    {/* Cyan smoke backdrop matches pricing / club-flow / image-grid
+        treatment so the closing section reads as part of the same
+        visual family rather than a quiet footer. */}
+    <canvas class="glass-smoke" data-glass-smoke-canvas aria-hidden="true"></canvas>
+
     <div class="pilot-cta-stage__inner">
       <h2 class="pilot-cta-stage__headline">
         {t('pilot.headline')}
@@ -247,9 +259,24 @@ const feedbackItems =
         <span class="hero-pill-shimmer" aria-hidden="true"></span>
         <span class="hero-pill-content">{t('pilot.cta')}</span>
       </a>
-      <p class="pilot-cta-stage__email">{t('pilot.email')}</p>
+      <a
+        href={`mailto:${t('pilot.email')}`}
+        class="pilot-cta-stage__email"
+        aria-label={lang === 'cs' ? 'Napsat na ' + t('pilot.email') : 'Email ' + t('pilot.email')}
+      >
+        {t('pilot.email')}
+      </a>
     </div>
   </section>
+
+  <script>
+    import { mountGlassSmoke } from '../scripts/glass-smoke';
+    if ('requestIdleCallback' in window) {
+      (window as any).requestIdleCallback(() => mountGlassSmoke(), { timeout: 1500 });
+    } else {
+      setTimeout(() => mountGlassSmoke(), 250);
+    }
+  </script>
 </BaseLayout>
 
 <style>
@@ -321,51 +348,72 @@ const feedbackItems =
 
   .feedback-stage__flow {
     display: grid;
-    gap: 0.9rem;
+    gap: 1rem;
   }
 
-  .feedback-card {
-    border-radius: 1.25rem;
-  }
-
+  /*
+    Feedback card — premium "input → output" layout with no arrow
+    (per user 2026-05-01: "ty šipky jsou zbytečné"). Stack format:
+       Vstup           ← cyan caps eyebrow
+       Title           ← input subject, primary-text
+       ─────           ← hairline cyan divider
+       Výstup          ← cyan caps eyebrow
+       Body sentence   ← output description, soft secondary
+    Same .glass-card recipe as pricing for visual cohesion.
+  */
   .feedback-card .glass-content {
-    display: grid;
-    grid-template-columns: 1fr auto;
-    align-items: center;
-    gap: 0.5rem 1rem;
-    padding: 1.25rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.55rem;
+    padding: clamp(1.5rem, 2vw, 1.85rem);
   }
 
   .feedback-card__label {
-    grid-column: 1 / -1;
-    font-size: 0.68rem;
-    font-weight: 700;
+    margin: 0;
+    font-size: 0.7rem;
+    font-weight: 600;
     letter-spacing: 0.22em;
+    text-transform: uppercase;
     color: var(--color-accent-primary);
   }
 
-  .feedback-card h3 {
+  .feedback-card__label--out {
+    margin-top: 0.25rem;
+  }
+
+  .feedback-card__input {
     margin: 0;
-    font-size: clamp(1.05rem, 1.8vw, 1.35rem);
-    line-height: 1.1;
-    letter-spacing: -0.02em;
+    font-size: clamp(1.2rem, 1.9vw, 1.55rem);
+    font-weight: 700;
+    line-height: 1.15;
+    letter-spacing: -0.025em;
     color: var(--color-text-primary);
   }
 
-  .feedback-card__arrow {
-    font-size: 1.4rem;
-    line-height: 1;
-    color: var(--color-accent-primary);
-    filter: drop-shadow(0 0 14px rgba(0, 240, 255, 0.4));
+  /* Hairline cyan divider — replaces the old arrow. Reads as a
+     soft gradient line so it has the brand glow without
+     dominating the card. */
+  .feedback-card__divider {
+    display: block;
+    width: 100%;
+    height: 1px;
+    margin: 0.85rem 0 0.25rem;
+    background: linear-gradient(
+      90deg,
+      transparent,
+      color-mix(in srgb, var(--color-accent-primary) 55%, transparent) 30%,
+      color-mix(in srgb, var(--color-accent-primary) 55%, transparent) 70%,
+      transparent
+    );
   }
 
-  .feedback-card p {
-    grid-column: 1 / -1;
+  .feedback-card__output {
     margin: 0;
-    max-width: 28rem;
-    font-size: 0.95rem;
+    max-width: 30rem;
+    font-size: 0.98rem;
     line-height: 1.55;
-    color: var(--color-text-secondary);
+    color: color-mix(in srgb, var(--color-text-secondary) 92%, var(--color-text-primary));
+    text-wrap: pretty;
   }
 
   .pilot-cta-stage {
@@ -378,6 +426,33 @@ const feedbackItems =
     background:
       radial-gradient(circle at 50% 0%, rgba(0, 240, 255, 0.12), transparent 38%),
       var(--color-bg-canvas);
+  }
+
+  /* Same sticky-100vh smoke backdrop pattern as the other liquid-glass
+     sections (pricing / club-flow / image-grid). z-index -1 puts it
+     behind the section's bg gradient + content. */
+  .pilot-cta-stage .glass-smoke {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -1;
+    pointer-events: none;
+    filter: saturate(120%) brightness(1.05);
+    mask-image: linear-gradient(
+      180deg,
+      transparent 0%,
+      black 18%,
+      black 82%,
+      transparent 100%
+    );
+    -webkit-mask-image: linear-gradient(
+      180deg,
+      transparent 0%,
+      black 18%,
+      black 82%,
+      transparent 100%
+    );
   }
 
   .pilot-cta-stage__inner {
@@ -409,13 +484,41 @@ const feedbackItems =
   }
 
   .pilot-cta-stage__button {
-    margin-top: 2.25rem;
+    margin-top: 2.5rem;
   }
 
+  /* Email rendered as a prominent cyan link (was tiny tertiary-grey
+     text per user 2026-05-01: "měl by být vidět naší branding
+     barvou"). Reads as a confident secondary CTA below the pill —
+     "or just email us directly". Subtle cyan glow + animated
+     underline on hover ties it to the brand voice. */
   .pilot-cta-stage__email {
-    margin: 1.15rem 0 0;
-    font-size: 0.9rem;
-    color: var(--color-text-tertiary);
+    display: inline-block;
+    margin-top: 1.5rem;
+    font-size: clamp(1.05rem, 1.8vw, 1.4rem);
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    color: var(--color-accent-primary);
+    text-decoration: none;
+    text-shadow: 0 0 24px color-mix(in srgb, var(--color-accent-primary) 35%, transparent);
+    background-image: linear-gradient(
+      90deg,
+      var(--color-accent-primary),
+      var(--color-accent-primary)
+    );
+    background-position: 0 100%;
+    background-repeat: no-repeat;
+    background-size: 0% 1px;
+    transition: background-size 0.35s cubic-bezier(0.39, 0.575, 0.565, 1);
+  }
+  .pilot-cta-stage__email:hover,
+  .pilot-cta-stage__email:focus-visible {
+    background-size: 100% 1px;
+  }
+  .pilot-cta-stage__email:focus-visible {
+    outline: 2px solid var(--color-accent-primary-subtle);
+    outline-offset: 6px;
+    border-radius: 4px;
   }
 
   @media (max-width: 640px) {
