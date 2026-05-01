@@ -53,18 +53,13 @@ const prefixWord2 = firstSpace > 0 ? prefix.slice(firstSpace + 1) : '';
 
     <h2 class="particle-statement__headline">
       <span class="particle-statement__line">{prefixWord1}</span>
-      {prefixWord2 && (
-        <span class="particle-statement__line">{prefixWord2}</span>
-      )}
       <span class="particle-statement__line particle-statement__line--word">
-        <span
+        {prefixWord2}{prefixWord2 && ' '}<span
           class="particle-statement__typed text-[var(--color-accent-primary)]"
           data-rotate-word
           data-rotate-words={words.join('|')}
           aria-live="polite"
-        >
-          {words[0]}
-        </span>{t('particles.headlineSuffix')}
+        >{words[0]}</span>{t('particles.headlineSuffix')}
       </span>
     </h2>
 
@@ -153,17 +148,18 @@ const prefixWord2 = firstSpace > 0 ? prefix.slice(firstSpace + 1) : '';
   }
 
   /*
-    Three-line layout: prefix word 1 / prefix word 2 / rotating word
-    + suffix. Each line is its own block so reflows in the rotating
-    word never push the prefix between lines. User feedback 2026-05-01.
+    Two-line layout: prefix word 1 alone on line 1, prefix word 2 +
+    rotating word + suffix together on line 2. Each line is a block
+    so "pro" can never reflow back up onto line 1 when the rotating
+    word is short. User feedback 2026-05-01.
   */
   .particle-statement__line {
     display: block;
   }
   .particle-statement__line--word {
-    /* The rotating word + suffix can be slightly wider than the prefix
-       words; nowrap so a long rotation never wraps onto a 4th line
-       (would push the section taller mid-rotation). */
+    /* Prefix word 2 + rotating word + suffix sit inline on this line
+       and must never wrap — a wrap would re-introduce the layout
+       jitter we're fixing. */
     white-space: nowrap;
   }
 
