@@ -863,9 +863,22 @@ const t = useTranslations(lang);
     }
 
     .image-grid-section .tech-card h3 {
-      font-size: clamp(0.85rem, 4.8vw, 1.2rem);
-      line-height: 1;
+      /* Tighter clamp on phones — longer EN/CS labels (Attendance,
+         Statistiky, Bezpečnost, Komunikace) need to fit a ~67 px
+         inner content area on a 320 px viewport without clipping.
+         User feedback 2026-05-01: Communication on the bottom-right
+         card was getting cut off at the right edge. */
+      font-size: clamp(0.75rem, 3.6vw, 1rem);
+      line-height: 1.05;
       letter-spacing: -0.04em;
+      /* Safety net: if a label is ever longer than the cell can fit,
+         allow the browser to wrap mid-word rather than silently
+         clipping. With line-height 1.05 a 2-line wrap stays within
+         the icon+label flex layout. */
+      word-break: break-word;
+      overflow-wrap: anywhere;
+      hyphens: auto;
+      max-width: 100%;
     }
   }
 

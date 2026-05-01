@@ -274,7 +274,23 @@ export function mountHeroScene({ canvas }: MountOptions): SceneHandle | null {
     const nextWidth = Math.max(1, Math.floor(window.innerWidth * 0.75 * nextDpr));
     const nextHeight = Math.max(1, Math.floor(window.innerHeight * 0.75 * nextDpr));
 
-    if (Math.abs(nextWidth - width) < 1 && Math.abs(nextHeight - height) < 1) return;
+    const widthDelta = Math.abs(nextWidth - width);
+    const heightDelta = Math.abs(nextHeight - height);
+    if (widthDelta < 1 && heightDelta < 1) return;
+
+    /*
+      Mobile URL-bar tolerance — when the user scrolls on iOS Safari /
+      Chrome Android, the URL bar shows/hides which fires window
+      'resize' with innerHeight changing by ~50-150 CSS px. Each
+      rebuild recompiles the fragment shader (WIDTH/HEIGHT are baked
+      as constants in the source) and re-uploads it, producing a
+      visible flicker / stutter the user described as "buguje se to".
+      Tolerate height-only changes up to 250 backing px (roughly the
+      URL bar on a 3× phone) — the canvas keeps its old backing size
+      while CSS stretches it to the new visible area, which is
+      imperceptible at the 0.75 internal-resolution multiplier we use.
+    */
+    if (widthDelta < 1 && heightDelta < 250) return;
 
     width = nextWidth;
     height = nextHeight;
@@ -326,6 +342,13 @@ export function mountHeroScene({ canvas }: MountOptions): SceneHandle | null {
   }
 
   function onPointerDown(event: PointerEvent) {
+    // Touch devices: tap to scroll is the primary interaction. Triggering
+    // the speed-toggle on every tap inside the hero region looked like a
+    // bug to mobile users (the metaballs would suddenly accelerate while
+    // they were just trying to scroll). Skip touch + pen entirely so the
+    // speed toggle is mouse-only.
+    if (event.pointerType !== 'mouse') return;
+
     const target = event.target;
     if (target instanceof Element && target.closest('a, button, input, textarea, select, label')) {
       return;

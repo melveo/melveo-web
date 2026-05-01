@@ -167,7 +167,7 @@ export const ui = {
     'gridMorph.scrollHint': 'Scroll',
 
     'gridCard.attendance': 'Attendance',
-    'gridCard.communication': 'Communication',
+    'gridCard.communication': 'Messaging',
     'gridCard.security': 'Security',
     'gridCard.schedule': 'Schedule',
     'gridCard.stats': 'Stats',
