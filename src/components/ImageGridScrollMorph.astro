@@ -592,23 +592,73 @@ const t = useTranslations(lang);
     grid-row: -1;
   }
 
-  /* ─── Mobile layout (3 cols × 5 rows = 15 cells) ───────────────
-     Per user feedback 2026-05-01: "vždy se musí ukazovat 15 karet"
-     — the previous `display: none` on Layer 1 dropped to 9 visible
-     cells on phones. Rotate the grid 90° instead: same 14 photos /
-     tech cards + 1 scaler, just stacked taller.
+  /* ─── Mobile layout (≤ 700 CSS px) ─────────────────────────────
+     Static 3 × 5 = 15-cell gallery in document flow. Per user
+     feedback 2026-05-01: "na menších devices toto prostě nefunguje"
+     — the desktop scroll-driven morph + sticky pin is a desktop
+     interaction. On phones the cells never reach a clean rest state
+     and the layout reads as chaos. Strip the morph entirely on
+     phones and present a clean static gallery; users scroll the
+     section past naturally.
 
-     Layer 1 (6 children) fills the top + bottom rows.
-     Layer 2 (6 children) fills rows 2 + 4.
-     Layer 3 (2 children) flanks the scaler in row 3.
-     Scaler centres at row 3 col 2.
+     Mobile-only changes:
+       1. Section goes static (no sticky pin, normal flow).
+       2. Grid is in normal flow (no absolute centring).
+       3. Intro overlay (wordmark + scroll button + darken layer) is
+          hidden — it only made sense paired with the morph.
+       4. Smoke field is hidden — adds visual noise to a static
+          gallery without the displacement filter being driven.
+       5. Scaler photo collapses to its natural cell size (centre of
+          row 3) with no inline-width animation.
+       6. JS Motion mount is skipped for the mobile breakpoint
+          (see hero-grid script).
+
+     Layer mapping (still 14 photos/cards + 1 scaler = 15 cells):
+       Layer 1 (6 children) → row 1 cols 1-3 + row 5 cols 1-3
+       Layer 2 (6 children) → row 2 cols 1-3 + row 4 cols 1-3
+       Layer 3 (2 children) → row 3 col 1 + row 3 col 3
+       Scaler                → row 3 col 2
   */
   @media (max-width: 700px) {
+    .image-grid-section {
+      min-height: 0;
+      padding: clamp(2.5rem, 8vw, 4.5rem) 0;
+    }
+
+    .image-grid-section .content {
+      position: relative;
+      min-height: 0;
+      width: 100%;
+      padding: 0 clamp(0.75rem, 3vw, 1.25rem);
+      display: block;
+      z-index: 1;
+    }
+
     .image-grid-section .grid {
-      --gutter: 1rem;
-      --gap: clamp(8px, 2vw, 14px);
+      position: relative;
+      top: auto;
+      left: auto;
+      translate: none;
+      width: 100%;
+      max-width: 100%;
+      --gap: 0.6rem;
       grid-template-columns: repeat(3, 1fr);
       grid-template-rows: repeat(5, 1fr);
+    }
+
+    /* Hide morph-only chrome — these only made sense paired with
+       the desktop sticky-pin reveal animation. */
+    .image-grid-section .grid-intro,
+    .image-grid-section .grid-intro-darken,
+    .image-grid-section .glass-smoke {
+      display: none;
+    }
+
+    /* Layers no longer need scale/opacity baselines from JS Motion
+       (which we skip on mobile) — just place children. */
+    .image-grid-section .grid > .layer {
+      opacity: 1 !important;
+      transform: none !important;
     }
 
     /* Layer 1 → top row (children 1-3) + bottom row (children 4-6) */
@@ -633,6 +683,14 @@ const t = useTranslations(lang);
     }
     .image-grid-section .grid > .layer:nth-of-type(3) > div:last-of-type {
       grid-area: 3 / 3;
+    }
+
+    /* Scaler is a regular grid cell at row 3 col 2. The actual <img>
+       reset for mobile lives at the bottom of this stylesheet so it
+       wins the cascade against the base `.scaler img` rule above. */
+    .image-grid-section .grid .scaler {
+      width: 100%;
+      height: 100%;
     }
   }
 
@@ -846,6 +904,26 @@ const t = useTranslations(lang);
     max-height: none;
   }
 
+  /* Mobile override for the scaler img — must come AFTER the base
+     `.scaler img { position: absolute; … }` rule above to win the
+     cascade (same specificity, later wins). On mobile the scaler is
+     a static centre-cell photo, no morph, no inline width/height
+     from JS. */
+  @media (max-width: 700px) {
+    .image-grid-section .scaler img {
+      position: relative;
+      top: auto;
+      left: auto;
+      translate: none;
+      width: 100%;
+      height: 100%;
+      border-radius: 1.25rem;
+      object-fit: cover;
+      object-position: 50% 50%;
+      aspect-ratio: 4 / 5;
+    }
+  }
+
   /* Reduced-motion: drop the sticky/scroll dance. Show every cell in
      its final position, statically. */
   @media (prefers-reduced-motion: reduce) {
@@ -896,8 +974,15 @@ const t = useTranslations(lang);
   */
 
   const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  // Mobile (≤ 700 CSS px) renders a static 3 × 5 gallery via CSS —
+  // skip the Motion morph entirely there. Mounting Motion on a layout
+  // that's no longer sticky-pinned would set inline opacity/scale on
+  // elements the user wants to see plain. (User feedback 2026-05-01:
+  // "na menších devices toto prostě nefunguje" — fix is the static
+  // gallery, not "fix the morph for phones".)
+  const isMobileLayout = window.matchMedia('(max-width: 700px)').matches;
 
-  if (!reduceMotion) {
+  if (!reduceMotion && !isMobileLayout) {
     const section = document.querySelector<HTMLElement>('[data-grid-section]');
     const image = section?.querySelector<HTMLImageElement>('.scaler img');
     const layers = section?.querySelectorAll<HTMLElement>('.grid > .layer');
