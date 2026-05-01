@@ -900,7 +900,15 @@ const steps = content.steps;
       inset: auto;
       flex: 0 0 var(--carousel-card-width);
       scroll-snap-align: center;
-      scroll-snap-stop: always;
+      /*
+        scroll-snap-stop: normal (default) — fast flick can carry the
+        rail past multiple snap points before the magnet catches the
+        nearest one. Matches Apple App Store featured shelf: a strong
+        swipe glides through 2–3 cards, a gentle one settles on the
+        next. Was `always` initially (one-card-per-swipe lock) but
+        that read as too rigid — user feedback 2026-05-01.
+      */
+      scroll-snap-stop: normal;
       border-radius: clamp(1.25rem, 5vw, 1.65rem);
       pointer-events: auto !important;
       /*
