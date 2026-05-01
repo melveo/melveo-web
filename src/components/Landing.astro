@@ -232,17 +232,12 @@ const feedbackItems =
 
   <!-- ============================================================== -->
   <!-- STAGE 9 — Pilot CTA                                             -->
+  <!--   Quiet closing section — no smoke backdrop, no pill button.    -->
+  <!--   Per user 2026-05-01: the email is the only thing that         -->
+  <!--   needs to dominate. Headline + body are tiny eyebrows above    -->
+  <!--   it; everything else is removed.                               -->
   <!-- ============================================================== -->
-  <section
-    class="pilot-cta-stage"
-    data-glass-smoke
-    data-glass-smoke-density="0.7"
-  >
-    {/* Cyan smoke backdrop matches pricing / club-flow / image-grid
-        treatment so the closing section reads as part of the same
-        visual family rather than a quiet footer. */}
-    <canvas class="glass-smoke" data-glass-smoke-canvas aria-hidden="true"></canvas>
-
+  <section class="pilot-cta-stage">
     <div class="pilot-cta-stage__inner">
       <h2 class="pilot-cta-stage__headline">
         {t('pilot.headline')}
@@ -250,15 +245,6 @@ const feedbackItems =
       <p class="pilot-cta-stage__body">
         {t('pilot.body')}
       </p>
-      <a
-        href={`mailto:${t('pilot.email')}?subject=${encodeURIComponent(
-          lang === 'cs' ? 'Zájem o pilot Melveo' : 'Melveo pilot enquiry'
-        )}`}
-        class="hero-pill hero-pill--ghost pilot-cta-stage__button"
-      >
-        <span class="hero-pill-shimmer" aria-hidden="true"></span>
-        <span class="hero-pill-content">{t('pilot.cta')}</span>
-      </a>
       <a
         href={`mailto:${t('pilot.email')}`}
         class="pilot-cta-stage__email"
@@ -268,15 +254,6 @@ const feedbackItems =
       </a>
     </div>
   </section>
-
-  <script>
-    import { mountGlassSmoke } from '../scripts/glass-smoke';
-    if ('requestIdleCallback' in window) {
-      (window as any).requestIdleCallback(() => mountGlassSmoke(), { timeout: 1500 });
-    } else {
-      setTimeout(() => mountGlassSmoke(), 250);
-    }
-  </script>
 </BaseLayout>
 
 <style>
@@ -294,25 +271,28 @@ const feedbackItems =
     inset: 4% auto auto 50%;
   }
 
+  /*
+    Centred layout (was a 2-col left/right grid on desktop). Per user
+    feedback 2026-05-01: "všechny sekce situované na střed… i ty
+    tabulky." Headline + body stack centred at the top, then a 3-col
+    grid of feedback cards centred below.
+  */
   .feedback-stage__inner {
     position: relative;
     z-index: 1;
-    display: grid;
+    display: flex;
+    flex-direction: column;
     align-items: center;
-    gap: clamp(2.5rem, 6vw, 5rem);
+    gap: clamp(2.5rem, 6vw, 4.5rem);
     width: min(100% - 2rem, 78rem);
     margin: 0 auto;
     padding: clamp(6rem, 12vw, 10rem) 0;
-  }
-
-  @media (min-width: 960px) {
-    .feedback-stage__inner {
-      grid-template-columns: minmax(0, 1fr) minmax(25rem, 0.85fr);
-    }
+    text-align: center;
   }
 
   .feedback-stage__copy {
-    text-align: left;
+    text-align: center;
+    max-width: 56rem;
   }
 
   .feedback-stage__eyebrow {
@@ -338,7 +318,7 @@ const feedbackItems =
   }
 
   .feedback-stage__body {
-    margin: 1.5rem 0 0;
+    margin: 1.5rem auto 0;
     max-width: 42rem;
     font-size: clamp(1.05rem, 1.5vw, 1.25rem);
     line-height: 1.65;
@@ -346,9 +326,19 @@ const feedbackItems =
     text-wrap: pretty;
   }
 
+  /* Cards in a centred grid — single column on phones, multi-column
+     on tablets+ so the three input/output pairs read as a row. */
   .feedback-stage__flow {
     display: grid;
     gap: 1rem;
+    width: 100%;
+    max-width: 72rem;
+  }
+  @media (min-width: 720px) {
+    .feedback-stage__flow {
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1.25rem;
+    }
   }
 
   /*
@@ -364,6 +354,8 @@ const feedbackItems =
   .feedback-card .glass-content {
     display: flex;
     flex-direction: column;
+    align-items: center;
+    text-align: center;
     gap: 0.55rem;
     padding: clamp(1.5rem, 2vw, 1.85rem);
   }
@@ -416,91 +408,64 @@ const feedbackItems =
     text-wrap: pretty;
   }
 
+  /*
+    Pilot CTA — quiet closing footer. No smoke, no pill button, no
+    decorative cyan halo (user 2026-05-01: "možná bych tam nedával
+    ani to pozadí, hlavní věc je ten firemní e-mail jako největší
+    co tam je"). Headline + body are tiny eyebrows above the email,
+    which is the focal element of the whole page closing.
+  */
   .pilot-cta-stage {
     position: relative;
-    isolation: isolate;
     width: 100%;
-    overflow: hidden;
     border-top: 1px solid var(--color-stroke-base);
-    border-bottom: 1px solid var(--color-stroke-base);
-    background:
-      radial-gradient(circle at 50% 0%, rgba(0, 240, 255, 0.12), transparent 38%),
-      var(--color-bg-canvas);
-  }
-
-  /* Same sticky-100vh smoke backdrop pattern as the other liquid-glass
-     sections (pricing / club-flow / image-grid). z-index -1 puts it
-     behind the section's bg gradient + content. */
-  .pilot-cta-stage .glass-smoke {
-    position: absolute;
-    inset: 0;
-    width: 100%;
-    height: 100%;
-    z-index: -1;
-    pointer-events: none;
-    filter: saturate(120%) brightness(1.05);
-    mask-image: linear-gradient(
-      180deg,
-      transparent 0%,
-      black 18%,
-      black 82%,
-      transparent 100%
-    );
-    -webkit-mask-image: linear-gradient(
-      180deg,
-      transparent 0%,
-      black 18%,
-      black 82%,
-      transparent 100%
-    );
+    background: var(--color-bg-canvas);
   }
 
   .pilot-cta-stage__inner {
-    position: relative;
-    z-index: 1;
-    width: min(100% - 2rem, 52rem);
+    width: min(100% - 2rem, 64rem);
     margin: 0 auto;
     padding: clamp(5.5rem, 11vw, 9rem) 0;
     text-align: center;
   }
 
+  /* Headline + body are now eyebrow-scale labels above the email,
+     not the focal copy. Reads as "Pojďme to spustit. / Krátký
+     e-mail stačí." */
   .pilot-cta-stage__headline {
     margin: 0;
-    font-weight: 700;
-    line-height: 1.05;
-    letter-spacing: -0.03em;
-    color: var(--color-text-primary);
-    font-size: clamp(2.15rem, 4.8vw, 4rem);
-    text-wrap: balance;
+    font-weight: 600;
+    font-size: clamp(0.95rem, 1.3vw, 1.1rem);
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--color-accent-primary);
   }
 
   .pilot-cta-stage__body {
-    margin: 1.25rem auto 0;
-    max-width: 35rem;
-    font-size: clamp(1rem, 1.6vw, 1.18rem);
-    line-height: 1.65;
+    margin: 0.85rem auto 0;
+    max-width: 32rem;
+    font-size: clamp(0.95rem, 1.4vw, 1.1rem);
+    line-height: 1.55;
     color: var(--color-text-secondary);
     text-wrap: pretty;
   }
 
-  .pilot-cta-stage__button {
-    margin-top: 2.5rem;
-  }
-
-  /* Email rendered as a prominent cyan link (was tiny tertiary-grey
-     text per user 2026-05-01: "měl by být vidět naší branding
-     barvou"). Reads as a confident secondary CTA below the pill —
-     "or just email us directly". Subtle cyan glow + animated
-     underline on hover ties it to the brand voice. */
+  /*
+    Email = the largest, brightest thing on the closing footer. Brand
+    cyan, display weight, scales up to ~7 rem on big screens so it
+    reads as the page's last word. Animated underline on hover.
+  */
   .pilot-cta-stage__email {
     display: inline-block;
-    margin-top: 1.5rem;
-    font-size: clamp(1.05rem, 1.8vw, 1.4rem);
-    font-weight: 600;
-    letter-spacing: -0.01em;
+    margin-top: clamp(1.75rem, 4vw, 2.5rem);
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: clamp(1.85rem, 7vw, 5.5rem);
+    line-height: 1;
+    letter-spacing: -0.04em;
     color: var(--color-accent-primary);
     text-decoration: none;
-    text-shadow: 0 0 24px color-mix(in srgb, var(--color-accent-primary) 35%, transparent);
+    text-shadow: 0 0 36px color-mix(in srgb, var(--color-accent-primary) 28%, transparent);
     background-image: linear-gradient(
       90deg,
       var(--color-accent-primary),
@@ -508,29 +473,21 @@ const feedbackItems =
     );
     background-position: 0 100%;
     background-repeat: no-repeat;
-    background-size: 0% 1px;
-    transition: background-size 0.35s cubic-bezier(0.39, 0.575, 0.565, 1);
+    background-size: 0% 2px;
+    transition: background-size 0.4s cubic-bezier(0.39, 0.575, 0.565, 1);
   }
   .pilot-cta-stage__email:hover,
   .pilot-cta-stage__email:focus-visible {
-    background-size: 100% 1px;
+    background-size: 100% 2px;
   }
   .pilot-cta-stage__email:focus-visible {
     outline: 2px solid var(--color-accent-primary-subtle);
-    outline-offset: 6px;
-    border-radius: 4px;
+    outline-offset: 8px;
+    border-radius: 6px;
   }
 
-  @media (max-width: 640px) {
-    .feedback-stage__copy,
-    .pilot-cta-stage__inner {
-      text-align: center;
-    }
-
-    .feedback-stage__body {
-      margin-inline: auto;
-    }
-  }
+  /* Feedback section is centred at all viewports now (see
+     .feedback-stage__inner above) — no @media override needed. */
 
   /*
     Hero rotating word — wrap so y-translate during cycle stays within

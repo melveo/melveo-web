@@ -112,16 +112,16 @@ export const ui = {
     'pricing.disclaimer':
       'Ceny jsou v Kč bez DPH. Provozovatel není plátcem DPH. Všechny platby zpracovává Stripe.',
 
-    // Stage 7 — privacy promise
-    'privacy.eyebrow': 'SOUKROMÍ',
-    'privacy.headlineLine1': 'Trenér nikdy nevidí',
-    'privacy.headlineLine2': 'syrová čísla hráče.',
+    // Stage 7 — data feedback promise
+    'privacy.eyebrow': 'DATA → FEEDBACK',
+    'privacy.headlineLine1': 'Každý vstup má',
+    'privacy.headlineLine2': 'výstup pro trenéra.',
     'privacy.body':
-      'Wellness data jsou agregovaná. Klub kupuje, hráč nikdy neplatí. Co je hráčovo, zůstává hráčovo.',
+      'Check-iny, docházka, RPE i sessions se zpracují do přehledů a signálů, se kterými může realizační tým hned pracovat.',
 
     // Stage 9 — pilot CTA
-    'pilot.headline': 'Klub a chcete pilot?',
-    'pilot.body': 'Napište, krátce zavoláme, do 14 dní spustíme první trénink.',
+    'pilot.headline': 'Pojďme to spustit.',
+    'pilot.body': 'Krátký e-mail stačí.',
     'pilot.email': 'hello@melveo.app',
 
     // Locale switcher
@@ -213,14 +213,14 @@ export const ui = {
     'pricing.disclaimer':
       'Prices in CZK, VAT not applicable. Operator is not a VAT payer. All payments processed by Stripe.',
 
-    'privacy.eyebrow': 'PRIVACY',
-    'privacy.headlineLine1': "Coach never sees",
-    'privacy.headlineLine2': "raw player numbers.",
+    'privacy.eyebrow': 'DATA → FEEDBACK',
+    'privacy.headlineLine1': "Every input creates",
+    'privacy.headlineLine2': "coach-ready output.",
     'privacy.body':
-      "Wellness data is aggregated. Clubs pay, players never. What's a player's stays a player's.",
+      'Check-ins, attendance, RPE, and sessions become clear signals the coaching staff can use immediately.',
 
-    'pilot.headline': 'Pilot for your club?',
-    'pilot.body': "Write to us, short call, first training in 14 days.",
+    'pilot.headline': 'Let’s start it.',
+    'pilot.body': 'A short email is enough.',
     'pilot.email': 'hello@melveo.app',
 
     'locale.cs': 'CS',

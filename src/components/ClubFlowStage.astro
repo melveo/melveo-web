@@ -41,7 +41,7 @@ const copy = {
         number: '01',
         kicker: 'Ráno · 30 sekund',
         title: 'Pětiosý check-in',
-        body: 'Hráč pošle stav těla i hlavy. Vzniká týmový signál — beze syrových čísel.',
+        body: 'Hráč pošle stav těla i hlavy. Melveo z něj vytvoří týmový signál pro trenéra.',
         image: '/images/club-flow/check-in.webp',
         alt: 'Hráč v šatně vyplňuje týmový check-in v telefonu.',
       },
@@ -49,7 +49,7 @@ const copy = {
         number: '02',
         kicker: 'Trénink · plán',
         title: 'Sessions',
-        body: 'Trénink podle aktuální readiness. Plán, docházka i RPE u jedné session.',
+        body: 'Plán, docházka a RPE drží celý trénink v jednom kontextu.',
         image: '/images/club-flow/sessions.webp',
         alt: 'Trenér sleduje trénink a drží tablet s analytikou týmu.',
       },
@@ -57,7 +57,7 @@ const copy = {
         number: '03',
         kicker: 'Kontext · 1 minuta',
         title: 'Coach board',
-        body: 'Check-iny, docházka a zátěž v jednom přehledu — připravený za minutu.',
+        body: 'Check-iny, docházka a zátěž se spojí do přehledu pro realizační tým.',
         image: '/images/club-flow/coach-board.webp',
         alt: 'Dva trenéři na palubovce společně kontrolují týmový coach board na tabletu.',
       },
@@ -65,7 +65,7 @@ const copy = {
         number: '04',
         kicker: 'Rozhodnutí · akce',
         title: 'Správné rozhodnutí',
-        body: 'Konec hádání. Intenzita, role i regenerace podle dat, ne pocitů.',
+        body: 'Trenér vidí souvislosti a může upravit zátěž, roli nebo regeneraci.',
         image: '/images/club-flow/decision.webp',
         alt: 'Trenér sleduje trénující tým a na tabletu kontroluje analytiku.',
       },
@@ -82,7 +82,7 @@ const copy = {
         number: '01',
         kicker: 'Morning · 30 seconds',
         title: '5-axis check-in',
-        body: 'Players send a body-and-mind signal. Becomes team context — no raw numbers.',
+        body: 'Players send a body-and-mind signal. Melveo turns it into coach-ready context.',
         image: '/images/club-flow/check-in.webp',
         alt: 'A player in a locker room completes a team check-in on a phone.',
       },
@@ -90,7 +90,7 @@ const copy = {
         number: '02',
         kicker: 'Training · plan',
         title: 'Sessions',
-        body: 'Train to current readiness. Plan, attendance, and RPE on one session.',
+        body: 'Plan, attendance, and RPE keep the whole session in one context.',
         image: '/images/club-flow/sessions.webp',
         alt: 'A coach watches practice while holding a tablet with team analytics.',
       },
@@ -98,7 +98,7 @@ const copy = {
         number: '03',
         kicker: 'Context · 1 minute',
         title: 'Coach board',
-        body: 'Check-ins, attendance, and load on one view — readable in a minute.',
+        body: 'Check-ins, attendance, and load become one view for the coaching staff.',
         image: '/images/club-flow/coach-board.webp',
         alt: 'Two coaches review a team coach board on a tablet courtside.',
       },
@@ -106,7 +106,7 @@ const copy = {
         number: '04',
         kicker: 'Decision · action',
         title: 'The right decision',
-        body: 'No more guesswork. Intensity, roles, and recovery from data, not feelings.',
+        body: 'Coaches see the context and can adjust load, role, or recovery.',
         image: '/images/club-flow/decision.webp',
         alt: 'A coach watches the team train while checking analytics on a tablet.',
       },
@@ -397,10 +397,10 @@ const steps = content.steps;
 
   .club-flow-stage__layout {
     display: grid;
-    grid-template-columns: minmax(0, 1.08fr) minmax(23rem, 0.92fr);
-    gap: clamp(2rem, 5vw, 5rem);
-    width: min(100%, 88rem);
-    min-height: min(760px, 76vh);
+    grid-template-columns: minmax(0, 1.12fr) minmax(20rem, 0.72fr);
+    gap: clamp(1.75rem, 4vw, 4rem);
+    width: min(100%, 82rem);
+    min-height: min(700px, 72vh);
     margin: 0 auto;
     align-items: stretch;
   }
@@ -426,7 +426,7 @@ const steps = content.steps;
      ring + content-clip needed for this specific surface. */
   .club-flow-stage__media {
     height: 100%;
-    min-height: 34rem;
+    min-height: 31rem;
   }
   .club-flow-stage__media .glass-content {
     position: relative;
@@ -563,7 +563,8 @@ const steps = content.steps;
     display: grid;
     grid-template-columns: 0.2rem minmax(0, 1fr);
     gap: clamp(1rem, 2vw, 1.5rem);
-    min-height: 100%;
+    align-self: center;
+    min-height: min(560px, 62vh);
   }
 
   .club-flow-stage__progress {
@@ -588,7 +589,7 @@ const steps = content.steps;
 
   .club-flow-stage__cards {
     position: relative;
-    min-height: min(760px, 76vh);
+    min-height: min(560px, 62vh);
   }
 
   .club-flow-stage__card {
@@ -614,7 +615,7 @@ const steps = content.steps;
      so the step content sits comfortably inside the glass. */
   .club-flow-stage__card-panel {
     width: 100%;
-    padding: clamp(1.25rem, 2vw, 2rem);
+    padding: clamp(1.15rem, 1.7vw, 1.65rem);
   }
 
   /* Active state — glass-layer overrides instead of full-rule rewrite.
@@ -656,14 +657,14 @@ const steps = content.steps;
     display: flex;
     align-items: center;
     gap: clamp(1rem, 1.6vw, 1.5rem);
-    margin-bottom: clamp(1.75rem, 3.5vh, 2.5rem);
-    padding-bottom: clamp(1.25rem, 2.5vh, 1.75rem);
+    margin-bottom: clamp(1.15rem, 2.2vh, 1.75rem);
+    padding-bottom: clamp(0.9rem, 1.8vh, 1.3rem);
     border-bottom: 1px solid color-mix(in srgb, var(--color-accent-primary) 28%, transparent);
   }
 
   .club-flow-stage__card-number {
     color: var(--color-accent-primary);
-    font-size: clamp(2.25rem, 5.5vw, 4.5rem);
+    font-size: clamp(2rem, 4.2vw, 3.75rem);
     font-weight: 700;
     line-height: 0.9;
     letter-spacing: -0.04em;
@@ -682,7 +683,7 @@ const steps = content.steps;
 
   .club-flow-stage__card h3 {
     margin: 0;
-    font-size: clamp(2.25rem, 5vw, 5rem);
+    font-size: clamp(2rem, 4vw, 4rem);
     font-weight: 700;
     line-height: 0.98;
     letter-spacing: -0.045em;
@@ -690,40 +691,42 @@ const steps = content.steps;
   }
 
   .club-flow-stage__card-body {
-    max-width: 32rem;
-    margin: clamp(1.25rem, 2.5vh, 1.85rem) 0 0;
+    max-width: 25rem;
+    margin: clamp(0.9rem, 1.8vh, 1.25rem) 0 0;
     color: color-mix(in srgb, var(--color-text-secondary) 90%, var(--color-text-primary));
     font-size: clamp(1.05rem, 1.5vw, 1.25rem);
     line-height: 1.55;
     text-wrap: pretty;
   }
 
-  @media (max-width: 1100px) {
+  @media (min-width: 1180px) and (max-width: 1280px) {
     .club-flow-stage__layout {
-      grid-template-columns: minmax(0, 0.95fr) minmax(21rem, 1.05fr);
+      grid-template-columns: minmax(0, 1.05fr) minmax(19rem, 0.72fr);
       gap: 1.5rem;
     }
   }
 
-  @media (max-width: 899px) {
+  @media (max-width: 1179px) {
     .club-flow-stage {
       overflow: hidden;
     }
 
     /*
-      Mobile redesign per user feedback 2026-05-01: "lépe vyřešit ať
-      to vypadá víc jako ty karty v pricingu, které mají ten liquid
-      glass." Compact glass cards with tighter typography, smaller
-      photo, premium spacing — same .glass-card recipe as pricing.
+      Mobile redesign per user feedback 2026-05-01: each step card is
+      the photo surface; the copy sits in a bottom shadow instead of a
+      separate text block under a framed image.
     */
     .club-flow-stage__intro {
-      text-align: left;
+      /* Centred on mobile too — the rest of the page is centred so
+         keeping ClubFlow left-aligned on phones broke the rhythm
+         (user feedback 2026-05-01: "všechno na střed"). */
+      text-align: center;
       padding: clamp(4rem, 10vw, 6rem) clamp(1rem, 4vw, 1.5rem) clamp(1.5rem, 4vw, 2.5rem);
     }
 
     .club-flow-stage__intro h2 {
       max-width: none;
-      margin: 0;
+      margin: 0 auto;
       font-size: clamp(2.25rem, 9vw, 3.25rem);
       line-height: 1.02;
       letter-spacing: -0.035em;
@@ -731,7 +734,7 @@ const steps = content.steps;
 
     .club-flow-stage__intro > p:last-child {
       max-width: none;
-      margin: 1rem 0 0;
+      margin: 1rem auto 0;
       font-size: 1rem;
       line-height: 1.55;
     }
@@ -739,7 +742,7 @@ const steps = content.steps;
     .club-flow-stage__scroll {
       height: auto;
       min-height: 0;
-      padding: 0 clamp(1rem, 4vw, 1.5rem) clamp(3rem, 10vw, 5rem);
+      padding: 0 clamp(0.75rem, 2.4vw, 1.25rem) clamp(3rem, 10vw, 5rem);
     }
 
     .club-flow-stage__pin {
@@ -751,7 +754,7 @@ const steps = content.steps;
     .club-flow-stage__layout {
       display: block;
       width: 100%;
-      max-width: 32rem;
+      max-width: 78rem;
       margin: 0 auto;
       min-height: 0;
     }
@@ -768,97 +771,176 @@ const steps = content.steps;
 
     .club-flow-stage__cards {
       display: grid;
-      gap: 0.85rem;
+      grid-template-columns: minmax(0, 1fr);
+      gap: clamp(0.9rem, 3vw, 1.15rem);
       min-height: 0;
     }
 
     .club-flow-stage__card {
       position: relative;
       inset: auto;
-      /* Match pricing card radius family (1.25 rem reads as the
-         mobile-equivalent of the 1.75 rem desktop pricing radius —
-         smaller surface, smaller corner). */
-      border-radius: 1.25rem;
+      border-radius: clamp(1.25rem, 5vw, 1.65rem);
       opacity: 1 !important;
       transform: none !important;
       pointer-events: auto !important;
+      box-shadow:
+        0 12px 36px rgba(0, 0, 0, 0.36),
+        0 0 30px color-mix(in srgb, var(--color-accent-primary) 9%, transparent);
     }
 
-    /* All step cards share the same baseline visual weight on mobile
-       (no "active" cyan halo dance — that was a desktop scroll-driven
-       effect; mobile shows them in a static stack). */
+    /* All step cards share the same baseline visual weight on mobile.
+       The desktop active-card glow would make the image stack noisy. */
     .club-flow-stage__card.is-active {
       box-shadow:
-        0 6px 6px rgba(0, 0, 0, 0.28),
-        0 0 24px rgba(0, 0, 0, 0.18);
+        0 12px 36px rgba(0, 0, 0, 0.36),
+        0 0 30px color-mix(in srgb, var(--color-accent-primary) 9%, transparent);
     }
+
+    .club-flow-stage__card .glass-filter {
+      backdrop-filter: blur(8px) saturate(160%);
+      -webkit-backdrop-filter: blur(8px) saturate(160%);
+      filter: url(#glass-lens) brightness(1.02);
+    }
+
     .club-flow-stage__card.is-active .glass-overlay {
       background: linear-gradient(
         180deg,
-        rgba(255, 255, 255, 0.06) 0%,
-        rgba(255, 255, 255, 0.02) 55%,
-        rgba(0, 240, 255, 0.018) 100%
+        rgba(255, 255, 255, 0.02) 0%,
+        rgba(255, 255, 255, 0.01) 55%,
+        rgba(0, 240, 255, 0.02) 100%
       );
     }
+
+    .club-flow-stage__card .glass-specular,
     .club-flow-stage__card.is-active .glass-specular {
+      z-index: 6;
       box-shadow:
-        inset 1px 1px 0 rgba(255, 255, 255, 0.28),
-        inset 0 0 8px rgba(255, 255, 255, 0.12),
-        inset -1px -1px 0 rgba(255, 255, 255, 0.05);
+        inset 1px 1px 0 rgba(255, 255, 255, 0.26),
+        inset 0 0 14px color-mix(in srgb, var(--color-accent-primary) 18%, transparent),
+        inset -1px -1px 0 rgba(255, 255, 255, 0.06);
     }
 
     .club-flow-stage__card-panel {
-      padding: 1rem;
-      gap: 0.85rem;
+      position: relative;
+      min-height: clamp(25rem, 112vw, 34rem);
+      justify-content: flex-end;
+      overflow: hidden;
+      padding: clamp(1rem, 4.2vw, 1.35rem);
+      isolation: isolate;
+    }
+
+    .club-flow-stage__card-panel::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      z-index: 1;
+      background:
+        radial-gradient(
+          circle at 72% 78%,
+          color-mix(in srgb, var(--color-accent-primary) 28%, transparent),
+          transparent 34%
+        ),
+        linear-gradient(
+          180deg,
+          rgba(5, 6, 8, 0.04) 0%,
+          rgba(5, 6, 8, 0.12) 38%,
+          rgba(5, 6, 8, 0.72) 70%,
+          rgba(5, 6, 8, 0.95) 100%
+        );
+      pointer-events: none;
+    }
+
+    .club-flow-stage__card-panel::after {
+      content: '';
+      position: absolute;
+      inset: auto 0 0;
+      z-index: 1;
+      height: 58%;
+      background: linear-gradient(
+        180deg,
+        transparent 0%,
+        color-mix(in srgb, var(--color-bg-tint) 34%, rgba(5, 6, 8, 0.9)) 100%
+      );
+      opacity: 0.72;
+      pointer-events: none;
     }
 
     .club-flow-stage__card-photo {
+      position: absolute;
+      inset: 0;
+      z-index: 0;
       display: block;
       width: 100%;
-      height: auto;
-      aspect-ratio: 4 / 3;
-      max-height: 200px;
+      height: 100%;
+      aspect-ratio: auto;
+      max-height: none;
       max-width: none;
       margin: 0;
-      border-radius: 0.85rem;
+      border-radius: inherit;
       object-fit: cover;
+      filter: saturate(0.94) contrast(1.08) brightness(0.78);
+      transform: scale(1.015);
     }
 
-    /* Tight number + kicker row — same hairline cyan divider as
-       desktop, but compressed. */
+    .club-flow-stage__card-topline,
+    .club-flow-stage__card h3,
+    .club-flow-stage__card-body {
+      position: relative;
+      z-index: 2;
+    }
+
     .club-flow-stage__card-topline {
-      margin-top: 1rem;
-      margin-bottom: 0.75rem;
-      padding-bottom: 0.75rem;
-      gap: 0.85rem;
+      margin: 0 0 clamp(0.8rem, 2.5vw, 1rem);
+      padding-bottom: clamp(0.75rem, 2.4vw, 0.95rem);
+      gap: clamp(0.75rem, 2.6vw, 1rem);
     }
 
     .club-flow-stage__card-number {
-      font-size: 1.85rem;
+      font-size: clamp(2rem, 8vw, 2.45rem);
       letter-spacing: -0.03em;
-      /* Drop the desktop cyan glow on the number — at this size it
-         smudges against the body copy below. */
-      text-shadow: none;
+      text-shadow: 0 0 22px color-mix(in srgb, var(--color-accent-primary) 32%, transparent);
     }
 
     .club-flow-stage__card-kicker {
-      font-size: 0.8rem;
+      font-size: clamp(0.76rem, 2.5vw, 0.86rem);
       letter-spacing: 0.02em;
-      color: var(--color-text-tertiary);
+      color: color-mix(in srgb, var(--color-text-secondary) 78%, var(--color-text-primary));
     }
 
     .club-flow-stage__card h3 {
-      font-size: clamp(1.5rem, 6.5vw, 2rem);
+      font-size: clamp(1.65rem, 7vw, 2.25rem);
       line-height: 1.05;
       letter-spacing: -0.035em;
     }
 
     .club-flow-stage__card-body {
       max-width: none;
-      margin-top: 0.6rem;
+      margin-top: clamp(0.55rem, 2vw, 0.75rem);
       font-size: 0.95rem;
       line-height: 1.55;
-      color: color-mix(in srgb, var(--color-text-secondary) 92%, var(--color-text-primary));
+      color: color-mix(in srgb, var(--color-text-secondary) 88%, var(--color-text-primary));
+    }
+  }
+
+  @media (min-width: 700px) and (max-width: 1179px) {
+    .club-flow-stage__intro {
+      max-width: 78rem;
+    }
+
+    .club-flow-stage__cards {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .club-flow-stage__card-panel {
+      min-height: clamp(25rem, 56vw, 31rem);
+    }
+
+    .club-flow-stage__card h3 {
+      font-size: clamp(1.55rem, 3.8vw, 2.05rem);
+    }
+
+    .club-flow-stage__card-body {
+      font-size: clamp(0.9rem, 1.8vw, 0.98rem);
     }
   }
 
@@ -904,7 +986,7 @@ const steps = content.steps;
     const dots = Array.from(stage.querySelectorAll<HTMLElement>('[data-club-flow-dot]'));
     const progressBar = stage.querySelector<HTMLElement>('.club-flow-stage__progress span');
     const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
-    const desktop = window.matchMedia('(min-width: 900px)');
+    const desktop = window.matchMedia('(min-width: 1180px)');
 
     if (!scrollArea || cards.length === 0) return;
 
