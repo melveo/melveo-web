@@ -341,7 +341,7 @@ const t = useTranslations(lang);
     overflow: clip;
   }
 
-  @media (max-width: 768px) {
+  @media (max-width: 1024px) {
     .image-grid-section {
       min-height: 430vh;
     }
@@ -543,9 +543,14 @@ const t = useTranslations(lang);
 
     width: var(--container-width);
     max-width: calc(100% - (2 * var(--gutter)));
+    /* Cap to viewport height across all sizes so the grid never
+       overflows top + bottom of the sticky-pinned content (which
+       would clip rows 1 and 3 on shorter laptops or mid-tablet
+       viewports). 1fr rows distribute equally inside this cap. */
+    height: calc(100vh - 4rem);
     display: grid;
     grid-template-columns: repeat(5, 1fr);
-    grid-template-rows: repeat(3, auto);
+    grid-template-rows: repeat(3, 1fr);
     gap: var(--gap);
     margin: 0 auto;
     align-content: center;
@@ -553,6 +558,15 @@ const t = useTranslations(lang);
     top: 50%;
     left: 50%;
     translate: -50% -50%;
+  }
+
+  /* min-height: 0 on the grid items lets 1fr rows actually shrink
+     to fit the cap. Without it, default min-height: auto pins rows
+     to the cells' intrinsic 4/5 height and the grid overflows. */
+  .image-grid-section .grid > .layer > div,
+  .image-grid-section .grid > .scaler {
+    min-height: 0;
+    min-width: 0;
   }
 
   /* Layers spread across the full 5×3 (or 3×5 mobile) grid via subgrid */
@@ -611,8 +625,14 @@ const t = useTranslations(lang);
                                               + row 5 cols 1-3
                                                  (top + bottom bands)
        Scaler                                → row 3 col 2
+
+     Breakpoint extended to 1024 px so iPad-portrait + small-laptop
+     viewports also use the rotated 3 × 5 layout — at those widths
+     5 columns crunch the cells too tight to read tech-card content
+     comfortably (user feedback 2026-05-01: "při změně rozlišení je
+     rozložení karet random").
   */
-  @media (max-width: 700px) {
+  @media (max-width: 1024px) {
     .image-grid-section .grid {
       --gutter: 1rem;
       --gap: clamp(8px, 2vw, 14px);
@@ -677,31 +697,15 @@ const t = useTranslations(lang);
      `display: block` here clobbered that and pinned the icon+title
      to the top of the card (user feedback 2026-05-01: "není to na
      středu"). */
+  /* All cells fill their grid track at every viewport — track height
+     is now driven by 1fr (grid is height-capped to viewport). The old
+     aspect-ratio: 4/5 baked the cell intrinsic height into the row
+     track, overflowing top + bottom rows past viewport. */
   .image-grid-section .grid-photo,
   .image-grid-section .tech-card {
     width: 100%;
-    aspect-ratio: 4 / 5;
-  }
-
-  /* On phones the grid is height-constrained to the viewport — cells
-     fill their grid track height instead of enforcing the 4/5 aspect.
-     Placed AFTER the base rule above so the cascade resolves to the
-     mobile values when the media query matches. min-height: 0 on the
-     grid cells lets the 1fr rows actually distribute equally — without
-     it, default min-height: auto prevents rows from shrinking below
-     the cell's intrinsic content size. */
-  @media (max-width: 700px) {
-    .image-grid-section .grid > .layer > div,
-    .image-grid-section .grid > .scaler {
-      min-height: 0;
-      height: 100%;
-    }
-    .image-grid-section .grid-photo,
-    .image-grid-section .tech-card {
-      aspect-ratio: auto;
-      height: 100%;
-      min-height: 0;
-    }
+    height: 100%;
+    min-height: 0;
   }
 
   /* Glass cards in the grid don't lift on hover — they live inside
@@ -878,7 +882,7 @@ const t = useTranslations(lang);
     width: 100%;
     height: 100%;
   }
-  @media (max-width: 700px) {
+  @media (max-width: 1024px) {
     .image-grid-section .grid .scaler {
       grid-area: 3 / 2;
     }
