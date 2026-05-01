@@ -83,7 +83,17 @@ const feedbackItems =
       </a>
     </header>
 
-    <div class="relative z-10 flex flex-1 flex-col items-center justify-center px-6 pb-8 pt-24 text-center sm:pt-32">
+    {/*
+      flex-1 + justify-center already vertically-centres the hero
+      content within the remaining viewport-minus-header space, so
+      the previous `pt-24 pb-8 sm:pt-32` tilted the whole stack
+      visibly downward. User feedback 2026-05-01 — wanted the texts +
+      CTAs more centred. Using a small SYMMETRIC py value gives a
+      hairline safety margin (so the headline doesn't graze the
+      header on very short viewports) while letting justify-center
+      do the actual centring work.
+    */}
+    <div class="relative z-10 flex flex-1 flex-col items-center justify-center px-6 py-6 text-center sm:py-10">
       <p class="mb-8 text-xs font-semibold uppercase tracking-[0.4em] text-[var(--color-accent-primary)]">
         {t('hero.eyebrow')}
       </p>
