@@ -87,17 +87,34 @@ const t = useTranslations(lang);
     height: 100%;
 
     /*
-      Brand-cyan ramp. Codepen used a violet→mint→white gradient;
-      we lean fully into the Melveo cyan palette so the reveal feels
-      on-brand instead of off-key against the rest of the page.
-      Three stops: deep cyan accent → mid cyan tint → near-white so
-      the reveal still has visual depth.
+      Glass-marble orb body — a radial gradient that follows the
+      cursor (same --x / --y as the mask) so the visible reveal
+      reads as an actual lit glass sphere instead of a flat cyan
+      patch. Per user feedback 2026-05-01: "tu kouli dát více do
+      našich barev a trošku glass efektu".
+
+      Stop layout (radial centred just above-left of cursor so the
+      spec sits where light would naturally catch a glass orb):
+        0 %    rgba white .55  → small spec / light catch
+        6 %    cyan-subtle     → quick fade out of the spec
+        25 %   brand cyan      → main body
+        65 %   cyan ↔ canvas   → deepening teal
+        100 %  cyan ↔ canvas   → bottom-of-orb shadow
+
+      No straight white anymore — every stop is in the brand cyan
+      family. Spec is the only non-cyan colour and it's tight at the
+      centre, reading as light catching curved glass rather than a
+      flat colour swatch.
     */
-    background: linear-gradient(
-      45deg,
-      var(--color-accent-primary),
-      var(--color-accent-primary-subtle),
-      #ffffff
+    --x: 70%;
+    --y: 50%;
+    background: radial-gradient(
+      circle at calc(var(--x) - 6%) calc(var(--y) - 6%),
+      rgba(255, 255, 255, 0.55) 0%,
+      var(--color-accent-primary-subtle) 6%,
+      var(--color-accent-primary) 25%,
+      color-mix(in srgb, var(--color-accent-primary) 75%, var(--color-bg-canvas)) 65%,
+      color-mix(in srgb, var(--color-accent-primary) 50%, var(--color-bg-canvas)) 100%
     );
 
     /*
@@ -108,13 +125,17 @@ const t = useTranslations(lang);
     color: var(--color-bg-canvas);
 
     /*
-      Radial mask — codepen uses `black 25%` (full opacity in inner
-      25% of the gradient, transparent outside). Default position
-      70% / 50% before pointermove kicks in.
+      Radial mask — black 24 % full reveal, then a 3 % feathered
+      transition to transparent. Soft edge instead of the codepen's
+      hard cliff so the orb rim reads as glass curvature.
     */
-    --x: 70%;
-    --y: 50%;
-    --mask: radial-gradient(circle at var(--x) var(--y), black 25%, transparent 0);
+    --mask: radial-gradient(
+      circle at var(--x) var(--y),
+      black 0%,
+      black 24%,
+      rgba(0, 0, 0, 0.55) 25.5%,
+      transparent 27%
+    );
     -webkit-mask-image: var(--mask);
     mask-image: var(--mask);
 
