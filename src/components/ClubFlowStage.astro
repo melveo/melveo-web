@@ -843,15 +843,33 @@ const steps = content.steps;
     */
     .club-flow-stage__cards {
       /*
-        Card width shrunk from 85vw → 70vw because at 85vw on a
-        393 px iPhone the math gave only 13 px of card-2 peek on the
-        right, which the 5 %-fade mask then ate entirely (user
-        feedback 2026-05-01: "neni jakoby videt ten další obrazek").
-        At 70vw the math gives ~43 px peek (~11 % of viewport) which
-        comfortably reads as "there's another card here". The 26 rem
-        cap keeps cards from getting absurdly wide on tablets.
+        Switched from centre-snap to start-snap (user feedback
+        2026-05-01: "ta karta nemusí byt tak zmenšená.. má více
+        prostoru na levé straně takže šířka může byt zachovana").
+        With centre-snap the symmetric padding put roughly equal
+        empty space on each side of the active card, so to get any
+        meaningful peek the card had to shrink. Start-snap pins the
+        active card's leading edge to a small left inset (1 rem) and
+        all the remaining viewport space lands on the right as peek
+        — the card can stay wider AND the peek is plainly visible.
+
+        Math at 393 px iPhone, card 80 vw:
+          card width  = 314
+          card 1 left = 16 (start-snap, leading inset)
+          card 1 right = 330
+          gap         = 16
+          card 2 left = 346
+          peek        = 47 px (~12 % of viewport)
+        Compare with the previous centre-snap geometry: 85vw → 13 px
+        peek (invisible), 70vw → 43 px peek but card too small.
+
+        padding-inline-end auto-computed so the LAST card can also
+        scroll-snap to the leading position (without enough trailing
+        space in the rail, the browser snap can't reach the start
+        anchor for the last card). Formula: 100 % minus card width
+        minus the two 1 rem insets.
       */
-      --carousel-card-width: min(70vw, 26rem);
+      --carousel-card-width: min(80vw, 28rem);
       display: flex;
       flex-direction: row;
       gap: 1rem;
@@ -867,17 +885,19 @@ const steps = content.steps;
          under the rail). */
       scrollbar-width: none;
       -ms-overflow-style: none;
-      /* Phantom space so first + last cards centre-snap — without
-         this, snap tries to centre but can't reach the rail edges. */
-      padding-inline: calc(50% - var(--carousel-card-width) / 2);
-      scroll-padding-inline: calc(50% - var(--carousel-card-width) / 2);
+      /* Asymmetric padding: small leading inset (1 rem) so the card
+         hugs the left edge with a hairline gutter, computed end
+         padding so the last card can still snap to start without
+         running out of trailing scroll space. */
+      padding-inline-start: 1rem;
+      padding-inline-end: calc(100% - var(--carousel-card-width) - 2rem);
+      scroll-padding-inline-start: 1rem;
       /* Vertical headroom so cards' bottom shadow + cyan glow don't
          get clipped. */
       padding-block: 1rem clamp(1.5rem, 4vw, 2rem);
       /*
         Soft fade at the rail edges so peeking cards "dissolve" into
-        the page. Reduced from 5 % to 3 % so the fade doesn't eat
-        most of the (now larger) peek.
+        the page. 3 % is gentle enough not to eat the visible peek.
       */
       mask-image: linear-gradient(
         90deg,
@@ -910,7 +930,7 @@ const steps = content.steps;
       position: relative;
       inset: auto;
       flex: 0 0 var(--carousel-card-width);
-      scroll-snap-align: center;
+      scroll-snap-align: start;
       /*
         scroll-snap-stop: normal (default) — fast flick can carry the
         rail past multiple snap points before the magnet catches the
@@ -1128,11 +1148,11 @@ const steps = content.steps;
     }
 
     /*
-      Tablet carousel — same Apple peek mechanic, just a narrower
-      card so two neighbours peek meaningfully on each side (iPad
-      portrait can fit it without a single card looking lonely).
-      Centre-snap + phantom padding still computed against
-      --carousel-card-width.
+      Tablet carousel — same start-snap mechanic, smaller card-width
+      ratio so the right-side peek of the next card is generous
+      (iPad portrait has plenty of width to spare). The padding-end
+      formula auto-adjusts to give the last card enough trailing
+      scroll space.
     */
     .club-flow-stage__cards {
       --carousel-card-width: min(62vw, 32rem);
@@ -1223,9 +1243,14 @@ const steps = content.steps;
       if (desktop.matches || !cardsRail || cards.length === 0) return;
 
       const railRect = cardsRail.getBoundingClientRect();
-      const railCentre = railRect.left + railRect.width / 2;
-      // Use the active card's measured width — falls back to first
-      // card on first frame (before any active is set).
+      // Start-snap anchor: the leading edge of the snapped (active)
+      // card lands at scroll-padding-inline-start within the rail.
+      // Read the resolved value live so any responsive breakpoint
+      // change auto-updates without JS edits.
+      const padStart = parseFloat(
+        getComputedStyle(cardsRail).scrollPaddingInlineStart,
+      ) || 16;
+      const anchor = railRect.left + padStart;
       const referenceWidth = cards[0]?.offsetWidth || 1;
 
       let closestIndex = 0;
@@ -1233,10 +1258,11 @@ const steps = content.steps;
 
       cards.forEach((card, index) => {
         const cardRect = card.getBoundingClientRect();
-        const cardCentre = cardRect.left + cardRect.width / 2;
-        const signed = (cardCentre - railCentre) / referenceWidth;
-        // Hard clamp at ±1.5 — beyond that the card is fully off-stage
-        // and the math doesn't need to keep linearly extrapolating.
+        // Distance is measured from the card's LEADING edge to the
+        // start-snap anchor. The active card has its leading edge at
+        // the anchor → distance 0; one card-width to the right →
+        // distance +1; one card-width to the left → distance -1.
+        const signed = (cardRect.left - anchor) / referenceWidth;
         const clampedSigned = Math.max(-1.5, Math.min(1.5, signed));
         const progress = Math.min(1, Math.abs(clampedSigned));
 
