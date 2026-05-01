@@ -71,16 +71,12 @@ const t = useTranslations(lang);
 
     <div class="grid-intro" data-grid-intro>
       <div class="grid-intro__center">
-        <p class="grid-intro__eyebrow">{t('gridMorph.subline')}</p>
-        {/* Brand wordmark — always lowercase visually
-            (text-transform on the CSS rule + lowercase string).
-            Two stacked spans so we can layer a soft cyan-tinted blur
-            behind a sharper foreground for a "liquid glass etched
-            cyan" feel. */}
-        <h2 class="grid-intro__wordmark" aria-label="Melveo">
-          <span class="grid-intro__wordmark-blur" aria-hidden="true">melveo</span>
-          <span class="grid-intro__wordmark-fill">melveo</span>
-        </h2>
+        {/* Brand wordmark — always lowercase visually (text-transform
+            on the CSS rule + lowercase string). Single span, soft
+            rounded display font (Outfit, --font-wordmark), minimal
+            shadow per user feedback 2026-05-01: "glow bych z tama
+            dal pryč". Eyebrow text removed too. */}
+        <h2 class="grid-intro__wordmark">melveo</h2>
       </div>
       <button
         type="button"
@@ -431,66 +427,40 @@ const t = useTranslations(lang);
     max-width: min(92vw, 1400px);
   }
 
-  .image-grid-section .grid-intro__eyebrow {
-    margin: 0;
-    max-width: 38rem;
-    font-size: clamp(0.95rem, 1.6vw, 1.2rem);
-    line-height: 1.5;
-    letter-spacing: 0.01em;
-    color: var(--color-text-secondary);
-    text-wrap: balance;
-    text-shadow: 0 2px 14px rgba(0, 0, 0, 0.65);
-  }
-
   /*
-    Wordmark — half-section size, cyan-gradient fill, glass-etched
-    feel. Two stacked spans:
-      .__wordmark-blur — sits behind, blurred + cyan-tinted, gives
-                         the "halo emission" beneath the glyphs
-      .__wordmark-fill — sharp foreground, cyan→white→cyan vertical
-                         gradient via background-clip:text, plus a
-                         hairline white text-stroke that reads as a
-                         glass etch on the rim
-    Always lowercase per user request 2026-05-01: "ten nadpis melveo
-    musí být vždy všechno malé písmo".
+    Wordmark — half-section size, cyan-gradient fill, soft rounded
+    display font. Single span, no glow — per user feedback 2026-05-01
+    ("glow bych z tama dal pryč... potřebujeme nějaký lepší font aby
+    nebyl takový ostrý, chce to takové jemně zaoblené hrany").
+
+    Font: Outfit (loaded in BaseLayout, var --font-wordmark). Soft
+    geometric sans with rounded terminals — the "m" no longer reads
+    as sharp.
+
+    Look: vertical gradient cyan-white → cyan → teal-deep via
+    background-clip:text, hairline white text-stroke as a subtle
+    rim etch, single dark drop-shadow ONLY (for legibility on the
+    photo); no cyan halo / blur halo behind.
+
+    Always lowercase via text-transform as a guard plus the
+    lowercase string in the markup.
   */
   .image-grid-section .grid-intro__wordmark {
     position: relative;
+    display: block;
     margin: 0;
-    font-family: var(--font-display);
+    font-family: var(--font-wordmark);
     font-weight: 800;
-    /* Half-the-section size per user request 2026-05-01 ("hodně
-       větší, klidně přes půl sekce"). 30vw lands the lowercase
-       glyphs at ~50 % of viewport height on most ratios. */
+    /* Half-the-section size per user request ("hodně větší, klidně
+       přes půl sekce"). 30vw lands the lowercase glyphs at ~50 % of
+       viewport height on most ratios. */
     font-size: clamp(7rem, 30vw, 24rem);
     line-height: 0.85;
-    letter-spacing: -0.07em;
+    letter-spacing: -0.04em;
     text-transform: lowercase;
-    /* Reset display for the spans we layer on top */
-    display: inline-grid;
-  }
-
-  .image-grid-section .grid-intro__wordmark-blur,
-  .image-grid-section .grid-intro__wordmark-fill {
-    grid-column: 1;
-    grid-row: 1;
-    display: block;
-  }
-
-  .image-grid-section .grid-intro__wordmark-blur {
-    color: rgba(0, 240, 255, 0.55);
-    filter: blur(22px);
-    transform: translateY(2px);
-    /* Stronger cyan presence in the blurred backing. */
-    text-shadow:
-      0 0 30px rgba(0, 240, 255, 0.45),
-      0 0 90px rgba(0, 240, 255, 0.28);
-  }
-
-  .image-grid-section .grid-intro__wordmark-fill {
     /* Vertical gradient: brighter cyan-white at top, deeper cyan at
        middle, dim teal at bottom — reads as a curved glass surface
-       catching light. */
+       catching light without needing a glow halo. */
     background: linear-gradient(
       180deg,
       rgba(255, 255, 255, 0.9) 0%,
@@ -501,15 +471,10 @@ const t = useTranslations(lang);
     -webkit-background-clip: text;
     background-clip: text;
     color: transparent;
-    /* Hairline white outline — the "etch" on the rim of the glass. */
-    -webkit-text-stroke: 0.5px rgba(255, 255, 255, 0.22);
-    /* Drop-shadow chain works through background-clip:text where
-       text-shadow doesn't. Tight inner halo + broad atmospheric
-       cyan + dark separator for contrast against the photo+darken. */
-    filter:
-      drop-shadow(0 0 14px rgba(0, 240, 255, 0.5))
-      drop-shadow(0 0 42px rgba(0, 240, 255, 0.3))
-      drop-shadow(0 12px 30px rgba(0, 0, 0, 0.55));
+    -webkit-text-stroke: 0.5px rgba(255, 255, 255, 0.18);
+    /* Single dark drop-shadow only — gives the wordmark separation
+       from the photo without re-introducing the cyan halo. */
+    filter: drop-shadow(0 10px 24px rgba(0, 0, 0, 0.55));
   }
 
   /* Scroll-hint pill anchored to the bottom-centre of the overlay

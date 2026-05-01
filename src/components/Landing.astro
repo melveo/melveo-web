@@ -16,6 +16,7 @@ import HeroScene from './HeroScene.astro';
 import ImageGridScrollMorph from './ImageGridScrollMorph.astro';
 import GooeyStage from './GooeyStage.astro';
 import WordScrollStage from './WordScrollStage.astro';
+import ClubFlowStage from './ClubFlowStage.astro';
 import OrbStage from './OrbStage.astro';
 import ParticleStatementStage from './ParticleStatementStage.astro';
 import PricingStage from './PricingStage.astro';
@@ -134,40 +135,9 @@ const t = useTranslations(lang);
   <WordScrollStage lang={lang} />
 
   <!-- ============================================================== -->
-  <!-- STAGE 4 — Wellness                                              -->
+  <!-- STAGE 4 — Sticky club workflow                                  -->
   <!-- ============================================================== -->
-  <section class="relative isolate w-full overflow-hidden border-t border-[var(--color-stroke-base)] bg-[var(--color-bg-surface)]">
-    <div class="grid-overlay"></div>
-
-    <div class="relative z-10 grid items-center gap-16 px-6 py-24 sm:px-12 sm:py-32 lg:grid-cols-2 lg:gap-24 lg:px-20 lg:py-40">
-      <div>
-        <p class="mb-6 text-xs font-semibold uppercase tracking-[0.4em] text-[var(--color-accent-primary)]">
-          {t('wellness.eyebrow')}
-        </p>
-        <h2
-          class="text-balance font-bold leading-[1.05] tracking-tight text-[var(--color-text-primary)]"
-          style="font-size: clamp(2rem, 5vw, 4.5rem); letter-spacing: -0.03em;"
-        >
-          {t('wellness.headline')}
-        </h2>
-        <p class="mt-6 max-w-[28rem] text-pretty text-lg text-[var(--color-text-secondary)]">
-          {t('wellness.body')}
-        </p>
-      </div>
-
-      <div class="relative">
-        <div
-          class="aspect-[9/16] overflow-hidden rounded-[2.5rem] border border-[var(--color-stroke-emphasized)] bg-[var(--color-bg-canvas)] shadow-[0_40px_120px_-20px_rgba(0,240,255,0.15)]"
-        >
-          <div class="flex h-full w-full items-center justify-center bg-gradient-to-b from-[var(--color-bg-surface-elevated)] to-[var(--color-bg-canvas)]">
-            <p class="text-xs uppercase tracking-[0.3em] text-[var(--color-text-tertiary)]">
-              Check-in
-            </p>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
+  <ClubFlowStage lang={lang} />
 
   <!-- ============================================================== -->
   <!-- STAGE 5 — Glass orb + rotating text (Giomgio codepen)           -->
@@ -178,42 +148,6 @@ const t = useTranslations(lang);
   <!-- STAGE 5.5 — Particles statement (Ahmad Awais codepen)           -->
   <!-- ============================================================== -->
   <ParticleStatementStage lang={lang} />
-
-  <!-- ============================================================== -->
-  <!-- STAGE 6 — Sessions + Coach Board                                -->
-  <!-- ============================================================== -->
-  <section class="relative isolate w-full overflow-hidden border-t border-[var(--color-stroke-base)] bg-[var(--color-bg-canvas)]">
-    <div class="halo-cyan" style="opacity: 0.4; inset: auto 0 -50% 50%;"></div>
-
-    <div class="relative z-10 grid items-center gap-16 px-6 py-24 sm:px-12 sm:py-32 lg:grid-cols-2 lg:gap-24 lg:px-20 lg:py-40">
-      <div class="lg:order-2">
-        <p class="mb-6 text-xs font-semibold uppercase tracking-[0.4em] text-[var(--color-accent-primary)]">
-          {t('sessions.eyebrow')}
-        </p>
-        <h2
-          class="text-balance font-bold leading-[1.05] tracking-tight text-[var(--color-text-primary)]"
-          style="font-size: clamp(2rem, 5vw, 4.5rem); letter-spacing: -0.03em;"
-        >
-          {t('sessions.headline')}
-        </h2>
-        <p class="mt-6 max-w-[28rem] text-pretty text-lg text-[var(--color-text-secondary)]">
-          {t('sessions.body')}
-        </p>
-      </div>
-
-      <div class="relative lg:order-1">
-        <div
-          class="aspect-[4/5] overflow-hidden rounded-[2.5rem] border border-[var(--color-stroke-emphasized)] bg-[var(--color-bg-surface)] shadow-[0_40px_120px_-20px_rgba(0,240,255,0.12)]"
-        >
-          <div class="flex h-full w-full items-center justify-center bg-gradient-to-tr from-[var(--color-bg-surface)] to-[var(--color-bg-surface-elevated)]">
-            <p class="text-xs uppercase tracking-[0.3em] text-[var(--color-text-tertiary)]">
-              Sessions
-            </p>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
 
   <!-- ============================================================== -->
   <!-- STAGE 6.5 — Pricing                                             -->

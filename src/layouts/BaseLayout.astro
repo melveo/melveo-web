@@ -80,6 +80,21 @@ const altUrls = {
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="canonical" href={canonicalUrl} />
 
+    {/* Display wordmark font — Outfit (soft geometric sans with
+        rounded terminals, picked over Inter per user feedback
+        2026-05-01: "potřebujeme nějaký lepší font aby nebyl takový
+        ostrý jako je to m, chce to takové jemně zaoblené hrany").
+        Used today only by .grid-intro__wordmark via --font-wordmark
+        in global.css; the rest of the site keeps Inter. Swap the
+        family name in the URL + CSS var to try Plus Jakarta Sans /
+        Manrope / Sora / Hanken Grotesk. */}
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Outfit:wght@600;700;800&display=swap"
+    />
+
     <!-- Hreflang alternates -->
     <link rel="alternate" hreflang="cs" href={altUrls.cs} />
     <link rel="alternate" hreflang="en" href={altUrls.en} />
