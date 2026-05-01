@@ -155,38 +155,50 @@ const steps = content.steps;
       <div class="club-flow-stage__layout">
         <div class="club-flow-stage__media-shell" aria-label={content.mediaLabel}>
           <div class="club-flow-stage__media-glow" aria-hidden="true"></div>
-          <div class="club-flow-stage__media">
-            {
-              steps.map((step, index) => (
-                <img
-                  class="club-flow-stage__image"
-                  class:list={{ 'is-active': index === 0 }}
-                  data-club-flow-image
-                  src={step.image}
-                  alt={step.alt}
-                  width="1586"
-                  height="992"
-                  loading="lazy"
-                  decoding="async"
-                  style={`--image-index: ${index};`}
-                />
-              ))
-            }
-            <div class="club-flow-stage__media-scrim" aria-hidden="true"></div>
+          {/*
+            Media frame uses the same .glass-card recipe as pricing
+            cards + image-grid photos (per user request 2026-05-01:
+            "stejný Liquid Glass design"). The 4 layer spans render
+            the frame; the photo + HUD overlays sit inside
+            .glass-content.
+          */}
+          <div class="club-flow-stage__media glass-card">
+            <span class="glass-filter" aria-hidden="true" />
+            <span class="glass-overlay" aria-hidden="true" />
+            <span class="glass-specular" aria-hidden="true" />
+            <div class="glass-content">
+              {
+                steps.map((step, index) => (
+                  <img
+                    class="club-flow-stage__image"
+                    class:list={{ 'is-active': index === 0 }}
+                    data-club-flow-image
+                    src={step.image}
+                    alt={step.alt}
+                    width="1586"
+                    height="992"
+                    loading="lazy"
+                    decoding="async"
+                    style={`--image-index: ${index};`}
+                  />
+                ))
+              }
+              <div class="club-flow-stage__media-scrim" aria-hidden="true"></div>
 
-            <div class="club-flow-stage__hud">
-              <span class="club-flow-stage__hud-label">{content.mediaLabel}</span>
-              <div class="club-flow-stage__hud-dots" aria-hidden="true">
-                {steps.map((_, index) => <span data-club-flow-dot class:list={{ 'is-active': index === 0 }}></span>)}
+              <div class="club-flow-stage__hud">
+                <span class="club-flow-stage__hud-label">{content.mediaLabel}</span>
+                <div class="club-flow-stage__hud-dots" aria-hidden="true">
+                  {steps.map((_, index) => <span data-club-flow-dot class:list={{ 'is-active': index === 0 }}></span>)}
+                </div>
               </div>
-            </div>
 
-            <div class="club-flow-stage__mini-board" aria-hidden="true">
-              <span>{content.progressLabel}</span>
-              <div class="club-flow-stage__mini-lines">
-                <i></i>
-                <i></i>
-                <i></i>
+              <div class="club-flow-stage__mini-board" aria-hidden="true">
+                <span>{content.progressLabel}</span>
+                <div class="club-flow-stage__mini-lines">
+                  <i></i>
+                  <i></i>
+                  <i></i>
+                </div>
               </div>
             </div>
           </div>
@@ -201,12 +213,26 @@ const steps = content.steps;
             {
               steps.map((step, index) => (
                 <article
-                  class="club-flow-stage__card"
-                  class:list={{ 'is-active': index === 0 }}
+                  class:list={[
+                    'club-flow-stage__card glass-card',
+                    { 'is-active': index === 0 },
+                  ]}
                   data-club-flow-card
                   style={`--card-index: ${index};`}
                 >
-                  <div class="club-flow-stage__card-panel">
+                  {/*
+                    Same .glass-card recipe as pricing cards + image-
+                    grid photos. The 4 layer spans render the frame;
+                    the step content (number, title, bullets, metric)
+                    sits inside .glass-content. The .__card-panel
+                    class is kept on .glass-content so existing
+                    .is-active modifiers + responsive overrides keep
+                    targeting the right node.
+                  */}
+                  <span class="glass-filter" aria-hidden="true" />
+                  <span class="glass-overlay" aria-hidden="true" />
+                  <span class="glass-specular" aria-hidden="true" />
+                  <div class="glass-content club-flow-stage__card-panel">
                     <img
                       class="club-flow-stage__card-photo"
                       src={step.image}
@@ -373,18 +399,18 @@ const steps = content.steps;
     opacity: 0.72;
   }
 
+  /* Inherits frame from .glass-card (4 layers + dual drop shadow +
+     specular rim). Local rule only carries the sizing + sticky-cyan
+     ring + content-clip needed for this specific surface. */
   .club-flow-stage__media {
-    position: relative;
     height: 100%;
     min-height: 34rem;
+  }
+  .club-flow-stage__media .glass-content {
+    position: relative;
     overflow: hidden;
-    border: 1px solid color-mix(in srgb, var(--color-accent-primary) 22%, var(--color-stroke-emphasized));
-    border-radius: clamp(1.25rem, 2vw, 2rem);
-    background: var(--color-bg-surface);
-    box-shadow:
-      0 36px 110px -56px color-mix(in srgb, var(--color-accent-primary) 48%, transparent),
-      0 22px 90px -40px rgba(0, 0, 0, 0.82),
-      inset 0 1px 0 rgba(255, 255, 255, 0.12);
+    border-radius: inherit;
+    padding: 0;
   }
 
   .club-flow-stage__image {
@@ -561,35 +587,36 @@ const steps = content.steps;
     pointer-events: auto;
   }
 
+  /* Card panel = .glass-content host. Frame (border / blur / shadow)
+     comes from .glass-card. Local rule only carries the inner padding
+     so the step content sits comfortably inside the glass. */
   .club-flow-stage__card-panel {
     width: 100%;
-    border: 1px solid color-mix(in srgb, var(--color-stroke-emphasized) 74%, transparent);
-    border-radius: clamp(1.1rem, 1.5vw, 1.5rem);
     padding: clamp(1.25rem, 2vw, 2rem);
-    background:
-      linear-gradient(180deg, rgba(255, 255, 255, 0.075), rgba(255, 255, 255, 0.026)),
-      color-mix(in srgb, var(--color-bg-surface) 74%, transparent);
-    box-shadow:
-      0 24px 76px -44px rgba(0, 0, 0, 0.94),
-      inset 0 1px 0 rgba(255, 255, 255, 0.11);
-    backdrop-filter: blur(20px) saturate(150%);
-    -webkit-backdrop-filter: blur(20px) saturate(150%);
-    transition:
-      border-color 220ms ease,
-      box-shadow 220ms ease,
-      background 220ms ease;
   }
 
-  .club-flow-stage__card.is-active .club-flow-stage__card-panel {
-    border-color: color-mix(in srgb, var(--color-accent-primary) 50%, var(--color-stroke-emphasized));
-    background:
-      radial-gradient(circle at 18% 0%, color-mix(in srgb, var(--color-accent-primary) 14%, transparent), transparent 52%),
-      linear-gradient(180deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.032)),
-      color-mix(in srgb, var(--color-bg-surface) 84%, transparent);
+  /* Active state — glass-layer overrides instead of full-rule rewrite.
+     Each layer takes a cyan-tinted variant so the active card looks
+     "lit from inside" while preserving the .glass-card recipe. */
+  .club-flow-stage__card.is-active {
     box-shadow:
-      0 26px 90px -48px color-mix(in srgb, var(--color-accent-primary) 58%, transparent),
-      0 24px 76px -44px rgba(0, 0, 0, 0.94),
-      inset 0 1px 0 rgba(255, 255, 255, 0.16);
+      0 6px 6px rgba(0, 0, 0, 0.32),
+      0 24px 60px -16px rgba(0, 240, 255, 0.32),
+      0 0 32px rgba(0, 0, 0, 0.18);
+  }
+  .club-flow-stage__card.is-active .glass-overlay {
+    background: linear-gradient(
+      180deg,
+      rgba(0, 240, 255, 0.1) 0%,
+      rgba(255, 255, 255, 0.02) 55%,
+      rgba(0, 240, 255, 0.025) 100%
+    );
+  }
+  .club-flow-stage__card.is-active .glass-specular {
+    box-shadow:
+      inset 1px 1px 0 rgba(0, 240, 255, 0.45),
+      inset 0 0 12px rgba(0, 240, 255, 0.18),
+      inset -1px -1px 0 rgba(255, 255, 255, 0.06);
   }
 
   .club-flow-stage__card-photo {
@@ -748,7 +775,11 @@ const steps = content.steps;
     .club-flow-stage__card {
       position: relative;
       inset: auto;
-      display: block;
+      /* Smaller radius on mobile (1/3-screen-wide cards). Set on
+         the .glass-card host so the actual rendered corner shrinks
+         (the radius on .glass-content is invisible — it's inside
+         the rounded host). */
+      border-radius: 1.25rem;
       opacity: 1 !important;
       transform: none !important;
       pointer-events: auto !important;
@@ -756,7 +787,6 @@ const steps = content.steps;
 
     .club-flow-stage__card-panel {
       padding: 1rem;
-      border-radius: 1.25rem;
     }
 
     .club-flow-stage__card-photo {
