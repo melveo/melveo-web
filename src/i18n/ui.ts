@@ -65,6 +65,8 @@ export const ui = {
     // the cursor sweeping across.
     'orb.primary': 'Pro celý klub.',
     'orb.secondary': 'Pro každého hráče.',
+    'orb.tiltCta': 'Hni telefonem',
+    'orb.tiltActive': 'Náhni telefon',
 
     // Stage 5.5 — particle statement after the club/player reveal.
     'particles.eyebrow': 'JEDEN SYSTÉM',
@@ -173,6 +175,8 @@ export const ui = {
 
     'orb.primary': 'For the whole club.',
     'orb.secondary': 'For every player.',
+    'orb.tiltCta': 'Tilt your phone',
+    'orb.tiltActive': 'Tilt to move',
 
     'particles.eyebrow': 'ONE SYSTEM',
     'particles.headlinePrefix': 'Everything for',

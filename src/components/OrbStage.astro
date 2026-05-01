@@ -36,6 +36,32 @@ const t = useTranslations(lang);
   <div class="orb-hero orb-hero--secondary" aria-hidden="true" data-orb-secondary>
     <p class="orb-heading">{t('orb.secondary')}</p>
   </div>
+
+  {/*
+    Mobile-only tilt CTA — touch-controlled orb dragging conflicts
+    with vertical scroll, so on phones we expose device orientation
+    instead. Button requests the iOS 13+ permission on tap (Android +
+    older iOS just enable directly). Hidden on cursor devices.
+    The data-state attr toggles between "off" (CTA "Hni telefonem")
+    and "on" (subtle confirmation "Náhni telefon"). */}
+  <button
+    type="button"
+    class="orb-tilt-button"
+    data-orb-tilt-toggle
+    data-state="off"
+    data-active-label={t('orb.tiltActive')}
+    aria-pressed="false"
+  >
+    <span class="orb-tilt-button__icon" aria-hidden="true">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="6" y="2" width="12" height="20" rx="2.5"></rect>
+        <circle cx="12" cy="18" r="0.6" fill="currentColor"></circle>
+      </svg>
+    </span>
+    <span class="orb-tilt-button__label" data-orb-tilt-label>
+      {t('orb.tiltCta')}
+    </span>
+  </button>
 </section>
 
 <script>
@@ -87,34 +113,24 @@ const t = useTranslations(lang);
     height: 100%;
 
     /*
-      Glass-marble orb body — a radial gradient that follows the
-      cursor (same --x / --y as the mask) so the visible reveal
-      reads as an actual lit glass sphere instead of a flat cyan
-      patch. Per user feedback 2026-05-01: "tu kouli dát více do
-      našich barev a trošku glass efektu".
-
-      Stop layout (radial centred just above-left of cursor so the
-      spec sits where light would naturally catch a glass orb):
-        0 %    rgba white .55  → small spec / light catch
-        6 %    cyan-subtle     → quick fade out of the spec
-        25 %   brand cyan      → main body
-        65 %   cyan ↔ canvas   → deepening teal
+      Glass-marble orb body — pure brand-cyan radial gradient that
+      follows the cursor / device tilt (same --x / --y as the mask).
+      Per user feedback 2026-05-01: "tu kouli více do našich barev"
+      — dropped the white-spec stop, every stop is now in the cyan
+      ramp:
+        0 %    cyan-subtle     → bright cyan-white centre
+        18 %   accent-primary  → brand cyan body
+        55 %   cyan ↔ canvas   → deepening teal
         100 %  cyan ↔ canvas   → bottom-of-orb shadow
-
-      No straight white anymore — every stop is in the brand cyan
-      family. Spec is the only non-cyan colour and it's tight at the
-      centre, reading as light catching curved glass rather than a
-      flat colour swatch.
     */
     --x: 70%;
     --y: 50%;
     background: radial-gradient(
       circle at calc(var(--x) - 6%) calc(var(--y) - 6%),
-      rgba(255, 255, 255, 0.55) 0%,
-      var(--color-accent-primary-subtle) 6%,
-      var(--color-accent-primary) 25%,
-      color-mix(in srgb, var(--color-accent-primary) 75%, var(--color-bg-canvas)) 65%,
-      color-mix(in srgb, var(--color-accent-primary) 50%, var(--color-bg-canvas)) 100%
+      var(--color-accent-primary-subtle) 0%,
+      var(--color-accent-primary) 18%,
+      color-mix(in srgb, var(--color-accent-primary) 75%, var(--color-bg-canvas)) 55%,
+      color-mix(in srgb, var(--color-accent-primary) 45%, var(--color-bg-canvas)) 100%
     );
 
     /*
@@ -125,16 +141,17 @@ const t = useTranslations(lang);
     color: var(--color-bg-canvas);
 
     /*
-      Radial mask — black 24 % full reveal, then a 3 % feathered
-      transition to transparent. Soft edge instead of the codepen's
-      hard cliff so the orb rim reads as glass curvature.
+      Radial mask — sharper rim per user feedback 2026-05-01 ("ne
+      tak rozostřené kraje"). Was a 3 % feathered transition; now
+      a 1 % feather so the orb has a crisp glass edge instead of
+      a soft blob.
     */
     --mask: radial-gradient(
       circle at var(--x) var(--y),
       black 0%,
-      black 24%,
-      rgba(0, 0, 0, 0.55) 25.5%,
-      transparent 27%
+      black 25%,
+      rgba(0, 0, 0, 0.4) 25.7%,
+      transparent 26%
     );
     -webkit-mask-image: var(--mask);
     mask-image: var(--mask);
@@ -179,5 +196,76 @@ const t = useTranslations(lang);
     max-width: fit-content;
     margin-left: auto;
     margin-right: auto;
+  }
+
+  /*
+    Mobile-only tilt CTA — small frosted-glass pill anchored to the
+    bottom of the orb section. Hidden on cursor devices (mouse can
+    just hover); shown on coarse pointer (phones, tablets). Once the
+    user grants orientation access, the button sticks around as a
+    subtle "Tilt to move" pip so they remember the interaction model.
+  */
+  .orb-tilt-button {
+    display: none;
+  }
+
+  @media (pointer: coarse) {
+    .orb-tilt-button {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.55rem;
+      position: absolute;
+      bottom: clamp(1.5rem, 5vh, 3rem);
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 2;
+      padding: 0.7rem 1.2rem;
+      border: 1px solid rgba(0, 240, 255, 0.32);
+      border-radius: 9999px;
+      background: linear-gradient(
+        180deg,
+        rgba(0, 240, 255, 0.16) 0%,
+        rgba(0, 240, 255, 0.05) 55%,
+        rgba(255, 255, 255, 0.02) 100%
+      );
+      backdrop-filter: blur(14px) saturate(170%);
+      -webkit-backdrop-filter: blur(14px) saturate(170%);
+      box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.18),
+        inset 0 0 0 1px rgba(0, 240, 255, 0.12),
+        0 8px 22px -10px rgba(0, 240, 255, 0.4);
+      color: var(--color-text-primary);
+      font: inherit;
+      font-size: 0.85rem;
+      font-weight: 600;
+      letter-spacing: 0.01em;
+      cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .orb-tilt-button[data-state='on'] {
+      opacity: 0.7;
+    }
+    .orb-tilt-button:active {
+      transform: translateX(-50%) scale(0.96);
+    }
+  }
+
+  .orb-tilt-button__icon {
+    display: inline-flex;
+    width: 1rem;
+    height: 1rem;
+    color: var(--color-accent-primary);
+    /* Gentle wiggle so the user reads "tilt me" — only when off. */
+    animation: orb-tilt-wiggle 1.6s ease-in-out infinite;
+  }
+  .orb-tilt-button[data-state='on'] .orb-tilt-button__icon {
+    animation: none;
+  }
+  @keyframes orb-tilt-wiggle {
+    0%, 100% { transform: rotate(-12deg); }
+    50% { transform: rotate(12deg); }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .orb-tilt-button__icon { animation: none; }
   }
 </style>
