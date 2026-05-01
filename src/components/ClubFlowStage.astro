@@ -842,7 +842,16 @@ const steps = content.steps;
           at a hard rectangle (App Store behaviour).
     */
     .club-flow-stage__cards {
-      --carousel-card-width: min(85vw, 30rem);
+      /*
+        Card width shrunk from 85vw → 70vw because at 85vw on a
+        393 px iPhone the math gave only 13 px of card-2 peek on the
+        right, which the 5 %-fade mask then ate entirely (user
+        feedback 2026-05-01: "neni jakoby videt ten další obrazek").
+        At 70vw the math gives ~43 px peek (~11 % of viewport) which
+        comfortably reads as "there's another card here". The 26 rem
+        cap keeps cards from getting absurdly wide on tablets.
+      */
+      --carousel-card-width: min(70vw, 26rem);
       display: flex;
       flex-direction: row;
       gap: 1rem;
@@ -865,21 +874,23 @@ const steps = content.steps;
       /* Vertical headroom so cards' bottom shadow + cyan glow don't
          get clipped. */
       padding-block: 1rem clamp(1.5rem, 4vw, 2rem);
-      /* Soft fade at the rail edges so peeking cards "dissolve" into
-         the page instead of ending at a hard rectangle — same effect
-         Apple uses on featured shelves. */
+      /*
+        Soft fade at the rail edges so peeking cards "dissolve" into
+        the page. Reduced from 5 % to 3 % so the fade doesn't eat
+        most of the (now larger) peek.
+      */
       mask-image: linear-gradient(
         90deg,
         transparent 0,
-        black 5%,
-        black 95%,
+        black 3%,
+        black 97%,
         transparent 100%
       );
       -webkit-mask-image: linear-gradient(
         90deg,
         transparent 0,
-        black 5%,
-        black 95%,
+        black 3%,
+        black 97%,
         transparent 100%
       );
     }
