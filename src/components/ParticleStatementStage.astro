@@ -21,6 +21,24 @@ const words =
   lang === 'cs'
     ? ['hráče', 'trenéra', 'tým', 'klub', 'sezónu']
     : ['players', 'coaches', 'teams', 'clubs', 'seasons'];
+
+/*
+  Split the headline prefix into two words on separate lines so the
+  rotating word lives on its own third line. User feedback 2026-05-01:
+  with "Všechno pro <word>" all on one rendered block, "pro" kept
+  reflowing between line 1 and line 2 every time the rotating word
+  grew/shrank — the whole section visibly jittered between rotations.
+  Locking each prefix word to its own line removes the reflow entirely;
+  the rotating word can grow as much as it wants on line 3 without
+  touching the prefix.
+
+  Works for both CS ("Všechno pro") and EN ("Everything for") — first
+  space splits the prefix into [first word, rest].
+*/
+const prefix = t('particles.headlinePrefix');
+const firstSpace = prefix.indexOf(' ');
+const prefixWord1 = firstSpace > 0 ? prefix.slice(0, firstSpace) : prefix;
+const prefixWord2 = firstSpace > 0 ? prefix.slice(firstSpace + 1) : '';
 ---
 
 <section class="particle-statement" data-particle-stage>
@@ -34,15 +52,20 @@ const words =
     </p>
 
     <h2 class="particle-statement__headline">
-      {t('particles.headlinePrefix')}{' '}
-      <span
-        class="particle-statement__typed text-[var(--color-accent-primary)]"
-        data-rotate-word
-        data-rotate-words={words.join('|')}
-        aria-live="polite"
-      >
-        {words[0]}
-      </span>{t('particles.headlineSuffix')}
+      <span class="particle-statement__line">{prefixWord1}</span>
+      {prefixWord2 && (
+        <span class="particle-statement__line">{prefixWord2}</span>
+      )}
+      <span class="particle-statement__line particle-statement__line--word">
+        <span
+          class="particle-statement__typed text-[var(--color-accent-primary)]"
+          data-rotate-word
+          data-rotate-words={words.join('|')}
+          aria-live="polite"
+        >
+          {words[0]}
+        </span>{t('particles.headlineSuffix')}
+      </span>
     </h2>
 
     <p class="particle-statement__subline">
@@ -118,12 +141,30 @@ const words =
   .particle-statement__headline {
     margin: 0;
     max-width: 78rem;
-    text-wrap: balance;
+    /* text-wrap: balance removed — we now control wrapping explicitly
+       via three block-level lines (one per word, plus the rotating
+       word). Balance was reflowing the prefix as the rotating word
+       changed size, which is exactly the jitter we're fixing. */
     font-weight: 700;
     line-height: 0.95;
     color: var(--color-text-primary);
     font-size: clamp(3rem, 8.5vw, 8.5rem);
     letter-spacing: -0.04em;
+  }
+
+  /*
+    Three-line layout: prefix word 1 / prefix word 2 / rotating word
+    + suffix. Each line is its own block so reflows in the rotating
+    word never push the prefix between lines. User feedback 2026-05-01.
+  */
+  .particle-statement__line {
+    display: block;
+  }
+  .particle-statement__line--word {
+    /* The rotating word + suffix can be slightly wider than the prefix
+       words; nowrap so a long rotation never wraps onto a 4th line
+       (would push the section taller mid-rotation). */
+    white-space: nowrap;
   }
 
   .particle-statement__typed {
