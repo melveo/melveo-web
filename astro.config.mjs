@@ -3,9 +3,12 @@ import { defineConfig } from 'astro/config';
 import tailwindcss from '@tailwindcss/vite';
 import sitemap from '@astrojs/sitemap';
 
+import cloudflare from '@astrojs/cloudflare';
+
 // https://astro.build/config
 export default defineConfig({
   site: 'https://melveo.app',
+
   i18n: {
     defaultLocale: 'cs',
     locales: ['cs', 'en'],
@@ -16,6 +19,7 @@ export default defineConfig({
       redirectToDefaultLocale: false,
     },
   },
+
   integrations: [
     sitemap({
       i18n: {
@@ -24,15 +28,20 @@ export default defineConfig({
       },
     }),
   ],
+
   // Disable the floating Astro dev toolbar — its `dev-bar-hitbox-above`
   // div was showing in dev screenshots and the user wants it gone (the
   // toolbar is dev-only and never ships to prod, but we'd rather have
   // a clean dev preview too).
   devToolbar: { enabled: false },
+
   vite: {
     plugins: [tailwindcss()],
   },
+
   build: {
     assets: 'assets',
   },
+
+  adapter: cloudflare(),
 });
