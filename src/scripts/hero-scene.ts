@@ -161,15 +161,32 @@ export function mountHeroScene({ canvas }: MountOptions): SceneHandle | null {
   canvas.height = height;
   gl.viewport(0, 0, canvas.width, canvas.height);
 
+  // Viewport-aware radius scale — desktop shows 30 balls in their full
+  // 10-70 px radius range, but on phones that fills the canvas with
+  // overlapping blobs (user feedback 2026-05-01: "ta hero sekce je
+  // těmi partikly nasycená... asi bychom to měli dávkovat dle velikosti
+  // zařízení nebo velikost těch koulí"). Below 768 CSS px we scale the
+  // radius down linearly to ~50 % at 360 CSS px so the hero feels
+  // breezy on phones rather than packed.
+  function radiusScale(): number {
+    const w = window.innerWidth;
+    if (w >= 768) return 1;
+    if (w <= 360) return 0.5;
+    return 0.5 + (w - 360) * (0.5 / (768 - 360));
+  }
+
   const metaballs: Metaball[] = [];
 
+  const initialScale = radiusScale();
   for (let i = 0; i < NUM_METABALLS; i += 1) {
-    const radius = Math.random() * 60 + 10;
+    const radius = (Math.random() * 60 + 10) * initialScale;
     metaballs.push({
       x: Math.random() * (width - 2 * radius) + radius,
       y: Math.random() * (height - 2 * radius) + radius,
-      vx: (Math.random() - 0.5) * 3,
-      vy: (Math.random() - 0.5) * 3,
+      // Velocity also lowered slightly on mobile so the smaller balls
+      // don't dart around faster relative to their size.
+      vx: (Math.random() - 0.5) * 3 * Math.max(0.7, initialScale),
+      vy: (Math.random() - 0.5) * 3 * Math.max(0.7, initialScale),
       r: radius * 0.76,
     });
   }
@@ -285,6 +302,14 @@ export function mountHeroScene({ canvas }: MountOptions): SceneHandle | null {
     gl.bindBuffer(gl.ARRAY_BUFFER, vertexDataBuffer);
     gl.vertexAttribPointer(nextPositionHandle, 2, gl.FLOAT, false, 2 * 4, 0);
 
+    // Re-apply the viewport radius scale so portrait↔landscape /
+    // browser-resize transitions don't keep oversized balls on a
+    // shrunk viewport.
+    const scale = radiusScale();
+    for (const metaball of metaballs) {
+      const targetR = (Math.random() * 60 + 10) * scale * 0.76;
+      metaball.r = targetR;
+    }
     for (const metaball of metaballs) {
       metaball.x = Math.min(Math.max(metaball.x, metaball.r), width - metaball.r);
       metaball.y = Math.min(Math.max(metaball.y, metaball.r), height - metaball.r);

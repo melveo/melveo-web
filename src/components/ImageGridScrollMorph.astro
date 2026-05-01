@@ -454,13 +454,16 @@ const t = useTranslations(lang);
   .image-grid-section .grid-intro__wordmark {
     position: relative;
     display: block;
+    max-width: 92vw;
     margin: 0;
     font-family: var(--font-wordmark);
     font-weight: 700;
-    /* Half-the-section size per user request ("hodně větší, klidně
-       přes půl sekce"). 30vw lands the lowercase glyphs at ~50 % of
-       viewport height on most ratios. */
-    font-size: clamp(7rem, 30vw, 24rem);
+    /* Half-the-section size on desktop ("hodně větší, klidně přes půl
+       sekce"). On phones the 30 vw multiplier was rendering the
+       lowercase "melveo" wider than the screen — the 2.5 px text-stroke
+       extends every glyph and the bold weight is wide. Tighter mobile
+       cap so it stays within the safe inset. */
+    font-size: clamp(4rem, 22vw, 26rem);
     line-height: 0.85;
     letter-spacing: -0.03em;
     text-transform: lowercase;
@@ -534,7 +537,6 @@ const t = useTranslations(lang);
   }
 
   .image-grid-section .grid {
-    --offset: 0;
     --container-width: 1600px;
     --gap: clamp(10px, 7.35vw, 80px);
     --gutter: 2rem;
@@ -553,19 +555,7 @@ const t = useTranslations(lang);
     translate: -50% -50%;
   }
 
-  @media (max-width: 600px) {
-    .image-grid-section .grid {
-      --gutter: 1rem;
-      grid-template-columns: repeat(3, 1fr);
-      --offset: -1;
-    }
-    /* Hide outer edges on mobile (3-col layout has no room for them) */
-    .image-grid-section .grid > .layer:nth-of-type(1) {
-      display: none;
-    }
-  }
-
-  /* Layers spread across the full 5×3 (or 3×3 mobile) grid via subgrid */
+  /* Layers spread across the full 5×3 (or 3×5 mobile) grid via subgrid */
   .image-grid-section .grid > .layer {
     display: grid;
     grid-column: 1 / -1;
@@ -573,6 +563,8 @@ const t = useTranslations(lang);
     grid-template-columns: subgrid;
     grid-template-rows: subgrid;
   }
+
+  /* ─── Desktop layout (5 cols × 3 rows = 15 cells) ─────────────── */
 
   /* Layer 1: outer edges — odd children → col 1, even → col -2 */
   .image-grid-section .grid > .layer:nth-of-type(1) > div:nth-of-type(odd) {
@@ -582,23 +574,66 @@ const t = useTranslations(lang);
     grid-column: -2;
   }
 
-  /* Layer 2: inner columns — odd → col 2, even → col -3
-     (offset shifts by -1 on mobile so col indexing collapses cleanly) */
+  /* Layer 2: inner columns — odd → col 2, even → col -3 */
   .image-grid-section .grid > .layer:nth-of-type(2) > div:nth-of-type(odd) {
-    grid-column: calc(2 + var(--offset));
+    grid-column: 2;
   }
   .image-grid-section .grid > .layer:nth-of-type(2) > div:nth-of-type(even) {
-    grid-column: calc(-3 - var(--offset));
+    grid-column: -3;
   }
 
   /* Layer 3: center column top + bottom rows */
   .image-grid-section .grid > .layer:nth-of-type(3) > div:first-of-type {
-    grid-column: calc(3 + var(--offset));
+    grid-column: 3;
     grid-row: 1;
   }
   .image-grid-section .grid > .layer:nth-of-type(3) > div:last-of-type {
-    grid-column: calc(3 + var(--offset));
+    grid-column: 3;
     grid-row: -1;
+  }
+
+  /* ─── Mobile layout (3 cols × 5 rows = 15 cells) ───────────────
+     Per user feedback 2026-05-01: "vždy se musí ukazovat 15 karet"
+     — the previous `display: none` on Layer 1 dropped to 9 visible
+     cells on phones. Rotate the grid 90° instead: same 14 photos /
+     tech cards + 1 scaler, just stacked taller.
+
+     Layer 1 (6 children) fills the top + bottom rows.
+     Layer 2 (6 children) fills rows 2 + 4.
+     Layer 3 (2 children) flanks the scaler in row 3.
+     Scaler centres at row 3 col 2.
+  */
+  @media (max-width: 700px) {
+    .image-grid-section .grid {
+      --gutter: 1rem;
+      --gap: clamp(8px, 2vw, 14px);
+      grid-template-columns: repeat(3, 1fr);
+      grid-template-rows: repeat(5, 1fr);
+    }
+
+    /* Layer 1 → top row (children 1-3) + bottom row (children 4-6) */
+    .image-grid-section .grid > .layer:nth-of-type(1) > div:nth-child(1) { grid-area: 1 / 1; }
+    .image-grid-section .grid > .layer:nth-of-type(1) > div:nth-child(2) { grid-area: 1 / 2; }
+    .image-grid-section .grid > .layer:nth-of-type(1) > div:nth-child(3) { grid-area: 1 / 3; }
+    .image-grid-section .grid > .layer:nth-of-type(1) > div:nth-child(4) { grid-area: 5 / 1; }
+    .image-grid-section .grid > .layer:nth-of-type(1) > div:nth-child(5) { grid-area: 5 / 2; }
+    .image-grid-section .grid > .layer:nth-of-type(1) > div:nth-child(6) { grid-area: 5 / 3; }
+
+    /* Layer 2 → row 2 (children 1-3) + row 4 (children 4-6) */
+    .image-grid-section .grid > .layer:nth-of-type(2) > div:nth-child(1) { grid-area: 2 / 1; }
+    .image-grid-section .grid > .layer:nth-of-type(2) > div:nth-child(2) { grid-area: 2 / 2; }
+    .image-grid-section .grid > .layer:nth-of-type(2) > div:nth-child(3) { grid-area: 2 / 3; }
+    .image-grid-section .grid > .layer:nth-of-type(2) > div:nth-child(4) { grid-area: 4 / 1; }
+    .image-grid-section .grid > .layer:nth-of-type(2) > div:nth-child(5) { grid-area: 4 / 2; }
+    .image-grid-section .grid > .layer:nth-of-type(2) > div:nth-child(6) { grid-area: 4 / 3; }
+
+    /* Layer 3 → row 3 left + right (flanking the scaler) */
+    .image-grid-section .grid > .layer:nth-of-type(3) > div:first-of-type {
+      grid-area: 3 / 1;
+    }
+    .image-grid-section .grid > .layer:nth-of-type(3) > div:last-of-type {
+      grid-area: 3 / 3;
+    }
   }
 
   /* Both photos and tech cards are now .glass-card hosts → identical
@@ -771,13 +806,21 @@ const t = useTranslations(lang);
 
   /* Scaler container occupies the centre cell of the grid; its <img>
      is absolutely positioned so we can animate width/height in pixels
-     while keeping the image perfectly centred. */
+     while keeping the image perfectly centred.
+
+     Desktop: row 2 col 3 (centre of 5×3).
+     Mobile (<= 700 px): row 3 col 2 (centre of 3×5). */
   .image-grid-section .grid .scaler {
     position: relative;
-    grid-area: 2 / calc(3 + var(--offset));
+    grid-area: 2 / 3;
     z-index: 2;
     width: 100%;
     height: 100%;
+  }
+  @media (max-width: 700px) {
+    .image-grid-section .grid .scaler {
+      grid-area: 3 / 2;
+    }
   }
 
   .image-grid-section .scaler img {

@@ -73,11 +73,12 @@ export const ui = {
     'particles.subline': 'Od ranního check-inu po rozhodnutí na tréninku. Tým běží v jednom rytmu.',
 
     // Stage 6.25 — Technical-feature mini bridge before pricing.
-    // Same visual family as gooey stage; ties the app's flagship
-    // feature (5-axis morning check-in) to its output (team signal),
-    // matching the visual of two balls merging into one.
-    'promise.headlinePrefix': 'Pětiosý check-in.',
-    'promise.headlineAccent': 'Týmový signál.',
+    // Same visual family as gooey stage. Pairs the live-data feature
+    // (coach board real-time) with the anti-feature differentiator
+    // (no spreadsheets, no paper, no WhatsApp groups) — fits the
+    // visual of two cyan values merging into one promise.
+    'promise.headlinePrefix': 'Realtime data.',
+    'promise.headlineAccent': 'Bez papíru.',
 
     // Stage 6 — sessions + coach board
     'sessions.eyebrow': 'TRÉNINK · ROZHODNUTÍ',
@@ -178,8 +179,8 @@ export const ui = {
     'particles.headlineSuffix': '.',
     'particles.subline': 'From morning check-in to training decisions. The team moves in one rhythm.',
 
-    'promise.headlinePrefix': '5-axis check-in.',
-    'promise.headlineAccent': 'Team signal.',
+    'promise.headlinePrefix': 'Real-time data.',
+    'promise.headlineAccent': 'No paper.',
 
     'sessions.eyebrow': 'TRAINING · DECISIONS',
     'sessions.headline': 'Sessions and coach board.',

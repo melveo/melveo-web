@@ -24,6 +24,11 @@ export default defineConfig({
       },
     }),
   ],
+  // Disable the floating Astro dev toolbar — its `dev-bar-hitbox-above`
+  // div was showing in dev screenshots and the user wants it gone (the
+  // toolbar is dev-only and never ships to prod, but we'd rather have
+  // a clean dev preview too).
+  devToolbar: { enabled: false },
   vite: {
     plugins: [tailwindcss()],
   },
