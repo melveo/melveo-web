@@ -795,60 +795,112 @@ const steps = content.steps;
     }
 
     /*
-      Apple-style horizontal snap carousel (user request 2026-05-01:
-      "slidovani doprava a doleva mezi těmi kartami... vždy jedna karta
-      vidět celá a té další třeba 1/4"). Rail bleeds to screen edges so
-      cards can fully fill the viewport while the next card peeks on
-      the right edge.
+      Apple App Store / Apple Music featured-shelf peek carousel
+      (user request 2026-05-01: this needs to feel like the real Apple
+      one, not just snap+peek).
 
-      Layout math:
-        - Rail padding-inline: 1rem on each side
-        - Card flex-basis: 78% of rail content-box
-        - Gap: 1rem between cards
-        - Result at 100vw: visible card ≈ 78vw - 1.5rem,
-          next card peeks ≈ 22vw - 0.4rem (the "there's more" cue)
-        - scroll-snap-align: start + scroll-padding-inline-start: 1rem
-          so each card snaps with the leading edge at 1rem from the
-          screen edge — same visual rest position whichever card is
-          centred. Apple App Store / Music featured shelf behaviour.
+      The pattern that makes Apple's version feel premium isn't only
+      scroll-snap — it's the live scale + dim + parallax on cards as
+      they move through the rail centre. Reference: the same trick
+      used in App Store featured cards on iOS, and the technique
+      Adam Argyle / Bramus Van Damme demonstrate in their scroll-
+      driven-animations CodePen series. We compute it from scroll
+      position with a JS scroll listener (rAF-throttled) so it works
+      on every browser, including iOS Safari < 17.4 where scroll-
+      driven CSS animations aren't available yet.
+
+      Layout math (centred-snap variant — Apple's approach):
+        - --carousel-card-width: min(85vw, 30rem) sets the card.
+        - Rail uses padding-inline + scroll-padding-inline of
+          calc(50% - card-width/2) on BOTH sides → phantom space so
+          the first and last card can scroll-snap to centre cleanly.
+        - Cards use scroll-snap-align: center.
+        - At rest: the active card is fully centred with peek of the
+          neighbour on each side (left + right). At scroll=0 the
+          phantom-space mechanic provides matching visual gutters.
+        - Edge fade mask on the rail softens the rail boundaries so
+          the peeking card "fades into" the page rather than ending
+          at a hard rectangle (App Store behaviour).
     */
     .club-flow-stage__cards {
+      --carousel-card-width: min(85vw, 30rem);
       display: flex;
       flex-direction: row;
       gap: 1rem;
       min-height: 0;
-      padding-inline: 1rem;
       overflow-x: auto;
-      overflow-y: hidden;
+      overflow-y: visible;
       scroll-snap-type: x mandatory;
-      scroll-padding-inline-start: 1rem;
       scroll-behavior: smooth;
-      /* iOS momentum scrolling — without this the swipe feels stiff
-         compared to native iOS carousels. */
+      /* iOS momentum — without this the swipe feels stiff compared to
+         native iOS carousels. */
       -webkit-overflow-scrolling: touch;
       /* Hide native scrollbar (App Store / Apple Music don't show one
          under the rail). */
       scrollbar-width: none;
       -ms-overflow-style: none;
-      /* Rail still needs vertical headroom for the cards' shadow + the
-         active-card cyan glow; without it the bottom shadow gets clipped
-         by overflow:hidden. */
-      padding-block: 0.5rem clamp(1.5rem, 4vw, 2rem);
+      /* Phantom space so first + last cards centre-snap — without
+         this, snap tries to centre but can't reach the rail edges. */
+      padding-inline: calc(50% - var(--carousel-card-width) / 2);
+      scroll-padding-inline: calc(50% - var(--carousel-card-width) / 2);
+      /* Vertical headroom so cards' bottom shadow + cyan glow don't
+         get clipped. */
+      padding-block: 1rem clamp(1.5rem, 4vw, 2rem);
+      /* Soft fade at the rail edges so peeking cards "dissolve" into
+         the page instead of ending at a hard rectangle — same effect
+         Apple uses on featured shelves. */
+      mask-image: linear-gradient(
+        90deg,
+        transparent 0,
+        black 5%,
+        black 95%,
+        transparent 100%
+      );
+      -webkit-mask-image: linear-gradient(
+        90deg,
+        transparent 0,
+        black 5%,
+        black 95%,
+        transparent 100%
+      );
     }
     .club-flow-stage__cards::-webkit-scrollbar {
       display: none;
     }
 
     .club-flow-stage__card {
+      /*
+        --carousel-progress (0..1) and --carousel-distance (-1..+1)
+        are written by the mobile carousel scroll handler in JS.
+        Defaults of 0 mean "active / at rail centre" so SSR + first
+        paint show every card at full size before JS attaches.
+      */
+      --carousel-progress: 0;
+      --carousel-distance: 0;
       position: relative;
       inset: auto;
-      flex: 0 0 78%;
-      scroll-snap-align: start;
+      flex: 0 0 var(--carousel-card-width);
+      scroll-snap-align: center;
       scroll-snap-stop: always;
       border-radius: clamp(1.25rem, 5vw, 1.65rem);
-      opacity: 1 !important;
-      transform: none !important;
       pointer-events: auto !important;
+      /*
+        Apple-feel scale + dim. Neighbours shrink toward 0.94 and dim
+        toward 0.62 opacity / 0.82 brightness as their distance from
+        rail centre approaches 1 (one card-width away). The transition
+        catches any post-snap easing so the cards "settle" smoothly
+        if scroll fires a final value after rAF stops.
+      */
+      transform: scale(calc(1 - 0.06 * var(--carousel-progress))) !important;
+      opacity: calc(1 - 0.38 * var(--carousel-progress)) !important;
+      filter: brightness(calc(1 - 0.18 * var(--carousel-progress)));
+      transform-origin: center center;
+      transition:
+        transform 320ms cubic-bezier(0.32, 0.72, 0.24, 1),
+        opacity 320ms cubic-bezier(0.32, 0.72, 0.24, 1),
+        filter 320ms cubic-bezier(0.32, 0.72, 0.24, 1),
+        box-shadow 320ms cubic-bezier(0.32, 0.72, 0.24, 1);
+      will-change: transform, opacity;
       box-shadow:
         0 12px 36px rgba(0, 0, 0, 0.36),
         0 0 30px color-mix(in srgb, var(--color-accent-primary) 9%, transparent);
@@ -945,7 +997,18 @@ const steps = content.steps;
       border-radius: inherit;
       object-fit: cover;
       filter: saturate(0.94) contrast(1.08) brightness(0.78);
-      transform: scale(1.015);
+      /*
+        Parallax — photo translates opposite to its parent card's
+        distance from rail centre. When the card is to the left of
+        centre (--carousel-distance < 0) the photo shifts right within
+        its frame, and vice versa. Combined with the 1.12× scale-up
+        (which gives the translate room without revealing edges) this
+        produces the 3D-depth feel Apple uses on App Store featured
+        cards — the photo "lags behind" the card frame as you swipe.
+      */
+      transform: scale(1.12) translateX(calc(var(--carousel-distance, 0) * -8%));
+      transition: transform 320ms cubic-bezier(0.32, 0.72, 0.24, 1);
+      will-change: transform;
     }
 
     .club-flow-stage__card-topline,
@@ -1027,20 +1090,15 @@ const steps = content.steps;
     }
 
     /*
-      Tablet carousel — wider rail can fit a larger card at 60% with
-      ~40% peek of the next, so two cards feel "almost both visible"
-      while preserving the swipe-to-reveal motion. Inline rail padding
-      bumped to 1.5rem so cards don't touch the screen edges on iPad
-      portrait.
+      Tablet carousel — same Apple peek mechanic, just a narrower
+      card so two neighbours peek meaningfully on each side (iPad
+      portrait can fit it without a single card looking lonely).
+      Centre-snap + phantom padding still computed against
+      --carousel-card-width.
     */
     .club-flow-stage__cards {
-      padding-inline: 1.5rem;
-      scroll-padding-inline-start: 1.5rem;
+      --carousel-card-width: min(62vw, 32rem);
       gap: 1.25rem;
-    }
-
-    .club-flow-stage__card {
-      flex: 0 0 60%;
     }
 
     .club-flow-stage__card-panel {
@@ -1105,32 +1163,51 @@ const steps = content.steps;
     if (!scrollArea || cards.length === 0) return;
 
     /*
-      Mobile carousel pagination. Listen to the cards rail's horizontal
-      scroll position and pick the card whose centre is closest to the
-      rail's centre — that's the "active" one. Only runs while the
-      mobile carousel layout is engaged (rail has overflow-x: auto on
-      ≤ 1179 px). On desktop the rail is just a positioning context for
-      the absolute-stacked cards and the scroll listener has nothing
-      to do, so we cheaply early-exit when desktop matches.
+      Mobile carousel — Apple App Store / Apple Music featured shelf
+      feel. On every horizontal scroll of the rail, compute each card's
+      signed distance from rail centre as a fraction of card-width:
+        --carousel-distance: -1 (one card-width left of centre) to
+                             +1 (one card-width right of centre)
+        --carousel-progress: |distance| clamped to 1 (used for scale,
+                             opacity, brightness — symmetric falloff)
+      The CSS layer reads these vars to drive scale/opacity/brightness
+      on the card frame and a parallax translateX on the inner photo.
+      Active dot pagination uses the same nearest-card lookup.
+
+      rAF-throttled. On desktop (>= 1180 px) the rail isn't a carousel
+      so we early-exit cheaply.
     */
     let mobileFrame = 0;
     let mobileActiveIndex = 0;
 
-    const updateMobileDots = () => {
+    const updateMobileCarousel = () => {
       mobileFrame = 0;
-      if (desktop.matches || !cardsRail || mobileDots.length === 0) return;
+      if (desktop.matches || !cardsRail || cards.length === 0) return;
 
       const railRect = cardsRail.getBoundingClientRect();
       const railCentre = railRect.left + railRect.width / 2;
+      // Use the active card's measured width — falls back to first
+      // card on first frame (before any active is set).
+      const referenceWidth = cards[0]?.offsetWidth || 1;
 
       let closestIndex = 0;
       let closestDistance = Infinity;
+
       cards.forEach((card, index) => {
         const cardRect = card.getBoundingClientRect();
         const cardCentre = cardRect.left + cardRect.width / 2;
-        const distance = Math.abs(cardCentre - railCentre);
-        if (distance < closestDistance) {
-          closestDistance = distance;
+        const signed = (cardCentre - railCentre) / referenceWidth;
+        // Hard clamp at ±1.5 — beyond that the card is fully off-stage
+        // and the math doesn't need to keep linearly extrapolating.
+        const clampedSigned = Math.max(-1.5, Math.min(1.5, signed));
+        const progress = Math.min(1, Math.abs(clampedSigned));
+
+        card.style.setProperty('--carousel-distance', clampedSigned.toFixed(3));
+        card.style.setProperty('--carousel-progress', progress.toFixed(3));
+
+        const absUnclamped = Math.abs(signed);
+        if (absUnclamped < closestDistance) {
+          closestDistance = absUnclamped;
           closestIndex = index;
         }
       });
@@ -1140,16 +1217,22 @@ const steps = content.steps;
         mobileDots.forEach((dot, index) =>
           dot.classList.toggle('is-active', index === closestIndex),
         );
+        // Mirror active state onto card classes too — keeps any
+        // .is-active-derived styling (e.g. specular glow) in sync
+        // with the carousel's actual focus.
+        cards.forEach((card, index) =>
+          card.classList.toggle('is-active', index === closestIndex),
+        );
       }
     };
 
-    const scheduleMobileDots = () => {
+    const scheduleMobileCarousel = () => {
       if (mobileFrame) return;
-      mobileFrame = window.requestAnimationFrame(updateMobileDots);
+      mobileFrame = window.requestAnimationFrame(updateMobileCarousel);
     };
 
     if (cardsRail) {
-      cardsRail.addEventListener('scroll', scheduleMobileDots, { passive: true });
+      cardsRail.addEventListener('scroll', scheduleMobileCarousel, { passive: true });
     }
 
     let frame = 0;
@@ -1234,12 +1317,12 @@ const steps = content.steps;
 
     window.addEventListener('scroll', schedule, { passive: true });
     window.addEventListener('resize', schedule);
-    window.addEventListener('resize', scheduleMobileDots);
+    window.addEventListener('resize', scheduleMobileCarousel);
     reduceMotion.addEventListener?.('change', schedule);
     desktop.addEventListener?.('change', schedule);
-    desktop.addEventListener?.('change', scheduleMobileDots);
+    desktop.addEventListener?.('change', scheduleMobileCarousel);
     schedule();
-    scheduleMobileDots();
+    scheduleMobileCarousel();
   }
 
   function mountClubFlowStages() {
