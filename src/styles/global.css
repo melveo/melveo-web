@@ -343,6 +343,110 @@ body {
   }
 }
 
+/* ─── Liquid-glass card (.glass-card) ────────────────────────────────
+   4-layer recipe from wprod codepen raVpwJL, dark-theme adapted.
+   Used by pricing cards, pricing extras, image-grid tech cards, and
+   any future surface that needs the same glassy frosted-cyan look.
+
+   Required markup (any host element + 4 children before the content):
+     <article class="glass-card">
+       <span class="glass-filter" aria-hidden="true"></span>
+       <span class="glass-overlay" aria-hidden="true"></span>
+       <span class="glass-specular" aria-hidden="true"></span>
+       <div class="glass-content">…actual content…</div>
+     </article>
+
+   Layers (stacked via z-index):
+     glass-filter   — backdrop-blur(14) saturate(190%) + url(#glass-lens)
+                      SVG displacement (defined once in BaseLayout)
+     glass-overlay  — faint white→cyan tint to sit text comfortably
+     glass-specular — inset rim highlights, top-left bright + bottom-
+                      right counter
+     glass-content  — flow content; the only layer in document flow
+
+   The host carries border-radius + box-shadow envelope; layers inherit
+   the radius and tile the host. Background MUST stay transparent on
+   the host — the four layers do all the painting. */
+.glass-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  border-radius: 1.75rem;
+  background: transparent;
+  color: var(--color-text-primary);
+  overflow: hidden;
+  box-shadow:
+    0 6px 6px rgba(0, 0, 0, 0.28),
+    0 0 24px rgba(0, 0, 0, 0.18);
+  transition:
+    transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 2.2),
+    box-shadow 0.4s ease;
+  isolation: isolate;
+}
+
+.glass-card .glass-filter,
+.glass-card .glass-overlay,
+.glass-card .glass-specular {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+}
+
+.glass-card .glass-filter {
+  z-index: 0;
+  backdrop-filter: blur(14px) saturate(190%);
+  -webkit-backdrop-filter: blur(14px) saturate(190%);
+  filter: url(#glass-lens) brightness(1.04);
+}
+
+.glass-card .glass-overlay {
+  z-index: 1;
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.06) 0%,
+    rgba(255, 255, 255, 0.02) 55%,
+    rgba(0, 240, 255, 0.018) 100%
+  );
+}
+
+.glass-card .glass-specular {
+  z-index: 2;
+  box-shadow:
+    inset 1px 1px 0 rgba(255, 255, 255, 0.28),
+    inset 0 0 8px rgba(255, 255, 255, 0.12),
+    inset -1px -1px 0 rgba(255, 255, 255, 0.05);
+}
+
+.glass-card .glass-content {
+  position: relative;
+  z-index: 3;
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+}
+
+.glass-card:hover {
+  transform: translateY(-4px);
+  box-shadow:
+    0 10px 12px rgba(0, 0, 0, 0.32),
+    0 24px 60px -16px rgba(0, 240, 255, 0.22),
+    0 0 32px rgba(0, 0, 0, 0.18);
+}
+.glass-card:hover .glass-specular {
+  box-shadow:
+    inset 1px 1px 0 rgba(255, 255, 255, 0.32),
+    inset 0 0 8px rgba(0, 240, 255, 0.22),
+    inset -1px -1px 0 rgba(255, 255, 255, 0.06);
+}
+
+/* Compact variant — same recipe, smaller default radius. Used by the
+   pricing extras (athlete pack + club bundle) which sit below the
+   main pricing cards and read as smaller chips. */
+.glass-card--compact {
+  border-radius: 1.25rem;
+}
+
 /* Subtle grid overlay used in feature bands (raycast pattern) */
 .grid-overlay {
   position: absolute;

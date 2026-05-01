@@ -200,6 +200,7 @@ const currencyShort = lang === 'cs' ? 'Kč' : 'CZK';
 <section
   class="pricing-stage"
   data-pricing-section
+  data-glass-smoke
   data-period="yearly"
   aria-label={t('pricing.eyebrow')}
 >
@@ -209,9 +210,10 @@ const currencyShort = lang === 'cs' ? 'Kč' : 'CZK';
     on flat black canvas the displacement filter has nothing to bend.
     This canvas drops a slow drifting cyan fog (teolitto codepen
     KwOVvL pattern) so the cards finally read as real liquid glass.
-    Mounts client-side from pricing-smoke.ts.
+    Mounted client-side from glass-smoke.ts via the [data-glass-smoke]
+    attribute on the section.
   */}
-  <canvas class="pricing-smoke" data-pricing-smoke aria-hidden="true"></canvas>
+  <canvas class="glass-smoke" data-glass-smoke-canvas aria-hidden="true"></canvas>
 
   <div class="pricing-inner">
     <header class="pricing-header">
@@ -252,50 +254,15 @@ const currencyShort = lang === 'cs' ? 'Kč' : 'CZK';
       </div>
     </header>
 
-    {/*
-      SVG displacement filter — referenced by .glass-filter on each
-      pricing card. Sourced from the wprod codepen raVpwJL (glass
-      morphism recipe) per user request 2026-05-01: "tak se na to
-      podívej a zkus to napodobit jen prostě u nas v těch tmavých
-      barvách". The filter feeds the filter input through a Gaussian
-      blur of the alpha channel and then displaces source pixels by
-      that blur — producing the "real glass" refraction halo at the
-      edges of the card. Hidden so it never paints itself.
-    */}
-    <svg
-      class="pricing-lens-defs"
-      xmlns="http://www.w3.org/2000/svg"
-      style="position:absolute;width:0;height:0;pointer-events:none;"
-      aria-hidden="true"
-    >
-      <filter
-        id="pricing-lens"
-        x="0%"
-        y="0%"
-        width="100%"
-        height="100%"
-        filterUnits="objectBoundingBox"
-      >
-        <feComponentTransfer in="SourceAlpha" result="alpha">
-          <feFuncA type="identity" />
-        </feComponentTransfer>
-        <feGaussianBlur in="alpha" stdDeviation="50" result="blur" />
-        <feDisplacementMap
-          in="SourceGraphic"
-          in2="blur"
-          scale="40"
-          xChannelSelector="A"
-          yChannelSelector="A"
-        />
-      </filter>
-    </svg>
+    {/* Global #glass-lens displacement filter is mounted in BaseLayout
+        (single instance, used by every .glass-card across the page). */}
 
     <ul class="pricing-cards">
       {
         plans.map((plan) => (
           <li
             class:list={[
-              'pricing-card',
+              'pricing-card glass-card',
               plan.free && 'pricing-card--free',
             ]}
             data-plan-id={plan.id}
@@ -398,13 +365,23 @@ const currencyShort = lang === 'cs' ? 'Kč' : 'CZK';
     </ul>
 
     <div class="pricing-extras">
-      <article class="pricing-extra">
-        <h4>{t('pricing.athleteHeading')}</h4>
-        <p>{t('pricing.athleteBody')}</p>
+      <article class="pricing-extra glass-card glass-card--compact">
+        <span class="glass-filter" aria-hidden="true" />
+        <span class="glass-overlay" aria-hidden="true" />
+        <span class="glass-specular" aria-hidden="true" />
+        <div class="glass-content">
+          <h4>{t('pricing.athleteHeading')}</h4>
+          <p>{t('pricing.athleteBody')}</p>
+        </div>
       </article>
-      <article class="pricing-extra">
-        <h4>{t('pricing.clubHeading')}</h4>
-        <p>{t('pricing.clubBody')}</p>
+      <article class="pricing-extra glass-card glass-card--compact">
+        <span class="glass-filter" aria-hidden="true" />
+        <span class="glass-overlay" aria-hidden="true" />
+        <span class="glass-specular" aria-hidden="true" />
+        <div class="glass-content">
+          <h4>{t('pricing.clubHeading')}</h4>
+          <p>{t('pricing.clubBody')}</p>
+        </div>
       </article>
     </div>
 
@@ -414,13 +391,13 @@ const currencyShort = lang === 'cs' ? 'Kč' : 'CZK';
 
 <script>
   import { mountPricingToggle } from '../scripts/pricing-toggle';
-  import { mountPricingSmoke } from '../scripts/pricing-smoke';
+  import { mountGlassSmoke } from '../scripts/glass-smoke';
   mountPricingToggle();
 
   // Defer the smoke field to idle so the toggle + LCP go through first.
   // Smoke is decorative; nothing in the page depends on it being up.
   function startSmoke() {
-    mountPricingSmoke();
+    mountGlassSmoke();
   }
   if ('requestIdleCallback' in window) {
     (window as any).requestIdleCallback(startSmoke, { timeout: 1500 });
@@ -458,8 +435,8 @@ const currencyShort = lang === 'cs' ? 'Kč' : 'CZK';
 
   /* Smoke field canvas — full-section, behind everything.
      Positioned absolutely so the section's normal flow ignores it.
-     Painted in pricing-smoke.ts. */
-  .pricing-smoke {
+     Painted in glass-smoke.ts. */
+  .glass-smoke {
     position: absolute;
     inset: 0;
     width: 100%;
@@ -649,110 +626,11 @@ const currencyShort = lang === 'cs' ? 'Kč' : 'CZK';
     }
   }
 
-  /*
-    ─── Liquid-glass card (4-layer recipe, dark-theme adapted) ─────
-    Adapted from wprod codepen raVpwJL (the wallet-screenshot widget
-    where the "search" / "home" pills look like real refracting glass).
-    We use the same 4-layer stack:
-      .glass-filter   — backdrop blur + url(#pricing-lens) displacement
-                        (the SVG filter blurs alpha then uses it to
-                        warp source pixels — gives the "real glass"
-                        edge halo without a heavy WebGL backend).
-      .glass-overlay  — translucent tint on top of the filter
-      .glass-specular — inset rim highlights ("shine")
-      .glass-content  — actual card body, sits on top via z-index
-    The .pricing-card host is just a transparent rounded box that
-    holds the four layers + sets the shadow envelope. */
-  .pricing-card {
-    position: relative;
-    display: flex;
-    flex-direction: column;
-    border-radius: 1.75rem;
-    background: transparent;
-    color: var(--color-text-primary);
-    overflow: hidden;
-    /* Dual shadow per codepen — close drop shadow + soft far halo. */
-    box-shadow:
-      0 6px 6px rgba(0, 0, 0, 0.28),
-      0 0 24px rgba(0, 0, 0, 0.18);
-    transition:
-      transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 2.2),
-      box-shadow 0.4s ease;
-    isolation: isolate;
-  }
-
-  /* Layers all share the same rounded inset — they tile the card. */
-  .pricing-card .glass-filter,
-  .pricing-card .glass-overlay,
-  .pricing-card .glass-specular {
-    position: absolute;
-    inset: 0;
-    border-radius: inherit;
-    pointer-events: none;
-  }
-
-  .pricing-card .glass-filter {
-    z-index: 0;
-    /* With the cyan smoke field underneath, we crank backdrop blur +
-       saturate so the smoke comes through as a soft cyan diffusion
-       rather than recognisable puffs. This is what sells "real glass":
-       the colour is there, but the source is unreadable. */
-    backdrop-filter: blur(14px) saturate(190%);
-    -webkit-backdrop-filter: blur(14px) saturate(190%);
-    /* Apple-style "lens" — referenced from <svg id="pricing-lens">.
-       feDisplacementMap warps source pixels by alpha-blurred amount
-       so card edges get the glass-edge halo. The smoke behind makes
-       this displacement actually visible (was a no-op on flat black). */
-    filter: url(#pricing-lens) brightness(1.04);
-  }
-
-  .pricing-card .glass-overlay {
-    z-index: 1;
-    /* Faint white→cyan tint on top of the blurred smoke. The blur has
-       already done the heavy lifting; this overlay just settles the
-       contrast so text in .glass-content stays readable. */
-    background: linear-gradient(
-      180deg,
-      rgba(255, 255, 255, 0.06) 0%,
-      rgba(255, 255, 255, 0.02) 55%,
-      rgba(0, 240, 255, 0.018) 100%
-    );
-  }
-
-  .pricing-card .glass-specular {
-    z-index: 2;
-    /* Top-left rim catches imaginary light → 1px white inset.
-       Soft inner glow rounds the rim. Slightly stronger than the
-       previous pass because the smoke backdrop pushes more light
-       through the glass — the rim needs more presence to still
-       read as "edge of glass" against the bright cyan diffusion. */
-    box-shadow:
-      inset 1px 1px 0 rgba(255, 255, 255, 0.28),
-      inset 0 0 8px rgba(255, 255, 255, 0.12),
-      inset -1px -1px 0 rgba(255, 255, 255, 0.05);
-  }
-
+  /* Pricing card uses the global .glass-card recipe (all 4 layers +
+     hover defined in src/styles/global.css). The component-local rule
+     here only contributes pricing-specific padding inside .glass-content. */
   .pricing-card .glass-content {
-    position: relative;
-    z-index: 3;
-    display: flex;
-    flex: 1;
-    flex-direction: column;
     padding: 1.75rem 1.5rem 1.5rem;
-  }
-
-  .pricing-card:hover {
-    transform: translateY(-4px);
-    box-shadow:
-      0 10px 12px rgba(0, 0, 0, 0.32),
-      0 24px 60px -16px rgba(0, 240, 255, 0.22),
-      0 0 32px rgba(0, 0, 0, 0.18);
-  }
-  .pricing-card:hover .glass-specular {
-    box-shadow:
-      inset 1px 1px 0 rgba(255, 255, 255, 0.32),
-      inset 0 0 6px rgba(0, 240, 255, 0.22),
-      inset -1px -1px 0 rgba(255, 255, 255, 0.06);
   }
 
   .pricing-card-header {
@@ -892,49 +770,12 @@ const currencyShort = lang === 'cs' ? 'Kč' : 'CZK';
       gap: 1.5rem;
     }
   }
-  .pricing-extra {
-    position: relative;
+  /* .pricing-extra inherits the full liquid-glass recipe from
+     .glass-card.glass-card--compact (global). Component-local rules
+     here only add the inner padding and typography for the heading +
+     body inside .glass-content. */
+  .pricing-extra .glass-content {
     padding: 1.5rem 1.75rem;
-    border-radius: 1.5rem;
-    border: 1px solid rgba(255, 255, 255, 0.07);
-    background: linear-gradient(
-      180deg,
-      rgba(255, 255, 255, 0.05) 0%,
-      rgba(255, 255, 255, 0.018) 100%
-    );
-    backdrop-filter: blur(18px) saturate(160%);
-    -webkit-backdrop-filter: blur(18px) saturate(160%);
-    box-shadow:
-      inset 0 1px 0 rgba(255, 255, 255, 0.08),
-      0 14px 40px -22px rgba(0, 0, 0, 0.55);
-    transition:
-      border-color 0.25s ease,
-      box-shadow 0.25s ease,
-      transform 0.25s ease;
-  }
-  .pricing-extra::before {
-    content: '';
-    position: absolute;
-    inset: 0 0 auto 0;
-    height: 50%;
-    border-radius: 1.5rem 1.5rem 0 0;
-    background: linear-gradient(
-      180deg,
-      rgba(255, 255, 255, 0.04),
-      transparent 100%
-    );
-    pointer-events: none;
-  }
-  .pricing-extra:hover {
-    border-color: rgba(0, 240, 255, 0.24);
-    box-shadow:
-      inset 0 1px 0 rgba(255, 255, 255, 0.12),
-      0 18px 44px -20px rgba(0, 240, 255, 0.18);
-    transform: translateY(-1px);
-  }
-  .pricing-extra > * {
-    position: relative;
-    z-index: 1;
   }
   .pricing-extra h4 {
     margin: 0 0 0.4rem;

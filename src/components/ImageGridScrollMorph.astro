@@ -30,7 +30,19 @@
  */
 ---
 
-<section class="image-grid-section" data-grid-section>
+<section
+  class="image-grid-section"
+  data-grid-section
+  data-glass-smoke
+  data-glass-smoke-density="0.7"
+>
+  {/* Cyan smoke field behind the grid — same recipe as the pricing
+      section, slightly thinned (density 0.7) because the grid section
+      is taller and busy with photos. The .glass-filter on each tech
+      card needs something colourful behind it to refract; on flat
+      black canvas the SVG displacement is invisible. */}
+  <canvas class="glass-smoke" data-glass-smoke-canvas aria-hidden="true"></canvas>
+
   <div class="content">
     <div class="grid">
       <!-- Layer 1: Outer edges (photos + tech cards, 3 left + 3 right) -->
@@ -42,17 +54,22 @@
           <img src="/images/melveo-grid/team-sideline-wide.jpg" alt="" loading="lazy" decoding="async" />
         </div>
         <div>
-          <article class="tech-card" aria-label="Docházka">
-            <span class="tech-card__icon-wrap">
-              <svg class="tech-card__icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                <path d="M9 4h6a1 1 0 0 1 1 1v1a1 1 0 0 1-1 1H9a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1z" />
-                <path d="M16 5.5h2a2 2 0 0 1 2 2V19a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V7.5a2 2 0 0 1 2-2h2" />
-                <path d="M8.5 12.5l2 2 4-4.5" />
-                <path d="M8.5 17.5h7" />
-              </svg>
-            </span>
-            <h3>Docházka</h3>
-            <p>Účast, absence i pozdní příchody jsou pro tým jasně dohledatelné.</p>
+          <article class="tech-card glass-card" aria-label="Docházka">
+            <span class="glass-filter" aria-hidden="true" />
+            <span class="glass-overlay" aria-hidden="true" />
+            <span class="glass-specular" aria-hidden="true" />
+            <div class="glass-content">
+              <span class="tech-card__icon-wrap">
+                <svg class="tech-card__icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                  <path d="M9 4h6a1 1 0 0 1 1 1v1a1 1 0 0 1-1 1H9a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1z" />
+                  <path d="M16 5.5h2a2 2 0 0 1 2 2V19a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V7.5a2 2 0 0 1 2-2h2" />
+                  <path d="M8.5 12.5l2 2 4-4.5" />
+                  <path d="M8.5 17.5h7" />
+                </svg>
+              </span>
+              <h3>Docházka</h3>
+              <p>Účast, absence i pozdní příchody jsou pro tým jasně dohledatelné.</p>
+            </div>
           </article>
         </div>
         <div>
@@ -62,15 +79,20 @@
           <img src="/images/melveo-grid/equipment-detail.jpg" alt="" loading="lazy" decoding="async" />
         </div>
         <div>
-          <article class="tech-card" aria-label="Komunikace">
-            <span class="tech-card__icon-wrap">
-              <svg class="tech-card__icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                <path d="M5 5h14a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2h-8l-4 3.5V17H5a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2z" />
-                <path d="M8 9.5h8M8 12.5h5" />
-              </svg>
-            </span>
-            <h3>Komunikace</h3>
-            <p>Změny, zprávy a pokyny zůstanou u správného týmu.</p>
+          <article class="tech-card glass-card" aria-label="Komunikace">
+            <span class="glass-filter" aria-hidden="true" />
+            <span class="glass-overlay" aria-hidden="true" />
+            <span class="glass-specular" aria-hidden="true" />
+            <div class="glass-content">
+              <span class="tech-card__icon-wrap">
+                <svg class="tech-card__icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                  <path d="M5 5h14a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2h-8l-4 3.5V17H5a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2z" />
+                  <path d="M8 9.5h8M8 12.5h5" />
+                </svg>
+              </span>
+              <h3>Komunikace</h3>
+              <p>Změny, zprávy a pokyny zůstanou u správného týmu.</p>
+            </div>
           </article>
         </div>
       </div>
@@ -78,17 +100,22 @@
       <!-- Layer 2: Inner columns (mixed photos + tech cards) -->
       <div class="layer">
         <div>
-          <article class="tech-card tech-card--security" aria-label="Bezpečnost">
-            <span class="tech-card__icon-wrap">
-              <svg class="tech-card__icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                <path d="M7 10V8a5 5 0 0 1 10 0v2" />
-                <rect class="security-lock__body" x="4.5" y="10" width="15" height="11" rx="2.4" />
-                <circle class="security-lock__pin" cx="12" cy="14.7" r="1.1" />
-                <path d="M12 15.8v2.4" />
-              </svg>
-            </span>
-            <h3>Bezpečnost</h3>
-            <p>Vaše data jsou chráněná, oddělená podle rolí a pod kontrolou.</p>
+          <article class="tech-card tech-card--security glass-card" aria-label="Bezpečnost">
+            <span class="glass-filter" aria-hidden="true" />
+            <span class="glass-overlay" aria-hidden="true" />
+            <span class="glass-specular" aria-hidden="true" />
+            <div class="glass-content">
+              <span class="tech-card__icon-wrap">
+                <svg class="tech-card__icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                  <path d="M7 10V8a5 5 0 0 1 10 0v2" />
+                  <rect class="security-lock__body" x="4.5" y="10" width="15" height="11" rx="2.4" />
+                  <circle class="security-lock__pin" cx="12" cy="14.7" r="1.1" />
+                  <path d="M12 15.8v2.4" />
+                </svg>
+              </span>
+              <h3>Bezpečnost</h3>
+              <p>Vaše data jsou chráněná, oddělená podle rolí a pod kontrolou.</p>
+            </div>
           </article>
         </div>
         <div>
@@ -98,21 +125,26 @@
           <img src="/images/melveo-grid/coach-field-tablet.jpg" alt="" loading="lazy" decoding="async" />
         </div>
         <div>
-          <article class="tech-card tech-card--schedule" aria-label="Schedule">
-            <span class="tech-card__icon-wrap">
-              <svg class="tech-card__icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                <rect x="3.5" y="5" width="17" height="15.5" rx="2.4" />
-                <path d="M3.5 9.5h17" />
-                <path d="M8 3.5v3M16 3.5v3" />
-                <circle cx="8.4" cy="13.5" r="0.9" fill="currentColor" stroke="none" />
-                <circle cx="12" cy="13.5" r="0.9" fill="currentColor" stroke="none" />
-                <circle cx="15.6" cy="13.5" r="0.9" fill="currentColor" stroke="none" />
-                <circle cx="8.4" cy="17" r="0.9" fill="currentColor" stroke="none" />
-                <circle cx="12" cy="17" r="0.9" fill="currentColor" stroke="none" />
-              </svg>
-            </span>
-            <h3>Schedule</h3>
-            <p>Tréninky, sessions a změny jsou v jednom přehledu pro celý tým.</p>
+          <article class="tech-card tech-card--schedule glass-card" aria-label="Schedule">
+            <span class="glass-filter" aria-hidden="true" />
+            <span class="glass-overlay" aria-hidden="true" />
+            <span class="glass-specular" aria-hidden="true" />
+            <div class="glass-content">
+              <span class="tech-card__icon-wrap">
+                <svg class="tech-card__icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                  <rect x="3.5" y="5" width="17" height="15.5" rx="2.4" />
+                  <path d="M3.5 9.5h17" />
+                  <path d="M8 3.5v3M16 3.5v3" />
+                  <circle cx="8.4" cy="13.5" r="0.9" fill="currentColor" stroke="none" />
+                  <circle cx="12" cy="13.5" r="0.9" fill="currentColor" stroke="none" />
+                  <circle cx="15.6" cy="13.5" r="0.9" fill="currentColor" stroke="none" />
+                  <circle cx="8.4" cy="17" r="0.9" fill="currentColor" stroke="none" />
+                  <circle cx="12" cy="17" r="0.9" fill="currentColor" stroke="none" />
+                </svg>
+              </span>
+              <h3>Schedule</h3>
+              <p>Tréninky, sessions a změny jsou v jednom přehledu pro celý tým.</p>
+            </div>
           </article>
         </div>
         <div>
@@ -126,32 +158,42 @@
       <!-- Layer 3: Center column top + bottom cards -->
       <div class="layer">
         <div>
-          <article class="tech-card" aria-label="Statistiky">
-            <span class="tech-card__icon-wrap">
-              <svg class="tech-card__icon tech-card__icon--filled" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                <rect x="3.5" y="13" width="3.6" height="7.5" rx="1.1" />
-                <rect x="10.2" y="7" width="3.6" height="13.5" rx="1.1" />
-                <rect x="16.9" y="10" width="3.6" height="10.5" rx="1.1" />
-                <path d="M3 20.5h18" stroke-width="1.4" />
-              </svg>
-            </span>
-            <h3>Statistiky</h3>
-            <p>Z výkonu, docházky a zátěže vzniká přehled, který trenér použije hned.</p>
+          <article class="tech-card glass-card" aria-label="Statistiky">
+            <span class="glass-filter" aria-hidden="true" />
+            <span class="glass-overlay" aria-hidden="true" />
+            <span class="glass-specular" aria-hidden="true" />
+            <div class="glass-content">
+              <span class="tech-card__icon-wrap">
+                <svg class="tech-card__icon tech-card__icon--filled" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                  <rect x="3.5" y="13" width="3.6" height="7.5" rx="1.1" />
+                  <rect x="10.2" y="7" width="3.6" height="13.5" rx="1.1" />
+                  <rect x="16.9" y="10" width="3.6" height="10.5" rx="1.1" />
+                  <path d="M3 20.5h18" stroke-width="1.4" />
+                </svg>
+              </span>
+              <h3>Statistiky</h3>
+              <p>Z výkonu, docházky a zátěže vzniká přehled, který trenér použije hned.</p>
+            </div>
           </article>
         </div>
         <div>
-          <article class="tech-card" aria-label="Tým">
-            <span class="tech-card__icon-wrap">
-              <svg class="tech-card__icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                <circle cx="12" cy="7" r="2.6" />
-                <circle cx="6" cy="11" r="2.1" />
-                <circle cx="18" cy="11" r="2.1" />
-                <path d="M7.5 19c.6-2.6 2.4-4 4.5-4s3.9 1.4 4.5 4" />
-                <path d="M2 18c.5-2 1.8-3 3.6-3M22 18c-.5-2-1.8-3-3.6-3" />
-              </svg>
-            </span>
-            <h3>Tým</h3>
-            <p>Hráči, trenéři i vedení zůstávají propojení v jednom klubovém prostoru.</p>
+          <article class="tech-card glass-card" aria-label="Tým">
+            <span class="glass-filter" aria-hidden="true" />
+            <span class="glass-overlay" aria-hidden="true" />
+            <span class="glass-specular" aria-hidden="true" />
+            <div class="glass-content">
+              <span class="tech-card__icon-wrap">
+                <svg class="tech-card__icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                  <circle cx="12" cy="7" r="2.6" />
+                  <circle cx="6" cy="11" r="2.1" />
+                  <circle cx="18" cy="11" r="2.1" />
+                  <path d="M7.5 19c.6-2.6 2.4-4 4.5-4s3.9 1.4 4.5 4" />
+                  <path d="M2 18c.5-2 1.8-3 3.6-3M22 18c-.5-2-1.8-3-3.6-3" />
+                </svg>
+              </span>
+              <h3>Tým</h3>
+              <p>Hráči, trenéři i vedení zůstávají propojení v jednom klubovém prostoru.</p>
+            </div>
           </article>
         </div>
       </div>
@@ -198,6 +240,46 @@
     .image-grid-section {
       min-height: 430vh;
     }
+  }
+
+  /* Smoke canvas — same recipe as the pricing section. Sticks to the
+     viewport so it covers the whole sticky-content area instead of
+     the 620vh section bounding box (which would force the canvas to
+     be enormous and stretch the puffs vertically). The smoke needs
+     to live above the section background but below .content. */
+  .image-grid-section .glass-smoke {
+    position: sticky;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    margin-bottom: -100vh; /* take it out of normal flow so .content sits where it would naturally */
+    pointer-events: none;
+    z-index: 0;
+    filter: saturate(120%) brightness(1.05);
+    /* Soft fade at top + bottom so the smoke doesn't hard-cut against
+       neighbouring sections. */
+    mask-image: linear-gradient(
+      180deg,
+      transparent 0%,
+      black 12%,
+      black 88%,
+      transparent 100%
+    );
+    -webkit-mask-image: linear-gradient(
+      180deg,
+      transparent 0%,
+      black 12%,
+      black 88%,
+      transparent 100%
+    );
+  }
+
+  /* .content needs to sit above the smoke. Sticky positioning on
+     siblings doesn't share a stacking context, so we lift it via
+     z-index. */
+  .image-grid-section .content {
+    z-index: 1;
   }
 
   .image-grid-section .content {
@@ -287,71 +369,47 @@
     display: block;
   }
 
+  /* ─── Photo glass-frame ─────────────────────────────────────────
+     The grid photos pick up the same liquid-glass language as the
+     tech cards by way of a 1 px white inset rim + soft drop shadow +
+     a pale cyan halo. Lighter than a full 4-layer glass-card host
+     because <img> is opaque content — we just need a frame. */
   .image-grid-section .grid img {
     object-fit: cover;
+    box-shadow:
+      inset 0 0 0 1px rgba(255, 255, 255, 0.16),
+      inset 1px 1px 0 rgba(255, 255, 255, 0.18),
+      0 6px 6px rgba(0, 0, 0, 0.28),
+      0 18px 44px -22px rgba(0, 240, 255, 0.22);
   }
 
-  /*
-    Tech card — same liquid-glass family as the hero ghost pill and
-    the pricing cards:
-      - layered linear gradient body (top brighter, fades to almost nothing)
-      - heavy backdrop-blur with saturate boost so cyan behind the card
-        bleeds through with character
-      - multi-stop inset highlight (top rim catches imaginary light)
-      - ::before sheen across the upper half
-      - ::after permanent cyan halo bottom-right (anchored, not hover-only —
-        the cards live inside an animated grid, hover-state would barely fire)
-      - cyan ring border + soft cyan undertone in box-shadow
-  */
+  /* Tech cards inherit .glass-card from global.css (4-layer recipe).
+     We round the radius down to 1rem so it fits the grid cell, drop
+     the global hover transform (the cards live inside the scroll-
+     animated grid where individual hover is awkward), and override
+     the .glass-content padding/centering so the icon + title + body
+     stack reads cleanly. */
   .image-grid-section .tech-card {
-    position: relative;
-    overflow: hidden;
-    isolation: isolate;
-    display: flex;
-    flex-direction: column;
+    border-radius: 1rem;
+  }
+  .image-grid-section .tech-card.glass-card:hover {
+    transform: none;
+  }
+
+  .image-grid-section .tech-card .glass-content {
     align-items: center;
     justify-content: center;
+    text-align: center;
     gap: clamp(0.85rem, 1.3vw, 1.15rem);
     padding: clamp(1rem, 1.8vw, 1.55rem);
-    border-radius: 1rem;
-    border: 1px solid rgba(255, 255, 255, 0.09);
-    background: linear-gradient(
-      180deg,
-      rgba(255, 255, 255, 0.07) 0%,
-      rgba(255, 255, 255, 0.028) 50%,
-      rgba(255, 255, 255, 0.014) 100%
-    );
-    backdrop-filter: blur(22px) saturate(170%);
-    -webkit-backdrop-filter: blur(22px) saturate(170%);
-    color: var(--color-text-primary);
-    box-shadow:
-      inset 0 1px 0 rgba(255, 255, 255, 0.12),
-      inset 0 -1px 0 rgba(255, 255, 255, 0.02),
-      0 22px 60px -28px rgba(0, 0, 0, 0.6),
-      0 1px 2px rgba(0, 0, 0, 0.3),
-      0 0 28px -10px rgba(0, 240, 255, 0.18);
   }
 
-  /* Top sheen — a thin highlight that reads as light catching the rim
-     of curved glass. Same recipe as .pricing-card::before. */
-  .image-grid-section .tech-card::before {
-    content: '';
-    position: absolute;
-    inset: 0 0 auto 0;
-    height: 55%;
-    border-radius: 1rem 1rem 0 0;
-    background: linear-gradient(
-      180deg,
-      rgba(255, 255, 255, 0.07),
-      transparent 100%
-    );
-    pointer-events: none;
-    z-index: 0;
-  }
-
-  /* Cyan halo bottom-right — anchored aura, not hover-only.
-     The cards animate in/out with the grid, so hover hardly registers. */
-  .image-grid-section .tech-card::after {
+  /* Permanent cyan halo at the bottom-right of each card — separate
+     from the global recipe (which doesn't anchor a halo) because the
+     tech cards animate in/out with the grid, so hover-only effects
+     barely register. The halo lives on the host (z-index above the
+     four glass layers but below .glass-content thanks to inset). */
+  .image-grid-section .tech-card.glass-card::after {
     content: '';
     position: absolute;
     right: -28%;
@@ -361,16 +419,11 @@
     border-radius: 999px;
     background: radial-gradient(
       circle,
-      rgba(0, 240, 255, 0.22),
+      rgba(0, 240, 255, 0.18),
       transparent 65%
     );
     pointer-events: none;
     z-index: 0;
-  }
-
-  .image-grid-section .tech-card > * {
-    position: relative;
-    z-index: 1;
   }
 
   /*
@@ -467,13 +520,12 @@
 
   @media (max-width: 640px) {
     .image-grid-section .tech-card {
-      padding: 0.65rem;
       border-radius: 0.85rem;
-      gap: 0.55rem;
     }
 
-    .image-grid-section .tech-card::before {
-      border-radius: 0.85rem 0.85rem 0 0;
+    .image-grid-section .tech-card .glass-content {
+      padding: 0.65rem;
+      gap: 0.55rem;
     }
 
     .image-grid-section .tech-card__icon-wrap {
@@ -544,6 +596,20 @@
 
 <script>
   import { animate, scroll } from 'motion';
+  import { mountGlassSmoke } from '../scripts/glass-smoke';
+
+  // Smoke field behind the grid — defer to idle so the scroll/Motion
+  // setup below runs first. mountGlassSmoke scans for [data-glass-smoke]
+  // sections so the same call also re-attaches new sections if the page
+  // adds them later.
+  function startSmoke() {
+    mountGlassSmoke();
+  }
+  if ('requestIdleCallback' in window) {
+    (window as any).requestIdleCallback(startSmoke, { timeout: 1500 });
+  } else {
+    setTimeout(startSmoke, 250);
+  }
 
   /*
     Motion v12 keyframe-timing API note:

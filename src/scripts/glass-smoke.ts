@@ -1,29 +1,38 @@
 /**
- * pricing-smoke — Canvas 2D backdrop for the pricing section.
+ * glass-smoke — Canvas 2D cyan-fog backdrop for any liquid-glass section.
  *
  * Adapted from teolitto codepen KwOVvL (Three.js cyan-smoke fog field
  * rotating behind a "Quick Text" callout). The codepen uses a 3D scene
  * with 150 textured planes; we replicate the *look* (slow drifting cyan
- * fog) in pure Canvas 2D so we don't pull in Three.js for a single
- * decorative backdrop:
+ * fog) in pure Canvas 2D so we don't pull in Three.js for a decorative
+ * backdrop. Same script powers both the pricing section and the image
+ * grid section — each opts in by attaching the data attribute below.
  *
- *   - 60 (mobile) / 90 (desktop) "smoke" sprites are blitted onto a
- *     full-section canvas. Each sprite is a precomputed radial gradient
- *     (white→transparent) cached once on an offscreen canvas, then
- *     rotated and tinted cyan via `globalCompositeOperation = 'lighter'`
- *     for additive blending (the codepen used THREE.AdditiveBlending).
- *   - Each particle has a slow rotation speed (matches the codepen's
- *     `delta * 0.2` rate) plus a tiny drift. The combination produces
- *     the lazy moving-cloud effect.
- *   - IntersectionObserver pauses the rAF loop while the section is
- *     off-screen. ResizeObserver resizes the canvas to match the
- *     section's pixel size.
+ * USAGE
+ *   <section data-glass-smoke
+ *            data-glass-smoke-density="0.9"  /* optional, default 1 *‍/>
+ *     <canvas class="glass-smoke" data-glass-smoke-canvas></canvas>
+ *     …rest of section…
+ *   </section>
  *
- * The pricing cards' .glass-filter SVG-displacement layer refracts
- * whatever sits behind it — on flat dark canvas there's nothing to
- * refract, so the displacement reads as an outline only. With this
- * smoke field underneath, the displacement now bends real cyan colour
- * → the cards finally read as actual liquid glass.
+ *   import { mountGlassSmoke } from '../scripts/glass-smoke';
+ *   mountGlassSmoke();   // scans the document for [data-glass-smoke]
+ *
+ * IMPLEMENTATION
+ *   - Two pre-tinted radial gradient sprites (cyan + teal) cached once
+ *     on offscreen canvases. Wide alpha tail to 0.55 of radius gives
+ *     the "smoke" feel rather than a hard spotlight.
+ *   - Default density is 60 (mobile) / 90 (desktop) puffs scaled by the
+ *     section's data-glass-smoke-density (lets a section dial it up
+ *     or down from the same script).
+ *   - Slow rotation + drift + per-puff breathing scale.
+ *   - Blitted with globalCompositeOperation='lighter' (additive).
+ *   - IntersectionObserver pauses rAF while the section is off-screen.
+ *
+ * The .glass-card recipe uses backdrop-blur + url(#glass-lens)
+ * displacement — both refract whatever sits behind. On flat dark canvas
+ * the displacement is a no-op; with this smoke field underneath, the
+ * cards finally read as actual liquid glass.
  */
 
 const SPRITE_SIZE = 256;
@@ -120,7 +129,7 @@ function makePuff(width: number, height: number): Puff {
 }
 
 function mount(section: HTMLElement): Handle | null {
-  const canvas = section.querySelector<HTMLCanvasElement>('[data-pricing-smoke]');
+  const canvas = section.querySelector<HTMLCanvasElement>('[data-glass-smoke-canvas]');
   if (!canvas) return null;
   const ctx = canvas.getContext('2d', { alpha: true });
   if (!ctx) return null;
@@ -128,6 +137,13 @@ function mount(section: HTMLElement): Handle | null {
   const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   const cyan = getCyanSprite();
   const teal = getTealSprite();
+
+  // Optional per-section density multiplier (e.g. 1.2 for a busier
+  // backdrop, 0.6 for a calmer one). Defaults to 1.
+  const density = Math.max(
+    0.2,
+    Math.min(2, parseFloat(section.dataset.glassSmokeDensity ?? '1')),
+  );
 
   let width = 1;
   let height = 1;
@@ -138,18 +154,25 @@ function mount(section: HTMLElement): Handle | null {
   let visible = false;
 
   function targetCount(): number {
-    return window.matchMedia('(max-width: 700px)').matches ? 60 : 90;
+    const base = window.matchMedia('(max-width: 700px)').matches ? 60 : 90;
+    return Math.round(base * density);
   }
 
   function resize() {
-    const rect = section.getBoundingClientRect();
-    width = Math.max(1, rect.width);
-    height = Math.max(1, rect.height);
+    // Measure the CANVAS, not the section. The pricing section's
+    // canvas is `inset: 0` of the section (= same height); the image
+    // grid section is 620vh tall but the canvas sits at sticky
+    // 100vh — measuring the section there would give a 11000+ px
+    // canvas and disperse the smoke into invisibility.
+    const rect = canvas.getBoundingClientRect();
+    width = Math.max(1, rect.width || section.clientWidth);
+    height = Math.max(1, rect.height || window.innerHeight);
     dpr = Math.min(window.devicePixelRatio || 1, 2);
     canvas.width = Math.round(width * dpr);
     canvas.height = Math.round(height * dpr);
-    canvas.style.width = `${width}px`;
-    canvas.style.height = `${height}px`;
+    // Don't override style.width/height — the host CSS already sets
+    // those (sticky 100vh on image grid, 100% of section on pricing),
+    // and overwriting can break the sticky positioning.
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
 
     // Re-seed puffs to fill the new size. Cheaper than transforming
@@ -226,8 +249,11 @@ function mount(section: HTMLElement): Handle | null {
     };
   }
 
+  // Watch the canvas itself (its rendered size) rather than the section
+  // — the image grid section is 620vh, the canvas is 100vh sticky, and
+  // we want to react to the latter.
   const ro = new ResizeObserver(() => resize());
-  ro.observe(section);
+  ro.observe(canvas);
 
   const io = new IntersectionObserver(
     (entries) => {
@@ -251,8 +277,8 @@ function mount(section: HTMLElement): Handle | null {
   };
 }
 
-export function mountPricingSmoke() {
-  const sections = document.querySelectorAll<HTMLElement>('[data-pricing-section]');
+export function mountGlassSmoke() {
+  const sections = document.querySelectorAll<HTMLElement>('[data-glass-smoke]');
   sections.forEach((section) => {
     if (HANDLES.has(section)) return;
     const handle = mount(section);
