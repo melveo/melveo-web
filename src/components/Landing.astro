@@ -29,6 +29,36 @@ interface Props {
 
 const { lang } = Astro.props;
 const t = useTranslations(lang);
+const feedbackItems =
+  lang === 'cs'
+    ? [
+        {
+          input: 'Check-in hráče',
+          output: 'Signál pro dnešní zátěž, regeneraci a riziko přetížení.',
+        },
+        {
+          input: 'Docházka + RPE',
+          output: 'Přehled účasti a zatížení týmu po každé session.',
+        },
+        {
+          input: 'Sessions',
+          output: 'Konkrétní feedback pro trenéra před dalším tréninkem.',
+        },
+      ]
+    : [
+        {
+          input: 'Player check-in',
+          output: 'A signal for today’s load, recovery, and overload risk.',
+        },
+        {
+          input: 'Attendance + RPE',
+          output: 'A clear view of team presence and load after every session.',
+        },
+        {
+          input: 'Sessions',
+          output: 'Concrete coaching feedback before the next training.',
+        },
+      ];
 ---
 
 <BaseLayout title="Melveo" lang={lang}>
@@ -72,13 +102,13 @@ const t = useTranslations(lang);
         </span>{t('hero.headlineSuffix')}
       </h1>
 
-      <p class="mx-auto mt-10 max-w-[36rem] text-pretty text-lg text-[var(--color-text-secondary)] sm:text-xl">
+      <p class="mx-auto mt-10 max-w-[36rem] text-pretty text-lg font-medium text-[var(--color-text-primary)] sm:text-xl">
         {t('hero.subline')}
       </p>
 
       <div class="hero-cta-row">
         <a
-          href="#brzy"
+          href="mailto:hello@melveo.app?subject=App%20Store%20notification"
           aria-label={t('hero.cta.appstore')}
           class="hero-pill hero-pill--filled"
         >
@@ -111,13 +141,6 @@ const t = useTranslations(lang);
           <span class="hero-pill-content">{t('hero.cta.pilot')}</span>
         </a>
       </div>
-
-      <p
-        id="brzy"
-        class="mt-8 text-xs uppercase tracking-[0.2em] text-[var(--color-text-tertiary)]"
-      >
-        {t('hero.beta')}
-      </p>
     </div>
 
   </section>
@@ -165,64 +188,247 @@ const t = useTranslations(lang);
   <PricingStage lang={lang} />
 
   <!-- ============================================================== -->
-  <!-- STAGE 7 — Privacy promise                                       -->
+  <!-- STAGE 7 — Data feedback promise                                 -->
   <!-- ============================================================== -->
-  <section class="relative isolate w-full overflow-hidden border-t border-[var(--color-stroke-base)] bg-[var(--color-bg-canvas)]">
-    <div class="halo-cyan" style="opacity: 0.5;"></div>
+  <section class="feedback-stage">
+    <div class="halo-cyan feedback-stage__halo"></div>
 
-    <div class="relative z-10 mx-auto max-w-[64rem] px-6 py-32 text-center sm:py-48">
-      <p class="mb-6 text-xs font-semibold uppercase tracking-[0.4em] text-[var(--color-accent-primary)]">
-        {t('privacy.eyebrow')}
-      </p>
-      <h2
-        class="text-balance font-bold leading-[1.05] tracking-tight text-[var(--color-text-primary)]"
-        style="font-size: clamp(2.5rem, 6vw, 6rem); letter-spacing: -0.04em;"
-        data-text-reveal
-      >
-        {t('privacy.headlineLine1')}<br />
-        <span class="text-[var(--color-accent-primary)]">
-          {t('privacy.headlineLine2')}
-        </span>
-      </h2>
-      <p class="mx-auto mt-8 max-w-[42rem] text-pretty text-lg text-[var(--color-text-secondary)] sm:text-xl">
-        {t('privacy.body')}
-      </p>
+    <div class="feedback-stage__inner">
+      <div class="feedback-stage__copy">
+        <p class="feedback-stage__eyebrow">
+          {t('privacy.eyebrow')}
+        </p>
+        <h2 class="feedback-stage__headline">
+          {t('privacy.headlineLine1')}<br />
+          <span>{t('privacy.headlineLine2')}</span>
+        </h2>
+        <p class="feedback-stage__body">
+          {t('privacy.body')}
+        </p>
+      </div>
+
+      <div class="feedback-stage__flow" aria-label={lang === 'cs' ? 'Vstupy a výstupy v Melveo' : 'Inputs and outputs in Melveo'}>
+        {feedbackItems.map((item) => (
+          <article class="feedback-card glass-card glass-card--compact">
+            <span class="glass-filter" aria-hidden="true"></span>
+            <span class="glass-overlay" aria-hidden="true"></span>
+            <span class="glass-specular" aria-hidden="true"></span>
+            <div class="glass-content">
+              <span class="feedback-card__label">
+                {lang === 'cs' ? 'VSTUP' : 'INPUT'}
+              </span>
+              <h3>{item.input}</h3>
+              <span class="feedback-card__arrow" aria-hidden="true">→</span>
+              <p>{item.output}</p>
+            </div>
+          </article>
+        ))}
+      </div>
     </div>
   </section>
 
   <!-- ============================================================== -->
   <!-- STAGE 9 — Pilot CTA                                             -->
   <!-- ============================================================== -->
-  <section class="relative isolate w-full overflow-hidden border-t border-[var(--color-stroke-base)] bg-[var(--color-bg-canvas)]">
-    <div class="relative z-10 mx-auto max-w-[48rem] px-6 py-32 text-center sm:py-40">
-      <h2
-        class="text-balance font-bold leading-[1.05] tracking-tight text-[var(--color-text-primary)]"
-        style="font-size: clamp(2rem, 4.5vw, 3.5rem); letter-spacing: -0.03em;"
-      >
+  <section class="pilot-cta-stage">
+    <div class="pilot-cta-stage__inner">
+      <h2 class="pilot-cta-stage__headline">
         {t('pilot.headline')}
       </h2>
-      <p class="mt-6 max-w-[28rem] text-pretty text-lg text-[var(--color-text-secondary)] mx-auto">
+      <p class="pilot-cta-stage__body">
         {t('pilot.body')}
       </p>
       <a
         href={`mailto:${t('pilot.email')}?subject=${encodeURIComponent(
-          lang === 'cs' ? 'Mám zájem o pilot' : 'Pilot enquiry'
+          lang === 'cs' ? 'Zájem o pilot Melveo' : 'Melveo pilot enquiry'
         )}`}
-        class="mt-12 inline-flex items-baseline gap-3 transition-opacity hover:opacity-70"
+        class="hero-pill hero-pill--ghost pilot-cta-stage__button"
       >
-        <span
-          class="font-semibold tracking-tight text-[var(--color-accent-primary)]"
-          style="font-size: clamp(1.75rem, 4vw, 3rem);"
-        >
-          {t('pilot.email')}
-        </span>
-        <span class="text-2xl text-[var(--color-accent-primary)]" aria-hidden="true">→</span>
+        <span class="hero-pill-shimmer" aria-hidden="true"></span>
+        <span class="hero-pill-content">{t('pilot.cta')}</span>
       </a>
+      <p class="pilot-cta-stage__email">{t('pilot.email')}</p>
     </div>
   </section>
 </BaseLayout>
 
 <style>
+  .feedback-stage {
+    position: relative;
+    isolation: isolate;
+    width: 100%;
+    overflow: hidden;
+    border-top: 1px solid var(--color-stroke-base);
+    background: var(--color-bg-canvas);
+  }
+
+  .feedback-stage__halo {
+    opacity: 0.45;
+    inset: 4% auto auto 50%;
+  }
+
+  .feedback-stage__inner {
+    position: relative;
+    z-index: 1;
+    display: grid;
+    align-items: center;
+    gap: clamp(2.5rem, 6vw, 5rem);
+    width: min(100% - 2rem, 78rem);
+    margin: 0 auto;
+    padding: clamp(6rem, 12vw, 10rem) 0;
+  }
+
+  @media (min-width: 960px) {
+    .feedback-stage__inner {
+      grid-template-columns: minmax(0, 1fr) minmax(25rem, 0.85fr);
+    }
+  }
+
+  .feedback-stage__copy {
+    text-align: left;
+  }
+
+  .feedback-stage__eyebrow {
+    margin: 0 0 1.25rem;
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.4em;
+    color: var(--color-accent-primary);
+  }
+
+  .feedback-stage__headline {
+    margin: 0;
+    font-weight: 700;
+    line-height: 1.03;
+    letter-spacing: -0.04em;
+    color: var(--color-text-primary);
+    font-size: clamp(2.6rem, 6vw, 6rem);
+    text-wrap: balance;
+  }
+
+  .feedback-stage__headline span {
+    color: var(--color-accent-primary);
+  }
+
+  .feedback-stage__body {
+    margin: 1.5rem 0 0;
+    max-width: 42rem;
+    font-size: clamp(1.05rem, 1.5vw, 1.25rem);
+    line-height: 1.65;
+    color: var(--color-text-secondary);
+    text-wrap: pretty;
+  }
+
+  .feedback-stage__flow {
+    display: grid;
+    gap: 0.9rem;
+  }
+
+  .feedback-card {
+    border-radius: 1.25rem;
+  }
+
+  .feedback-card .glass-content {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: center;
+    gap: 0.5rem 1rem;
+    padding: 1.25rem;
+  }
+
+  .feedback-card__label {
+    grid-column: 1 / -1;
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 0.22em;
+    color: var(--color-accent-primary);
+  }
+
+  .feedback-card h3 {
+    margin: 0;
+    font-size: clamp(1.05rem, 1.8vw, 1.35rem);
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+    color: var(--color-text-primary);
+  }
+
+  .feedback-card__arrow {
+    font-size: 1.4rem;
+    line-height: 1;
+    color: var(--color-accent-primary);
+    filter: drop-shadow(0 0 14px rgba(0, 240, 255, 0.4));
+  }
+
+  .feedback-card p {
+    grid-column: 1 / -1;
+    margin: 0;
+    max-width: 28rem;
+    font-size: 0.95rem;
+    line-height: 1.55;
+    color: var(--color-text-secondary);
+  }
+
+  .pilot-cta-stage {
+    position: relative;
+    isolation: isolate;
+    width: 100%;
+    overflow: hidden;
+    border-top: 1px solid var(--color-stroke-base);
+    border-bottom: 1px solid var(--color-stroke-base);
+    background:
+      radial-gradient(circle at 50% 0%, rgba(0, 240, 255, 0.12), transparent 38%),
+      var(--color-bg-canvas);
+  }
+
+  .pilot-cta-stage__inner {
+    position: relative;
+    z-index: 1;
+    width: min(100% - 2rem, 52rem);
+    margin: 0 auto;
+    padding: clamp(5.5rem, 11vw, 9rem) 0;
+    text-align: center;
+  }
+
+  .pilot-cta-stage__headline {
+    margin: 0;
+    font-weight: 700;
+    line-height: 1.05;
+    letter-spacing: -0.03em;
+    color: var(--color-text-primary);
+    font-size: clamp(2.15rem, 4.8vw, 4rem);
+    text-wrap: balance;
+  }
+
+  .pilot-cta-stage__body {
+    margin: 1.25rem auto 0;
+    max-width: 35rem;
+    font-size: clamp(1rem, 1.6vw, 1.18rem);
+    line-height: 1.65;
+    color: var(--color-text-secondary);
+    text-wrap: pretty;
+  }
+
+  .pilot-cta-stage__button {
+    margin-top: 2.25rem;
+  }
+
+  .pilot-cta-stage__email {
+    margin: 1.15rem 0 0;
+    font-size: 0.9rem;
+    color: var(--color-text-tertiary);
+  }
+
+  @media (max-width: 640px) {
+    .feedback-stage__copy,
+    .pilot-cta-stage__inner {
+      text-align: center;
+    }
+
+    .feedback-stage__body {
+      margin-inline: auto;
+    }
+  }
+
   /*
     Hero rotating word — wrap so y-translate during cycle stays within
     the line. Typewriter version writes characters in-place via
