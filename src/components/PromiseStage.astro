@@ -1,0 +1,119 @@
+---
+/**
+ * PromiseStage — quiet mini bridge between "Jeden systém" and Pricing.
+ *
+ * Same visual family as GooeyStage (cyan halo + gooey-filtered cyan
+ * blobs + split headline with cyan accent) but a different rhythm so
+ * the page doesn't repeat itself: TWO balls instead of three, one
+ * drifting horizontally, the other vertically, meeting at the centre.
+ * They merge for a beat then separate — reads as "two parties, one
+ * promise" which fits the headline.
+ *
+ * Headline copy is the brand's billing-+-privacy promise in two
+ * words — "Klub platí. Hráč nikdy." — and is drawn from i18n
+ * (`promise.headlinePrefix` / `promise.headlineAccent`). The accent
+ * inherits the same cyan colour treatment as the other split-headline
+ * stages so the brand voice is consistent.
+ *
+ * Min-height 60vh, same as GooeyStage. Sits in Landing.astro between
+ * ParticleStatementStage and PricingStage.
+ */
+
+import { useTranslations, type Lang } from '../i18n/ui';
+
+interface Props {
+  lang: Lang;
+}
+
+const { lang } = Astro.props;
+const t = useTranslations(lang);
+---
+
+<section class="relative isolate w-full overflow-hidden border-t border-[var(--color-stroke-base)] bg-[var(--color-bg-canvas)]">
+  <div class="halo-cyan" style="opacity: 0.32; inset: -28% 0 auto 50%;"></div>
+
+  <div class="relative z-10 flex min-h-[60vh] flex-col items-center justify-center px-6 py-24 text-center sm:py-32">
+    {/*
+      Own gooey filter ID so it doesn't collide with the GooeyStage
+      filter elsewhere on the page. Two balls only — they're larger
+      and meet at the centre rather than orbiting.
+    */}
+    <svg
+      class="promise-svg"
+      viewBox="-200 -100 400 200"
+      preserveAspectRatio="xMidYMid meet"
+      aria-hidden="true"
+    >
+      <defs>
+        <filter id="promise-gooey">
+          <feGaussianBlur in="SourceGraphic" stdDeviation="14"></feGaussianBlur>
+          <feColorMatrix
+            values="
+              1 0 0 0 0
+              0 1 0 0 0
+              0 0 1 0 0
+              0 0 0 22 -10"
+          ></feColorMatrix>
+        </filter>
+        <radialGradient id="promise-cyan" cx="50%" cy="50%" r="50%">
+          <stop offset="0%" stop-color="#00f0ff" stop-opacity="0.95"></stop>
+          <stop offset="100%" stop-color="#00f0ff" stop-opacity="0.55"></stop>
+        </radialGradient>
+      </defs>
+
+      <g filter="url(#promise-gooey)">
+        <circle class="promise-ball promise-ball--a" cx="0" cy="0" r="44" fill="url(#promise-cyan)"></circle>
+        <circle class="promise-ball promise-ball--b" cx="0" cy="0" r="40" fill="url(#promise-cyan)"></circle>
+      </g>
+    </svg>
+
+    <h2
+      class="relative z-10 mt-12 text-balance font-bold tracking-tight text-[var(--color-text-primary)]"
+      style="font-size: clamp(2rem, 5vw, 4rem); letter-spacing: -0.03em;"
+    >
+      {t('promise.headlinePrefix')}{' '}
+      <span class="text-[var(--color-accent-primary)]">
+        {t('promise.headlineAccent')}
+      </span>
+    </h2>
+  </div>
+</section>
+
+<style>
+  .promise-svg {
+    width: clamp(260px, 50vw, 600px);
+    height: auto;
+  }
+
+  /*
+    Two balls cross paths through the centre — ball A drifts on a
+    horizontal axis, ball B on a vertical axis, both with sine
+    timings. They overlap for a beat (gooey filter merges them) then
+    pass through. 8 s + 11 s periods so the meeting moments don't
+    fall in lockstep with the gooey stage's 9/11/13 s rhythm earlier
+    on the page.
+  */
+  @keyframes promise-orbit-a {
+    0% { transform: translate(-130px, -8px); }
+    50% { transform: translate(130px, 8px); }
+    100% { transform: translate(-130px, -8px); }
+  }
+
+  @keyframes promise-orbit-b {
+    0% { transform: translate(8px, 70px); }
+    50% { transform: translate(-8px, -70px); }
+    100% { transform: translate(8px, 70px); }
+  }
+
+  .promise-ball--a { animation: promise-orbit-a 8s ease-in-out infinite; }
+  .promise-ball--b { animation: promise-orbit-b 11s ease-in-out infinite; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .promise-ball--a,
+    .promise-ball--b {
+      animation: none;
+    }
+    .promise-ball--a { transform: translate(-50px, 0); }
+    .promise-ball--b { transform: translate(50px, 0); }
+  }
+</style>

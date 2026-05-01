@@ -72,6 +72,12 @@ export const ui = {
     'particles.headlineSuffix': '.',
     'particles.subline': 'Od ranního check-inu po rozhodnutí na tréninku. Tým běží v jednom rytmu.',
 
+    // Stage 6.25 — Billing promise (mini bridge before pricing).
+    // Same visual family as gooey stage; the "Hráč nikdy." accent is
+    // the brand's billing-+-privacy promise in two words.
+    'promise.headlinePrefix': 'Klub platí.',
+    'promise.headlineAccent': 'Hráč nikdy.',
+
     // Stage 6 — sessions + coach board
     'sessions.eyebrow': 'TRÉNINK · ROZHODNUTÍ',
     'sessions.headline': 'Sessions a coach board.',
@@ -170,6 +176,9 @@ export const ui = {
     'particles.headlinePrefix': 'Everything for',
     'particles.headlineSuffix': '.',
     'particles.subline': 'From morning check-in to training decisions. The team moves in one rhythm.',
+
+    'promise.headlinePrefix': 'Clubs pay.',
+    'promise.headlineAccent': 'Players never.',
 
     'sessions.eyebrow': 'TRAINING · DECISIONS',
     'sessions.headline': 'Sessions and coach board.',
