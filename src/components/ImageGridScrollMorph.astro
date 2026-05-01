@@ -428,19 +428,25 @@ const t = useTranslations(lang);
   }
 
   /*
-    Wordmark — half-section size, cyan-gradient fill, soft rounded
-    display font. Single span, no glow — per user feedback 2026-05-01
-    ("glow bych z tama dal pryč... potřebujeme nějaký lepší font aby
-    nebyl takový ostrý, chce to takové jemně zaoblené hrany").
+    Wordmark — half-section size, solid brand cyan, soft round font,
+    subtle glass treatment. Per user feedback 2026-05-01:
+      - "celý bez gradientu v naší primární barvě" → solid cyan,
+        no background-clip:text gradient
+      - "trošku glass efektu" → keep just enough specular touch to
+        read as glass (no halo, no glow)
+      - Font: Open Sans for the rounded "m"
 
-    Font: Outfit (loaded in BaseLayout, var --font-wordmark). Soft
-    geometric sans with rounded terminals — the "m" no longer reads
-    as sharp.
+    Glass effect comes from layered text-shadows:
+      - 1 px white inset on top → reads as light catching the top
+        rim of curved glass
+      - 1 px dark inset on bottom → reads as the bottom shadow of
+        the glass relief
+      - Hairline white text-stroke on the rim
+    No cyan glow / halo — explicitly removed.
 
-    Look: vertical gradient cyan-white → cyan → teal-deep via
-    background-clip:text, hairline white text-stroke as a subtle
-    rim etch, single dark drop-shadow ONLY (for legibility on the
-    photo); no cyan halo / blur halo behind.
+    Single dark drop-shadow on filter for legibility against the
+    photo (the photo behind starts at 28 % brightness, fully
+    revealed by the time the wordmark is gone).
 
     Always lowercase via text-transform as a guard plus the
     lowercase string in the markup.
@@ -456,24 +462,17 @@ const t = useTranslations(lang);
        viewport height on most ratios. */
     font-size: clamp(7rem, 30vw, 24rem);
     line-height: 0.85;
-    letter-spacing: -0.04em;
+    letter-spacing: -0.03em;
     text-transform: lowercase;
-    /* Vertical gradient: brighter cyan-white at top, deeper cyan at
-       middle, dim teal at bottom — reads as a curved glass surface
-       catching light without needing a glow halo. */
-    background: linear-gradient(
-      180deg,
-      rgba(255, 255, 255, 0.9) 0%,
-      var(--color-accent-primary-subtle) 22%,
-      var(--color-accent-primary) 55%,
-      color-mix(in srgb, var(--color-accent-primary) 65%, var(--color-bg-canvas)) 100%
-    );
-    -webkit-background-clip: text;
-    background-clip: text;
-    color: transparent;
-    -webkit-text-stroke: 0.5px rgba(255, 255, 255, 0.18);
-    /* Single dark drop-shadow only — gives the wordmark separation
-       from the photo without re-introducing the cyan halo. */
+    color: var(--color-accent-primary);
+    -webkit-text-stroke: 0.5px rgba(255, 255, 255, 0.22);
+    /* Glass relief: tiny white catch on the top edge + tiny dark
+       on the bottom. Reads as a curved glass face without any halo. */
+    text-shadow:
+      0 1px 0 rgba(255, 255, 255, 0.35),
+      0 -1px 0 rgba(0, 0, 0, 0.35),
+      0 2px 0 rgba(255, 255, 255, 0.08);
+    /* Dark drop-shadow only — separation from the photo. */
     filter: drop-shadow(0 10px 24px rgba(0, 0, 0, 0.55));
   }
 

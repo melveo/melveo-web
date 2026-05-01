@@ -1,0 +1,913 @@
+---
+/**
+ * ClubFlowStage — sticky product workflow section.
+ *
+ * Native scroll-driven version of the "sticky media + stacked cards"
+ * CodePen direction discussed with the user. No GSAP dependency: the
+ * section pins one viewport, maps document scroll to card/image states,
+ * and falls back to a normal stacked layout on smaller screens.
+ */
+
+import type { Lang } from '../i18n/ui';
+
+interface Props {
+  lang: Lang;
+}
+
+const { lang } = Astro.props;
+
+const copy = {
+  cs: {
+    eyebrow: 'JEDEN DEN V KLUBU',
+    headline: 'Od check-inu k rozhodnutí.',
+    body:
+      'Ranní signál, tréninková session i coach board běží v jednom toku. Trenér vidí kontext dřív, než začne trénink.',
+    mediaLabel: 'Živý klubový tok',
+    progressLabel: 'Průběh dne',
+    steps: [
+      {
+        number: '01',
+        kicker: 'RÁNO · 30 SEKUND',
+        title: 'Pětiosý check-in',
+        body:
+          'Hráč rychle pošle stav těla i hlavy. Melveo z toho skládá týmový signál bez odhalování syrových čísel jednotlivce.',
+        bullets: ['energie, spánek, bolestivost', 'nálada a motivace', 'privacy-by-design agregace'],
+        metricLabel: 'typický vstup',
+        metricValue: '30 s',
+        image: '/images/club-flow/check-in.webp',
+        alt: 'Hráč v šatně vyplňuje týmový check-in v telefonu.',
+      },
+      {
+        number: '02',
+        kicker: 'TRÉNINK · PLÁN',
+        title: 'Sessions',
+        body:
+          'Trenér staví session podle aktuální readiness. Účast, plán a následné RPE zůstávají u jednoho tréninku.',
+        bullets: ['plán bloku a cíl tréninku', 'docházka bez papíru', 'post-session RPE a zátěž'],
+        metricLabel: 'jeden záznam',
+        metricValue: 'plán + RPE',
+        image: '/images/club-flow/sessions.webp',
+        alt: 'Trenér sleduje trénink a drží tablet s analytikou týmu.',
+      },
+      {
+        number: '03',
+        kicker: 'KONTEXT · TÝM',
+        title: 'Coach board',
+        body:
+          'Coach board spojuje check-iny, attendance a zátěž do přehledu, který jde číst v minutě před tréninkem.',
+        bullets: ['readiness týmu', 'trend zátěže', 'hráči, kteří potřebují pozornost'],
+        metricLabel: 'čas na přehled',
+        metricValue: '1 min',
+        image: '/images/club-flow/coach-board.webp',
+        alt: 'Dva trenéři na palubovce společně kontrolují týmový coach board na tabletu.',
+      },
+      {
+        number: '04',
+        kicker: 'ROZHODNUTÍ · AKCE',
+        title: 'Správné rozhodnutí',
+        body:
+          'Na hřišti už nejde o hádání. Trenér upraví intenzitu, roli hráče nebo regeneraci podle dat, která dávají smysl.',
+        bullets: ['rychlejší úprava zátěže', 'méně slepých míst', 'lepší komunikace v týmu'],
+        metricLabel: 'výstup',
+        metricValue: 'jasný další krok',
+        image: '/images/club-flow/decision.webp',
+        alt: 'Trenér sleduje trénující tým a na tabletu kontroluje analytiku.',
+      },
+    ],
+  },
+  en: {
+    eyebrow: 'ONE CLUB DAY',
+    headline: 'From check-in to decision.',
+    body:
+      'Morning signal, training session, and coach board live in one workflow. Coaches see context before practice starts.',
+    mediaLabel: 'Live club workflow',
+    progressLabel: 'Day progress',
+    steps: [
+      {
+        number: '01',
+        kicker: 'MORNING · 30 SECONDS',
+        title: '5-axis check-in',
+        body:
+          'Players quickly send a body-and-mind signal. Melveo turns it into team context without exposing raw individual numbers.',
+        bullets: ['energy, sleep, soreness', 'mood and motivation', 'privacy-by-design aggregation'],
+        metricLabel: 'typical input',
+        metricValue: '30 s',
+        image: '/images/club-flow/check-in.webp',
+        alt: 'A player in a locker room completes a team check-in on a phone.',
+      },
+      {
+        number: '02',
+        kicker: 'TRAINING · PLAN',
+        title: 'Sessions',
+        body:
+          'Coaches shape each session around current readiness. Attendance, plan, and post-session RPE stay attached to the same training.',
+        bullets: ['block plan and training goal', 'paperless attendance', 'post-session RPE and load'],
+        metricLabel: 'single record',
+        metricValue: 'plan + RPE',
+        image: '/images/club-flow/sessions.webp',
+        alt: 'A coach watches practice while holding a tablet with team analytics.',
+      },
+      {
+        number: '03',
+        kicker: 'CONTEXT · TEAM',
+        title: 'Coach board',
+        body:
+          'Coach board joins check-ins, attendance, and load into a view that can be read in the minute before practice.',
+        bullets: ['team readiness', 'load trend', 'players who need attention'],
+        metricLabel: 'review time',
+        metricValue: '1 min',
+        image: '/images/club-flow/coach-board.webp',
+        alt: 'Two coaches review a team coach board on a tablet courtside.',
+      },
+      {
+        number: '04',
+        kicker: 'DECISION · ACTION',
+        title: 'The right decision',
+        body:
+          'On court, it is no longer guesswork. Coaches adjust intensity, player roles, or recovery from data that makes sense.',
+        bullets: ['faster load changes', 'fewer blind spots', 'clearer team communication'],
+        metricLabel: 'output',
+        metricValue: 'next best step',
+        image: '/images/club-flow/decision.webp',
+        alt: 'A coach watches the team train while checking analytics on a tablet.',
+      },
+    ],
+  },
+};
+
+const content = copy[lang];
+const steps = content.steps;
+---
+
+<section class="club-flow-stage" data-club-flow-stage style={`--club-flow-count: ${steps.length};`}>
+  <div class="club-flow-stage__grid" aria-hidden="true"></div>
+  <div class="club-flow-stage__halo club-flow-stage__halo--top" aria-hidden="true"></div>
+  <div class="club-flow-stage__halo club-flow-stage__halo--bottom" aria-hidden="true"></div>
+
+  <div class="club-flow-stage__intro">
+    <p class="club-flow-stage__eyebrow">{content.eyebrow}</p>
+    <h2>{content.headline}</h2>
+    <p>{content.body}</p>
+  </div>
+
+  <div class="club-flow-stage__scroll" data-club-flow-scroll>
+    <div class="club-flow-stage__pin">
+      <div class="club-flow-stage__layout">
+        <div class="club-flow-stage__media-shell" aria-label={content.mediaLabel}>
+          <div class="club-flow-stage__media-glow" aria-hidden="true"></div>
+          <div class="club-flow-stage__media">
+            {
+              steps.map((step, index) => (
+                <img
+                  class="club-flow-stage__image"
+                  class:list={{ 'is-active': index === 0 }}
+                  data-club-flow-image
+                  src={step.image}
+                  alt={step.alt}
+                  width="1586"
+                  height="992"
+                  loading="lazy"
+                  decoding="async"
+                  style={`--image-index: ${index};`}
+                />
+              ))
+            }
+            <div class="club-flow-stage__media-scrim" aria-hidden="true"></div>
+
+            <div class="club-flow-stage__hud">
+              <span class="club-flow-stage__hud-label">{content.mediaLabel}</span>
+              <div class="club-flow-stage__hud-dots" aria-hidden="true">
+                {steps.map((_, index) => <span data-club-flow-dot class:list={{ 'is-active': index === 0 }}></span>)}
+              </div>
+            </div>
+
+            <div class="club-flow-stage__mini-board" aria-hidden="true">
+              <span>{content.progressLabel}</span>
+              <div class="club-flow-stage__mini-lines">
+                <i></i>
+                <i></i>
+                <i></i>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="club-flow-stage__right">
+          <div class="club-flow-stage__progress" aria-hidden="true">
+            <span></span>
+          </div>
+
+          <div class="club-flow-stage__cards">
+            {
+              steps.map((step, index) => (
+                <article
+                  class="club-flow-stage__card"
+                  class:list={{ 'is-active': index === 0 }}
+                  data-club-flow-card
+                  style={`--card-index: ${index};`}
+                >
+                  <div class="club-flow-stage__card-panel">
+                    <img
+                      class="club-flow-stage__card-photo"
+                      src={step.image}
+                      alt=""
+                      width="1586"
+                      height="992"
+                      loading="lazy"
+                      decoding="async"
+                    />
+
+                    <div class="club-flow-stage__card-topline">
+                      <span>{step.number}</span>
+                      <p>{step.kicker}</p>
+                    </div>
+
+                    <h3>{step.title}</h3>
+                    <p class="club-flow-stage__card-body">{step.body}</p>
+
+                    <ul>
+                      {step.bullets.map((bullet) => <li>{bullet}</li>)}
+                    </ul>
+
+                    <div class="club-flow-stage__metric">
+                      <span>{step.metricLabel}</span>
+                      <strong>{step.metricValue}</strong>
+                    </div>
+                  </div>
+                </article>
+              ))
+            }
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .club-flow-stage {
+    position: relative;
+    isolation: isolate;
+    overflow: clip;
+    border-top: 1px solid var(--color-stroke-base);
+    background:
+      radial-gradient(circle at 50% 0%, color-mix(in srgb, var(--color-bg-tint) 64%, transparent), transparent 42rem),
+      linear-gradient(180deg, var(--color-bg-canvas), color-mix(in srgb, var(--color-bg-surface) 44%, var(--color-bg-canvas)) 48%, var(--color-bg-canvas));
+    color: var(--color-text-primary);
+  }
+
+  .club-flow-stage__grid {
+    position: absolute;
+    inset: 0;
+    z-index: -3;
+    background-image:
+      linear-gradient(to right, rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+    background-size: 72px 72px;
+    mask-image: radial-gradient(ellipse at center, black 18%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .club-flow-stage__halo {
+    position: absolute;
+    z-index: -2;
+    width: 54rem;
+    height: 54rem;
+    border-radius: 999px;
+    background: radial-gradient(
+      closest-side,
+      color-mix(in srgb, var(--color-accent-primary) 20%, transparent),
+      transparent 72%
+    );
+    filter: blur(36px);
+    pointer-events: none;
+  }
+
+  .club-flow-stage__halo--top {
+    top: -20rem;
+    left: 50%;
+    transform: translateX(-50%);
+  }
+
+  .club-flow-stage__halo--bottom {
+    right: -22rem;
+    bottom: 10%;
+    opacity: 0.55;
+  }
+
+  .club-flow-stage__intro {
+    position: relative;
+    z-index: 1;
+    max-width: 72rem;
+    margin: 0 auto;
+    padding: clamp(6rem, 11vw, 10rem) 1.5rem clamp(2.5rem, 5vw, 4rem);
+    text-align: center;
+  }
+
+  .club-flow-stage__eyebrow {
+    margin: 0 0 1.25rem;
+    color: var(--color-accent-primary);
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.4em;
+    text-transform: uppercase;
+  }
+
+  .club-flow-stage__intro h2 {
+    max-width: 58rem;
+    margin: 0 auto;
+    font-size: clamp(2.5rem, 7vw, 6.25rem);
+    font-weight: 800;
+    line-height: 0.94;
+    letter-spacing: -0.04em;
+    text-wrap: balance;
+  }
+
+  .club-flow-stage__intro > p:last-child {
+    max-width: 42rem;
+    margin: 1.5rem auto 0;
+    color: var(--color-text-secondary);
+    font-size: clamp(1rem, 1.6vw, 1.25rem);
+    line-height: 1.65;
+    text-wrap: pretty;
+  }
+
+  .club-flow-stage__scroll {
+    position: relative;
+    height: calc((var(--club-flow-count) * 92vh) + 42vh);
+    min-height: 260rem;
+  }
+
+  .club-flow-stage__pin {
+    position: sticky;
+    top: 0;
+    display: grid;
+    min-height: 100vh;
+    align-items: center;
+    padding: clamp(3rem, 7vh, 5rem) 1.5rem;
+  }
+
+  .club-flow-stage__layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1.08fr) minmax(23rem, 0.92fr);
+    gap: clamp(2rem, 5vw, 5rem);
+    width: min(100%, 88rem);
+    min-height: min(760px, 76vh);
+    margin: 0 auto;
+    align-items: stretch;
+  }
+
+  .club-flow-stage__media-shell {
+    position: relative;
+    min-height: 100%;
+  }
+
+  .club-flow-stage__media-glow {
+    position: absolute;
+    inset: 8% 8% -8%;
+    border-radius: 2rem;
+    background:
+      radial-gradient(circle at 26% 24%, color-mix(in srgb, var(--color-accent-primary) 34%, transparent), transparent 38%),
+      radial-gradient(circle at 80% 82%, color-mix(in srgb, var(--color-accent-warm-dark) 20%, transparent), transparent 44%);
+    filter: blur(34px);
+    opacity: 0.72;
+  }
+
+  .club-flow-stage__media {
+    position: relative;
+    height: 100%;
+    min-height: 34rem;
+    overflow: hidden;
+    border: 1px solid color-mix(in srgb, var(--color-accent-primary) 22%, var(--color-stroke-emphasized));
+    border-radius: clamp(1.25rem, 2vw, 2rem);
+    background: var(--color-bg-surface);
+    box-shadow:
+      0 36px 110px -56px color-mix(in srgb, var(--color-accent-primary) 48%, transparent),
+      0 22px 90px -40px rgba(0, 0, 0, 0.82),
+      inset 0 1px 0 rgba(255, 255, 255, 0.12);
+  }
+
+  .club-flow-stage__image {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    max-width: none;
+    object-fit: cover;
+    opacity: 0;
+    transform: scale(1.05);
+    filter: saturate(0.92) contrast(1.06);
+    transition:
+      opacity 260ms linear,
+      transform 520ms cubic-bezier(0.2, 0.8, 0.2, 1),
+      filter 520ms ease;
+    will-change: opacity, transform;
+  }
+
+  .club-flow-stage__image.is-active {
+    opacity: 1;
+    transform: scale(1);
+    filter: saturate(1.03) contrast(1.05);
+  }
+
+  .club-flow-stage__media-scrim {
+    position: absolute;
+    inset: 0;
+    background:
+      linear-gradient(90deg, rgba(5, 6, 8, 0.1), rgba(5, 6, 8, 0.28)),
+      linear-gradient(180deg, transparent 46%, rgba(5, 6, 8, 0.54));
+    pointer-events: none;
+  }
+
+  .club-flow-stage__hud,
+  .club-flow-stage__mini-board {
+    position: absolute;
+    left: clamp(1rem, 2vw, 1.5rem);
+    right: clamp(1rem, 2vw, 1.5rem);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    background: rgba(5, 6, 8, 0.46);
+    backdrop-filter: blur(18px) saturate(160%);
+    -webkit-backdrop-filter: blur(18px) saturate(160%);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  }
+
+  .club-flow-stage__hud {
+    top: clamp(1rem, 2vw, 1.5rem);
+    border-radius: 999px;
+    padding: 0.7rem 0.8rem 0.7rem 1rem;
+  }
+
+  .club-flow-stage__hud-label {
+    color: var(--color-text-primary);
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+  }
+
+  .club-flow-stage__hud-dots {
+    display: inline-flex;
+    gap: 0.45rem;
+  }
+
+  .club-flow-stage__hud-dots span {
+    width: 0.52rem;
+    height: 0.52rem;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.22);
+    transition:
+      width 260ms ease,
+      background 260ms ease,
+      box-shadow 260ms ease;
+  }
+
+  .club-flow-stage__hud-dots span.is-active {
+    width: 1.5rem;
+    background: var(--color-accent-primary);
+    box-shadow: 0 0 22px color-mix(in srgb, var(--color-accent-primary) 70%, transparent);
+  }
+
+  .club-flow-stage__mini-board {
+    bottom: clamp(1rem, 2vw, 1.5rem);
+    align-items: flex-start;
+    border-radius: 1.25rem;
+    padding: 1rem;
+  }
+
+  .club-flow-stage__mini-board span {
+    color: var(--color-text-secondary);
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+  }
+
+  .club-flow-stage__mini-lines {
+    display: grid;
+    width: min(48%, 15rem);
+    gap: 0.55rem;
+  }
+
+  .club-flow-stage__mini-lines i {
+    display: block;
+    height: 0.45rem;
+    border-radius: 999px;
+    background: linear-gradient(90deg, var(--color-accent-primary), rgba(255, 255, 255, 0.16));
+    transform-origin: left center;
+  }
+
+  .club-flow-stage__mini-lines i:nth-child(2) {
+    width: 76%;
+    opacity: 0.72;
+  }
+
+  .club-flow-stage__mini-lines i:nth-child(3) {
+    width: 54%;
+    opacity: 0.44;
+  }
+
+  .club-flow-stage__right {
+    position: relative;
+    display: grid;
+    grid-template-columns: 0.2rem minmax(0, 1fr);
+    gap: clamp(1rem, 2vw, 1.5rem);
+    min-height: 100%;
+  }
+
+  .club-flow-stage__progress {
+    position: relative;
+    width: 0.2rem;
+    overflow: hidden;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.08);
+  }
+
+  .club-flow-stage__progress span {
+    position: absolute;
+    inset: 0 0 auto;
+    height: 100%;
+    border-radius: inherit;
+    background: linear-gradient(180deg, var(--color-accent-primary), var(--color-accent-primary-subtle));
+    box-shadow: 0 0 24px color-mix(in srgb, var(--color-accent-primary) 64%, transparent);
+    transform: scaleY(0);
+    transform-origin: top center;
+    transition: transform 80ms linear;
+  }
+
+  .club-flow-stage__cards {
+    position: relative;
+    min-height: min(760px, 76vh);
+  }
+
+  .club-flow-stage__card {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    opacity: var(--card-opacity, 0);
+    transform: translate3d(0, var(--card-y, 72%), 0) scale(var(--card-scale, 0.92));
+    transition:
+      opacity 120ms linear,
+      transform 120ms linear;
+    will-change: opacity, transform;
+    pointer-events: none;
+  }
+
+  .club-flow-stage__card.is-active {
+    pointer-events: auto;
+  }
+
+  .club-flow-stage__card-panel {
+    width: 100%;
+    border: 1px solid color-mix(in srgb, var(--color-stroke-emphasized) 74%, transparent);
+    border-radius: clamp(1.1rem, 1.5vw, 1.5rem);
+    padding: clamp(1.25rem, 2vw, 2rem);
+    background:
+      linear-gradient(180deg, rgba(255, 255, 255, 0.075), rgba(255, 255, 255, 0.026)),
+      color-mix(in srgb, var(--color-bg-surface) 74%, transparent);
+    box-shadow:
+      0 24px 76px -44px rgba(0, 0, 0, 0.94),
+      inset 0 1px 0 rgba(255, 255, 255, 0.11);
+    backdrop-filter: blur(20px) saturate(150%);
+    -webkit-backdrop-filter: blur(20px) saturate(150%);
+    transition:
+      border-color 220ms ease,
+      box-shadow 220ms ease,
+      background 220ms ease;
+  }
+
+  .club-flow-stage__card.is-active .club-flow-stage__card-panel {
+    border-color: color-mix(in srgb, var(--color-accent-primary) 50%, var(--color-stroke-emphasized));
+    background:
+      radial-gradient(circle at 18% 0%, color-mix(in srgb, var(--color-accent-primary) 14%, transparent), transparent 52%),
+      linear-gradient(180deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.032)),
+      color-mix(in srgb, var(--color-bg-surface) 84%, transparent);
+    box-shadow:
+      0 26px 90px -48px color-mix(in srgb, var(--color-accent-primary) 58%, transparent),
+      0 24px 76px -44px rgba(0, 0, 0, 0.94),
+      inset 0 1px 0 rgba(255, 255, 255, 0.16);
+  }
+
+  .club-flow-stage__card-photo {
+    display: none;
+  }
+
+  .club-flow-stage__card-topline {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: clamp(1.5rem, 3vh, 2.25rem);
+  }
+
+  .club-flow-stage__card-topline span {
+    color: var(--color-accent-primary);
+    font-size: clamp(2rem, 5vw, 4.25rem);
+    font-weight: 800;
+    line-height: 0.9;
+    letter-spacing: -0.04em;
+  }
+
+  .club-flow-stage__card-topline p {
+    margin: 0;
+    color: var(--color-text-tertiary);
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.26em;
+    text-align: right;
+    text-transform: uppercase;
+  }
+
+  .club-flow-stage__card h3 {
+    margin: 0;
+    font-size: clamp(2rem, 4.6vw, 4.8rem);
+    font-weight: 800;
+    line-height: 0.96;
+    letter-spacing: -0.045em;
+    text-wrap: balance;
+  }
+
+  .club-flow-stage__card-body {
+    max-width: 34rem;
+    margin: 1.15rem 0 0;
+    color: var(--color-text-secondary);
+    font-size: clamp(1rem, 1.45vw, 1.16rem);
+    line-height: 1.62;
+    text-wrap: pretty;
+  }
+
+  .club-flow-stage__card ul {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0.65rem;
+    margin: 1.5rem 0 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .club-flow-stage__card li {
+    min-height: 3rem;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 0.9rem;
+    padding: 0.75rem;
+    background: rgba(255, 255, 255, 0.035);
+    color: color-mix(in srgb, var(--color-text-secondary) 84%, var(--color-text-primary));
+    font-size: 0.82rem;
+    line-height: 1.28;
+  }
+
+  .club-flow-stage__metric {
+    display: flex;
+    align-items: end;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-top: 1.65rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    padding-top: 1.1rem;
+  }
+
+  .club-flow-stage__metric span {
+    color: var(--color-text-tertiary);
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+  }
+
+  .club-flow-stage__metric strong {
+    color: var(--color-accent-primary);
+    font-size: clamp(1.25rem, 2.4vw, 2rem);
+    line-height: 1;
+    text-align: right;
+  }
+
+  @media (max-width: 1100px) {
+    .club-flow-stage__layout {
+      grid-template-columns: minmax(0, 0.95fr) minmax(21rem, 1.05fr);
+      gap: 1.5rem;
+    }
+
+    .club-flow-stage__card ul {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  @media (max-width: 899px) {
+    .club-flow-stage {
+      overflow: hidden;
+    }
+
+    .club-flow-stage__intro {
+      text-align: left;
+    }
+
+    .club-flow-stage__intro h2,
+    .club-flow-stage__intro > p:last-child {
+      margin-left: 0;
+      margin-right: 0;
+    }
+
+    .club-flow-stage__scroll {
+      height: auto;
+      min-height: 0;
+      padding: 0 1rem 6rem;
+    }
+
+    .club-flow-stage__pin {
+      position: relative;
+      min-height: 0;
+      padding: 0;
+    }
+
+    .club-flow-stage__layout {
+      display: block;
+      width: min(100%, 40rem);
+      min-height: 0;
+    }
+
+    .club-flow-stage__media-shell,
+    .club-flow-stage__progress {
+      display: none;
+    }
+
+    .club-flow-stage__right {
+      display: block;
+      min-height: 0;
+    }
+
+    .club-flow-stage__cards {
+      display: grid;
+      gap: 1rem;
+      min-height: 0;
+    }
+
+    .club-flow-stage__card {
+      position: relative;
+      inset: auto;
+      display: block;
+      opacity: 1 !important;
+      transform: none !important;
+      pointer-events: auto !important;
+    }
+
+    .club-flow-stage__card-panel {
+      padding: 1rem;
+      border-radius: 1.25rem;
+    }
+
+    .club-flow-stage__card-photo {
+      display: block;
+      width: 100%;
+      height: auto;
+      aspect-ratio: 16 / 10;
+      max-width: none;
+      margin-bottom: 1.25rem;
+      border-radius: 0.95rem;
+      object-fit: cover;
+    }
+
+    .club-flow-stage__card-topline {
+      margin-bottom: 1rem;
+    }
+
+    .club-flow-stage__card-topline span {
+      font-size: 2rem;
+    }
+
+    .club-flow-stage__card-topline p {
+      font-size: 0.64rem;
+      letter-spacing: 0.18em;
+    }
+
+    .club-flow-stage__card h3 {
+      font-size: clamp(2rem, 12vw, 3.15rem);
+    }
+
+    .club-flow-stage__card-body {
+      font-size: 1rem;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .club-flow-stage__image,
+    .club-flow-stage__card,
+    .club-flow-stage__progress span,
+    .club-flow-stage__hud-dots span {
+      transition: none;
+    }
+  }
+</style>
+
+<script>
+  const mountedClubFlowStages = new WeakSet<HTMLElement>();
+
+  function clamp(value: number, min: number, max: number) {
+    return Math.min(max, Math.max(min, value));
+  }
+
+  function mountClubFlowStage(stage: HTMLElement) {
+    if (mountedClubFlowStages.has(stage)) return;
+    mountedClubFlowStages.add(stage);
+
+    const scrollArea = stage.querySelector<HTMLElement>('[data-club-flow-scroll]');
+    const cards = Array.from(stage.querySelectorAll<HTMLElement>('[data-club-flow-card]'));
+    const images = Array.from(stage.querySelectorAll<HTMLElement>('[data-club-flow-image]'));
+    const dots = Array.from(stage.querySelectorAll<HTMLElement>('[data-club-flow-dot]'));
+    const progressBar = stage.querySelector<HTMLElement>('.club-flow-stage__progress span');
+    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+    const desktop = window.matchMedia('(min-width: 900px)');
+
+    if (!scrollArea || cards.length === 0) return;
+
+    let frame = 0;
+    let activeIndex = -1;
+
+    const resetForStackedLayout = () => {
+      cards.forEach((card, index) => {
+        card.style.removeProperty('--card-y');
+        card.style.removeProperty('--card-scale');
+        card.style.removeProperty('--card-opacity');
+        card.classList.toggle('is-active', index === 0);
+      });
+
+      images.forEach((image, index) => {
+        image.style.removeProperty('opacity');
+        image.style.removeProperty('transform');
+        image.classList.toggle('is-active', index === 0);
+      });
+
+      dots.forEach((dot, index) => dot.classList.toggle('is-active', index === 0));
+      progressBar?.style.setProperty('transform', 'scaleY(0)');
+      activeIndex = 0;
+    };
+
+    const update = () => {
+      frame = 0;
+
+      if (!desktop.matches) {
+        resetForStackedLayout();
+        return;
+      }
+
+      const rect = scrollArea.getBoundingClientRect();
+      const maxScroll = Math.max(1, scrollArea.offsetHeight - window.innerHeight);
+      const progress = reduceMotion.matches ? 0 : clamp(-rect.top / maxScroll, 0, 1);
+      const cursor = progress * (cards.length - 1);
+      const nextActiveIndex = clamp(Math.round(cursor), 0, cards.length - 1);
+
+      if (nextActiveIndex !== activeIndex) {
+        activeIndex = nextActiveIndex;
+        dots.forEach((dot, index) => dot.classList.toggle('is-active', index === activeIndex));
+      }
+
+      progressBar?.style.setProperty('transform', `scaleY(${progress})`);
+
+      cards.forEach((card, index) => {
+        const delta = index - cursor;
+        const distance = Math.abs(delta);
+        const y = clamp(delta * 64, -46, 84);
+        const scale = 1 - Math.min(distance * 0.075, 0.18);
+        const opacity = distance > 1.7 ? 0 : 1 - Math.min(distance * 0.54, 0.86);
+
+        card.style.setProperty('--card-y', `${y}%`);
+        card.style.setProperty('--card-scale', `${scale}`);
+        card.style.setProperty('--card-opacity', `${opacity}`);
+        card.classList.toggle('is-active', distance < 0.48);
+      });
+
+      images.forEach((image, index) => {
+        const distance = Math.abs(index - cursor);
+        const opacity = Math.max(0, 1 - distance * 1.18);
+        const scale = 1.035 + Math.min(distance * 0.025, 0.075);
+
+        image.style.opacity = `${opacity}`;
+        image.style.transform = `scale(${scale})`;
+        image.classList.toggle('is-active', distance < 0.5);
+      });
+    };
+
+    const schedule = () => {
+      if (frame) return;
+      frame = window.requestAnimationFrame(update);
+    };
+
+    window.addEventListener('scroll', schedule, { passive: true });
+    window.addEventListener('resize', schedule);
+    reduceMotion.addEventListener?.('change', schedule);
+    desktop.addEventListener?.('change', schedule);
+    schedule();
+  }
+
+  function mountClubFlowStages() {
+    document
+      .querySelectorAll<HTMLElement>('[data-club-flow-stage]')
+      .forEach((stage) => mountClubFlowStage(stage));
+  }
+
+  mountClubFlowStages();
+  document.addEventListener('astro:page-load', mountClubFlowStages);
+</script>

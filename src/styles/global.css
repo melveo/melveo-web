@@ -51,10 +51,10 @@
   /* Typography */
   --font-sans: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
   --font-display: "Inter", -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
-  /* Soft rounded display family for the brand wordmark — Outfit
-     (loaded in BaseLayout). Falls back through the same chain as
-     --font-display if Outfit fails to load. */
-  --font-wordmark: "Outfit", "Inter", -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+  /* Round humanist sans for the brand wordmark — Open Sans (loaded
+     in BaseLayout). Falls back through the same chain as
+     --font-display if Open Sans fails to load. */
+  --font-wordmark: "Open Sans", "Inter", -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
 
   /* Spacing scale — 4px base, mirrors SwiftUI .spacing* tokens.
      NOTE: Tailwind 4 derives max-w-* / w-* / etc. from `--spacing-*`
