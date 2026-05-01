@@ -540,8 +540,10 @@ const currencyShort = lang === 'cs' ? 'Kč' : 'CZK';
   .pricing-toggle-btn {
     display: inline-flex;
     align-items: center;
+    /* Min 44 px tap target for phone — was 41 px (audit 2026-05-01). */
+    min-height: 44px;
     gap: 0.45rem;
-    padding: 0.55rem 1.1rem;
+    padding: 0.65rem 1.15rem;
     border-radius: 9999px;
     background: transparent;
     border: 1px solid transparent;

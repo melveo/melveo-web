@@ -158,30 +158,35 @@ const altUrls = {
     {
       showLandingFooter && (
         <footer class="border-t border-[var(--color-stroke-base)]/60">
+          {/* Footer links use inline-flex + min-height: 44px for phone
+              tap-target compliance (audit 2026-05-01) — was 20 px row
+              height, well under 44 px guideline. py-2 gives 8 px above
+              + below the 14 px text → 30 px content + padding = 46 px
+              total clickable height. */}
           <div class="flex flex-col items-center gap-4 px-6 py-10 text-center text-sm text-[var(--color-text-tertiary)] sm:flex-row sm:flex-wrap sm:justify-center sm:gap-x-8 sm:gap-y-4">
             <span>{t('footer.copyright')}</span>
             <a
               href="mailto:hello@melveo.app"
-              class="transition-colors hover:text-[var(--color-text-primary)]"
+              class="inline-flex items-center min-h-[44px] py-2 transition-colors hover:text-[var(--color-text-primary)]"
             >
               hello@melveo.app
             </a>
             <a
               href={`/${lang}/privacy`}
-              class="transition-colors hover:text-[var(--color-text-primary)]"
+              class="inline-flex items-center min-h-[44px] py-2 transition-colors hover:text-[var(--color-text-primary)]"
             >
               {t('footer.privacy')}
             </a>
             <a
               href={`/${lang}/terms`}
-              class="transition-colors hover:text-[var(--color-text-primary)]"
+              class="inline-flex items-center min-h-[44px] py-2 transition-colors hover:text-[var(--color-text-primary)]"
             >
               {t('footer.terms')}
             </a>
             <button
               type="button"
               data-cookie-reopen
-              class="bg-transparent border-0 cursor-pointer text-[var(--color-text-tertiary)] transition-colors hover:text-[var(--color-text-primary)] p-0 font-inherit text-inherit"
+              class="inline-flex items-center min-h-[44px] py-2 bg-transparent border-0 cursor-pointer text-[var(--color-text-tertiary)] transition-colors hover:text-[var(--color-text-primary)] font-inherit text-inherit"
             >
               {t('footer.cookieSettings')}
             </button>
