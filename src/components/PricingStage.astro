@@ -203,6 +203,16 @@ const currencyShort = lang === 'cs' ? 'Kč' : 'CZK';
   data-period="yearly"
   aria-label={t('pricing.eyebrow')}
 >
+  {/*
+    Cyan smoke field behind the pricing cards. The 4-layer glass-card
+    recipe relies on having something colourful behind it to refract —
+    on flat black canvas the displacement filter has nothing to bend.
+    This canvas drops a slow drifting cyan fog (teolitto codepen
+    KwOVvL pattern) so the cards finally read as real liquid glass.
+    Mounts client-side from pricing-smoke.ts.
+  */}
+  <canvas class="pricing-smoke" data-pricing-smoke aria-hidden="true"></canvas>
+
   <div class="pricing-inner">
     <header class="pricing-header">
       <p class="pricing-eyebrow">{t('pricing.eyebrow')}</p>
@@ -404,7 +414,19 @@ const currencyShort = lang === 'cs' ? 'Kč' : 'CZK';
 
 <script>
   import { mountPricingToggle } from '../scripts/pricing-toggle';
+  import { mountPricingSmoke } from '../scripts/pricing-smoke';
   mountPricingToggle();
+
+  // Defer the smoke field to idle so the toggle + LCP go through first.
+  // Smoke is decorative; nothing in the page depends on it being up.
+  function startSmoke() {
+    mountPricingSmoke();
+  }
+  if ('requestIdleCallback' in window) {
+    (window as any).requestIdleCallback(startSmoke, { timeout: 1500 });
+  } else {
+    setTimeout(startSmoke, 250);
+  }
 </script>
 
 <style>
@@ -418,7 +440,8 @@ const currencyShort = lang === 'cs' ? 'Kč' : 'CZK';
   }
   .pricing-stage::before {
     /* Subtle radial cyan glow behind the cards — same family as the
-       hero halo, tuned dim. Doesn't compete with the headline. */
+       hero halo, tuned dim. Doesn't compete with the headline. Sits
+       above the smoke canvas so the brightest cyan stays centred. */
     content: '';
     position: absolute;
     inset: -10% 20% auto 20%;
@@ -430,12 +453,46 @@ const currencyShort = lang === 'cs' ? 'Kč' : 'CZK';
     );
     pointer-events: none;
     filter: blur(40px);
+    z-index: 1;
+  }
+
+  /* Smoke field canvas — full-section, behind everything.
+     Positioned absolutely so the section's normal flow ignores it.
+     Painted in pricing-smoke.ts. */
+  .pricing-smoke {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 0;
+    /* Slight extra saturation/contrast on the canvas itself helps the
+       cyan smoke read against the dark canvas without us needing to
+       crank per-puff alpha. */
+    filter: saturate(120%) brightness(1.05);
+    /* Soft fade at top + bottom so the smoke doesn't hard-cut against
+       the previous/next stage borders. */
+    mask-image: linear-gradient(
+      180deg,
+      transparent 0%,
+      black 12%,
+      black 88%,
+      transparent 100%
+    );
+    -webkit-mask-image: linear-gradient(
+      180deg,
+      transparent 0%,
+      black 12%,
+      black 88%,
+      transparent 100%
+    );
   }
 
   .pricing-inner {
     position: relative;
     margin: 0 auto;
     max-width: 84rem;
+    z-index: 2;
   }
 
   /* ─── Header ─────────────────────────────────────────────────── */
@@ -636,40 +693,43 @@ const currencyShort = lang === 'cs' ? 'Kč' : 'CZK';
 
   .pricing-card .glass-filter {
     z-index: 0;
-    backdrop-filter: blur(8px) saturate(160%);
-    -webkit-backdrop-filter: blur(8px) saturate(160%);
+    /* With the cyan smoke field underneath, we crank backdrop blur +
+       saturate so the smoke comes through as a soft cyan diffusion
+       rather than recognisable puffs. This is what sells "real glass":
+       the colour is there, but the source is unreadable. */
+    backdrop-filter: blur(14px) saturate(190%);
+    -webkit-backdrop-filter: blur(14px) saturate(190%);
     /* Apple-style "lens" — referenced from <svg id="pricing-lens">.
        feDisplacementMap warps source pixels by alpha-blurred amount
-       so card edges get the glass-edge halo. Kept paired with a
-       small brightness boost so the subtle Melveo cyan glow behind
-       the cards reads through the glass. */
-    filter: url(#pricing-lens) brightness(1.06);
+       so card edges get the glass-edge halo. The smoke behind makes
+       this displacement actually visible (was a no-op on flat black). */
+    filter: url(#pricing-lens) brightness(1.04);
   }
 
   .pricing-card .glass-overlay {
     z-index: 1;
-    /* On dark canvas the codepen's white 0.25 tint is too aggressive
-       (cards look chalky). Drop to a faint white-with-cyan tint that
-       barely exists but still reads as "frosted". */
+    /* Faint white→cyan tint on top of the blurred smoke. The blur has
+       already done the heavy lifting; this overlay just settles the
+       contrast so text in .glass-content stays readable. */
     background: linear-gradient(
       180deg,
-      rgba(255, 255, 255, 0.05) 0%,
-      rgba(255, 255, 255, 0.018) 60%,
-      rgba(0, 240, 255, 0.012) 100%
+      rgba(255, 255, 255, 0.06) 0%,
+      rgba(255, 255, 255, 0.02) 55%,
+      rgba(0, 240, 255, 0.018) 100%
     );
   }
 
   .pricing-card .glass-specular {
     z-index: 2;
     /* Top-left rim catches imaginary light → 1px white inset.
-       Soft 6 px inner glow rounds the rim so it doesn't look like a
-       hard outline. Both lighter than the codepen's 0.75 highlight
-       because we're on a dark canvas — full 0.75 white reads as a
-       harsh outline, not a glass shine. */
+       Soft inner glow rounds the rim. Slightly stronger than the
+       previous pass because the smoke backdrop pushes more light
+       through the glass — the rim needs more presence to still
+       read as "edge of glass" against the bright cyan diffusion. */
     box-shadow:
-      inset 1px 1px 0 rgba(255, 255, 255, 0.22),
-      inset 0 0 6px rgba(255, 255, 255, 0.1),
-      inset -1px -1px 0 rgba(255, 255, 255, 0.04);
+      inset 1px 1px 0 rgba(255, 255, 255, 0.28),
+      inset 0 0 8px rgba(255, 255, 255, 0.12),
+      inset -1px -1px 0 rgba(255, 255, 255, 0.05);
   }
 
   .pricing-card .glass-content {
