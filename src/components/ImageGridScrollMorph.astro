@@ -538,7 +538,11 @@ const t = useTranslations(lang);
 
   .image-grid-section .grid {
     --container-width: 1600px;
-    --gap: clamp(10px, 7.35vw, 80px);
+    /* Tighter gap so cells stay readable at all viewports (was
+       clamp(10px, 7.35vw, 80px) which on 1440-wide viewport hit the
+       80 px cap, eating ~320 px of cell width across 4 gaps and
+       leaving photos too small for faces to read). */
+    --gap: clamp(8px, 1.6vw, 24px);
     --gutter: 2rem;
 
     width: var(--container-width);
@@ -729,6 +733,13 @@ const t = useTranslations(lang);
     width: 100%;
     height: 100%;
     object-fit: cover;
+    /* Crop slightly above centre — the photos are 1122 × 1402 portrait
+       with subjects' faces in the upper third. Default object-position
+       (50% 50%) cropped portrait photos to the chest area when cells
+       become landscape-shaped (5 × 3 layout on desktop). 50% 30% keeps
+       heads in frame on every viewport while still showing some torso
+       context (user feedback 2026-05-01: "ať jsou vidět hlavy"). */
+    object-position: 50% 30%;
     display: block;
   }
 
