@@ -1,11 +1,12 @@
 /**
- * Hero scene — CodePen-inspired WebGL metaballs background.
+ * Hero scene — TC5550 CodePen metaballs port.
  *
- * Source reference: TC5550 / "Metaballs - WebGL".
- * The implementation keeps the same idea: moving circles are sent to a
- * fragment shader as vec3 uniforms and the shader renders the combined
- * metaball field. It is adapted for Melveo's darker brand palette and
- * for the site's lazy-mounted hero canvas.
+ * This intentionally mirrors the supplied CodePen logic:
+ * - internal canvas resolution is viewport * 0.75
+ * - 30 metaballs
+ * - radius/velocity formulas match the pen
+ * - fragment shader color and threshold logic match the pen
+ * - mouse coordinates are not used for motion
  */
 
 interface MountOptions {
@@ -21,12 +22,10 @@ interface Metaball {
   y: number;
   vx: number;
   vy: number;
-  radius: number;
-  seed: number;
+  r: number;
 }
 
-const METABALL_COUNT = 24;
-const MOBILE_METABALL_COUNT = 16;
+const NUM_METABALLS = 30;
 
 const VERTEX_SHADER = `
 attribute vec2 position;
@@ -36,69 +35,42 @@ void main() {
 }
 `;
 
-function fragmentShaderSource(count: number): string {
+function fragmentShaderSource(width: number, height: number): string {
   return `
 precision highp float;
 
-uniform vec2 uResolution;
-uniform float uTime;
-uniform vec3 uMetaballs[${count}];
+const float WIDTH = ${width >> 0}.0;
+const float HEIGHT = ${height >> 0}.0;
 
-const vec3 BRAND_CYAN = vec3(0.0, 0.941176, 1.0);
-const vec3 BRAND_ICE = vec3(0.45, 0.86, 0.90);
-const vec3 BRAND_TEAL = vec3(0.05, 0.56, 0.62);
-const vec3 BRAND_DEEP = vec3(0.0, 0.13, 0.16);
-
-float hash(vec2 p) {
-  return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453123);
-}
+uniform vec3 metaballs[${NUM_METABALLS}];
 
 void main() {
-  vec2 p = gl_FragCoord.xy;
-  vec2 uv = p / uResolution;
-  vec2 centered = uv - 0.5;
-  centered.x *= uResolution.x / max(uResolution.y, 1.0);
+  float x = gl_FragCoord.x;
+  float y = gl_FragCoord.y;
 
-  float field = 0.0;
+  float sum = 0.0;
+  for (int i = 0; i < ${NUM_METABALLS}; i++) {
+    vec3 metaball = metaballs[i];
+    float dx = metaball.x - x;
+    float dy = metaball.y - y;
+    float radius = metaball.z;
 
-  for (int i = 0; i < ${count}; i++) {
-    vec3 metaball = uMetaballs[i];
-    vec2 delta = metaball.xy - p;
-    float distSq = max(dot(delta, delta), 32.0);
-    float strength = (metaball.z * metaball.z) / distSq;
-    field += strength;
+    sum += (radius * radius) / (dx * dx + dy * dy);
   }
 
-  float mass = smoothstep(0.9, 1.08, field);
-  float interior = smoothstep(1.02, 1.22, field);
-  float rim = smoothstep(0.84, 1.0, field) * (1.0 - smoothstep(1.08, 1.34, field));
-  float outerGlow = smoothstep(0.22, 0.92, field) * (1.0 - interior);
-  float innerShade = 1.0 - smoothstep(1.15, 3.2, field);
-  float grain = hash(floor(p * 0.55) + vec2(uTime * 18.0, -uTime * 9.0));
+  if (sum >= 0.99) {
+    gl_FragColor = vec4(
+      mix(
+        vec3(x / WIDTH, y / HEIGHT, 1.0),
+        vec3(0.0, 0.0, 0.0),
+        max(0.0, 1.0 - (sum - 0.99) * 100.0)
+      ),
+      1.0
+    );
+    return;
+  }
 
-  vec3 background = mix(BRAND_DEEP * 0.2, BRAND_DEEP * 0.62, 1.0 - uv.y);
-  background += BRAND_TEAL * 0.045 * smoothstep(0.82, 0.0, length(centered + vec2(0.18, -0.08)));
-  background += BRAND_CYAN * 0.025 * smoothstep(1.05, 0.0, length(centered - vec2(0.34, 0.18)));
-
-  vec3 cool = mix(BRAND_TEAL, BRAND_CYAN, clamp(uv.x * 0.5 + uv.y * 0.18, 0.0, 1.0));
-  vec3 surface = mix(BRAND_DEEP * 0.72 + BRAND_TEAL * 0.16, cool * 0.56, 0.34);
-  surface = mix(surface * 0.82, surface, innerShade);
-  surface += BRAND_ICE * rim * 0.2;
-
-  vec3 color = background;
-  color += BRAND_CYAN * outerGlow * 0.045;
-  color = mix(color, surface, mass * 0.78);
-  color += rim * BRAND_CYAN * 0.12;
-
-  float centerQuiet = smoothstep(0.08, 0.74, length(centered * vec2(0.86, 1.42)));
-  color = mix(background * 0.72 + color * 0.08, color, centerQuiet);
-
-  float vignette = smoothstep(0.88, 0.24, length(centered));
-  color *= 0.55 + vignette * 0.55;
-  color += (grain - 0.5) * 0.012;
-  color = pow(max(color, vec3(0.0)), vec3(0.92));
-
-  gl_FragColor = vec4(color, 1.0);
+  gl_FragColor = vec4(0.0, 0.0, 0.0, 1.0);
 }
 `;
 }
@@ -108,19 +80,6 @@ export function prefersReducedMotion(): boolean {
     typeof window !== 'undefined' &&
     window.matchMedia('(prefers-reduced-motion: reduce)').matches
   );
-}
-
-function createSeededRandom(seed = 88421): () => number {
-  let state = seed >>> 0;
-
-  return () => {
-    state = (state * 1664525 + 1013904223) >>> 0;
-    return state / 4294967296;
-  };
-}
-
-function randomRange(random: () => number, min: number, max: number): number {
-  return min + random() * (max - min);
 }
 
 function createShader(
@@ -179,11 +138,28 @@ export function mountHeroScene({ canvas }: MountOptions): SceneHandle | null {
 
   if (!context) return null;
   const gl: WebGLRenderingContext = context;
-  const isMobile = window.innerWidth < 768;
-  const metaballCount = isMobile ? MOBILE_METABALL_COUNT : METABALL_COUNT;
+
+  const width = Math.max(1, window.innerWidth * 0.75);
+  const height = Math.max(1, window.innerHeight * 0.75);
+  canvas.width = width;
+  canvas.height = height;
+  gl.viewport(0, 0, canvas.width, canvas.height);
+
+  const metaballs: Metaball[] = [];
+
+  for (let i = 0; i < NUM_METABALLS; i += 1) {
+    const radius = Math.random() * 60 + 10;
+    metaballs.push({
+      x: Math.random() * (width - 2 * radius) + radius,
+      y: Math.random() * (height - 2 * radius) + radius,
+      vx: (Math.random() - 0.5) * 3,
+      vy: (Math.random() - 0.5) * 3,
+      r: radius * 0.75,
+    });
+  }
 
   const vertexShader = createShader(gl, gl.VERTEX_SHADER, VERTEX_SHADER);
-  const fragmentShader = createShader(gl, gl.FRAGMENT_SHADER, fragmentShaderSource(metaballCount));
+  const fragmentShader = createShader(gl, gl.FRAGMENT_SHADER, fragmentShaderSource(width, height));
 
   if (!vertexShader || !fragmentShader) {
     if (vertexShader) gl.deleteShader(vertexShader);
@@ -198,93 +174,56 @@ export function mountHeroScene({ canvas }: MountOptions): SceneHandle | null {
     return null;
   }
 
-  const positionLocation = gl.getAttribLocation(program, 'position');
-  const uResolution = gl.getUniformLocation(program, 'uResolution');
-  const uTime = gl.getUniformLocation(program, 'uTime');
-  const uMetaballs = gl.getUniformLocation(program, 'uMetaballs');
+  gl.useProgram(program);
 
-  if (positionLocation < 0 || !uResolution || !uTime || !uMetaballs) {
-    gl.deleteProgram(program);
-    gl.deleteShader(vertexShader);
-    gl.deleteShader(fragmentShader);
-    return null;
-  }
-
-  const positions = new Float32Array([
-    -1, -1,
-    1, -1,
-    -1, 1,
-    1, 1,
+  const vertexData = new Float32Array([
+    -1.0, 1.0,
+    -1.0, -1.0,
+    1.0, 1.0,
+    1.0, -1.0,
   ]);
-
-  const positionBuffer = gl.createBuffer();
-  if (!positionBuffer) {
+  const vertexDataBuffer = gl.createBuffer();
+  if (!vertexDataBuffer) {
     gl.deleteProgram(program);
     gl.deleteShader(vertexShader);
     gl.deleteShader(fragmentShader);
     return null;
   }
 
-  gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
-  gl.bufferData(gl.ARRAY_BUFFER, positions, gl.STATIC_DRAW);
+  gl.bindBuffer(gl.ARRAY_BUFFER, vertexDataBuffer);
+  gl.bufferData(gl.ARRAY_BUFFER, vertexData, gl.STATIC_DRAW);
 
-  const random = createSeededRandom();
-  const metaballs: Metaball[] = [];
-  const metaballData = new Float32Array(metaballCount * 3);
-  const pixelRatio = Math.min(window.devicePixelRatio || 1, isMobile ? 0.9 : 1.15);
+  const positionHandle = gl.getAttribLocation(program, 'position');
+  if (positionHandle < 0) {
+    gl.deleteBuffer(vertexDataBuffer);
+    gl.deleteProgram(program);
+    gl.deleteShader(vertexShader);
+    gl.deleteShader(fragmentShader);
+    return null;
+  }
 
-  let width = 1;
-  let height = 1;
+  gl.enableVertexAttribArray(positionHandle);
+  gl.vertexAttribPointer(
+    positionHandle,
+    2,
+    gl.FLOAT,
+    false,
+    2 * 4,
+    0,
+  );
+
+  const metaballsHandle = gl.getUniformLocation(program, 'metaballs');
+  if (!metaballsHandle) {
+    gl.deleteBuffer(vertexDataBuffer);
+    gl.deleteProgram(program);
+    gl.deleteShader(vertexShader);
+    gl.deleteShader(fragmentShader);
+    return null;
+  }
+
   let running = true;
-  let canvasInView = true;
   let rafId = 0;
-  let mouseX = 0.5;
-  let mouseY = 0.5;
-  let targetMouseX = 0.5;
-  let targetMouseY = 0.5;
-
-  function resetMetaballs() {
-    metaballs.length = 0;
-    const minSide = Math.min(width, height);
-    const baseRadius = minSide * (isMobile ? 0.078 : 0.052);
-
-    for (let i = 0; i < metaballCount; i += 1) {
-      const radius = randomRange(random, baseRadius * 0.72, baseRadius * 1.55);
-      metaballs.push({
-        x: randomRange(random, radius, width - radius),
-        y: randomRange(random, radius, height - radius),
-        vx: randomRange(random, -0.22, 0.22) * (isMobile ? 0.8 : 1),
-        vy: randomRange(random, -0.18, 0.18) * (isMobile ? 0.8 : 1),
-        radius,
-        seed: randomRange(random, 0, Math.PI * 2),
-      });
-    }
-  }
-
-  function resizeCanvas() {
-    const rect = canvas.getBoundingClientRect();
-    const nextWidth = Math.max(1, Math.floor(rect.width * pixelRatio));
-    const nextHeight = Math.max(1, Math.floor(rect.height * pixelRatio));
-    const changed = canvas.width !== nextWidth || canvas.height !== nextHeight;
-
-    if (changed) {
-      canvas.width = nextWidth;
-      canvas.height = nextHeight;
-      width = nextWidth;
-      height = nextHeight;
-      resetMetaballs();
-    }
-
-    gl.viewport(0, 0, nextWidth, nextHeight);
-  }
-
-  function onPointerMove(event: PointerEvent) {
-    const rect = canvas.getBoundingClientRect();
-    if (rect.width <= 0 || rect.height <= 0) return;
-
-    targetMouseX = (event.clientX - rect.left) / rect.width;
-    targetMouseY = (event.clientY - rect.top) / rect.height;
-  }
+  let canvasInView = true;
 
   function stopFrame() {
     if (!rafId) return;
@@ -294,76 +233,44 @@ export function mountHeroScene({ canvas }: MountOptions): SceneHandle | null {
 
   function scheduleFrame() {
     if (rafId || !running || !canvasInView) return;
-    rafId = requestAnimationFrame(render);
+    rafId = requestAnimationFrame(loop);
   }
 
-  function updateMetaballs(time: number) {
-    mouseX += (targetMouseX - mouseX) * 0.035;
-    mouseY += (targetMouseY - mouseY) * 0.035;
-
-    const driftX = (mouseX - 0.5) * width * 0.0012;
-    const driftY = (mouseY - 0.5) * height * 0.0012;
-
-    for (let i = 0; i < metaballCount; i += 1) {
-      const metaball = metaballs[i];
-      if (!metaball) continue;
-
-      metaball.x += metaball.vx + Math.sin(time * 0.24 + metaball.seed) * 0.055 + driftX;
-      metaball.y += metaball.vy + Math.cos(time * 0.2 + metaball.seed) * 0.05 - driftY;
-
-      if (metaball.x < metaball.radius) {
-        metaball.x = metaball.radius;
-        metaball.vx = Math.abs(metaball.vx);
-      } else if (metaball.x > width - metaball.radius) {
-        metaball.x = width - metaball.radius;
-        metaball.vx = -Math.abs(metaball.vx);
-      }
-
-      if (metaball.y < metaball.radius) {
-        metaball.y = metaball.radius;
-        metaball.vy = Math.abs(metaball.vy);
-      } else if (metaball.y > height - metaball.radius) {
-        metaball.y = height - metaball.radius;
-        metaball.vy = -Math.abs(metaball.vy);
-      }
-
-      const dataIndex = i * 3;
-      metaballData[dataIndex] = metaball.x;
-      metaballData[dataIndex + 1] = metaball.y;
-      metaballData[dataIndex + 2] = metaball.radius;
-    }
-  }
-
-  const startTime = performance.now();
-
-  function render(now: number) {
+  function loop() {
     rafId = 0;
     if (!running || !canvasInView) return;
 
-    const time = (now - startTime) * 0.001;
-    updateMetaballs(time);
+    for (let i = 0; i < NUM_METABALLS; i += 1) {
+      const metaball = metaballs[i];
+      if (!metaball) continue;
 
-    gl.clearColor(0, 0, 0, 1);
-    gl.clear(gl.COLOR_BUFFER_BIT);
-    gl.useProgram(program);
-    gl.uniform2f(uResolution, width, height);
-    gl.uniform1f(uTime, time);
-    gl.uniform3fv(uMetaballs, metaballData);
+      metaball.x += metaball.vx;
+      metaball.y += metaball.vy;
 
-    gl.enableVertexAttribArray(positionLocation);
-    gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
-    gl.vertexAttribPointer(positionLocation, 2, gl.FLOAT, false, 0, 0);
+      if (metaball.x < metaball.r || metaball.x > width - metaball.r) {
+        metaball.vx *= -1;
+      }
+      if (metaball.y < metaball.r || metaball.y > height - metaball.r) {
+        metaball.vy *= -1;
+      }
+    }
+
+    const dataToSendToGPU = new Float32Array(3 * NUM_METABALLS);
+    for (let i = 0; i < NUM_METABALLS; i += 1) {
+      const baseIndex = 3 * i;
+      const metaball = metaballs[i];
+      if (!metaball) continue;
+
+      dataToSendToGPU[baseIndex] = metaball.x;
+      dataToSendToGPU[baseIndex + 1] = metaball.y;
+      dataToSendToGPU[baseIndex + 2] = metaball.r;
+    }
+
+    gl.uniform3fv(metaballsHandle, dataToSendToGPU);
     gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
 
     scheduleFrame();
   }
-
-  resizeCanvas();
-  window.addEventListener('pointermove', onPointerMove, { passive: true });
-  window.addEventListener('resize', resizeCanvas, { passive: true });
-
-  const resizeObserver = new ResizeObserver(resizeCanvas);
-  resizeObserver.observe(canvas);
 
   const viewportObserver =
     'IntersectionObserver' in window
@@ -397,12 +304,9 @@ export function mountHeroScene({ canvas }: MountOptions): SceneHandle | null {
   function dispose() {
     running = false;
     stopFrame();
-    window.removeEventListener('pointermove', onPointerMove);
-    window.removeEventListener('resize', resizeCanvas);
     document.removeEventListener('visibilitychange', onVisibilityChange);
-    resizeObserver.disconnect();
     viewportObserver?.disconnect();
-    gl.deleteBuffer(positionBuffer);
+    gl.deleteBuffer(vertexDataBuffer);
     gl.deleteProgram(program);
     gl.deleteShader(vertexShader);
     gl.deleteShader(fragmentShader);
