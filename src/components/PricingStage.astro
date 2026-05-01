@@ -299,8 +299,15 @@ const currencyShort = lang === 'cs' ? 'Kč' : 'CZK';
               )}
             </div>
 
-            <a class="pricing-card-cta" href={plan.ctaHref}>
-              {plan.ctaLabel}
+            {/* Pricing plan CTA — literally the hero-pill from the
+                landing hero (App Store / Pilot buttons). Same class,
+                same internal structure (shimmer + content layers).
+                The pointer-tracking handler in Landing.astro's
+                mountHeroButtons() picks these up for free because it
+                queries .hero-pill across the whole document. */}
+            <a class="hero-pill pricing-card-cta" href={plan.ctaHref}>
+              <span class="hero-pill-shimmer" aria-hidden="true"></span>
+              <span class="hero-pill-content">{plan.ctaLabel}</span>
             </a>
 
             <p class="pricing-card-included">{t('pricing.included')}</p>
@@ -749,64 +756,21 @@ const currencyShort = lang === 'cs' ? 'Kč' : 'CZK';
 
   /* ─── CTA inside card — full hero pill family ────────────────── */
 
+  /* Pricing CTA = .hero-pill verbatim (recipe in global.css). The only
+     component-local tweaks are LAYOUT inside the card:
+       - full width of the card column
+       - drop the hero pill's 12rem min-width (cards are narrow)
+       - smaller padding so the button doesn't dwarf the price block
+       - bottom margin separates it from the features list
+     Everything visual (background, border-flow animation, shimmer,
+     hover glow, focus ring) is inherited untouched. */
   .pricing-card-cta {
-    position: relative;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
+    width: 100%;
+    min-width: 0;
+    padding: 0.95rem 1.25rem;
     margin-bottom: 1.5rem;
-    padding: 0.85rem 1.25rem;
-    border-radius: 9999px;
     font-size: 0.95rem;
-    font-weight: 600;
-    text-decoration: none;
-    background: linear-gradient(
-      180deg,
-      rgba(255, 255, 255, 0.08) 0%,
-      rgba(255, 255, 255, 0.03) 100%
-    );
-    backdrop-filter: blur(14px) saturate(160%);
-    -webkit-backdrop-filter: blur(14px) saturate(160%);
-    color: var(--color-text-primary);
-    border: 1px solid rgba(0, 240, 255, 0.3);
-    box-shadow:
-      inset 0 1px 0 rgba(255, 255, 255, 0.12),
-      0 8px 24px -10px rgba(0, 0, 0, 0.4);
-    transition:
-      transform 0.2s cubic-bezier(0.39, 0.575, 0.565, 1),
-      background-color 0.25s ease,
-      border-color 0.25s ease,
-      box-shadow 0.25s ease;
-  }
-  .pricing-card-cta:hover {
-    background: linear-gradient(
-      180deg,
-      rgba(0, 240, 255, 0.18) 0%,
-      rgba(0, 240, 255, 0.06) 100%
-    );
-    border-color: rgba(0, 240, 255, 0.55);
-    transform: translateY(-1px);
-    box-shadow:
-      inset 0 1px 0 rgba(255, 255, 255, 0.18),
-      0 14px 36px -10px rgba(0, 240, 255, 0.35);
-  }
-
-  /* Popular card's CTA = filled cyan (matches .hero-pill--filled) */
-  .pricing-card--popular .pricing-card-cta {
-    background: var(--color-accent-primary);
-    color: var(--color-accent-primary-cta-fg);
-    border-color: rgba(0, 240, 255, 0.65);
-    box-shadow:
-      inset 0 1px 0 rgba(255, 255, 255, 0.3),
-      0 12px 36px -10px rgba(0, 240, 255, 0.55),
-      0 0 0 1px rgba(0, 240, 255, 0.4);
-  }
-  .pricing-card--popular .pricing-card-cta:hover {
-    background: var(--color-accent-primary-hover);
-    box-shadow:
-      inset 0 1px 0 rgba(255, 255, 255, 0.35),
-      0 16px 44px -10px rgba(0, 240, 255, 0.65),
-      0 0 0 1px rgba(0, 240, 255, 0.55);
+    letter-spacing: 0.04em;
   }
 
   /* ─── Features list ─────────────────────────────────────────── */
