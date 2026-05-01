@@ -1,19 +1,22 @@
 ---
 /**
- * PromiseStage — quiet mini bridge between "Jeden systém" and Pricing.
+ * PromiseStage — "Realtime data. Bez papíru." mini bridge between
+ * "Jeden systém" and Pricing.
  *
- * Same visual family as GooeyStage (cyan halo + gooey-filtered cyan
- * blobs + split headline with cyan accent) but a different rhythm so
- * the page doesn't repeat itself: TWO balls instead of three, one
- * drifting horizontally, the other vertically, meeting at the centre.
- * They merge for a beat then separate — reads as "two parties, one
- * promise" which fits the headline.
+ * Three-element layout (user 2026-05-01: indicate "real data"):
+ *   - Left endpoint (anchored, larger blob)
+ *   - Right endpoint (anchored, larger blob)
+ *   - Shuttle (smaller blob pendulum-ing fast between them)
  *
- * Headline copy is the brand's billing-+-privacy promise in two
- * words — "Klub platí. Hráč nikdy." — and is drawn from i18n
- * (`promise.headlinePrefix` / `promise.headlineAccent`). The accent
- * inherits the same cyan colour treatment as the other split-headline
- * stages so the brand voice is consistent.
+ * Reads as a data packet flying between two clients — the fast cadence
+ * is the visual cue for "realtime". The gooey SVG filter merges the
+ * shuttle into each endpoint as it docks, so each pass looks like
+ * "data delivered → data sent back". Ease-in-out with custom timing
+ * gives a brief dock-pause at each endpoint before snapping away.
+ *
+ * Headline (`promise.headlinePrefix` / `promise.headlineAccent`)
+ * stays in i18n with the same cyan-accent treatment as the other
+ * split-headline stages.
  *
  * Min-height 60vh, same as GooeyStage. Sits in Landing.astro between
  * ParticleStatementStage and PricingStage.
@@ -62,8 +65,17 @@ const t = useTranslations(lang);
       </defs>
 
       <g filter="url(#promise-gooey)">
-        <circle class="promise-ball promise-ball--a" cx="0" cy="0" r="44" fill="url(#promise-cyan)"></circle>
-        <circle class="promise-ball promise-ball--b" cx="0" cy="0" r="40" fill="url(#promise-cyan)"></circle>
+        {/* Left endpoint — anchored "client A". Slight breathing scale
+            so it doesn't feel frozen between shuttle visits. */}
+        <circle class="promise-ball promise-ball--left" cx="-130" cy="0" r="42" fill="url(#promise-cyan)"></circle>
+        {/* Right endpoint — anchored "client B". Counter-phased breathing
+            so the two endpoints don't pulse in lockstep. */}
+        <circle class="promise-ball promise-ball--right" cx="130" cy="0" r="42" fill="url(#promise-cyan)"></circle>
+        {/* Shuttle — smaller, fast pendulum between endpoints. Reads as
+            a data packet flying back and forth. The gooey filter merges
+            it into each endpoint at dock time so each pass looks like
+            "delivery → reply". */}
+        <circle class="promise-ball promise-ball--shuttle" cx="0" cy="0" r="22" fill="url(#promise-cyan)"></circle>
       </g>
     </svg>
 
@@ -86,34 +98,63 @@ const t = useTranslations(lang);
   }
 
   /*
-    Two balls cross paths through the centre — ball A drifts on a
-    horizontal axis, ball B on a vertical axis, both with sine
-    timings. They overlap for a beat (gooey filter merges them) then
-    pass through. 8 s + 11 s periods so the meeting moments don't
-    fall in lockstep with the gooey stage's 9/11/13 s rhythm earlier
-    on the page.
+    Endpoints — anchored at ±130 in viewBox space. The cx attribute
+    on each <circle> already places them; we just add a subtle
+    breathing scale via transform so they don't feel frozen between
+    shuttle visits. transform-origin must be the circle's own centre
+    (not 0,0) so the scale doesn't drift them across the canvas.
+    The two endpoints breathe counter-phased (0% / 50%) so they
+    don't pulse in lockstep — reads as two independent clients.
   */
-  @keyframes promise-orbit-a {
-    0% { transform: translate(-130px, -8px); }
-    50% { transform: translate(130px, 8px); }
-    100% { transform: translate(-130px, -8px); }
+  .promise-ball--left {
+    transform-box: fill-box;
+    transform-origin: center;
+    animation: promise-breathe 3.2s ease-in-out infinite;
+  }
+  .promise-ball--right {
+    transform-box: fill-box;
+    transform-origin: center;
+    animation: promise-breathe 3.2s ease-in-out -1.6s infinite;
   }
 
-  @keyframes promise-orbit-b {
-    0% { transform: translate(8px, 70px); }
-    50% { transform: translate(-8px, -70px); }
-    100% { transform: translate(8px, 70px); }
+  @keyframes promise-breathe {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.06); }
   }
 
-  .promise-ball--a { animation: promise-orbit-a 8s ease-in-out infinite; }
-  .promise-ball--b { animation: promise-orbit-b 11s ease-in-out infinite; }
+  /*
+    Shuttle — fast pendulum between the two endpoints. 1.8 s round
+    trip (0.9 s each way) so the user sees ~33 deliveries per
+    minute, well into "realtime" territory. Custom cubic-bezier
+    accelerates out of each dock and decelerates into the next,
+    matching how a network packet "shoots" then "lands". The 0%
+    and 100% keyframes are the same left dock so the loop is
+    seamless; the 50% keyframe is the right dock.
+
+    Squash on the shuttle's x-axis at mid-flight (scaleX 1.18,
+    scaleY 0.88) reinforces the speed read — the blob looks
+    elongated by motion, then snaps back to round at the dock.
+  */
+  .promise-ball--shuttle {
+    animation: promise-shuttle 1.8s cubic-bezier(0.5, 0, 0.5, 1) infinite;
+  }
+
+  @keyframes promise-shuttle {
+    0% { transform: translate(-130px, 0) scale(1); }
+    25% { transform: translate(0, 0) scaleX(1.18) scaleY(0.88); }
+    50% { transform: translate(130px, 0) scale(1); }
+    75% { transform: translate(0, 0) scaleX(1.18) scaleY(0.88); }
+    100% { transform: translate(-130px, 0) scale(1); }
+  }
 
   @media (prefers-reduced-motion: reduce) {
-    .promise-ball--a,
-    .promise-ball--b {
+    .promise-ball--left,
+    .promise-ball--right,
+    .promise-ball--shuttle {
       animation: none;
     }
-    .promise-ball--a { transform: translate(-50px, 0); }
-    .promise-ball--b { transform: translate(50px, 0); }
+    /* Static fallback: endpoints stay put, shuttle parks at centre
+       so the three-element composition still reads. */
+    .promise-ball--shuttle { transform: translate(0, 0); }
   }
 </style>
