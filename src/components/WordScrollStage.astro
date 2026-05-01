@@ -1,0 +1,250 @@
+---
+/**
+ * WordScrollStage — close port of Daniel Haim's CodePen azmBEPL.
+ *
+ * Sticky prefix plus a page-scrolled word list with CSS
+ * view-timeline brightening mapped to the Melveo palette.
+ */
+
+import { useTranslations, type Lang } from '../i18n/ui';
+
+interface Props {
+  lang: Lang;
+}
+
+const { lang } = Astro.props;
+const t = useTranslations(lang);
+const words = t('wordScroll.words').split('|');
+const startIndex = 0;
+const endIndex = words.length - 1;
+const remainingSteps = Math.max(1, endIndex - startIndex);
+const scrollFriction = 4;
+const scrollDistance = `${remainingSteps * 6.09375 * scrollFriction}rem`;
+const scrollDistanceTablet = `${remainingSteps * 5.4375 * scrollFriction}rem`;
+const scrollDistanceMobile = `${remainingSteps * 3.125 * scrollFriction}rem`;
+const scrollDistanceSmall = `${remainingSteps * 2.375 * scrollFriction}rem`;
+const colors = [
+  'var(--color-accent-primary)',
+  'var(--color-accent-primary-hover)',
+  'var(--color-accent-primary-subtle)',
+  'var(--color-accent-warm-dark)',
+];
+---
+
+<section
+  class="word-scroll-stage"
+  data-word-scroll-stage
+  data-start-index={startIndex}
+  data-end-index={endIndex}
+  style={`--word-scroll-count: ${words.length}; --word-scroll-active-index: ${startIndex}; --word-scroll-distance: ${scrollDistance}; --word-scroll-distance-tablet: ${scrollDistanceTablet}; --word-scroll-distance-mobile: ${scrollDistanceMobile}; --word-scroll-distance-small: ${scrollDistanceSmall};`}
+>
+  <div class="word-scroll-stage__pin">
+    <div class="word-scroll-stage__inner">
+      <h2 class="word-scroll-stage__prefix">
+        <span aria-hidden="true">{t('wordScroll.prefix')}&nbsp;</span>
+        <span class="word-scroll-stage__sr-only">
+          {t('wordScroll.screenReader')}
+        </span>
+      </h2>
+
+      <div class="word-scroll-stage__list-viewport" aria-hidden="true">
+        <ul class="word-scroll-stage__list">
+          {words.map((word, index) => (
+            <li
+              class="word-scroll-stage__item"
+              style={`--i: ${index}; --word-color: ${colors[index % colors.length]}; --word-distance: ${Math.abs(index - startIndex)};`}
+            >
+              {word}
+            </li>
+          ))}
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .word-scroll-stage {
+    position: relative;
+    isolation: isolate;
+    width: 100%;
+    height: calc(100vh + var(--word-scroll-distance));
+    overflow: visible;
+    border-top: 1px solid var(--color-stroke-base);
+    border-bottom: 1px solid var(--color-stroke-base);
+    background: var(--color-bg-canvas);
+    color: var(--color-text-primary);
+    color-scheme: dark;
+  }
+
+  .word-scroll-stage__pin {
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    overflow: hidden;
+  }
+
+  .word-scroll-stage__inner {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.24em;
+    height: 100%;
+    min-width: min-content;
+    padding-inline: 1.5rem;
+    font-size: 4.875rem;
+    font-weight: 500;
+    line-height: 1.25;
+    letter-spacing: 0;
+  }
+
+  .word-scroll-stage__prefix {
+    flex: 0 0 auto;
+    height: fit-content;
+    margin: 0;
+    font: inherit;
+    background: linear-gradient(
+      var(--color-text-primary) 50%,
+      color-mix(in oklch, var(--color-bg-canvas), var(--color-text-primary) 25%)
+    );
+    background-clip: text;
+    color: transparent;
+    -webkit-background-clip: text;
+  }
+
+  .word-scroll-stage__list-viewport {
+    position: relative;
+    flex: 0 0 auto;
+    height: 100%;
+    min-width: 0;
+  }
+
+  .word-scroll-stage__list {
+    position: relative;
+    top: 50%;
+    left: 0;
+    width: max-content;
+    transform: translate3d(
+      0,
+      calc(-0.625em - (var(--word-scroll-active-index) * 1.25em)),
+      0
+    );
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    padding-left: 0;
+    font: inherit;
+    white-space: nowrap;
+    will-change: transform;
+  }
+
+  .word-scroll-stage__item {
+    color: color-mix(in oklch, var(--word-color) 84%, var(--color-text-primary));
+    opacity: clamp(0.2, calc(1 - (var(--word-distance) * 0.8)), 1);
+    filter: brightness(clamp(1, calc(1.18 - (var(--word-distance) * 0.18)), 1.18));
+    will-change: opacity, filter;
+  }
+
+  .word-scroll-stage__item:last-of-type {
+    background: linear-gradient(
+      var(--color-text-primary) 50%,
+      color-mix(in oklch, var(--color-bg-canvas), var(--color-text-primary) 25%)
+    );
+    background-clip: text;
+    color: transparent;
+    -webkit-background-clip: text;
+  }
+
+  .word-scroll-stage__sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+  }
+
+  @media (max-width: 1100px) {
+    .word-scroll-stage {
+      --word-scroll-distance: var(--word-scroll-distance-tablet);
+    }
+
+    .word-scroll-stage__inner {
+      font-size: 4.35rem;
+    }
+  }
+
+  @media (max-width: 780px) {
+    .word-scroll-stage {
+      --word-scroll-distance: var(--word-scroll-distance-mobile);
+    }
+
+    .word-scroll-stage__inner {
+      gap: 0.18em;
+      padding-inline: 1rem;
+      font-size: 2.5rem;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .word-scroll-stage {
+      --word-scroll-distance: var(--word-scroll-distance-small);
+    }
+
+    .word-scroll-stage__inner {
+      font-size: 1.9rem;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .word-scroll-stage__item {
+      opacity: 0.72;
+      filter: none;
+    }
+  }
+</style>
+
+<script>
+  const clampWordScroll = (value, min, max) => Math.min(Math.max(value, min), max);
+
+  const updateWordScrollStages = () => {
+    document.querySelectorAll('[data-word-scroll-stage]').forEach((root) => {
+      const startIndex = Number(root.getAttribute('data-start-index') || 0);
+      const endIndex = Number(root.getAttribute('data-end-index') || startIndex);
+      const rect = root.getBoundingClientRect();
+      const scrollableDistance = Math.max(1, root.offsetHeight - window.innerHeight);
+      const progress = clampWordScroll(-rect.top / scrollableDistance, 0, 1);
+      const activeIndex = startIndex + progress * (endIndex - startIndex);
+
+      root.style.setProperty('--word-scroll-active-index', activeIndex.toFixed(4));
+
+      root.querySelectorAll('.word-scroll-stage__item').forEach((item, index) => {
+        item.style.setProperty('--word-distance', Math.abs(index - activeIndex).toFixed(4));
+      });
+    });
+  };
+
+  let wordScrollFrame = 0;
+  const queueWordScrollUpdate = () => {
+    if (wordScrollFrame) return;
+
+    wordScrollFrame = window.requestAnimationFrame(() => {
+      wordScrollFrame = 0;
+      updateWordScrollStages();
+    });
+  };
+
+  updateWordScrollStages();
+  window.addEventListener('scroll', queueWordScrollUpdate, { passive: true });
+  window.addEventListener('resize', queueWordScrollUpdate);
+  window.addEventListener('load', updateWordScrollStages, { once: true });
+  document.addEventListener('astro:page-load', updateWordScrollStages);
+
+  if ('fonts' in document) {
+    document.fonts.ready.then(updateWordScrollStages);
+  }
+</script>

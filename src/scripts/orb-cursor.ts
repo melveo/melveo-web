@@ -25,13 +25,14 @@
  * per frame.
  */
 
-const ORBIT_PERIOD_X_MS = 9000;
-const ORBIT_PERIOD_Y_MS = 11000;
+const ORBIT_PERIOD_X_MS = 10500;
+const ORBIT_PERIOD_Y_MS = 12800;
 const ORBIT_RESUME_DELAY = 1500;
 
 export function mountOrbCursor() {
+  const wrapper = document.querySelector<HTMLElement>('[data-orb-wrapper]');
   const secondary = document.querySelector<HTMLElement>('[data-orb-secondary]');
-  if (!secondary) return;
+  if (!wrapper || !secondary) return;
 
   const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   if (reduceMotion) return;
@@ -57,6 +58,12 @@ export function mountOrbCursor() {
     pendingX = (event.clientX / window.innerWidth) * 100;
     pendingY = (event.clientY / window.innerHeight) * 100;
     scheduleWrite();
+  }
+
+  function onPointerDown(event: PointerEvent) {
+    if (event.pointerType === 'mouse' || event.pointerType === 'pen') {
+      event.preventDefault();
+    }
   }
 
   /* ── Coarse-pointer path (touch) ────────────────────────────────── */
@@ -142,6 +149,8 @@ export function mountOrbCursor() {
     /* Mouse / trackpad — codepen-style cursor follow only. */
     window.addEventListener('pointermove', onPointerMove, { passive: true });
   }
+
+  wrapper.addEventListener('pointerdown', onPointerDown);
 
   /* Pause RAFs when the tab goes to background. */
   document.addEventListener('visibilitychange', () => {

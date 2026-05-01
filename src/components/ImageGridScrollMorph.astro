@@ -5,8 +5,8 @@
  * Direct re-implementation of the codepen source after the V4-D draft
  * missed the architecture. The trick is:
  *
- *   1. A 240vh-tall section with sticky inner content (.content)
- *      pinned at top:0 — gives 140vh of scroll runway while the
+ *   1. A tall section with sticky inner content (.content)
+ *      pinned at top:0 — gives a long scroll runway while the
  *      grid stays visible.
  *   2. The grid is 5 columns × 3 rows (3 cols on mobile). Cells are
  *      placed via CSS subgrid on three "layer" wrappers + one absolute
@@ -25,71 +25,116 @@
  * No headline above the grid (per user 2026-04-30 — "ten text pojme
  * scrollovat dej pryč"). The grid is the whole effect.
  *
- * Photos are the codepen's original Unsplash URLs as a starting set.
- * Swap to real Melveo iOS screenshots when available (Q6 deferred).
+ * Photos are local Melveo sports/club assets; the center scaler keeps
+ * the latest wide team briefing image as the primary visual.
  */
 ---
 
 <section class="image-grid-section" data-grid-section>
   <div class="content">
     <div class="grid">
-      <!-- Layer 1: Outer edges (6 images, 3 left + 3 right) -->
+      <!-- Layer 1: Outer edges (photos + tech cards, 3 left + 3 right) -->
       <div class="layer">
         <div>
-          <img src="https://images.unsplash.com/photo-1463100099107-aa0980c362e6?w=800&auto=format&fit=crop&q=60&ixlib=rb-4.0.3" alt="" loading="lazy" decoding="async" />
+          <img src="/images/melveo-grid/coach-player-wide-crop.jpg" alt="" loading="lazy" decoding="async" />
         </div>
         <div>
-          <img src="https://images.unsplash.com/photo-1556304044-0699e31c6a34?w=800&auto=format&fit=crop&q=60&ixlib=rb-4.0.3" alt="" loading="lazy" decoding="async" />
+          <img src="/images/melveo-grid/team-sideline-wide.jpg" alt="" loading="lazy" decoding="async" />
         </div>
         <div>
-          <img src="https://images.unsplash.com/photo-1590330297626-d7aff25a0431?w=800&auto=format&fit=crop&q=60&ixlib=rb-4.0.3" alt="" loading="lazy" decoding="async" />
+          <article class="tech-card" aria-label="Docházka">
+            <svg class="tech-card__icon" viewBox="0 0 192 192" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+              <path d="M48 98l28 28 68-76" />
+              <path d="M42 42h108v108H42z" />
+            </svg>
+            <h3>Docházka</h3>
+            <p>Účast, absence i pozdní příchody jsou pro tým jasně dohledatelné.</p>
+          </article>
         </div>
         <div>
-          <img src="https://images.unsplash.com/photo-1487222477894-8943e31ef7b2?w=800&auto=format&fit=crop&q=60&ixlib=rb-4.0.3" alt="" loading="lazy" decoding="async" />
+          <img src="/images/melveo-grid/player-mobile.jpg" alt="" loading="lazy" decoding="async" />
         </div>
         <div>
-          <img src="https://images.unsplash.com/photo-1488161628813-04466f872be2?w=800&auto=format&fit=crop&q=60&ixlib=rb-4.0.3" alt="" loading="lazy" decoding="async" />
+          <img src="/images/melveo-grid/equipment-detail.jpg" alt="" loading="lazy" decoding="async" />
         </div>
         <div>
-          <img src="https://images.unsplash.com/photo-1565321590372-09331b9dd1eb?w=800&auto=format&fit=crop&q=60&ixlib=rb-4.0.3" alt="" loading="lazy" decoding="async" />
+          <article class="tech-card" aria-label="Komunikace">
+            <svg class="tech-card__icon" viewBox="0 0 192 192" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+              <path d="M42 58h108v72H92l-30 24v-24H42z" />
+              <path d="M68 84h56M68 106h34" />
+            </svg>
+            <h3>Komunikace</h3>
+            <p>Změny, zprávy a pokyny zůstanou u správného týmu.</p>
+          </article>
         </div>
       </div>
 
-      <!-- Layer 2: Inner columns (6 images) -->
+      <!-- Layer 2: Inner columns (mixed photos + tech cards) -->
       <div class="layer">
         <div>
-          <img src="https://images.unsplash.com/photo-1531525645387-7f14be1bdbbd?w=800&auto=format&fit=crop&q=60&ixlib=rb-4.0.3" alt="" loading="lazy" decoding="async" />
+          <article class="tech-card tech-card--security" aria-label="Bezpečnost">
+            <svg class="tech-card__icon tech-card__icon--security-lock" viewBox="0 0 192 192" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+              <path class="security-lock__shackle" d="M62 82V66c0-21.5 14.7-38 34-38s34 16.5 34 38v16" />
+              <rect class="security-lock__body" x="42" y="78" width="108" height="84" rx="24" />
+              <circle class="security-lock__pin" cx="96" cy="113" r="8" />
+              <path class="security-lock__slot" d="M96 122v20" />
+            </svg>
+            <h3>Bezpečnost</h3>
+            <p>Vaše data jsou chráněná, oddělená podle rolí a pod kontrolou.</p>
+          </article>
         </div>
         <div>
-          <img src="https://images.unsplash.com/photo-1637414165749-9b3cd88b8271?w=800&auto=format&fit=crop&q=60&ixlib=rb-4.0.3" alt="" loading="lazy" decoding="async" />
+          <img src="/images/melveo-grid/coach-player-review.jpg" alt="" loading="lazy" decoding="async" />
         </div>
         <div>
-          <img src="https://images.unsplash.com/photo-1699911251220-8e0de3b5ce88?w=800&auto=format&fit=crop&q=60&ixlib=rb-4.0.3" alt="" loading="lazy" decoding="async" />
+          <img src="/images/melveo-grid/coach-field-tablet.jpg" alt="" loading="lazy" decoding="async" />
         </div>
         <div>
-          <img src="https://images.unsplash.com/photo-1667483629944-6414ad0648c5?w=800&auto=format&fit=crop&q=60&ixlib=rb-4.0.3" alt="" loading="lazy" decoding="async" />
+          <article class="tech-card tech-card--schedule" aria-label="Schedule">
+            <svg class="tech-card__icon" viewBox="0 0 192 192" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+              <path d="M56 42v22m80-22v22M38 74h116M54 54h84c8.837 0 16 7.163 16 16v76c0 8.837-7.163 16-16 16H54c-8.837 0-16-7.163-16-16V70c0-8.837 7.163-16 16-16z" />
+              <path d="M64 104h26m-26 28h50m18-28h4" />
+            </svg>
+            <h3>Schedule</h3>
+            <p>Tréninky, sessions a změny jsou v jednom přehledu pro celý tým.</p>
+          </article>
         </div>
         <div>
-          <img src="https://plus.unsplash.com/premium_photo-1706078438060-d76ced26d8d5?w=800&auto=format&fit=crop&q=60&ixlib=rb-4.0.3" alt="" loading="lazy" decoding="async" />
+          <img src="/images/melveo-grid/team-huddle.jpg" alt="" loading="lazy" decoding="async" />
         </div>
         <div>
-          <img src="https://images.unsplash.com/photo-1525385444278-b7968e7e28dc?w=800&auto=format&fit=crop&q=60&ixlib=rb-4.0.3" alt="" loading="lazy" decoding="async" />
+          <img src="/images/melveo-grid/coach-player-close.jpg" alt="" loading="lazy" decoding="async" />
         </div>
       </div>
 
-      <!-- Layer 3: Center column top + bottom (2 images) -->
+      <!-- Layer 3: Center column top + bottom cards -->
       <div class="layer">
         <div>
-          <img src="https://images.unsplash.com/reserve/LJIZlzHgQ7WPSh5KVTCB_Typewriter.jpg?w=800&auto=format&fit=crop&q=60&ixlib=rb-4.0.3" alt="" loading="lazy" decoding="async" />
+          <article class="tech-card" aria-label="Statistiky">
+            <svg class="tech-card__icon" viewBox="0 0 192 192" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+              <path d="M38 150h116" />
+              <path d="M56 128V92m40 36V62m40 66V80" />
+              <path d="M50 74l32 20 30-42 30 18" />
+            </svg>
+            <h3>Statistiky</h3>
+            <p>Z výkonu, docházky a zátěže vzniká přehled, který trenér použije hned.</p>
+          </article>
         </div>
         <div>
-          <img src="https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=800&auto=format&fit=crop&q=60&ixlib=rb-4.0.3" alt="" loading="lazy" decoding="async" />
+          <article class="tech-card" aria-label="Role">
+            <svg class="tech-card__icon" viewBox="0 0 192 192" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+              <path d="M72 82a24 24 0 1 0 0-48 24 24 0 0 0 0 48zM120 92a20 20 0 1 0 0-40 20 20 0 0 0 0 40z" />
+              <path d="M36 154c4-26 18-44 36-44s32 18 36 44M104 154c3-20 14-34 30-34 13 0 23 10 28 27" />
+            </svg>
+            <h3>Role</h3>
+            <p>Hráč, trenér i vedení vidí jen to, co opravdu potřebují.</p>
+          </article>
         </div>
       </div>
 
       <!-- Scaler: starts viewport-sized, shrinks into the centre cell -->
       <div class="scaler">
-        <img src="https://assets.codepen.io/605876/model-shades.jpg?format=auto&quality=100" alt="" decoding="async" />
+        <img src="/images/melveo-grid/team-briefing-wide.jpg" alt="" decoding="async" />
       </div>
     </div>
   </div>
@@ -102,24 +147,24 @@
   */
 
   .image-grid-section {
-    /* 480vh desktop runway — 1× viewport pinned + 380vh scroll
+    /* 620vh desktop runway — 1× viewport pinned + 520vh scroll
        budget. The extra height stretches the scaler's shrink phase
        across more scroll, so the user has to keep scrolling for
        longer to see the morph from full-bleed photo to grid.
-       Combined with the `'70% end'` scroll offset (animation
-       completes at 70 % of section), this leaves the last ~144vh
+       Combined with the `'82% end'` scroll offset (animation
+       completes at 82 % of section), this leaves the last ~112vh
        as rest where the fully formed grid sits before the next
        section arrives.
 
-       Mobile gets a shorter runway (340vh) because:
+       Mobile gets a shorter runway (430vh) because:
          a) Each "vh" on mobile is a smaller absolute pixel count,
-            so 480vh of scroll feels endless on a 6.5" screen.
+            so 620vh of scroll feels endless on a 6.5" screen.
          b) Mobile only has 9 cells visible (3 cols × 3 rows; the
             outer-edge layer is hidden by media query), so there's
             less to "fade in" — animation can finish sooner. */
     position: relative;
     width: 100%;
-    min-height: 480vh;
+    min-height: 620vh;
     background: var(--color-bg-canvas);
     border-top: 1px solid var(--color-stroke-base);
     overflow: clip;
@@ -127,7 +172,7 @@
 
   @media (max-width: 768px) {
     .image-grid-section {
-      min-height: 340vh;
+      min-height: 430vh;
     }
   }
 
@@ -210,12 +255,137 @@
     grid-row: -1;
   }
 
-  .image-grid-section .grid img {
+  .image-grid-section .grid img,
+  .image-grid-section .tech-card {
     width: 100%;
     aspect-ratio: 4 / 5;
-    object-fit: cover;
     border-radius: 1rem;
     display: block;
+  }
+
+  .image-grid-section .grid img {
+    object-fit: cover;
+  }
+
+  .image-grid-section .tech-card {
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: clamp(0.75rem, 1.2vw, 1rem);
+    padding: clamp(1rem, 1.8vw, 1.55rem);
+    border: 1px solid rgba(255, 255, 255, 0.11);
+    background:
+      radial-gradient(circle at 50% 18%, rgba(0, 240, 255, 0.16), transparent 42%),
+      linear-gradient(180deg, rgba(255, 255, 255, 0.055), rgba(255, 255, 255, 0.018));
+    color: var(--color-text-primary);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.1),
+      0 24px 80px -42px rgba(0, 240, 255, 0.7);
+  }
+
+  .image-grid-section .tech-card::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.12), transparent 34%);
+    opacity: 0.7;
+    pointer-events: none;
+  }
+
+  .image-grid-section .tech-card::after {
+    content: "";
+    position: absolute;
+    right: -22%;
+    bottom: -18%;
+    width: 70%;
+    aspect-ratio: 1;
+    border-radius: 999px;
+    background: radial-gradient(circle, rgba(0, 240, 255, 0.2), transparent 68%);
+    pointer-events: none;
+  }
+
+  .image-grid-section .tech-card > * {
+    position: relative;
+    z-index: 1;
+  }
+
+  .image-grid-section .tech-card__icon {
+    width: clamp(3.7rem, 5.6vw, 5.8rem);
+    height: auto;
+    overflow: visible;
+    fill: none;
+    stroke: var(--color-accent-primary);
+    stroke-width: 10;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    filter:
+      drop-shadow(0 0 18px rgba(0, 240, 255, 0.38))
+      drop-shadow(0 18px 32px rgba(0, 0, 0, 0.24));
+  }
+
+  .image-grid-section .tech-card__icon--security-lock {
+    width: clamp(4.3rem, 6.4vw, 6.6rem);
+    stroke-width: 9;
+  }
+
+  .image-grid-section .security-lock__body {
+    fill: rgba(0, 240, 255, 0.08);
+  }
+
+  .image-grid-section .security-lock__pin {
+    fill: var(--color-accent-primary);
+    stroke: none;
+  }
+
+  .image-grid-section .security-lock__slot {
+    stroke: var(--color-accent-primary);
+    stroke-width: 10;
+  }
+
+  .image-grid-section .tech-card h3 {
+    margin: 0;
+    font-size: clamp(1.15rem, 2.2vw, 2rem);
+    line-height: 1;
+    letter-spacing: -0.03em;
+    text-align: center;
+  }
+
+  .image-grid-section .tech-card p {
+    margin: 0;
+    max-width: 14rem;
+    font-size: clamp(0.72rem, 1vw, 0.9rem);
+    line-height: 1.45;
+    text-align: center;
+    color: var(--color-text-secondary);
+  }
+
+  @media (max-width: 640px) {
+    .image-grid-section .tech-card {
+      padding: 0.62rem;
+      border-radius: 0.8rem;
+      gap: 0.5rem;
+    }
+
+    .image-grid-section .tech-card__icon {
+      width: clamp(2.6rem, 13vw, 3.4rem);
+      stroke-width: 11;
+    }
+
+    .image-grid-section .tech-card__icon--security-lock {
+      width: clamp(3rem, 15vw, 4rem);
+    }
+
+    .image-grid-section .tech-card p {
+      display: none;
+    }
+
+    .image-grid-section .tech-card h3 {
+      font-size: clamp(0.82rem, 4.8vw, 1.15rem);
+      line-height: 1;
+    }
   }
 
   /* Scaler container occupies the centre cell of the grid; its <img>
@@ -316,6 +486,7 @@
         const power3InOut = [0.76, 0, 0.24, 1] as const;
         const power4InOut = [0.87, 0, 0.13, 1] as const;
         const sineOut = [0.61, 1, 0.88, 1] as const;
+        const scrollCompletionRatio = 0.82;
 
         // ─── Scaler: hold at viewport, then shrink to natural ──────────
         //     Width AND height in a SINGLE animate() call. Splitting
@@ -344,19 +515,19 @@
               ],
             },
             {
-              times: [0, 0.15, 1],
+              times: [0, 0.18, 1],
               ease: power2InOut as any,
             },
           ),
           {
             target: section,
-            // Animation completes at 70 % of section's scroll travel,
-            // leaving the last 30 % as a "rest" runway where the fully
+            // Animation completes at 82 % of section's scroll travel,
+            // leaving the last 18 % as a "rest" runway where the fully
             // formed grid sits at its final state before the next
             // section arrives. Scaler + every layer end inside this
-            // 0–70 % window so the grid is visually frozen for the
+            // 0–82 % window so the grid is visually frozen for the
             // whole rest period.
-            offset: ['start start', '70% end'] as any,
+            offset: ['start start', `${scrollCompletionRatio * 100}% end`] as any,
           },
         );
 
@@ -365,19 +536,19 @@
 
         layers.forEach((layer, index) => {
           // Endpoint shifts per layer for a subtle cascade. All layers
-          // finish BEFORE the scaler's end (70 %) so the grid is fully
+          // finish BEFORE the scaler's end (82 %) so the grid is fully
           // formed when the rest period begins. Outer edges (index 0)
           // end last; inner-most cells (index 2) finish earliest, same
           // ordering as codepen but compressed before the rest zone.
-          const endOffset = `${0.7 - index * 0.05} end`;
+          const endOffset = `${scrollCompletionRatio - index * 0.055} end`;
 
-          // Opacity: invisible until 55 % progress, then fades 0 → 1
+          // Opacity: invisible until 60 % progress, then fades 0 → 1
           scroll(
             animate(
               layer,
               { opacity: [0, 0, 1] },
               {
-                times: [0, 0.55, 1],
+                times: [0, 0.6, 1],
                 ease: sineOut as any,
               },
             ),
@@ -387,13 +558,13 @@
             },
           );
 
-          // Scale: held at 0 until 30 % progress, then springs to 1
+          // Scale: held at 0 until 36 % progress, then springs to 1
           scroll(
             animate(
               layer,
               { scale: [0, 0, 1] },
               {
-                times: [0, 0.3, 1],
+                times: [0, 0.36, 1],
                 ease: scaleEasings[index] as any,
               },
             ),

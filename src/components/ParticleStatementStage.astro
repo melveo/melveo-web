@@ -1,0 +1,171 @@
+---
+/**
+ * ParticleStatementStage — Ahmad Awais CodePen JodBmX-inspired section.
+ *
+ * The original pen uses particles.js: dot field, linked particle lines,
+ * hover grab, and a bold centered text block. This version keeps that
+ * logic in a lightweight local canvas script, remapped to Melveo cyan
+ * on a dark canvas and paired with the same typewriter text pattern as
+ * the hero.
+ */
+
+import { useTranslations, type Lang } from '../i18n/ui';
+
+interface Props {
+  lang: Lang;
+}
+
+const { lang } = Astro.props;
+const t = useTranslations(lang);
+const words =
+  lang === 'cs'
+    ? ['hráče', 'trenéra', 'tým', 'klub', 'sezónu']
+    : ['players', 'coaches', 'teams', 'clubs', 'seasons'];
+---
+
+<section class="particle-statement" data-particle-stage>
+  <canvas class="particle-statement__canvas" data-particle-canvas aria-hidden="true"></canvas>
+
+  <div class="particle-statement__shade" aria-hidden="true"></div>
+
+  <div class="particle-statement__content">
+    <p class="particle-statement__eyebrow">
+      {t('particles.eyebrow')}
+    </p>
+
+    <h2 class="particle-statement__headline">
+      {t('particles.headlinePrefix')}{' '}
+      <span
+        class="particle-statement__typed text-[var(--color-accent-primary)]"
+        data-rotate-word
+        data-rotate-words={words.join('|')}
+        aria-live="polite"
+      >
+        {words[0]}
+      </span>{t('particles.headlineSuffix')}
+    </h2>
+
+    <p class="particle-statement__subline">
+      {t('particles.subline')}
+    </p>
+  </div>
+</section>
+
+<script>
+  import { mountParticleStages } from '../scripts/particle-stage';
+  mountParticleStages();
+</script>
+
+<style>
+  .particle-statement {
+    position: relative;
+    isolation: isolate;
+    min-height: 100vh;
+    width: 100%;
+    overflow: hidden;
+    border-top: 1px solid var(--color-stroke-base);
+    background:
+      radial-gradient(circle at 50% 42%, rgba(0, 240, 255, 0.14), transparent 42%),
+      radial-gradient(circle at 18% 20%, rgba(0, 240, 255, 0.1), transparent 32%),
+      var(--color-bg-canvas);
+    -webkit-user-select: none;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .particle-statement__canvas {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    width: 100%;
+    height: 100%;
+    display: block;
+    opacity: 1;
+    mix-blend-mode: screen;
+  }
+
+  .particle-statement__shade {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    background:
+      radial-gradient(circle at center, transparent 0 48%, rgba(0, 0, 0, 0.1) 74%),
+      linear-gradient(180deg, rgba(0, 0, 0, 0.02), rgba(0, 0, 0, 0.16));
+    pointer-events: none;
+  }
+
+  .particle-statement__content {
+    position: relative;
+    z-index: 2;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 7rem 1.5rem;
+    text-align: center;
+  }
+
+  .particle-statement__eyebrow {
+    margin-bottom: 2rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.4em;
+    text-transform: uppercase;
+    color: var(--color-accent-primary);
+  }
+
+  .particle-statement__headline {
+    margin: 0;
+    max-width: 78rem;
+    text-wrap: balance;
+    font-weight: 700;
+    line-height: 0.95;
+    color: var(--color-text-primary);
+    font-size: clamp(3rem, 8.5vw, 8.5rem);
+    letter-spacing: -0.04em;
+  }
+
+  .particle-statement__typed {
+    display: inline-block;
+    border-right: 0.05em solid currentColor;
+    margin-right: -0.05em;
+    animation: particle-caret-blink 1.05s steps(2) infinite;
+  }
+
+  .particle-statement__subline {
+    margin: 2.5rem auto 0;
+    max-width: 38rem;
+    text-wrap: pretty;
+    font-size: clamp(1.125rem, 2vw, 1.35rem);
+    line-height: 1.55;
+    color: var(--color-text-secondary);
+  }
+
+  @keyframes particle-caret-blink {
+    50% { border-right-color: transparent; }
+  }
+
+  @media (max-width: 640px) {
+    .particle-statement__content {
+      padding: 6rem 1.25rem;
+    }
+
+    .particle-statement__eyebrow {
+      font-size: 0.68rem;
+      letter-spacing: 0.34em;
+    }
+
+    .particle-statement__headline {
+      font-size: clamp(3rem, 15vw, 5.4rem);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .particle-statement__typed {
+      animation: none;
+      border-right: 0;
+      margin-right: 0;
+    }
+  }
+</style>

@@ -32,24 +32,28 @@ const wordsByLang = {
 
 type Lang = keyof typeof wordsByLang;
 
-export function mountRotateWord() {
-  const el = document.querySelector<HTMLElement>('[data-rotate-word]');
-  if (!el) return;
+const mountedWords = new WeakSet<HTMLElement>();
 
-  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+function getPhrases(el: HTMLElement, lang: Lang): readonly string[] {
+  const customWords = el.dataset.rotateWords
+    ?.split('|')
+    .map((word) => word.trim())
+    .filter(Boolean);
 
-  const lang: Lang = document.documentElement.lang === 'en' ? 'en' : 'cs';
-  const phrases = wordsByLang[lang];
-
-  if (reduceMotion) {
-    // Don't cycle in reduced motion — leave the SSR-rendered word.
-    return;
+  if (customWords && customWords.length > 0) {
+    return customWords;
   }
+
+  return wordsByLang[lang];
+}
+
+function mountTypedWord(el: HTMLElement, phrases: readonly string[]) {
+  if (phrases.length === 0) return;
 
   // Start by treating the SSR-rendered word as already typed; the
   // first scripted action will be backspace.
   const initial = el.textContent?.trim() ?? phrases[0];
-  let phraseIdx = Math.max(0, phrases.indexOf(initial as (typeof phrases)[number]));
+  let phraseIdx = Math.max(0, phrases.indexOf(initial));
   let charIdx = phrases[phraseIdx].length;
   let isDeleting = true;
   let timer: number | null = null;
@@ -68,7 +72,7 @@ export function mountRotateWord() {
     if (!isDeleting) {
       // Typing forward
       charIdx += 1;
-      el!.textContent = phrase.slice(0, charIdx);
+      el.textContent = phrase.slice(0, charIdx);
       if (charIdx >= phrase.length) {
         // Finished typing — hold, then start deleting
         timer = window.setTimeout(() => {
@@ -81,7 +85,7 @@ export function mountRotateWord() {
     } else {
       // Deleting backwards
       charIdx -= 1;
-      el!.textContent = phrase.slice(0, Math.max(0, charIdx));
+      el.textContent = phrase.slice(0, Math.max(0, charIdx));
       if (charIdx <= 0) {
         // Finished deleting — advance to next phrase
         isDeleting = false;
@@ -105,5 +109,25 @@ export function mountRotateWord() {
     } else if (timer == null) {
       tick();
     }
+  });
+}
+
+export function mountRotateWord() {
+  const elements = document.querySelectorAll<HTMLElement>('[data-rotate-word]');
+  if (elements.length === 0) return;
+
+  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  const lang: Lang = document.documentElement.lang === 'en' ? 'en' : 'cs';
+
+  if (reduceMotion) {
+    // Don't cycle in reduced motion — leave the SSR-rendered words.
+    return;
+  }
+
+  elements.forEach((el) => {
+    if (mountedWords.has(el)) return;
+    mountedWords.add(el);
+    mountTypedWord(el, getPhrases(el, lang));
   });
 }

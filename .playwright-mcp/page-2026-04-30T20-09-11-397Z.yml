@@ -1,0 +1,148 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - link "melveo" [ref=e4] [cursor=pointer]:
+      - /url: /cs/
+    - generic [ref=e5]:
+      - paragraph [ref=e6]: PRO SPORTOVNÍ KLUBY
+      - heading "Chytřejší tréninky ." [level=1] [ref=e7]:
+        - text: Chytřejší
+        - generic [ref=e8]: tréninky
+        - text: .
+      - paragraph [ref=e9]: Wellness, sessions a coach board v jedné aplikaci.
+      - generic [ref=e10]:
+        - link "Stáhnout v App Store" [ref=e11] [cursor=pointer]:
+          - /url: "#brzy"
+          - generic [ref=e12]:
+            - img [ref=e13]
+            - generic [ref=e15]:
+              - generic [ref=e16]: Stáhnout v
+              - generic [ref=e17]: App Store
+        - link "Pilot pro klub →" [ref=e18] [cursor=pointer]:
+          - /url: mailto:hello@melveo.app?subject=Z%C3%A1jem%20o%20pilot
+          - generic [ref=e19]: Pilot pro klub →
+      - paragraph [ref=e20]: TestFlight beta · brzy
+  - generic [ref=e23]:
+    - generic:
+      - generic:
+        - article "Bezpečnost":
+          - heading "Bezpečnost" [level=3]
+      - generic:
+        - article "Schedule":
+          - heading "Schedule" [level=3]
+  - generic [ref=e26]:
+    - img [ref=e27]
+    - heading "Trenér + hráč. Synced." [level=2] [ref=e32]
+  - generic [ref=e35]:
+    - heading "Spojí check-iny, hráče, trenéry, sessions, docházku, zátěž, coach board, rozhodnutí a celý klub." [level=2] [ref=e36]:
+      - text: Spojí
+      - generic [ref=e37]: Spojí check-iny, hráče, trenéry, sessions, docházku, zátěž, coach board, rozhodnutí a celý klub.
+    - list [ref=e39]:
+      - listitem [ref=e40]: check-iny.
+      - listitem [ref=e41]: hráče.
+      - listitem [ref=e42]: trenéry.
+      - listitem [ref=e43]: sessions.
+      - listitem [ref=e44]: docházku.
+      - listitem [ref=e45]: zátěž.
+      - listitem [ref=e46]: coach board.
+      - listitem [ref=e47]: rozhodnutí.
+      - listitem [ref=e48]: celý klub.
+  - generic [ref=e50]:
+    - generic [ref=e51]:
+      - paragraph [ref=e52]: RÁNO · 30 SEKUND
+      - heading "Pětiosý check-in." [level=2] [ref=e53]
+      - paragraph [ref=e54]: Hráč rychle ohodnotí energii, spánek, bolestivost, náladu a motivaci. Trenér vidí tým — nikdy syrová čísla jednotlivce.
+    - paragraph [ref=e58]: Check-in
+  - generic [ref=e59]:
+    - heading "Pro celý klub." [level=2] [ref=e61]
+    - generic:
+      - paragraph: Pro každého hráče.
+  - generic [ref=e64]:
+    - paragraph [ref=e65]: JEDEN SYSTÉM
+    - heading "Všechno pro hráče ." [level=2] [ref=e66]:
+      - text: Všechno pro
+      - generic [ref=e67]: hráče
+      - text: .
+    - paragraph [ref=e68]: Od ranního check-inu po rozhodnutí na tréninku. Tým běží v jednom rytmu.
+  - generic [ref=e70]:
+    - generic [ref=e71]:
+      - paragraph [ref=e72]: TRÉNINK · ROZHODNUTÍ
+      - heading "Sessions a coach board." [level=2] [ref=e73]
+      - paragraph [ref=e74]: Plánuj tréninky, zaznamenej účast, sleduj zátěž (RPE). Než přijedeš na hřiště, víš co tým potřebuje.
+    - paragraph [ref=e78]: Sessions
+  - generic [ref=e80]:
+    - paragraph [ref=e81]: SOUKROMÍ
+    - heading "T r e n é r n i k d y n e v i d í s y r o v á č í s l a h r á č e ." [level=2] [ref=e82]:
+      - generic [ref=e83]:
+        - generic [ref=e84]: T
+        - generic [ref=e85]: r
+        - generic [ref=e86]: e
+        - generic [ref=e87]: "n"
+        - generic [ref=e88]: é
+        - generic [ref=e89]: r
+        - generic [ref=e90]: "n"
+        - generic [ref=e91]: i
+        - generic [ref=e92]: k
+        - generic [ref=e93]: d
+        - generic [ref=e94]: "y"
+        - generic [ref=e95]: "n"
+        - generic [ref=e96]: e
+        - generic [ref=e97]: v
+        - generic [ref=e98]: i
+        - generic [ref=e99]: d
+        - generic [ref=e100]: í
+      - generic [ref=e102]:
+        - generic [ref=e103]: s
+        - generic [ref=e104]: "y"
+        - generic [ref=e105]: r
+        - generic [ref=e106]: o
+        - generic [ref=e107]: v
+        - generic [ref=e108]: á
+        - generic [ref=e109]: č
+        - generic [ref=e110]: í
+        - generic [ref=e111]: s
+        - generic [ref=e112]: l
+        - generic [ref=e113]: a
+        - generic [ref=e114]: h
+        - generic [ref=e115]: r
+        - generic [ref=e116]: á
+        - generic [ref=e117]: č
+        - generic [ref=e118]: e
+        - generic [ref=e119]: .
+    - paragraph [ref=e120]: Wellness data jsou agregovaná. Klub kupuje, hráč nikdy neplatí. Co je hráčovo, zůstává hráčovo.
+  - generic [ref=e122]:
+    - heading "Klub a chcete pilot?" [level=2] [ref=e123]
+    - paragraph [ref=e124]: Napište, krátce zavoláme, do 14 dní spustíme první trénink.
+    - link "hello@melveo.app" [ref=e125] [cursor=pointer]:
+      - /url: mailto:hello@melveo.app?subject=M%C3%A1m%20z%C3%A1jem%20o%20pilot
+      - generic [ref=e126]: hello@melveo.app
+      - generic [ref=e127]: →
+  - dialog "Cookies":
+    - generic:
+      - generic:
+        - img
+      - generic:
+        - heading "Cookies" [level=3]
+        - paragraph:
+          - text: Používáme cookies pro statistiky a vylepšení stránky.
+          - link "Více v zásadách soukromí":
+            - /url: /cs/privacy
+          - text: .
+      - generic:
+        - button "Jen nutné"
+        - button "Nastavit"
+        - button "Přijmout vše"
+  - contentinfo [ref=e128]:
+    - generic [ref=e129]:
+      - generic [ref=e130]: © 2026 QUIX Global s.r.o.
+      - link "hello@melveo.app" [ref=e131] [cursor=pointer]:
+        - /url: mailto:hello@melveo.app
+      - link "Ochrana soukromí" [ref=e132] [cursor=pointer]:
+        - /url: /cs/privacy
+      - link "Podmínky" [ref=e133] [cursor=pointer]:
+        - /url: /cs/terms
+      - button "Nastavení cookies" [ref=e134] [cursor=pointer]
+      - navigation "Language" [ref=e135]:
+        - link "CS" [ref=e136] [cursor=pointer]:
+          - /url: /cs/
+        - link "EN" [ref=e137] [cursor=pointer]:
+          - /url: /en/

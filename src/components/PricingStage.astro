@@ -1,0 +1,782 @@
+---
+/**
+ * PricingStage — 4-tier plan cards with monthly/yearly toggle.
+ *
+ * Visual language matches the hero pill buttons:
+ *   - rounded-pill toggle with cyan glow
+ *   - glass-blur ghost cards (translucent + backdrop-filter + cyan stroke)
+ *   - one "popular" card filled with the brand cyan
+ *   - cyan accents on prices, features bullets, CTAs
+ *
+ * Monthly/yearly switch is CSS-driven: both prices are rendered, the
+ * inactive one is hidden via `[data-period]` on the section root.
+ * Toggle button just flips the data-attribute (one rAF, no reflow
+ * cascade beyond the cards).
+ *
+ * Per-day price is featured big — clubs evaluate "X Kč denně" easier
+ * than annual numbers. Per-month equivalent shown below for context.
+ *
+ * Pricing source: project_pilot_pricing memory + planning docs
+ * 02_pricing_strategy + 15_billing_and_licensed_scopes (provided
+ * by user 2026-04-30).
+ */
+
+import { useTranslations, type Lang } from '../i18n/ui';
+
+interface Props {
+  lang: Lang;
+}
+
+const { lang } = Astro.props;
+const t = useTranslations(lang);
+
+interface Plan {
+  id: string;
+  name: string;
+  badge: string | null;
+  popular: boolean;
+  free: boolean;
+  /** Czech-format monthly price — already grouped with non-breaking spaces. */
+  priceMonthly: number;
+  priceYearly: number;
+  perDayMonthly: number; // monthly price ÷ 30
+  perDayYearly: number; // yearly price ÷ 365
+  perMonthFromYearly: number; // yearly price ÷ 12 (the effective monthly when paying yearly)
+  limits: { players: number; staff: number };
+  features: string[];
+  ctaLabel: string;
+  ctaHref: string;
+}
+
+const ctaLabelPilot = t('pricing.ctaPilot');
+const ctaLabelFree = t('pricing.ctaFree');
+
+const featuresFreeCs = [
+  'Pětiosý ranní check-in',
+  'Plánování sessions',
+  'Docházka + post-session RPE',
+  'Základní coach board (today)',
+  '1 tým × 1 sezóna',
+];
+const featuresFreeEn = [
+  '5-axis morning check-in',
+  'Session planning',
+  'Attendance + post-session RPE',
+  'Basic coach board (today)',
+  '1 team × 1 season',
+];
+
+const featuresCoreCs = [
+  'Vše z Free Starter',
+  'Plný coach board s historií',
+  'Agregovaná readiness týmu',
+  'Privacy-by-design (doc 174)',
+  'E-mail podpora',
+];
+const featuresCoreEn = [
+  'Everything in Free Starter',
+  'Full coach board with history',
+  'Aggregate team readiness',
+  'Privacy-by-design (doc 174)',
+  'Email support',
+];
+
+const featuresLiveCs = [
+  'Vše z Team Core',
+  'Coach Board Live',
+  'Realtime sledování zátěže',
+  'Decision room během zápasu',
+  'Match-day live mode',
+  'Prioritní podpora',
+];
+const featuresLiveEn = [
+  'Everything in Team Core',
+  'Coach Board Live',
+  'Realtime load tracking',
+  'In-match decision room',
+  'Match-day live mode',
+  'Priority support',
+];
+
+const featuresIntelCs = [
+  'Vše z Team Live',
+  'Pokročilá analytika a periodizace',
+  'PDF / CSV exporty',
+  'Vlastní reporty',
+  'Onboarding s konzultantem',
+  'Dedikovaný account manager',
+];
+const featuresIntelEn = [
+  'Everything in Team Live',
+  'Advanced analytics + periodisation',
+  'PDF / CSV exports',
+  'Custom reports',
+  'Onboarding with a consultant',
+  'Dedicated account manager',
+];
+
+const mailto = (subject: string) =>
+  `mailto:hello@melveo.app?subject=${encodeURIComponent(subject)}`;
+
+const plans: Plan[] = [
+  {
+    id: 'free',
+    name: 'Free Starter',
+    badge: null,
+    popular: false,
+    free: true,
+    priceMonthly: 0,
+    priceYearly: 0,
+    perDayMonthly: 0,
+    perDayYearly: 0,
+    perMonthFromYearly: 0,
+    limits: { players: 8, staff: 2 },
+    features: lang === 'cs' ? featuresFreeCs : featuresFreeEn,
+    ctaLabel: ctaLabelFree,
+    ctaHref: '#brzy',
+  },
+  {
+    id: 'core',
+    name: 'Team Core',
+    badge: null,
+    popular: false,
+    free: false,
+    priceMonthly: 1790,
+    priceYearly: 17900,
+    perDayMonthly: 60,
+    perDayYearly: 49,
+    perMonthFromYearly: 1492,
+    limits: { players: 24, staff: 3 },
+    features: lang === 'cs' ? featuresCoreCs : featuresCoreEn,
+    ctaLabel: ctaLabelPilot,
+    ctaHref: mailto(lang === 'cs' ? 'Zájem o Team Core' : 'Team Core enquiry'),
+  },
+  {
+    id: 'live',
+    name: 'Team Live',
+    badge: t('pricing.popular'),
+    popular: true,
+    free: false,
+    priceMonthly: 2990,
+    priceYearly: 29900,
+    perDayMonthly: 100,
+    perDayYearly: 82,
+    perMonthFromYearly: 2492,
+    limits: { players: 24, staff: 6 },
+    features: lang === 'cs' ? featuresLiveCs : featuresLiveEn,
+    ctaLabel: ctaLabelPilot,
+    ctaHref: mailto(lang === 'cs' ? 'Zájem o Team Live' : 'Team Live enquiry'),
+  },
+  {
+    id: 'intelligence',
+    name: 'Team Intelligence',
+    badge: null,
+    popular: false,
+    free: false,
+    priceMonthly: 4990,
+    priceYearly: 49900,
+    perDayMonthly: 166,
+    perDayYearly: 137,
+    perMonthFromYearly: 4158,
+    limits: { players: 24, staff: 8 },
+    features: lang === 'cs' ? featuresIntelCs : featuresIntelEn,
+    ctaLabel: ctaLabelPilot,
+    ctaHref: mailto(
+      lang === 'cs' ? 'Zájem o Team Intelligence' : 'Team Intelligence enquiry',
+    ),
+  },
+];
+
+/** Format an integer with non-breaking thin spaces between thousands. */
+function fmt(n: number): string {
+  return n.toLocaleString('cs-CZ').replace(/ /g, ' ');
+}
+
+const limitsLabel = lang === 'cs' ? 'hráčů' : 'players';
+const staffLabel = lang === 'cs' ? 'staff' : 'staff';
+const currencyShort = lang === 'cs' ? 'Kč' : 'CZK';
+---
+
+<section
+  class="pricing-stage"
+  data-pricing-section
+  data-period="yearly"
+  aria-label={t('pricing.eyebrow')}
+>
+  <div class="pricing-inner">
+    <header class="pricing-header">
+      <p class="pricing-eyebrow">{t('pricing.eyebrow')}</p>
+      <h2 class="pricing-headline">
+        {t('pricing.headline')}<br />
+        <span class="pricing-headline-accent">{t('pricing.headlineAccent')}</span>
+      </h2>
+      <p class="pricing-subline">{t('pricing.subline')}</p>
+
+      {/* Glass pill toggle — same visual language as hero buttons */}
+      <div class="pricing-toggle" role="tablist" aria-label="Billing period">
+        <button
+          type="button"
+          role="tab"
+          data-period-set="monthly"
+          aria-selected="false"
+          class="pricing-toggle-btn"
+        >
+          {t('pricing.toggleMonthly')}
+        </button>
+        <button
+          type="button"
+          role="tab"
+          data-period-set="yearly"
+          aria-selected="true"
+          class="pricing-toggle-btn pricing-toggle-btn--active"
+        >
+          {t('pricing.toggleYearly')}
+          <span class="pricing-toggle-savings">{t('pricing.toggleSavings')}</span>
+        </button>
+        <span class="pricing-toggle-thumb" aria-hidden="true"></span>
+      </div>
+    </header>
+
+    <ul class="pricing-cards">
+      {
+        plans.map((plan) => (
+          <li
+            class:list={[
+              'pricing-card',
+              plan.popular && 'pricing-card--popular',
+              plan.free && 'pricing-card--free',
+            ]}
+            data-plan-id={plan.id}
+          >
+            {plan.badge && <span class="pricing-card-badge">{plan.badge}</span>}
+
+            <header class="pricing-card-header">
+              <h3 class="pricing-card-name">{plan.name}</h3>
+              <p class="pricing-card-limits">
+                <strong>{plan.limits.players}</strong> {limitsLabel}{' '}
+                <span class="pricing-dot">·</span>{' '}
+                <strong>{plan.limits.staff}</strong> {staffLabel}
+              </p>
+            </header>
+
+            <div class="pricing-card-price">
+              {plan.free ? (
+                <div class="pricing-price-block pricing-price-block--free">
+                  <span class="pricing-price-day">0&nbsp;{currencyShort}</span>
+                  <span class="pricing-price-suffix">{t('pricing.perDay')}</span>
+                </div>
+              ) : (
+                <Fragment>
+                  {/* MONTHLY view — visible when [data-period="monthly"] */}
+                  <div class="pricing-price-block pricing-price-block--monthly">
+                    <span class="pricing-price-day">
+                      {fmt(plan.perDayMonthly)}&nbsp;{currencyShort}
+                    </span>
+                    <span class="pricing-price-suffix">{t('pricing.perDay')}</span>
+                    <span class="pricing-price-secondary">
+                      {fmt(plan.priceMonthly)}&nbsp;{currencyShort}{' '}
+                      {t('pricing.perMonth')} · {t('pricing.billedMonthly')}
+                    </span>
+                  </div>
+
+                  {/* YEARLY view — visible when [data-period="yearly"] (default) */}
+                  <div class="pricing-price-block pricing-price-block--yearly">
+                    <span class="pricing-price-day">
+                      {fmt(plan.perDayYearly)}&nbsp;{currencyShort}
+                    </span>
+                    <span class="pricing-price-suffix">{t('pricing.perDay')}</span>
+                    <span class="pricing-price-secondary">
+                      {fmt(plan.perMonthFromYearly)}&nbsp;{currencyShort}{' '}
+                      {t('pricing.perMonth')} · {t('pricing.billedYearly')}
+                    </span>
+                  </div>
+                </Fragment>
+              )}
+            </div>
+
+            <a class="pricing-card-cta" href={plan.ctaHref}>
+              {plan.ctaLabel}
+            </a>
+
+            <p class="pricing-card-included">{t('pricing.included')}</p>
+            <ul class="pricing-card-features">
+              {plan.features.map((feat) => (
+                <li>
+                  <svg
+                    class="pricing-tick"
+                    viewBox="0 0 16 16"
+                    aria-hidden="true"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2.4"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  >
+                    <path d="M3.5 8.5l3 3 6-7" />
+                  </svg>
+                  <span>{feat}</span>
+                </li>
+              ))}
+            </ul>
+          </li>
+        ))
+      }
+    </ul>
+
+    <div class="pricing-extras">
+      <article class="pricing-extra">
+        <h4>{t('pricing.athleteHeading')}</h4>
+        <p>{t('pricing.athleteBody')}</p>
+      </article>
+      <article class="pricing-extra">
+        <h4>{t('pricing.clubHeading')}</h4>
+        <p>{t('pricing.clubBody')}</p>
+      </article>
+    </div>
+
+    <p class="pricing-disclaimer">{t('pricing.disclaimer')}</p>
+  </div>
+</section>
+
+<script>
+  import { mountPricingToggle } from '../scripts/pricing-toggle';
+  mountPricingToggle();
+</script>
+
+<style>
+  .pricing-stage {
+    position: relative;
+    width: 100%;
+    border-top: 1px solid var(--color-stroke-base);
+    background: var(--color-bg-canvas);
+    padding: clamp(4rem, 9vw, 8rem) clamp(1rem, 4vw, 3rem);
+    overflow: hidden;
+  }
+  .pricing-stage::before {
+    /* Subtle radial cyan glow behind the cards — same family as the
+       hero halo, tuned dim. Doesn't compete with the headline. */
+    content: '';
+    position: absolute;
+    inset: -10% 20% auto 20%;
+    height: 60%;
+    background: radial-gradient(
+      ellipse at center,
+      rgba(0, 240, 255, 0.12),
+      transparent 70%
+    );
+    pointer-events: none;
+    filter: blur(40px);
+  }
+
+  .pricing-inner {
+    position: relative;
+    margin: 0 auto;
+    max-width: 84rem;
+  }
+
+  /* ─── Header ─────────────────────────────────────────────────── */
+
+  .pricing-header {
+    text-align: center;
+    margin-bottom: clamp(2rem, 5vw, 4rem);
+  }
+
+  .pricing-eyebrow {
+    margin: 0 0 0.75rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.4em;
+    text-transform: uppercase;
+    color: var(--color-accent-primary);
+  }
+
+  .pricing-headline {
+    margin: 0;
+    font-weight: 700;
+    line-height: 1.05;
+    letter-spacing: -0.03em;
+    color: var(--color-text-primary);
+    font-size: clamp(2.25rem, 5.5vw, 4.75rem);
+    text-wrap: balance;
+  }
+  .pricing-headline-accent {
+    color: var(--color-accent-primary);
+  }
+
+  .pricing-subline {
+    margin: 1.25rem auto 0;
+    max-width: 38rem;
+    font-size: 1rem;
+    line-height: 1.6;
+    color: var(--color-text-secondary);
+    text-wrap: pretty;
+  }
+  @media (min-width: 640px) {
+    .pricing-subline {
+      font-size: 1.125rem;
+    }
+  }
+
+  /* ─── Toggle pill (same family as hero buttons) ──────────────── */
+
+  .pricing-toggle {
+    --thumb-x: 50%;
+    position: relative;
+    display: inline-flex;
+    align-items: stretch;
+    margin-top: 2rem;
+    padding: 4px;
+    border-radius: 9999px;
+    background: rgba(255, 255, 255, 0.04);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    border: 1px solid rgba(0, 240, 255, 0.22);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.08),
+      0 6px 22px -10px rgba(0, 0, 0, 0.4);
+    isolation: isolate;
+  }
+
+  .pricing-toggle-btn {
+    position: relative;
+    z-index: 1;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.625rem 1.25rem;
+    border-radius: 9999px;
+    background: transparent;
+    border: 0;
+    color: var(--color-text-secondary);
+    font: inherit;
+    font-weight: 600;
+    font-size: 0.875rem;
+    cursor: pointer;
+    transition: color 0.25s ease;
+    white-space: nowrap;
+  }
+  .pricing-toggle-btn:hover {
+    color: var(--color-text-primary);
+  }
+  .pricing-toggle-btn--active {
+    color: var(--color-accent-primary-cta-fg);
+  }
+
+  .pricing-toggle-savings {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.125rem 0.5rem;
+    border-radius: 9999px;
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    background: rgba(0, 240, 255, 0.18);
+    color: var(--color-accent-primary);
+  }
+  .pricing-toggle-btn--active .pricing-toggle-savings {
+    background: rgba(0, 16, 20, 0.16);
+    color: var(--color-accent-primary-cta-fg);
+  }
+
+  .pricing-toggle-thumb {
+    position: absolute;
+    top: 4px;
+    bottom: 4px;
+    left: 4px;
+    width: calc(50% - 4px);
+    border-radius: 9999px;
+    background: var(--color-accent-primary);
+    box-shadow:
+      0 6px 22px -8px rgba(0, 240, 255, 0.45),
+      0 0 0 1px rgba(0, 240, 255, 0.4);
+    transform: translateX(0);
+    transition: transform 0.35s cubic-bezier(0.39, 0.575, 0.565, 1);
+    z-index: 0;
+  }
+  [data-pricing-section][data-period='yearly'] .pricing-toggle-thumb {
+    transform: translateX(100%);
+  }
+
+  /* ─── Cards grid ─────────────────────────────────────────────── */
+
+  .pricing-cards {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: 1rem;
+    grid-template-columns: 1fr;
+  }
+  @media (min-width: 640px) {
+    .pricing-cards {
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1.25rem;
+    }
+  }
+  @media (min-width: 1100px) {
+    .pricing-cards {
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1.25rem;
+      align-items: stretch;
+    }
+  }
+
+  .pricing-card {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    padding: 1.75rem 1.5rem 1.5rem;
+    border-radius: 1.5rem;
+    background: rgba(255, 255, 255, 0.03);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.04),
+      0 18px 50px -22px rgba(0, 0, 0, 0.55);
+    color: var(--color-text-primary);
+    transition:
+      transform 0.25s ease,
+      border-color 0.25s ease,
+      box-shadow 0.25s ease;
+  }
+  .pricing-card:hover {
+    transform: translateY(-3px);
+    border-color: rgba(0, 240, 255, 0.28);
+  }
+
+  .pricing-card--popular {
+    /* Highlight in cyan, like the filled hero pill — but keep it as
+       a card (rectangular), not a pill. */
+    border-color: rgba(0, 240, 255, 0.42);
+    background: linear-gradient(
+      180deg,
+      rgba(0, 240, 255, 0.08) 0%,
+      rgba(0, 240, 255, 0.02) 60%,
+      rgba(255, 255, 255, 0.02) 100%
+    );
+    box-shadow:
+      inset 0 1px 0 rgba(0, 240, 255, 0.18),
+      0 18px 60px -16px rgba(0, 240, 255, 0.35),
+      0 0 0 1px rgba(0, 240, 255, 0.32);
+  }
+
+  .pricing-card-badge {
+    position: absolute;
+    top: -12px;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 0.3rem 0.85rem;
+    border-radius: 9999px;
+    background: var(--color-accent-primary);
+    color: var(--color-accent-primary-cta-fg);
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    box-shadow: 0 6px 22px -8px rgba(0, 240, 255, 0.55);
+  }
+
+  .pricing-card-header {
+    margin-bottom: 1.5rem;
+  }
+  .pricing-card-name {
+    margin: 0 0 0.4rem;
+    font-size: 1.125rem;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+  }
+  .pricing-card-limits {
+    margin: 0;
+    font-size: 0.875rem;
+    color: var(--color-text-secondary);
+  }
+  .pricing-card-limits strong {
+    color: var(--color-text-primary);
+  }
+  .pricing-dot {
+    color: var(--color-text-tertiary);
+  }
+
+  .pricing-card-price {
+    margin-bottom: 1.5rem;
+  }
+
+  .pricing-price-block {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 0.4rem;
+  }
+  .pricing-price-block--free {
+    /* Always shown for the free plan regardless of toggle. */
+  }
+  .pricing-price-block--monthly,
+  .pricing-price-block--yearly {
+    display: none;
+  }
+  [data-pricing-section][data-period='monthly']
+    .pricing-price-block--monthly {
+    display: flex;
+  }
+  [data-pricing-section][data-period='yearly']
+    .pricing-price-block--yearly {
+    display: flex;
+  }
+
+  .pricing-price-day {
+    font-size: 2.25rem;
+    font-weight: 700;
+    line-height: 1;
+    letter-spacing: -0.03em;
+    color: var(--color-text-primary);
+  }
+  .pricing-card--popular .pricing-price-day {
+    color: var(--color-accent-primary);
+  }
+  .pricing-price-suffix {
+    font-size: 0.95rem;
+    color: var(--color-text-secondary);
+  }
+  .pricing-price-secondary {
+    flex-basis: 100%;
+    margin-top: 0.4rem;
+    font-size: 0.8rem;
+    color: var(--color-text-tertiary);
+  }
+
+  /* ─── CTA inside card — share pill family with hero ──────────── */
+
+  .pricing-card-cta {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 1.5rem;
+    padding: 0.75rem 1.25rem;
+    border-radius: 9999px;
+    font-size: 0.95rem;
+    font-weight: 600;
+    text-decoration: none;
+    transition:
+      transform 0.2s cubic-bezier(0.39, 0.575, 0.565, 1),
+      background-color 0.2s ease,
+      border-color 0.2s ease,
+      box-shadow 0.25s ease;
+    background: rgba(255, 255, 255, 0.05);
+    color: var(--color-text-primary);
+    border: 1px solid rgba(0, 240, 255, 0.28);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  }
+  .pricing-card-cta:hover {
+    background: rgba(0, 240, 255, 0.1);
+    border-color: rgba(0, 240, 255, 0.5);
+    transform: translateY(-1px);
+  }
+
+  .pricing-card--popular .pricing-card-cta {
+    background: var(--color-accent-primary);
+    color: var(--color-accent-primary-cta-fg);
+    border-color: rgba(0, 240, 255, 0.6);
+    box-shadow:
+      0 10px 32px -10px rgba(0, 240, 255, 0.5),
+      0 0 0 1px rgba(0, 240, 255, 0.35);
+  }
+  .pricing-card--popular .pricing-card-cta:hover {
+    background: var(--color-accent-primary-hover);
+  }
+
+  /* ─── Features list ─────────────────────────────────────────── */
+
+  .pricing-card-included {
+    margin: 0 0 0.75rem;
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--color-text-tertiary);
+  }
+
+  .pricing-card-features {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+    flex: 1;
+  }
+  .pricing-card-features li {
+    display: flex;
+    gap: 0.6rem;
+    font-size: 0.9rem;
+    line-height: 1.45;
+    color: var(--color-text-secondary);
+  }
+  .pricing-card-features li span {
+    flex: 1;
+  }
+
+  .pricing-tick {
+    flex-shrink: 0;
+    width: 1.05rem;
+    height: 1.05rem;
+    margin-top: 2px;
+    color: var(--color-accent-primary);
+  }
+
+  /* ─── Extras (athlete pack + club bundle) ───────────────────── */
+
+  .pricing-extras {
+    margin-top: clamp(2rem, 4vw, 3rem);
+    display: grid;
+    gap: 1rem;
+    grid-template-columns: 1fr;
+  }
+  @media (min-width: 768px) {
+    .pricing-extras {
+      grid-template-columns: 1fr 1fr;
+      gap: 1.5rem;
+    }
+  }
+  .pricing-extra {
+    padding: 1.25rem 1.5rem;
+    border-radius: 1.25rem;
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    background: rgba(255, 255, 255, 0.02);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+  }
+  .pricing-extra h4 {
+    margin: 0 0 0.4rem;
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--color-text-primary);
+  }
+  .pricing-extra p {
+    margin: 0;
+    font-size: 0.85rem;
+    line-height: 1.55;
+    color: var(--color-text-secondary);
+  }
+
+  .pricing-disclaimer {
+    margin: 2rem auto 0;
+    max-width: 38rem;
+    text-align: center;
+    font-size: 0.75rem;
+    line-height: 1.5;
+    color: var(--color-text-tertiary);
+  }
+
+  /* ─── Reduced motion ─────────────────────────────────────────── */
+
+  @media (prefers-reduced-motion: reduce) {
+    .pricing-toggle-thumb {
+      transition: none;
+    }
+    .pricing-card,
+    .pricing-card-cta {
+      transition: none;
+    }
+  }
+</style>

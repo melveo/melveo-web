@@ -65,6 +65,9 @@ const t = useTranslations(lang);
     position: relative;
     width: 100%;
     border-top: 1px solid var(--color-stroke-base);
+    -webkit-user-select: none;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
   }
 
   .orb-hero {
@@ -134,8 +137,8 @@ const t = useTranslations(lang);
         - backface-visibility hidden helps Safari coalesce layers
     */
     transition:
-      --x 0.4s cubic-bezier(0.39, 0.575, 0.565, 1),
-      --y 0.4s cubic-bezier(0.39, 0.575, 0.565, 1);
+      --x 0.48s cubic-bezier(0.39, 0.575, 0.565, 1),
+      --y 0.48s cubic-bezier(0.39, 0.575, 0.565, 1);
     will-change: mask-image, -webkit-mask-image;
     transform: translate3d(0, 0, 0);
     backface-visibility: hidden;

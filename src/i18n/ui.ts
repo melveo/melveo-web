@@ -43,6 +43,13 @@ export const ui = {
     'gooey.headlinePrefix': 'Trenér + hráč.',
     'gooey.headlineAccent': 'Synced.',
 
+    // Stage 3.75 — scroll-timeline word highlight (Daniel Haim codepen)
+    'wordScroll.prefix': 'Spojí',
+    'wordScroll.screenReader':
+      'Spojí check-iny, hráče, trenéry, sessions, docházku, zátěž, coach board, rozhodnutí a celý klub.',
+    'wordScroll.words':
+      'check-iny.|hráče.|trenéry.|sessions.|docházku.|zátěž.|coach board.|rozhodnutí.|celý klub.',
+
     // Stage 4 — wellness
     'wellness.eyebrow': 'RÁNO · 30 SEKUND',
     'wellness.headline': 'Pětiosý check-in.',
@@ -58,11 +65,43 @@ export const ui = {
     'orb.primary': 'Pro celý klub.',
     'orb.secondary': 'Pro každého hráče.',
 
+    // Stage 5.5 — particle statement after the club/player reveal.
+    'particles.eyebrow': 'JEDEN SYSTÉM',
+    'particles.headlinePrefix': 'Všechno pro',
+    'particles.headlineSuffix': '.',
+    'particles.subline': 'Od ranního check-inu po rozhodnutí na tréninku. Tým běží v jednom rytmu.',
+
     // Stage 6 — sessions + coach board
     'sessions.eyebrow': 'TRÉNINK · ROZHODNUTÍ',
     'sessions.headline': 'Sessions a coach board.',
     'sessions.body':
       'Plánuj tréninky, zaznamenej účast, sleduj zátěž (RPE). Než přijedeš na hřiště, víš co tým potřebuje.',
+
+    // Stage 6.5 — Pricing
+    'pricing.eyebrow': 'CENÍK',
+    'pricing.headline': 'Začni zdarma.',
+    'pricing.headlineAccent': 'Plať jen co potřebuješ.',
+    'pricing.subline':
+      'Klub kupuje licenci pro celý tým. Hráči ani trenéři nikdy neplatí. Pilot a roční plány lze zrušit kdykoliv.',
+    'pricing.toggleMonthly': 'Měsíčně',
+    'pricing.toggleYearly': 'Ročně',
+    'pricing.toggleSavings': '−17 %',
+    'pricing.perDay': '/ den',
+    'pricing.perMonth': '/ měsíc',
+    'pricing.billedYearly': 'Účtováno ročně',
+    'pricing.billedMonthly': 'Účtováno měsíčně',
+    'pricing.popular': 'Nejoblíbenější',
+    'pricing.included': 'Co je v plánu',
+    'pricing.ctaFree': 'Začít zdarma',
+    'pricing.ctaPilot': 'Vyžádat pilot',
+    'pricing.athleteHeading': 'Potřebujete víc hráčů?',
+    'pricing.athleteBody':
+      'Athlete Pack rozšíří tým o dalších 10 hráčů za 5 900 Kč/rok (max 1 pack na tým).',
+    'pricing.clubHeading': 'Pro celý klub',
+    'pricing.clubBody':
+      'Klubový balíček pokrývá více týmů najednou. Core 49 900 / Live 89 900 / Intelligence 129 900 Kč/rok.',
+    'pricing.disclaimer':
+      'Ceny jsou v Kč bez DPH. Provozovatel není plátcem DPH. Všechny platby zpracovává Stripe.',
 
     // Stage 7 — privacy promise
     'privacy.eyebrow': 'SOUKROMÍ',
@@ -110,6 +149,12 @@ export const ui = {
     'gooey.headlinePrefix': 'Coach + player.',
     'gooey.headlineAccent': 'Synced.',
 
+    'wordScroll.prefix': 'Connects',
+    'wordScroll.screenReader':
+      'Connects check-ins, players, coaches, sessions, attendance, load, coach board, decisions, and the whole club.',
+    'wordScroll.words':
+      'check-ins.|players.|coaches.|sessions.|attendance.|load.|coach board.|decisions.|the whole club.',
+
     'wellness.eyebrow': 'MORNING · 30 SECONDS',
     'wellness.headline': '5-axis check-in.',
     'wellness.body':
@@ -119,10 +164,41 @@ export const ui = {
     'orb.primary': 'For the whole club.',
     'orb.secondary': 'For every player.',
 
+    'particles.eyebrow': 'ONE SYSTEM',
+    'particles.headlinePrefix': 'Everything for',
+    'particles.headlineSuffix': '.',
+    'particles.subline': 'From morning check-in to training decisions. The team moves in one rhythm.',
+
     'sessions.eyebrow': 'TRAINING · DECISIONS',
     'sessions.headline': 'Sessions and coach board.',
     'sessions.body':
       'Plan trainings, log attendance, track load (RPE). Before you arrive at the pitch, you know what the team needs.',
+
+    // Stage 6.5 — Pricing
+    'pricing.eyebrow': 'PRICING',
+    'pricing.headline': 'Start free.',
+    'pricing.headlineAccent': 'Pay only for what you need.',
+    'pricing.subline':
+      "Clubs buy a licence for the whole team. Players and coaches never pay. Pilots and annual plans can be cancelled anytime.",
+    'pricing.toggleMonthly': 'Monthly',
+    'pricing.toggleYearly': 'Yearly',
+    'pricing.toggleSavings': '−17 %',
+    'pricing.perDay': '/ day',
+    'pricing.perMonth': '/ month',
+    'pricing.billedYearly': 'Billed yearly',
+    'pricing.billedMonthly': 'Billed monthly',
+    'pricing.popular': 'Most popular',
+    'pricing.included': "What's included",
+    'pricing.ctaFree': 'Start free',
+    'pricing.ctaPilot': 'Request pilot',
+    'pricing.athleteHeading': 'Need more players?',
+    'pricing.athleteBody':
+      'The Athlete Pack adds 10 more players for 5,900 CZK / year (max 1 pack per team).',
+    'pricing.clubHeading': 'For the whole club',
+    'pricing.clubBody':
+      'The club bundle covers multiple teams at once. Core 49,900 / Live 89,900 / Intelligence 129,900 CZK / year.',
+    'pricing.disclaimer':
+      'Prices in CZK, VAT not applicable. Operator is not a VAT payer. All payments processed by Stripe.',
 
     'privacy.eyebrow': 'PRIVACY',
     'privacy.headlineLine1': "Coach never sees",
