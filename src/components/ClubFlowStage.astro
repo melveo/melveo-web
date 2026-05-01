@@ -16,60 +16,56 @@ interface Props {
 
 const { lang } = Astro.props;
 
+/*
+  Step copy — slimmed down from a 3-bullet table + metric row to
+  just number + kicker + title + 1-line body (per user feedback
+  2026-05-01: "hodně textů, je to nepřehledné... možná jenom
+  jednoduché texty... ne ty tabulky"). The kicker carries the time
+  / context tag; the body is a single confident sentence; the
+  metric strip is gone — its data was already redundant with the
+  kicker (e.g. "RÁNO · 30 SEKUND" + "typický vstup: 30 s").
+
+  Keep the .image entries even though they're only rendered on
+  mobile — the JS scroll handler still cycles between media slots
+  by index.
+*/
 const copy = {
   cs: {
     eyebrow: 'JEDEN DEN V KLUBU',
     headline: 'Od check-inu k rozhodnutí.',
-    body:
-      'Ranní signál, tréninková session i coach board běží v jednom toku. Trenér vidí kontext dřív, než začne trénink.',
+    body: 'Jeden tok od ranního signálu po rozhodnutí na hřišti.',
     mediaLabel: 'Živý klubový tok',
     progressLabel: 'Průběh dne',
     steps: [
       {
         number: '01',
-        kicker: 'RÁNO · 30 SEKUND',
+        kicker: 'Ráno · 30 sekund',
         title: 'Pětiosý check-in',
-        body:
-          'Hráč rychle pošle stav těla i hlavy. Melveo z toho skládá týmový signál bez odhalování syrových čísel jednotlivce.',
-        bullets: ['energie, spánek, bolestivost', 'nálada a motivace', 'privacy-by-design agregace'],
-        metricLabel: 'typický vstup',
-        metricValue: '30 s',
+        body: 'Hráč pošle stav těla i hlavy. Vzniká týmový signál — beze syrových čísel.',
         image: '/images/club-flow/check-in.webp',
         alt: 'Hráč v šatně vyplňuje týmový check-in v telefonu.',
       },
       {
         number: '02',
-        kicker: 'TRÉNINK · PLÁN',
+        kicker: 'Trénink · plán',
         title: 'Sessions',
-        body:
-          'Trenér staví session podle aktuální readiness. Účast, plán a následné RPE zůstávají u jednoho tréninku.',
-        bullets: ['plán bloku a cíl tréninku', 'docházka bez papíru', 'post-session RPE a zátěž'],
-        metricLabel: 'jeden záznam',
-        metricValue: 'plán + RPE',
+        body: 'Trénink podle aktuální readiness. Plán, docházka i RPE u jedné session.',
         image: '/images/club-flow/sessions.webp',
         alt: 'Trenér sleduje trénink a drží tablet s analytikou týmu.',
       },
       {
         number: '03',
-        kicker: 'KONTEXT · TÝM',
+        kicker: 'Kontext · 1 minuta',
         title: 'Coach board',
-        body:
-          'Coach board spojuje check-iny, attendance a zátěž do přehledu, který jde číst v minutě před tréninkem.',
-        bullets: ['readiness týmu', 'trend zátěže', 'hráči, kteří potřebují pozornost'],
-        metricLabel: 'čas na přehled',
-        metricValue: '1 min',
+        body: 'Check-iny, docházka a zátěž v jednom přehledu — připravený za minutu.',
         image: '/images/club-flow/coach-board.webp',
         alt: 'Dva trenéři na palubovce společně kontrolují týmový coach board na tabletu.',
       },
       {
         number: '04',
-        kicker: 'ROZHODNUTÍ · AKCE',
+        kicker: 'Rozhodnutí · akce',
         title: 'Správné rozhodnutí',
-        body:
-          'Na hřišti už nejde o hádání. Trenér upraví intenzitu, roli hráče nebo regeneraci podle dat, která dávají smysl.',
-        bullets: ['rychlejší úprava zátěže', 'méně slepých míst', 'lepší komunikace v týmu'],
-        metricLabel: 'výstup',
-        metricValue: 'jasný další krok',
+        body: 'Konec hádání. Intenzita, role i regenerace podle dat, ne pocitů.',
         image: '/images/club-flow/decision.webp',
         alt: 'Trenér sleduje trénující tým a na tabletu kontroluje analytiku.',
       },
@@ -78,56 +74,39 @@ const copy = {
   en: {
     eyebrow: 'ONE CLUB DAY',
     headline: 'From check-in to decision.',
-    body:
-      'Morning signal, training session, and coach board live in one workflow. Coaches see context before practice starts.',
+    body: 'One flow, from the morning signal to the call on the pitch.',
     mediaLabel: 'Live club workflow',
     progressLabel: 'Day progress',
     steps: [
       {
         number: '01',
-        kicker: 'MORNING · 30 SECONDS',
+        kicker: 'Morning · 30 seconds',
         title: '5-axis check-in',
-        body:
-          'Players quickly send a body-and-mind signal. Melveo turns it into team context without exposing raw individual numbers.',
-        bullets: ['energy, sleep, soreness', 'mood and motivation', 'privacy-by-design aggregation'],
-        metricLabel: 'typical input',
-        metricValue: '30 s',
+        body: 'Players send a body-and-mind signal. Becomes team context — no raw numbers.',
         image: '/images/club-flow/check-in.webp',
         alt: 'A player in a locker room completes a team check-in on a phone.',
       },
       {
         number: '02',
-        kicker: 'TRAINING · PLAN',
+        kicker: 'Training · plan',
         title: 'Sessions',
-        body:
-          'Coaches shape each session around current readiness. Attendance, plan, and post-session RPE stay attached to the same training.',
-        bullets: ['block plan and training goal', 'paperless attendance', 'post-session RPE and load'],
-        metricLabel: 'single record',
-        metricValue: 'plan + RPE',
+        body: 'Train to current readiness. Plan, attendance, and RPE on one session.',
         image: '/images/club-flow/sessions.webp',
         alt: 'A coach watches practice while holding a tablet with team analytics.',
       },
       {
         number: '03',
-        kicker: 'CONTEXT · TEAM',
+        kicker: 'Context · 1 minute',
         title: 'Coach board',
-        body:
-          'Coach board joins check-ins, attendance, and load into a view that can be read in the minute before practice.',
-        bullets: ['team readiness', 'load trend', 'players who need attention'],
-        metricLabel: 'review time',
-        metricValue: '1 min',
+        body: 'Check-ins, attendance, and load on one view — readable in a minute.',
         image: '/images/club-flow/coach-board.webp',
         alt: 'Two coaches review a team coach board on a tablet courtside.',
       },
       {
         number: '04',
-        kicker: 'DECISION · ACTION',
+        kicker: 'Decision · action',
         title: 'The right decision',
-        body:
-          'On court, it is no longer guesswork. Coaches adjust intensity, player roles, or recovery from data that makes sense.',
-        bullets: ['faster load changes', 'fewer blind spots', 'clearer team communication'],
-        metricLabel: 'output',
-        metricValue: 'next best step',
+        body: 'No more guesswork. Intensity, roles, and recovery from data, not feelings.',
         image: '/images/club-flow/decision.webp',
         alt: 'A coach watches the team train while checking analytics on a tablet.',
       },
@@ -262,21 +241,12 @@ const steps = content.steps;
                     />
 
                     <div class="club-flow-stage__card-topline">
-                      <span>{step.number}</span>
-                      <p>{step.kicker}</p>
+                      <span class="club-flow-stage__card-number">{step.number}</span>
+                      <p class="club-flow-stage__card-kicker">{step.kicker}</p>
                     </div>
 
                     <h3>{step.title}</h3>
                     <p class="club-flow-stage__card-body">{step.body}</p>
-
-                    <ul>
-                      {step.bullets.map((bullet) => <li>{bullet}</li>)}
-                    </ul>
-
-                    <div class="club-flow-stage__metric">
-                      <span>{step.metricLabel}</span>
-                      <strong>{step.metricValue}</strong>
-                    </div>
                   </div>
                 </article>
               ))
@@ -675,103 +645,63 @@ const steps = content.steps;
     display: none;
   }
 
+  /*
+    Premium step layout — number + kicker top row, then a hairline
+    cyan divider, then title, then a single confident sentence.
+    Generous breathing room between blocks; no list of bullets, no
+    metric strip (those got cut per user feedback 2026-05-01:
+    "hodně textů... možná i ne ty tabulky").
+  */
   .club-flow-stage__card-topline {
     display: flex;
     align-items: center;
-    justify-content: space-between;
-    gap: 1rem;
-    margin-bottom: clamp(1.5rem, 3vh, 2.25rem);
+    gap: clamp(1rem, 1.6vw, 1.5rem);
+    margin-bottom: clamp(1.75rem, 3.5vh, 2.5rem);
+    padding-bottom: clamp(1.25rem, 2.5vh, 1.75rem);
+    border-bottom: 1px solid color-mix(in srgb, var(--color-accent-primary) 28%, transparent);
   }
 
-  .club-flow-stage__card-topline span {
+  .club-flow-stage__card-number {
     color: var(--color-accent-primary);
-    font-size: clamp(2rem, 5vw, 4.25rem);
-    font-weight: 800;
+    font-size: clamp(2.25rem, 5.5vw, 4.5rem);
+    font-weight: 700;
     line-height: 0.9;
     letter-spacing: -0.04em;
+    /* Subtle cyan glow to match the card backdrop. */
+    text-shadow: 0 0 24px color-mix(in srgb, var(--color-accent-primary) 30%, transparent);
   }
 
-  .club-flow-stage__card-topline p {
+  .club-flow-stage__card-kicker {
     margin: 0;
-    color: var(--color-text-tertiary);
-    font-size: 0.7rem;
-    font-weight: 700;
-    letter-spacing: 0.26em;
-    text-align: right;
-    text-transform: uppercase;
+    color: var(--color-text-secondary);
+    font-size: clamp(0.78rem, 1vw, 0.92rem);
+    font-weight: 500;
+    letter-spacing: 0.04em;
+    line-height: 1.3;
   }
 
   .club-flow-stage__card h3 {
     margin: 0;
-    font-size: clamp(2rem, 4.6vw, 4.8rem);
-    font-weight: 800;
-    line-height: 0.96;
+    font-size: clamp(2.25rem, 5vw, 5rem);
+    font-weight: 700;
+    line-height: 0.98;
     letter-spacing: -0.045em;
     text-wrap: balance;
   }
 
   .club-flow-stage__card-body {
-    max-width: 34rem;
-    margin: 1.15rem 0 0;
-    color: var(--color-text-secondary);
-    font-size: clamp(1rem, 1.45vw, 1.16rem);
-    line-height: 1.62;
+    max-width: 32rem;
+    margin: clamp(1.25rem, 2.5vh, 1.85rem) 0 0;
+    color: color-mix(in srgb, var(--color-text-secondary) 90%, var(--color-text-primary));
+    font-size: clamp(1.05rem, 1.5vw, 1.25rem);
+    line-height: 1.55;
     text-wrap: pretty;
-  }
-
-  .club-flow-stage__card ul {
-    display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 0.65rem;
-    margin: 1.5rem 0 0;
-    padding: 0;
-    list-style: none;
-  }
-
-  .club-flow-stage__card li {
-    min-height: 3rem;
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    border-radius: 0.9rem;
-    padding: 0.75rem;
-    background: rgba(255, 255, 255, 0.035);
-    color: color-mix(in srgb, var(--color-text-secondary) 84%, var(--color-text-primary));
-    font-size: 0.82rem;
-    line-height: 1.28;
-  }
-
-  .club-flow-stage__metric {
-    display: flex;
-    align-items: end;
-    justify-content: space-between;
-    gap: 1rem;
-    margin-top: 1.65rem;
-    border-top: 1px solid rgba(255, 255, 255, 0.08);
-    padding-top: 1.1rem;
-  }
-
-  .club-flow-stage__metric span {
-    color: var(--color-text-tertiary);
-    font-size: 0.72rem;
-    font-weight: 700;
-    letter-spacing: 0.22em;
-    text-transform: uppercase;
-  }
-
-  .club-flow-stage__metric strong {
-    color: var(--color-accent-primary);
-    font-size: clamp(1.25rem, 2.4vw, 2rem);
-    line-height: 1;
-    text-align: right;
   }
 
   @media (max-width: 1100px) {
     .club-flow-stage__layout {
       grid-template-columns: minmax(0, 0.95fr) minmax(21rem, 1.05fr);
       gap: 1.5rem;
-    }
-
-    .club-flow-stage__card ul {
-      grid-template-columns: 1fr;
     }
   }
 
@@ -854,19 +784,19 @@ const steps = content.steps;
 
     .club-flow-stage__card-topline {
       margin-bottom: 1rem;
+      padding-bottom: 0.75rem;
     }
 
-    .club-flow-stage__card-topline span {
+    .club-flow-stage__card-number {
       font-size: 2rem;
     }
 
-    .club-flow-stage__card-topline p {
-      font-size: 0.64rem;
-      letter-spacing: 0.18em;
+    .club-flow-stage__card-kicker {
+      font-size: 0.78rem;
     }
 
     .club-flow-stage__card h3 {
-      font-size: clamp(2rem, 12vw, 3.15rem);
+      font-size: clamp(2rem, 11vw, 3.15rem);
     }
 
     .club-flow-stage__card-body {
