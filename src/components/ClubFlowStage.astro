@@ -139,7 +139,25 @@ const content = copy[lang];
 const steps = content.steps;
 ---
 
-<section class="club-flow-stage" data-club-flow-stage style={`--club-flow-count: ${steps.length};`}>
+<section
+  class="club-flow-stage"
+  data-club-flow-stage
+  data-glass-smoke
+  data-glass-smoke-density="1"
+  style={`--club-flow-count: ${steps.length};`}
+>
+  {/*
+    Cyan smoke field — same recipe + same component as pricing /
+    image-grid (per user request 2026-05-01: "by taky chtělo dát
+    nějaké pozadí... aby více vyniknul ten liquid glass"). Sticky
+    100 vh inside this 400+ vh section so the smoke covers the
+    visible viewport across the whole sticky pin runway. Drives
+    the .glass-card displacement filter on the media + cards —
+    on the previous flat-black section, the SVG displacement had
+    nothing to refract.
+  */}
+  <canvas class="glass-smoke" data-glass-smoke-canvas aria-hidden="true"></canvas>
+
   <div class="club-flow-stage__grid" aria-hidden="true"></div>
   <div class="club-flow-stage__halo club-flow-stage__halo--top" aria-hidden="true"></div>
   <div class="club-flow-stage__halo club-flow-stage__halo--bottom" aria-hidden="true"></div>
@@ -280,6 +298,40 @@ const steps = content.steps;
       radial-gradient(circle at 50% 0%, color-mix(in srgb, var(--color-bg-tint) 64%, transparent), transparent 42rem),
       linear-gradient(180deg, var(--color-bg-canvas), color-mix(in srgb, var(--color-bg-surface) 44%, var(--color-bg-canvas)) 48%, var(--color-bg-canvas));
     color: var(--color-text-primary);
+  }
+
+  /* Smoke canvas — sticky 100 vh inside the 400+ vh section so the
+     fog covers the visible viewport across the whole scroll runway
+     instead of getting stretched into one giant canvas (and so the
+     IntersectionObserver in glass-smoke.ts only paints while in
+     view). Margin-bottom: -100vh removes the canvas from normal
+     flow so .__intro / .__scroll sit where they would naturally. */
+  .club-flow-stage .glass-smoke {
+    position: sticky;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    margin-bottom: -100vh;
+    pointer-events: none;
+    z-index: -1;
+    filter: saturate(120%) brightness(1.05);
+    /* Soft fade at top + bottom so the fog doesn't hard-cut against
+       the previous / next section borders. */
+    mask-image: linear-gradient(
+      180deg,
+      transparent 0%,
+      black 12%,
+      black 88%,
+      transparent 100%
+    );
+    -webkit-mask-image: linear-gradient(
+      180deg,
+      transparent 0%,
+      black 12%,
+      black 88%,
+      transparent 100%
+    );
   }
 
   .club-flow-stage__grid {
@@ -833,6 +885,21 @@ const steps = content.steps;
 </style>
 
 <script>
+  import { mountGlassSmoke } from '../scripts/glass-smoke';
+
+  // Cyan smoke field behind the section. Deferred to idle so the
+  // sticky-pin layout below can settle first. mountGlassSmoke is
+  // idempotent (HANDLES WeakMap inside the module); calling it from
+  // multiple sections is safe.
+  function startSmoke() {
+    mountGlassSmoke();
+  }
+  if ('requestIdleCallback' in window) {
+    (window as any).requestIdleCallback(startSmoke, { timeout: 1500 });
+  } else {
+    setTimeout(startSmoke, 250);
+  }
+
   const mountedClubFlowStages = new WeakSet<HTMLElement>();
 
   function clamp(value: number, min: number, max: number) {
