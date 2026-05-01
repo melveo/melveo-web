@@ -23,12 +23,9 @@ const scrollDistance = `${remainingSteps * 6.09375 * scrollFriction}rem`;
 const scrollDistanceTablet = `${remainingSteps * 5.4375 * scrollFriction}rem`;
 const scrollDistanceMobile = `${remainingSteps * 3.125 * scrollFriction}rem`;
 const scrollDistanceSmall = `${remainingSteps * 2.375 * scrollFriction}rem`;
-const colors = [
-  'var(--color-accent-primary)',
-  'var(--color-accent-primary-hover)',
-  'var(--color-accent-primary-subtle)',
-  'var(--color-accent-warm-dark)',
-];
+const hueStart = 205;
+const hueEnd = 178;
+const hueStep = (hueEnd - hueStart) / Math.max(1, words.length - 1);
 ---
 
 <section
@@ -51,10 +48,13 @@ const colors = [
         <ul class="word-scroll-stage__list">
           {words.map((word, index) => (
             <li
-              class="word-scroll-stage__item"
-              style={`--i: ${index}; --word-color: ${colors[index % colors.length]}; --word-distance: ${Math.abs(index - startIndex)};`}
+              class="word-scroll-stage__item glass-card glass-card--compact"
+              style={`--i: ${index}; --word-hue: ${hueStart + index * hueStep}; --word-distance: ${Math.abs(index - startIndex)}; --word-focus: ${index === startIndex ? 1 : 0};`}
             >
-              {word}
+              <span class="glass-filter" aria-hidden="true"></span>
+              <span class="glass-overlay" aria-hidden="true"></span>
+              <span class="glass-specular" aria-hidden="true"></span>
+              <span class="glass-content word-scroll-stage__word">{word}</span>
             </li>
           ))}
         </ul>
@@ -77,11 +77,38 @@ const colors = [
     color-scheme: dark;
   }
 
+  .word-scroll-stage::before,
+  .word-scroll-stage::after {
+    content: '';
+    position: absolute;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .word-scroll-stage::before {
+    inset: 12% 10% auto 10%;
+    height: 42%;
+    background:
+      radial-gradient(circle at 42% 52%, rgba(0, 240, 255, 0.18), transparent 34%),
+      radial-gradient(circle at 58% 48%, rgba(176, 112, 46, 0.09), transparent 38%);
+    filter: blur(48px);
+    opacity: 0.72;
+  }
+
+  .word-scroll-stage::after {
+    inset: auto 18% 12% 18%;
+    height: 22%;
+    background: radial-gradient(circle, rgba(0, 240, 255, 0.1), transparent 62%);
+    filter: blur(42px);
+    opacity: 0.55;
+  }
+
   .word-scroll-stage__pin {
     position: sticky;
     top: 0;
     height: 100vh;
     overflow: hidden;
+    z-index: 1;
   }
 
   .word-scroll-stage__inner {
@@ -105,12 +132,14 @@ const colors = [
     margin: 0;
     font: inherit;
     background: linear-gradient(
-      var(--color-text-primary) 50%,
-      color-mix(in oklch, var(--color-bg-canvas), var(--color-text-primary) 25%)
+      180deg,
+      var(--color-text-primary) 42%,
+      color-mix(in oklch, var(--color-bg-canvas), var(--color-text-primary) 38%) 100%
     );
     background-clip: text;
     color: transparent;
     -webkit-background-clip: text;
+    text-shadow: 0 14px 28px rgba(0, 0, 0, 0.34);
   }
 
   .word-scroll-stage__list-viewport {
@@ -140,13 +169,34 @@ const colors = [
   }
 
   .word-scroll-stage__item {
-    color: color-mix(in oklch, var(--word-color) 84%, var(--color-text-primary));
-    opacity: clamp(0.2, calc(1 - (var(--word-distance) * 0.8)), 1);
-    filter: brightness(clamp(1, calc(1.18 - (var(--word-distance) * 0.18)), 1.18));
-    will-change: opacity, filter;
+    position: relative;
+    display: block;
+    width: max-content;
+    overflow: visible;
+    border-radius: 0.34em;
+    background: transparent;
+    --word-accent: oklch(0.82 0.16 var(--word-hue));
+    --word-accent-muted: color-mix(
+      in oklch,
+      var(--word-accent) 62%,
+      var(--color-text-primary)
+    );
+    color: var(--word-accent-muted);
+    opacity: clamp(0.16, calc(0.2 + (var(--word-focus) * 0.8)), 1);
+    filter: brightness(clamp(0.9, calc(0.94 + (var(--word-focus) * 0.2)), 1.14));
+    box-shadow:
+      0 10px 44px color-mix(in oklch, var(--word-accent) calc(var(--word-focus) * 32%), transparent),
+      0 4px 16px rgba(0, 0, 0, calc(var(--word-focus) * 0.2));
+    transition: none;
+    will-change: opacity, filter, box-shadow;
   }
 
   .word-scroll-stage__item:last-of-type {
+    background: transparent;
+    color: var(--color-text-primary);
+  }
+
+  .word-scroll-stage__item:last-of-type .word-scroll-stage__word {
     background: linear-gradient(
       var(--color-text-primary) 50%,
       color-mix(in oklch, var(--color-bg-canvas), var(--color-text-primary) 25%)
@@ -154,6 +204,45 @@ const colors = [
     background-clip: text;
     color: transparent;
     -webkit-background-clip: text;
+  }
+
+  .word-scroll-stage__item:hover {
+    transform: none;
+  }
+
+  .word-scroll-stage__item .glass-filter,
+  .word-scroll-stage__item .glass-overlay,
+  .word-scroll-stage__item .glass-specular {
+    inset: -0.08em -0.28em -0.12em;
+    border-radius: inherit;
+    opacity: var(--word-focus);
+  }
+
+  .word-scroll-stage__item .glass-filter {
+    backdrop-filter: blur(12px) saturate(190%);
+    -webkit-backdrop-filter: blur(12px) saturate(190%);
+  }
+
+  .word-scroll-stage__item .glass-overlay {
+    background: linear-gradient(
+      135deg,
+      rgba(255, 255, 255, 0.095),
+      color-mix(in oklch, var(--word-accent) 12%, transparent) 52%,
+      rgba(255, 255, 255, 0.02)
+    );
+  }
+
+  .word-scroll-stage__item .glass-specular {
+    box-shadow:
+      inset 1px 1px 0 rgba(255, 255, 255, 0.34),
+      inset 0 0 10px color-mix(in oklch, var(--word-accent) 30%, transparent),
+      inset -1px -1px 0 rgba(255, 255, 255, 0.05);
+  }
+
+  .word-scroll-stage__word {
+    display: inline-block;
+    flex: none;
+    text-shadow: 0 0 calc(30px * var(--word-focus)) color-mix(in oklch, var(--word-accent) 46%, transparent);
   }
 
   .word-scroll-stage__sr-only {
@@ -198,6 +287,12 @@ const colors = [
     .word-scroll-stage__inner {
       font-size: 1.9rem;
     }
+
+    .word-scroll-stage__item .glass-filter,
+    .word-scroll-stage__item .glass-overlay,
+    .word-scroll-stage__item .glass-specular {
+      inset: -0.08em -0.2em -0.1em;
+    }
   }
 
   @media (prefers-reduced-motion: reduce) {
@@ -223,7 +318,11 @@ const colors = [
       root.style.setProperty('--word-scroll-active-index', activeIndex.toFixed(4));
 
       root.querySelectorAll('.word-scroll-stage__item').forEach((item, index) => {
-        item.style.setProperty('--word-distance', Math.abs(index - activeIndex).toFixed(4));
+        const distance = Math.abs(index - activeIndex);
+        const focus = clampWordScroll(1 - distance * 1.08, 0, 1);
+
+        item.style.setProperty('--word-distance', distance.toFixed(4));
+        item.style.setProperty('--word-focus', focus.toFixed(4));
       });
     });
   };
