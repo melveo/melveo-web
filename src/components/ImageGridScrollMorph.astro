@@ -583,7 +583,22 @@ const t = useTranslations(lang);
   }
 
   .image-grid-section .content {
+    /*
+      Use dvh (dynamic viewport height) instead of vh so the sticky
+      pin's height ALWAYS matches the currently visible viewport. On
+      iOS Safari + Chrome mobile, `100vh` resolves to the LARGEST
+      possible viewport (URL bar collapsed = 852 px on iPhone 14 Pro)
+      while the actually-visible area is only 700 px when the URL
+      bar is shown. Using `vh` therefore made .content 152 px taller
+      than visible, so the photo (sized to .content) extended past
+      the visible area, leaving an empty band at the top of the
+      pinned section (user feedback 2026-05-01: "ta sekce jakoby
+      posunutá dolů"). dvh adapts to the current visible viewport
+      and the photo always fills the visible area exactly. Falls
+      back to `vh` on browsers without dvh support (iOS < 15.4).
+    */
     min-height: 100vh;
+    min-height: 100dvh;
     width: 100vw;
     position: sticky;
     top: 0;
@@ -605,10 +620,10 @@ const t = useTranslations(lang);
     width: var(--container-width);
     max-width: calc(100% - (2 * var(--gutter)));
     /* Cap to viewport height across all sizes so the grid never
-       overflows top + bottom of the sticky-pinned content (which
-       would clip rows 1 and 3 on shorter laptops or mid-tablet
-       viewports). 1fr rows distribute equally inside this cap. */
+       overflows top + bottom of the sticky-pinned content. dvh +
+       vh fallback for the same reason as .content above. */
     height: calc(100vh - 4rem);
+    height: calc(100dvh - 4rem);
     display: grid;
     grid-template-columns: repeat(5, 1fr);
     grid-template-rows: repeat(3, 1fr);
@@ -704,8 +719,10 @@ const t = useTranslations(lang);
          and clipped rows 1 and 5 (user feedback 2026-05-01: "horní
          karty jsou ořezané"). With explicit height + 5 × 1fr rows,
          each cell is `(viewport_h - 2 × inset - 4 × gap) / 5` tall,
-         and the cell aspect-ratio rule is overridden below. */
+         and the cell aspect-ratio rule is overridden below. dvh
+         keeps the grid synced with .content's dynamic viewport. */
       height: calc(100vh - 4rem);
+      height: calc(100dvh - 4rem);
       grid-template-rows: repeat(5, 1fr);
     }
     /* Drop the 4/5 aspect on mobile — height is dictated by the
