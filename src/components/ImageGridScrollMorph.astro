@@ -1057,8 +1057,24 @@ const t = useTranslations(lang);
         const naturalWidth = scalerEl?.offsetWidth ?? 280;
         const naturalHeight = scalerEl?.offsetHeight ?? 350;
 
-        const viewportWidth = window.innerWidth;
-        const viewportHeight = window.innerHeight;
+        /*
+          Use the .content's measured size, NOT window.innerHeight.
+          On iOS Safari and Chrome mobile the URL bar dynamically
+          resizes the viewport — window.innerHeight returns the
+          CURRENTLY visible area (e.g. 700 px when URL bar is shown),
+          while CSS `100vh` resolves to the LARGEST possible viewport
+          (e.g. 852 px). The .content element is sized via CSS
+          `min-height: 100vh`, so its offsetHeight matches the static
+          large viewport. If we use innerHeight here the start-state
+          image renders smaller than the .content sticky pin, leaving
+          a dark band above and below the photo (user feedback
+          2026-05-01: "ta sekce jakoby posunutá dolů"). Reading the
+          .content's actual size keeps the image in lockstep with
+          the pin regardless of the URL-bar state.
+        */
+        const contentEl = section.querySelector<HTMLElement>('.content');
+        const viewportWidth = contentEl?.offsetWidth || window.innerWidth;
+        const viewportHeight = contentEl?.offsetHeight || window.innerHeight;
 
         // Force the start state directly — Motion v12's scroll() pre-
         // applies the first keyframe value on mount, but in some
