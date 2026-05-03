@@ -134,6 +134,19 @@ export const ui = {
     'privacy.body':
       'Check-iny, docházka, RPE i sessions se zpracují do přehledů a signálů, se kterými může realizační tým hned pracovat.',
 
+    // Stage 7.5 — Customer testimonial (placeholder pre real quote)
+    // User dodá skutečný citát + autora + roli později (sport, klub).
+    // Do té doby běží placeholder ve stejné stylové rodině; když přijde
+    // skutečný citát, stačí přepsat hodnoty zde a vyměnit avatar v
+    // /public/images/testimonials/.
+    'testimonial.eyebrow': 'OD KLUBU',
+    'testimonial.placeholder': 'Citát bude doplněn po prvním pilotu.',
+    'testimonial.placeholderAuthor': 'Trenér · klub · sport',
+    'testimonial.quote':
+      '„Melveo je první nástroj, který nám dal kontext na trénink, ne jenom čísla. Ranní check-in zabere 30 vteřin a my víme, koho ten den šetřit a koho zatížit."',
+    'testimonial.author': 'Jan Novák',
+    'testimonial.role': 'Hlavní trenér · SK Melveo · fotbal U19',
+
     // Stage 8 — FAQ (added 2026-05-03)
     // Six questions covering the most common things a club/coach
     // asks before booking a pilot or downloading the app. Keep
@@ -268,6 +281,15 @@ export const ui = {
     'privacy.headlineLine2': "coach-ready output.",
     'privacy.body':
       'Check-ins, attendance, RPE, and sessions become clear signals the coaching staff can use immediately.',
+
+    // Customer testimonial — placeholder + final-shape strings
+    'testimonial.eyebrow': 'FROM A CLUB',
+    'testimonial.placeholder': 'Quote coming after the first pilot.',
+    'testimonial.placeholderAuthor': 'Coach · club · sport',
+    'testimonial.quote':
+      '"Melveo is the first tool that gave us context for training, not just numbers. The morning check-in takes 30 seconds and we know who to spare and who to load that day."',
+    'testimonial.author': 'Jan Novák',
+    'testimonial.role': 'Head coach · SK Melveo · football U19',
 
     // FAQ (mirrors CS keys above)
     'faq.eyebrow': 'QUESTIONS',
