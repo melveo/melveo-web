@@ -75,9 +75,32 @@ const altUrls = {
 <html lang={lang === 'cs' ? 'cs' : 'en'}>
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, viewport-fit=cover"
+    />
     <meta name="generator" content={Astro.generator} />
+
+    {/* Browser-chrome theming — matches the dark canvas brand colour
+        so the iOS Safari URL bar / Android Chrome system bar tints
+        with the page (audit 2026-05-03). */}
+    <meta name="theme-color" content="#06090f" media="(prefers-color-scheme: dark)" />
+    <meta name="theme-color" content="#06090f" />
+
+    {/* iOS home-screen / PWA-ish behaviour — when a user adds the
+        site to their home screen, this controls the launch chrome. */}
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="Melveo" />
+
+    {/* Disable iOS's "tappable" autolinking on phone-shaped numbers
+        in copy (some pricing strings get mistaken for phone numbers
+        and turn blue + clickable on iOS Safari). */}
+    <meta name="format-detection" content="telephone=no" />
+
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="icon" type="image/x-icon" href="/favicon.ico" sizes="any" />
+    <link rel="apple-touch-icon" href="/favicon.svg" />
     <link rel="canonical" href={canonicalUrl} />
 
     {/* Brand wordmark font — Quicksand (rounded geometric sans, every
@@ -107,12 +130,18 @@ const altUrls = {
     <meta property="og:description" content={finalDescription} />
     <meta property="og:url" content={canonicalUrl} />
     <meta property="og:image" content={new URL(ogImage, Astro.site).toString()} />
+    <meta property="og:image:alt" content={fullTitle} />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
     <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Melveo" />
     <meta property="og:locale" content={lang === 'cs' ? 'cs_CZ' : 'en_US'} />
     <meta property="og:locale:alternate" content={otherLang === 'cs' ? 'cs_CZ' : 'en_US'} />
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content={fullTitle} />
     <meta name="twitter:description" content={finalDescription} />
+    <meta name="twitter:image" content={new URL(ogImage, Astro.site).toString()} />
+    <meta name="twitter:image:alt" content={fullTitle} />
 
     {/* JSON-LD — SoftwareApplication schema for App Store discoverability */}
     <script
