@@ -91,7 +91,13 @@ const t = useTranslations(lang);
     inset: auto 0 1.5rem 0;
     margin: 0 auto;
     padding: 0 1rem;
-    max-width: min(40rem, 100%);
+    /* Narrower on phones (was 40rem cap with no min — covered ~60 %
+       of mobile viewport including stacked buttons). User feedback
+       2026-05-03: should not eat the hero on first load. */
+    max-width: min(34rem, calc(100vw - 1.5rem));
+    /* Honour iPhone home-indicator safe area so the banner sits
+       above it instead of underneath. */
+    padding-bottom: env(safe-area-inset-bottom, 0);
     z-index: 100;
     transform: translateY(140%);
     opacity: 0;
@@ -265,11 +271,41 @@ const t = useTranslations(lang);
     #cookie-banner {
       inset: auto 0 0.75rem 0;
     }
+    /* Compact card on mobile — smaller padding + smaller fonts so
+       the banner is unobtrusive (was a tall card with stacked
+       buttons that ate ~50 % of the viewport on first load). */
+    .banner-shell {
+      padding: 0.9rem 1rem 1.1rem;
+      gap: 0.55rem 0.85rem;
+      grid-template-areas:
+        "icon body"
+        "actions actions"
+        "panel panel";
+    }
+    .banner-icon {
+      width: 1.85rem;
+      height: 1.85rem;
+    }
+    .banner-title {
+      font-size: 0.92rem;
+    }
+    .banner-text {
+      font-size: 0.78rem;
+      line-height: 1.45;
+    }
+    /* Keep buttons HORIZONTAL on phones (was column-stacking, which
+       added ~120 px of height). Tighter buttons + ellipsis-prone
+       sizing keeps three buttons in one row on viewports ≥ 360 px. */
     .banner-actions {
-      flex-direction: column;
+      flex-direction: row;
+      gap: 0.4rem;
     }
     .banner-actions .btn {
-      width: 100%;
+      flex: 1 1 0;
+      width: auto;
+      padding: 0.55rem 0.6rem;
+      font-size: 0.78rem;
+      white-space: nowrap;
     }
   }
 </style>
@@ -285,15 +321,29 @@ const t = useTranslations(lang);
     const marketingToggle = banner.querySelector<HTMLInputElement>('[data-consent-cat="marketing"]');
 
     function showBanner() {
-      // Defer to idle — don't impact LCP
+      // Reveal AFTER the user has had a chance to see the hero clean.
+      // Wait for either of:
+      //   - first scroll event (user has engaged), OR
+      //   - 4 s timeout (user is reading, hero already absorbed)
+      // Whichever fires first, then defer one more idle tick so we
+      // don't compete with whatever rAF / animation is running.
+      // User feedback 2026-05-03: previous behaviour showed the
+      // banner during initial paint, eating ~50 % of the hero.
       const reveal = () => {
         banner!.dataset.bannerState = 'visible';
       };
-      if ('requestIdleCallback' in window) {
-        (window as any).requestIdleCallback(reveal, { timeout: 1500 });
-      } else {
-        setTimeout(reveal, 800);
-      }
+      let revealed = false;
+      const safeReveal = () => {
+        if (revealed) return;
+        revealed = true;
+        if ('requestIdleCallback' in window) {
+          (window as any).requestIdleCallback(reveal, { timeout: 600 });
+        } else {
+          setTimeout(reveal, 60);
+        }
+      };
+      window.addEventListener('scroll', safeReveal, { once: true, passive: true });
+      setTimeout(safeReveal, 4000);
     }
 
     function hideBanner() {
