@@ -17,9 +17,20 @@
   Permissions-Policy: camera=(), microphone=(), geolocation=(), interest-cohort=()
   Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
 
-# Static assets — long cache + immutable
+# Static assets — long cache + immutable (bundles are content-hashed)
 /assets/*
   Cache-Control: public, max-age=31536000, immutable
+
+# Images — long cache (filenames stable). If a photo needs to change,
+# rename it with a version suffix (e.g. coach-hero-v2.jpg).
+/images/*
+  Cache-Control: public, max-age=2592000
+
+# Favicons — week cache
+/favicon.svg
+  Cache-Control: public, max-age=604800
+/favicon.ico
+  Cache-Control: public, max-age=604800
 
 /badges/*
   Cache-Control: public, max-age=86400
