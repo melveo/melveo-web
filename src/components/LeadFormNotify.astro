@@ -1,0 +1,373 @@
+---
+/**
+ * LeadFormNotify — single-field email capture for App Store launch.
+ *
+ * Replaces the Hero "App Store" mailto: CTA with a real inline form.
+ * On submit POSTs to /api/lead (Worker endpoint defined in
+ * src/worker.ts) which forwards via Resend to hello@melveo.app.
+ *
+ * UX states:
+ *   idle       email field + cyan filled CTA
+ *   sending    CTA disabled + "Odesílám…" label, spinner
+ *   success    field+CTA replaced with check + "Hotovo. Dáme ti vědět."
+ *   error      inline error under the field, CTA re-enabled
+ *
+ * Security:
+ *   - Honeypot field "website" hidden via tabindex=-1 + visually
+ *     hidden CSS. Bots fill it, real users don't.
+ *   - Server validates email + same-origin + rate-limits per IP.
+ *   - No client-side analytics on submit (consent not granted by
+ *     default).
+ *
+ * Accessibility:
+ *   - Real <form> with <label> for screen reader pairing.
+ *   - aria-live region announces success / error.
+ *   - autocomplete="email" + inputmode=email for mobile keyboards.
+ */
+
+import { useTranslations, type Lang } from '../i18n/ui';
+
+interface Props {
+  lang: Lang;
+  /** Visual variant — `inline` is a slim hero-pill-style row,
+   *  `card` is a stand-alone card with heading + body. */
+  variant?: 'inline' | 'card';
+}
+
+const { lang, variant = 'card' } = Astro.props;
+const t = useTranslations(lang);
+---
+
+<form
+  class:list={['lead-notify', `lead-notify--${variant}`]}
+  data-lead-form
+  data-lead-type="app-notify"
+  data-lang={lang}
+  novalidate
+>
+  {variant === 'card' && (
+    <div class="lead-notify__intro">
+      <h3 class="lead-notify__heading">{t('lead.notifyHeading')}</h3>
+      <p class="lead-notify__body">{t('lead.notifyBody')}</p>
+    </div>
+  )}
+
+  <div class="lead-notify__row">
+    <label class="lead-notify__field">
+      <span class="lead-notify__label">{t('lead.emailLabel')}</span>
+      <input
+        type="email"
+        name="email"
+        autocomplete="email"
+        inputmode="email"
+        required
+        placeholder={t('lead.emailPlaceholder')}
+        data-lead-email
+        aria-describedby="lead-notify-error"
+      />
+    </label>
+
+    {/* Honeypot — bots fill, humans don't. Hidden visually + from
+        AT, but not hidden via display:none (some bots skip those). */}
+    <label class="lead-notify__honeypot" aria-hidden="true">
+      <input
+        type="text"
+        name="website"
+        tabindex="-1"
+        autocomplete="off"
+      />
+    </label>
+
+    <button type="submit" class="lead-notify__cta hero-pill hero-pill--filled" data-lead-submit>
+      <span class="hero-pill-shimmer" aria-hidden="true"></span>
+      <span class="hero-pill-content">
+        <span data-lead-cta-label>{t('lead.notifyCta')}</span>
+      </span>
+    </button>
+  </div>
+
+  <p id="lead-notify-error" class="lead-notify__error" role="alert" data-lead-error hidden></p>
+
+  <div class="lead-notify__success" role="status" data-lead-success hidden>
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <path d="M20 6L9 17l-5-5" />
+    </svg>
+    <span>{t('lead.notifySuccess')}</span>
+  </div>
+
+  {/* Localized validation strings exposed to JS via data-* */}
+  <script
+    type="application/json"
+    data-lead-strings
+    set:html={JSON.stringify({
+      sending: t('lead.notifyCtaSending'),
+      cta: t('lead.notifyCta'),
+      errEmailRequired: t('lead.errEmailRequired'),
+      errEmailInvalid: t('lead.errEmailInvalid'),
+      errGeneric: t('lead.notifyError'),
+    })}
+  />
+</form>
+
+<style>
+  .lead-notify {
+    display: block;
+    width: 100%;
+    max-width: 30rem;
+    margin: 0 auto;
+  }
+
+  .lead-notify__intro {
+    text-align: center;
+    margin-bottom: 1.25rem;
+  }
+
+  .lead-notify__heading {
+    margin: 0 0 0.5rem;
+    font-size: clamp(1.25rem, 2.5vw, 1.65rem);
+    font-weight: 700;
+    color: var(--color-text-primary);
+  }
+
+  .lead-notify__body {
+    margin: 0;
+    color: var(--color-text-secondary);
+    font-size: 0.95rem;
+    line-height: 1.5;
+  }
+
+  .lead-notify__row {
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+  }
+  @media (min-width: 480px) {
+    .lead-notify--inline .lead-notify__row {
+      flex-direction: row;
+      align-items: center;
+    }
+  }
+
+  .lead-notify__field {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+
+  .lead-notify__label {
+    /* Visually hidden but available to screen readers. */
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+  }
+
+  .lead-notify__field input {
+    width: 100%;
+    height: 3rem;
+    padding: 0 1.1rem;
+    border-radius: 9999px;
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    background: rgba(255, 255, 255, 0.04);
+    color: var(--color-text-primary);
+    font: inherit;
+    font-size: 0.95rem;
+    transition: border-color 0.18s ease, background 0.18s ease;
+    -webkit-appearance: none;
+  }
+  .lead-notify__field input::placeholder {
+    color: color-mix(in srgb, var(--color-text-secondary) 70%, transparent);
+  }
+  .lead-notify__field input:focus {
+    outline: none;
+    border-color: color-mix(in srgb, var(--color-accent-primary) 60%, transparent);
+    background: rgba(0, 240, 255, 0.04);
+  }
+  .lead-notify__field input:focus-visible {
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-accent-primary) 30%, transparent);
+  }
+  .lead-notify[data-lead-state="error"] .lead-notify__field input {
+    border-color: color-mix(in srgb, #ff5566 70%, transparent);
+  }
+
+  .lead-notify__honeypot {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    pointer-events: none;
+    opacity: 0;
+  }
+
+  .lead-notify__cta {
+    /* Inherits .hero-pill / .hero-pill--filled visuals. */
+    flex-shrink: 0;
+    cursor: pointer;
+    border: 0;
+    font: inherit;
+  }
+  .lead-notify__cta[disabled] {
+    opacity: 0.6;
+    cursor: progress;
+  }
+
+  .lead-notify__error {
+    margin: 0.55rem 0 0;
+    font-size: 0.85rem;
+    color: #ff8895;
+  }
+
+  .lead-notify__success {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0.85rem 1.1rem;
+    border-radius: 1rem;
+    background: color-mix(in srgb, var(--color-accent-primary) 12%, transparent);
+    border: 1px solid color-mix(in srgb, var(--color-accent-primary) 30%, transparent);
+    color: var(--color-text-primary);
+    font-size: 0.95rem;
+    line-height: 1.4;
+  }
+  .lead-notify__success svg {
+    width: 1.1rem;
+    height: 1.1rem;
+    color: var(--color-accent-primary);
+    flex-shrink: 0;
+  }
+
+  /* Hide the form once we've shown the success state. */
+  .lead-notify[data-lead-state="success"] .lead-notify__row,
+  .lead-notify[data-lead-state="success"] .lead-notify__error {
+    display: none;
+  }
+</style>
+
+<script>
+  /*
+    Lead form handler — works for BOTH the App Store notify form
+    (this component) and the Pilot inquiry form (LeadFormPilot.astro)
+    via shared data attributes:
+      data-lead-form     — form root
+      data-lead-type     — "app-notify" | "pilot"
+      data-lead-strings  — JSON dictionary of localized UI strings
+      data-lead-submit   — submit button
+      data-lead-error    — inline error <p>
+      data-lead-success  — success message block
+      data-lead-state    — "" | "sending" | "success" | "error"
+      data-lead-email    — the email input (always present)
+  */
+  type LeadStrings = {
+    sending: string;
+    cta?: string;
+    errEmailRequired: string;
+    errEmailInvalid: string;
+    errClubRequired?: string;
+    errSportRequired?: string;
+    errGeneric: string;
+  };
+
+  document.querySelectorAll<HTMLFormElement>('[data-lead-form]').forEach((form) => {
+    if (form.dataset.leadInit === '1') return;
+    form.dataset.leadInit = '1';
+
+    const stringsEl = form.querySelector<HTMLScriptElement>('[data-lead-strings]');
+    const strings: LeadStrings = JSON.parse(stringsEl?.textContent || '{}');
+    const submitBtn = form.querySelector<HTMLButtonElement>('[data-lead-submit]');
+    const ctaLabelEl = form.querySelector<HTMLElement>('[data-lead-cta-label]');
+    const errorEl = form.querySelector<HTMLElement>('[data-lead-error]');
+    const successEl = form.querySelector<HTMLElement>('[data-lead-success]');
+    const emailInput = form.querySelector<HTMLInputElement>('[data-lead-email]');
+    const lang = form.dataset.lang || 'cs';
+    const type = form.dataset.leadType || 'app-notify';
+
+    const setState = (state: '' | 'sending' | 'success' | 'error') => {
+      form.dataset.leadState = state;
+    };
+
+    const setError = (msg: string) => {
+      if (!errorEl) return;
+      errorEl.textContent = msg;
+      errorEl.hidden = false;
+      setState('error');
+    };
+
+    const clearError = () => {
+      if (!errorEl) return;
+      errorEl.hidden = true;
+      errorEl.textContent = '';
+    };
+
+    const validate = (): string | null => {
+      const email = emailInput?.value.trim() ?? '';
+      if (!email) return strings.errEmailRequired;
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)) return strings.errEmailInvalid;
+
+      if (type === 'pilot') {
+        const club = (form.elements.namedItem('club') as HTMLInputElement | null)?.value.trim() ?? '';
+        const sport = (form.elements.namedItem('sport') as HTMLInputElement | null)?.value.trim() ?? '';
+        if (!club) return strings.errClubRequired ?? 'Club required';
+        if (!sport) return strings.errSportRequired ?? 'Sport required';
+      }
+      return null;
+    };
+
+    form.addEventListener('submit', async (event) => {
+      event.preventDefault();
+      clearError();
+
+      const validationError = validate();
+      if (validationError) {
+        setError(validationError);
+        emailInput?.focus();
+        return;
+      }
+
+      // Read all fields the worker accepts
+      const email = emailInput?.value.trim() ?? '';
+      const club = (form.elements.namedItem('club') as HTMLInputElement | null)?.value.trim() ?? '';
+      const sport = (form.elements.namedItem('sport') as HTMLInputElement | null)?.value.trim() ?? '';
+      const role = (form.elements.namedItem('role') as HTMLInputElement | null)?.value.trim() ?? '';
+      const message = (form.elements.namedItem('message') as HTMLTextAreaElement | null)?.value.trim() ?? '';
+      const honeypot = (form.elements.namedItem('website') as HTMLInputElement | null)?.value ?? '';
+
+      setState('sending');
+      if (submitBtn) submitBtn.disabled = true;
+      if (ctaLabelEl && strings.sending) ctaLabelEl.textContent = strings.sending;
+
+      try {
+        const response = await fetch('/api/lead', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            type,
+            email,
+            club,
+            sport,
+            role,
+            message,
+            website: honeypot,
+            lang,
+          }),
+        });
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}`);
+        }
+        setState('success');
+        if (successEl) successEl.hidden = false;
+      } catch (err) {
+        console.error('[lead-form] submit failed:', err);
+        setError(strings.errGeneric);
+        if (submitBtn) submitBtn.disabled = false;
+        if (ctaLabelEl && strings.cta) ctaLabelEl.textContent = strings.cta;
+      }
+    });
+  });
+</script>

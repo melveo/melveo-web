@@ -3,15 +3,17 @@
 # Workers + Static Assets config for the melveo.app marketing site.
 #
 # Deployed to a Cloudflare Worker named `melveo-web` with the static
-# build output (dist/) bound as ASSETS, plus the bindings codex set up
-# for runtime use (Cloudflare Images + KV session store).
+# build output (dist/) bound as ASSETS, plus a tiny TypeScript
+# Worker entry that adds /api/lead for the App Store notify + Pilot
+# inquiry forms (T14 + T15, 2026-05-03).
 #
-# Auto-deploy is wired through Workers Builds — every push to main on
-# the matk0shub/melveo-web GitHub repo runs `bun install && bun run
-# build && bunx wrangler deploy`. See dashboard → melveo-web → Settings
-# → Builds for the connection.
+# Auto-deploy is wired through Workers Builds — every push to main
+# on the matk0shub/melveo-web GitHub repo runs `bun install &&
+# bun run build && bunx wrangler deploy`. See dashboard → melveo-web
+# → Settings → Builds for the connection.
 
 name = "melveo-web"
+main = "src/worker.ts"
 compatibility_date = "2026-05-01"
 compatibility_flags = ["global_fetch_strictly_public"]
 
@@ -20,11 +22,39 @@ compatibility_flags = ["global_fetch_strictly_public"]
 # (which Astro copies to dist/), so cache + security headers + the
 # locale-redirect rules ship with the deploy.
 #
-# This is an assets-only Worker (no `main` script, no bindings).
-# Cloudflare's runtime serves files from `directory` directly. If we
-# ever want runtime KV / Images / dynamic routes, add a Worker entry
-# point + the binding back here.
+# `binding = "ASSETS"` exposes env.ASSETS.fetch() inside the Worker
+# so we can fall through to static files for any non-API request.
 [assets]
 directory = "./dist"
+binding = "ASSETS"
 not_found_handling = "404-page"
 html_handling = "auto-trailing-slash"
+
+# Vars available to the Worker (non-secret). Override via dashboard
+# Settings → Variables and Secrets if needed.
+[vars]
+LEAD_NOTIFY_TO = "hello@melveo.app"
+LEAD_NOTIFY_FROM = "Melveo Web <notifications@melveo.app>"
+
+# ─────────────────────────────────────────────────────────────────
+# SECRETS that need to be set out-of-band (NOT in this file):
+#
+#   wrangler secret put RESEND_API_KEY
+#     OR
+#   Dashboard → melveo-web → Settings → Variables and Secrets →
+#   Add secret → Name: RESEND_API_KEY, Value: <re_xxxx from Resend>
+#
+#   The /api/lead endpoint falls back to console.log() if this
+#   secret is missing — the site won't break, but lead emails
+#   won't deliver. Watch `wrangler tail` during the gap.
+#
+# OPTIONAL KV binding for per-IP rate limiting (3 submissions per
+# IP per 10 minutes). Without it the endpoint runs unlimited:
+#
+#   wrangler kv namespace create LEAD_RATE_LIMIT
+#   then add the printed binding block under [[kv_namespaces]]:
+#
+#   [[kv_namespaces]]
+#   binding = "LEAD_RATE_LIMIT"
+#   id = "<id from create command>"
+# ─────────────────────────────────────────────────────────────────

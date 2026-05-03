@@ -134,6 +134,37 @@ export const ui = {
     'privacy.body':
       'Check-iny, docházka, RPE i sessions se zpracují do přehledů a signálů, se kterými může realizační tým hned pracovat.',
 
+    // Lead capture forms (App Store notify + Pilot inquiry, T14 + T15)
+    'lead.notifyHeading': 'Dej nám e-mail.',
+    'lead.notifyBody': 'Dáme ti vědět hned jak Melveo dorazí do App Store.',
+    'lead.emailPlaceholder': 'tvoje@adresa.cz',
+    'lead.emailLabel': 'E-mail',
+    'lead.notifyCta': 'Dej mi vědět',
+    'lead.notifyCtaSending': 'Odesílám…',
+    'lead.notifySuccess': 'Hotovo. Dáme ti vědět při launchi.',
+    'lead.notifyError':
+      'Něco se nepovedlo. Napiš nám rovnou na hello@melveo.app.',
+
+    'lead.pilotHeading': 'Vyžádat pilot.',
+    'lead.pilotBody':
+      '15 minut hovoru, demo appky, pilot 1 970 Kč na 30 dní s garancí vrácení peněz.',
+    'lead.clubLabel': 'Klub',
+    'lead.clubPlaceholder': 'SK Slavia Praha',
+    'lead.sportLabel': 'Sport',
+    'lead.sportPlaceholder': 'fotbal, hokej, volejbal…',
+    'lead.roleLabel': 'Tvoje role (volitelné)',
+    'lead.rolePlaceholder': 'hlavní trenér, manažer…',
+    'lead.messageLabel': 'Zpráva (volitelné)',
+    'lead.messagePlaceholder': 'Cokoliv co bychom měli vědět před hovorem.',
+    'lead.pilotCta': 'Odeslat',
+    'lead.pilotSuccess': 'Děkujeme. Ozveme se do 1 pracovního dne.',
+
+    // Field validation strings (client-side)
+    'lead.errEmailRequired': 'Vyplň e-mail.',
+    'lead.errEmailInvalid': 'Tohle nevypadá jako e-mail.',
+    'lead.errClubRequired': 'Vyplň jméno klubu.',
+    'lead.errSportRequired': 'Vyplň sport.',
+
     // Stage 6.75 — App screenshot showcase (placeholder pre real images)
     // User dodá reálné iOS screenshoty appky později. Do té doby
     // se zobrazí 3 prázdné phone-frame placeholdery v správném layoutu
@@ -298,6 +329,36 @@ export const ui = {
     'privacy.headlineLine2': "coach-ready output.",
     'privacy.body':
       'Check-ins, attendance, RPE, and sessions become clear signals the coaching staff can use immediately.',
+
+    // Lead capture forms — App Store notify + Pilot inquiry
+    'lead.notifyHeading': 'Drop us your email.',
+    'lead.notifyBody': "We'll let you know the moment Melveo hits the App Store.",
+    'lead.emailPlaceholder': 'you@example.com',
+    'lead.emailLabel': 'Email',
+    'lead.notifyCta': 'Notify me',
+    'lead.notifyCtaSending': 'Sending…',
+    'lead.notifySuccess': "Done — we'll email you at launch.",
+    'lead.notifyError':
+      'Something went wrong. Write us at hello@melveo.app instead.',
+
+    'lead.pilotHeading': 'Request a pilot.',
+    'lead.pilotBody':
+      '15-minute call, app demo, 1,970 CZK pilot for 30 days with a money-back guarantee.',
+    'lead.clubLabel': 'Club',
+    'lead.clubPlaceholder': 'SK Slavia Praha',
+    'lead.sportLabel': 'Sport',
+    'lead.sportPlaceholder': 'football, hockey, volleyball…',
+    'lead.roleLabel': 'Your role (optional)',
+    'lead.rolePlaceholder': 'head coach, manager…',
+    'lead.messageLabel': 'Message (optional)',
+    'lead.messagePlaceholder': 'Anything we should know before the call.',
+    'lead.pilotCta': 'Send',
+    'lead.pilotSuccess': "Thanks — we'll get back to you within 1 business day.",
+
+    'lead.errEmailRequired': 'Email is required.',
+    'lead.errEmailInvalid': "That doesn't look like a valid email.",
+    'lead.errClubRequired': 'Club name is required.',
+    'lead.errSportRequired': 'Sport is required.',
 
     // App screenshot showcase — placeholder + final-shape strings
     'appShots.eyebrow': 'WHAT THE APP LOOKS LIKE',

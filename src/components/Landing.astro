@@ -24,6 +24,7 @@ import PricingStage from './PricingStage.astro';
 import AppShotsStage from './AppShotsStage.astro';
 import TestimonialStage from './TestimonialStage.astro';
 import FaqStage from './FaqStage.astro';
+import ContactStage from './ContactStage.astro';
 import { useTranslations, type Lang } from '../i18n/ui';
 
 interface Props {
@@ -267,6 +268,16 @@ const feedbackItems =
   <!--   schema for Google rich results.                              -->
   <!-- ============================================================== -->
   <FaqStage lang={lang} />
+
+  <!-- ============================================================== -->
+  <!-- STAGE 8.5 — Contact / Lead capture (added 2026-05-03)           -->
+  <!--   Two real on-page forms (App Store notify + Pilot inquiry).   -->
+  <!--   POSTs to /api/lead → Worker → Resend → hello@melveo.app.     -->
+  <!--   Replaces the previous mailto-only CTAs as primary lead       -->
+  <!--   capture path. The pilot-cta-stage below stays as a quiet     -->
+  <!--   "email us directly" fallback.                                -->
+  <!-- ============================================================== -->
+  <ContactStage lang={lang} />
 
   <!-- ============================================================== -->
   <!-- STAGE 9 — Pilot CTA                                             -->

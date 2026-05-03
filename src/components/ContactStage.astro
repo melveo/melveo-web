@@ -1,0 +1,131 @@
+---
+/**
+ * ContactStage — two-column lead capture (T14 + T15).
+ *
+ * Left column:  LeadFormNotify  — single-field App Store launch notify
+ * Right column: LeadFormPilot   — multi-field pilot inquiry
+ *
+ * Replaces the previous mailto-only CTAs with real on-page forms
+ * (POSTs to /api/lead → Worker → Resend → hello@melveo.app).
+ * The legacy pilot-cta-stage stays at the bottom of the page as a
+ * quiet "email us directly" fallback for visitors who prefer it.
+ *
+ * Mobile: forms stack into a single column.
+ * Tablet+: 2 columns side-by-side, notify is half-width.
+ */
+
+import { type Lang } from '../i18n/ui';
+import LeadFormNotify from './LeadFormNotify.astro';
+import LeadFormPilot from './LeadFormPilot.astro';
+
+interface Props {
+  lang: Lang;
+}
+
+const { lang } = Astro.props;
+---
+
+<section class="contact-stage" aria-labelledby="contact-heading">
+  <div class="contact-stage__intro">
+    <p class="contact-stage__eyebrow">
+      {lang === 'cs' ? 'KONTAKT' : 'GET IN TOUCH'}
+    </p>
+    <h2 id="contact-heading" class="contact-stage__headline">
+      {lang === 'cs' ? 'Začněte tady.' : 'Start here.'}
+    </h2>
+    <p class="contact-stage__body">
+      {lang === 'cs'
+        ? 'Buď ti dáme vědět při launchi v App Store, nebo rovnou zařídíme pilot pro tvůj klub.'
+        : 'Either we let you know at App Store launch, or we set up a pilot for your club right away.'}
+    </p>
+  </div>
+
+  <div class="contact-stage__grid">
+    <div class="contact-stage__cell contact-stage__cell--notify">
+      <LeadFormNotify lang={lang} variant="card" />
+    </div>
+    <div class="contact-stage__cell contact-stage__cell--pilot">
+      <LeadFormPilot lang={lang} />
+    </div>
+  </div>
+</section>
+
+<style>
+  .contact-stage {
+    position: relative;
+    width: 100%;
+    background: var(--color-bg-canvas);
+    border-top: 1px solid var(--color-stroke-base);
+    padding: clamp(4rem, 8vw, 6.5rem) clamp(1rem, 4vw, 2rem);
+    overflow: hidden;
+  }
+
+  .contact-stage::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(
+      ellipse at 50% 30%,
+      color-mix(in srgb, var(--color-accent-primary) 9%, transparent),
+      transparent 55%
+    );
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .contact-stage__intro {
+    position: relative;
+    z-index: 1;
+    max-width: 50rem;
+    margin: 0 auto clamp(2.5rem, 5vw, 4rem);
+    text-align: center;
+  }
+
+  .contact-stage__eyebrow {
+    margin: 0 0 1rem;
+    color: var(--color-accent-primary);
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.4em;
+    text-transform: uppercase;
+  }
+
+  .contact-stage__headline {
+    margin: 0 0 1rem;
+    font-size: clamp(2rem, 5vw, 3.25rem);
+    font-weight: 800;
+    line-height: 1;
+    letter-spacing: -0.04em;
+  }
+
+  .contact-stage__body {
+    margin: 0 auto;
+    max-width: 38rem;
+    color: var(--color-text-secondary);
+    font-size: clamp(0.95rem, 1.5vw, 1.125rem);
+    line-height: 1.6;
+  }
+
+  .contact-stage__grid {
+    position: relative;
+    z-index: 1;
+    max-width: 76rem;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: clamp(2rem, 4vw, 3rem);
+    align-items: start;
+  }
+  @media (min-width: 880px) {
+    .contact-stage__grid {
+      /* Pilot form (right) is wider — multi-field — so give it more
+         space on tablet+. Notify form is compact. */
+      grid-template-columns: minmax(0, 0.85fr) minmax(0, 1.15fr);
+    }
+  }
+
+  .contact-stage__cell {
+    display: flex;
+    justify-content: center;
+  }
+</style>

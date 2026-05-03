@@ -1,0 +1,221 @@
+---
+/**
+ * LeadFormPilot — multi-field pilot inquiry form.
+ *
+ * Replaces the Hero "Pilot for your club" mailto: CTA AND the
+ * Pricing "Request pilot" CTA with a real inline form. POSTs to
+ * /api/lead with type=pilot which triggers a richer email subject
+ * line and includes club / sport / role / message in the body.
+ *
+ * Reuses the form-handler script from LeadFormNotify (single
+ * shared submit listener via [data-lead-form] selector — both
+ * forms behave identically beyond which fields are validated).
+ */
+
+import { useTranslations, type Lang } from '../i18n/ui';
+
+interface Props {
+  lang: Lang;
+}
+
+const { lang } = Astro.props;
+const t = useTranslations(lang);
+---
+
+<form
+  class="lead-pilot lead-notify lead-notify--card"
+  data-lead-form
+  data-lead-type="pilot"
+  data-lang={lang}
+  novalidate
+>
+  <div class="lead-notify__intro">
+    <h3 class="lead-notify__heading">{t('lead.pilotHeading')}</h3>
+    <p class="lead-notify__body">{t('lead.pilotBody')}</p>
+  </div>
+
+  <div class="lead-pilot__fields">
+    <label class="lead-pilot__field">
+      <span class="lead-pilot__label">{t('lead.emailLabel')}</span>
+      <input
+        type="email"
+        name="email"
+        autocomplete="email"
+        inputmode="email"
+        required
+        placeholder={t('lead.emailPlaceholder')}
+        data-lead-email
+      />
+    </label>
+
+    <label class="lead-pilot__field">
+      <span class="lead-pilot__label">{t('lead.clubLabel')}</span>
+      <input
+        type="text"
+        name="club"
+        autocomplete="organization"
+        required
+        maxlength="200"
+        placeholder={t('lead.clubPlaceholder')}
+      />
+    </label>
+
+    <label class="lead-pilot__field">
+      <span class="lead-pilot__label">{t('lead.sportLabel')}</span>
+      <input
+        type="text"
+        name="sport"
+        required
+        maxlength="60"
+        placeholder={t('lead.sportPlaceholder')}
+      />
+    </label>
+
+    <label class="lead-pilot__field">
+      <span class="lead-pilot__label">{t('lead.roleLabel')}</span>
+      <input
+        type="text"
+        name="role"
+        autocomplete="organization-title"
+        maxlength="80"
+        placeholder={t('lead.rolePlaceholder')}
+      />
+    </label>
+
+    <label class="lead-pilot__field lead-pilot__field--full">
+      <span class="lead-pilot__label">{t('lead.messageLabel')}</span>
+      <textarea
+        name="message"
+        rows="3"
+        maxlength="1000"
+        placeholder={t('lead.messagePlaceholder')}
+      ></textarea>
+    </label>
+
+    {/* Honeypot */}
+    <label class="lead-notify__honeypot" aria-hidden="true">
+      <input type="text" name="website" tabindex="-1" autocomplete="off" />
+    </label>
+  </div>
+
+  <button type="submit" class="lead-pilot__cta hero-pill hero-pill--filled" data-lead-submit>
+    <span class="hero-pill-shimmer" aria-hidden="true"></span>
+    <span class="hero-pill-content">
+      <span data-lead-cta-label>{t('lead.pilotCta')}</span>
+    </span>
+  </button>
+
+  <p class="lead-notify__error" role="alert" data-lead-error hidden></p>
+
+  <div class="lead-notify__success" role="status" data-lead-success hidden>
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <path d="M20 6L9 17l-5-5" />
+    </svg>
+    <span>{t('lead.pilotSuccess')}</span>
+  </div>
+
+  <script
+    type="application/json"
+    data-lead-strings
+    set:html={JSON.stringify({
+      sending: t('lead.notifyCtaSending'),
+      cta: t('lead.pilotCta'),
+      errEmailRequired: t('lead.errEmailRequired'),
+      errEmailInvalid: t('lead.errEmailInvalid'),
+      errClubRequired: t('lead.errClubRequired'),
+      errSportRequired: t('lead.errSportRequired'),
+      errGeneric: t('lead.notifyError'),
+    })}
+  />
+</form>
+
+<style>
+  .lead-pilot {
+    /* Inherits .lead-notify base styles for .intro / .label / .error /
+       .success / .cta — only override layout for the multi-field grid. */
+    max-width: 36rem;
+  }
+
+  .lead-pilot__fields {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 0.85rem;
+    margin-bottom: 1rem;
+  }
+  @media (min-width: 600px) {
+    .lead-pilot__fields {
+      grid-template-columns: 1fr 1fr;
+    }
+    .lead-pilot__field--full {
+      grid-column: 1 / -1;
+    }
+  }
+
+  .lead-pilot__field {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+  }
+
+  .lead-pilot__label {
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: var(--color-text-secondary);
+    letter-spacing: 0.01em;
+  }
+
+  .lead-pilot__field input,
+  .lead-pilot__field textarea {
+    width: 100%;
+    padding: 0.85rem 1rem;
+    border-radius: 0.85rem;
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    background: rgba(255, 255, 255, 0.04);
+    color: var(--color-text-primary);
+    font: inherit;
+    font-size: 0.95rem;
+    transition: border-color 0.18s ease, background 0.18s ease;
+    -webkit-appearance: none;
+    resize: vertical;
+  }
+  .lead-pilot__field textarea {
+    min-height: 5.5rem;
+    line-height: 1.45;
+  }
+  .lead-pilot__field input::placeholder,
+  .lead-pilot__field textarea::placeholder {
+    color: color-mix(in srgb, var(--color-text-secondary) 70%, transparent);
+  }
+  .lead-pilot__field input:focus,
+  .lead-pilot__field textarea:focus {
+    outline: none;
+    border-color: color-mix(in srgb, var(--color-accent-primary) 60%, transparent);
+    background: rgba(0, 240, 255, 0.04);
+  }
+  .lead-pilot__field input:focus-visible,
+  .lead-pilot__field textarea:focus-visible {
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-accent-primary) 30%, transparent);
+  }
+
+  .lead-pilot__cta {
+    width: 100%;
+    cursor: pointer;
+    border: 0;
+    font: inherit;
+  }
+  .lead-pilot__cta[disabled] {
+    opacity: 0.6;
+    cursor: progress;
+  }
+
+  /* Hide form contents once submitted successfully */
+  .lead-pilot[data-lead-state="success"] .lead-pilot__fields,
+  .lead-pilot[data-lead-state="success"] .lead-pilot__cta,
+  .lead-pilot[data-lead-state="success"] .lead-pilot__intro,
+  .lead-pilot[data-lead-state="success"] .lead-notify__error {
+    display: none;
+  }
+</style>
+
+{/* The submit handler is defined in LeadFormNotify.astro and binds
+    to ALL [data-lead-form] elements — no need to re-import. */}
