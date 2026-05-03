@@ -35,8 +35,11 @@
 /badges/*
   Cache-Control: public, max-age=86400
 
-# OG image — moderate cache so we can refresh without bust
-/og-default.png
+# OG images — moderate cache so we can refresh without bust.
+# Both .jpg (compatibility) and .webp (modern crawlers) shipped.
+/og-default.jpg
+  Cache-Control: public, max-age=86400
+/og-default.webp
   Cache-Control: public, max-age=86400
 
 # Sitemap should refresh frequently
