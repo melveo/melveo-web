@@ -261,9 +261,26 @@ const steps = content.steps;
             Active state is updated by JS via scroll-position observer
             on the cards rail.
           */}
-          <div class="club-flow-stage__mobile-dots" aria-hidden="true">
-            {steps.map((_, index) => (
-              <span data-club-flow-mobile-dot class:list={{ 'is-active': index === 0 }}></span>
+          {/*
+            Tappable dots — each dot is a real <button> that scrolls
+            the carousel to its card. Wider hit-target wraps the
+            visible dot so finger-sized taps work even on the small
+            6 px / 22 px dots themselves. User feedback 2026-05-03:
+            "carousel dots could be tap-able for direct navigation".
+          */}
+          <div class="club-flow-stage__mobile-dots" role="tablist" aria-label={lang === 'cs' ? 'Krok' : 'Step'}>
+            {steps.map((step, index) => (
+              <button
+                type="button"
+                class="club-flow-stage__mobile-dot"
+                data-club-flow-mobile-dot
+                data-club-flow-target-index={index}
+                role="tab"
+                aria-label={`${lang === 'cs' ? 'Krok' : 'Step'} ${index + 1}: ${step.title}`}
+                aria-selected={index === 0 ? 'true' : 'false'}
+              >
+                <span class:list={['club-flow-stage__mobile-dot-pip', { 'is-active': index === 0 }]} aria-hidden="true"></span>
+              </button>
             ))}
           </div>
         </div>
@@ -1124,7 +1141,33 @@ const steps = content.steps;
       padding-inline: 1rem;
     }
 
-    .club-flow-stage__mobile-dots span {
+    /*
+      Each dot is a real <button> with a 44 × 22 px hit-target that
+      wraps a small visible pip. Hit-target is invisible (transparent
+      background, no border) but covers a finger-sized area so taps
+      land reliably even on the 6 px / 22 px pip itself.
+    */
+    .club-flow-stage__mobile-dot {
+      appearance: none;
+      -webkit-appearance: none;
+      background: transparent;
+      border: 0;
+      padding: 0.6rem 0.4rem;
+      margin: 0;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .club-flow-stage__mobile-dot:focus-visible {
+      outline: 2px solid var(--color-accent-primary);
+      outline-offset: 4px;
+      border-radius: 999px;
+    }
+
+    .club-flow-stage__mobile-dot-pip {
+      display: block;
       width: 0.45rem;
       height: 0.45rem;
       border-radius: 999px;
@@ -1135,7 +1178,7 @@ const steps = content.steps;
         box-shadow 260ms ease;
     }
 
-    .club-flow-stage__mobile-dots span.is-active {
+    .club-flow-stage__mobile-dot-pip.is-active {
       width: 1.4rem;
       background: var(--color-accent-primary);
       box-shadow: 0 0 14px color-mix(in srgb, var(--color-accent-primary) 64%, transparent);
@@ -1278,9 +1321,14 @@ const steps = content.steps;
 
       if (closestIndex !== mobileActiveIndex) {
         mobileActiveIndex = closestIndex;
-        mobileDots.forEach((dot, index) =>
-          dot.classList.toggle('is-active', index === closestIndex),
-        );
+        mobileDots.forEach((dot, index) => {
+          // Toggle the visible pip's active class (the pip is the
+          // span INSIDE the button — the button itself stays a
+          // transparent hit-target).
+          const pip = dot.querySelector('.club-flow-stage__mobile-dot-pip');
+          pip?.classList.toggle('is-active', index === closestIndex);
+          dot.setAttribute('aria-selected', index === closestIndex ? 'true' : 'false');
+        });
         // Mirror active state onto card classes too — keeps any
         // .is-active-derived styling (e.g. specular glow) in sync
         // with the carousel's actual focus.
@@ -1289,6 +1337,33 @@ const steps = content.steps;
         );
       }
     };
+
+    /*
+      Click-to-navigate: tapping a dot scrolls the carousel rail to
+      that card's snap position. Uses smooth scrolling so the user
+      sees the magnet glide. Only wired when the rail is present
+      (mobile carousel layout). Desktop early-exits because
+      cardsRail is null on desktop — but it's not, the same rail
+      element is just laid out differently. We early-exit via the
+      desktop matchMedia check instead.
+    */
+    if (cardsRail) {
+      mobileDots.forEach((dot, index) => {
+        dot.addEventListener('click', () => {
+          if (desktop.matches) return;
+          const card = cards[index];
+          if (!card) return;
+          const padStart = parseFloat(
+            getComputedStyle(cardsRail).scrollPaddingInlineStart,
+          ) || 16;
+          // Card.offsetLeft is the leading edge of the card relative
+          // to the rail's content box. Subtract the scroll-padding
+          // so the leading edge lands at the snap anchor.
+          const target = card.offsetLeft - padStart;
+          cardsRail.scrollTo({ left: target, behavior: 'smooth' });
+        });
+      });
+    }
 
     const scheduleMobileCarousel = () => {
       if (mobileFrame) return;
