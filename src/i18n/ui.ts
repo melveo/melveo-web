@@ -134,6 +134,23 @@ export const ui = {
     'privacy.body':
       'Check-iny, docházka, RPE i sessions se zpracují do přehledů a signálů, se kterými může realizační tým hned pracovat.',
 
+    // Stage 6.75 — App screenshot showcase (placeholder pre real images)
+    // User dodá reálné iOS screenshoty appky později. Do té doby
+    // se zobrazí 3 prázdné phone-frame placeholdery v správném layoutu
+    // — když přijdou skutečné obrázky, stačí je dropnout do
+    // /public/images/app-shots/ a v komponentě prohodit src.
+    'appShots.eyebrow': 'JAK VYPADÁ APPKA',
+    'appShots.headline': 'V telefonu hráče i trenéra.',
+    'appShots.body':
+      'Tři klíčové obrazovky: ranní check-in pro hráče, sessions plán pro trenéra, coach board pro realizační tým.',
+    'appShots.shot1Title': 'Ranní check-in',
+    'appShots.shot1Caption': 'Pětiosé hodnocení za 30 vteřin.',
+    'appShots.shot2Title': 'Sessions',
+    'appShots.shot2Caption': 'Plán tréninku, docházka, RPE.',
+    'appShots.shot3Title': 'Coach board',
+    'appShots.shot3Caption': 'Týmový kontext v reálném čase.',
+    'appShots.placeholder': 'Snímek bude doplněn',
+
     // Stage 7.5 — Customer testimonial (placeholder pre real quote)
     // User dodá skutečný citát + autora + roli později (sport, klub).
     // Do té doby běží placeholder ve stejné stylové rodině; když přijde
@@ -281,6 +298,19 @@ export const ui = {
     'privacy.headlineLine2': "coach-ready output.",
     'privacy.body':
       'Check-ins, attendance, RPE, and sessions become clear signals the coaching staff can use immediately.',
+
+    // App screenshot showcase — placeholder + final-shape strings
+    'appShots.eyebrow': 'WHAT THE APP LOOKS LIKE',
+    'appShots.headline': 'On the player\'s and coach\'s phone.',
+    'appShots.body':
+      'Three key screens: morning check-in for the player, sessions plan for the coach, coach board for the staff.',
+    'appShots.shot1Title': 'Morning check-in',
+    'appShots.shot1Caption': '5-axis rating in 30 seconds.',
+    'appShots.shot2Title': 'Sessions',
+    'appShots.shot2Caption': 'Plan, attendance, RPE.',
+    'appShots.shot3Title': 'Coach board',
+    'appShots.shot3Caption': 'Team context, real-time.',
+    'appShots.placeholder': 'Screenshot coming',
 
     // Customer testimonial — placeholder + final-shape strings
     'testimonial.eyebrow': 'FROM A CLUB',

@@ -21,6 +21,7 @@ import OrbStage from './OrbStage.astro';
 import ParticleStatementStage from './ParticleStatementStage.astro';
 import PromiseStage from './PromiseStage.astro';
 import PricingStage from './PricingStage.astro';
+import AppShotsStage from './AppShotsStage.astro';
 import TestimonialStage from './TestimonialStage.astro';
 import FaqStage from './FaqStage.astro';
 import { useTranslations, type Lang } from '../i18n/ui';
@@ -241,6 +242,14 @@ const feedbackItems =
       </div>
     </div>
   </section>
+
+  <!-- ============================================================== -->
+  <!-- STAGE 6.75 — App screenshot showcase (added 2026-05-03)         -->
+  <!--   Three iPhone-frame mockups (check-in, sessions, coach board). -->
+  <!--   Currently placeholder state — drop real PNG/WEBP into         -->
+  <!--   /public/images/app-shots/ + flip placeholder={false}.         -->
+  <!-- ============================================================== -->
+  <AppShotsStage lang={lang} placeholder={true} />
 
   <!-- ============================================================== -->
   <!-- STAGE 7.5 — Customer testimonial (added 2026-05-03)             -->
