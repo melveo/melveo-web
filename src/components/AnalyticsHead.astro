@@ -13,6 +13,29 @@
  *
  * Order matters: gtag('consent','default',...) must execute before
  * GTM loads any tags. We hand-author the snippet for that reason.
+ *
+ * ─────────────────────────────────────────────────────────────────
+ * SETUP — How to enable Cloudflare Web Analytics on melveo.app
+ * ─────────────────────────────────────────────────────────────────
+ *   1. Cloudflare dashboard → Analytics & Logs → Web Analytics
+ *   2. "Add a site" → enter melveo.app → "Done"
+ *   3. Copy the JS Snippet token (the long hex string in
+ *      `data-cf-beacon='{"token":"…"}'` of the generated snippet)
+ *   4. Workers & Pages → melveo-web → Settings → Variables and
+ *      Secrets → Add variable
+ *      Name: PUBLIC_CF_ANALYTICS_TOKEN
+ *      Value: <paste token>
+ *      Type: Plaintext (must be PUBLIC_ prefixed so Astro inlines
+ *      it at build time)
+ *   5. Trigger a redeploy (push or "Retry build" in dashboard)
+ *   6. Verify: view-source on melveo.app, search for
+ *      "static.cloudflareinsights.com/beacon.min.js" — should be
+ *      present with your token in data-cf-beacon.
+ *
+ * Cloudflare Web Analytics is COOKIELESS so does not require user
+ * consent — it runs alongside the GDPR consent banner without
+ * being gated by it. (GTM tags ARE gated via gtag('consent',...)
+ * default-denied state above.)
  */
 
 const gtmId = import.meta.env.PUBLIC_GTM_CONTAINER_ID ?? '';
