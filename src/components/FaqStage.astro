@@ -1,0 +1,250 @@
+---
+/**
+ * FaqStage — collapsible Q&A list with light glass styling.
+ *
+ * Six questions covering the most common things a club / coach asks
+ * before booking a pilot or downloading the app: who pays, check-in
+ * mechanics, data privacy, supported sports, partial uptake, how to
+ * start. Added 2026-05-03.
+ *
+ * Implementation:
+ *   - Native <details>/<summary> — works without JS, fully accessible
+ *     (keyboard navigable, AT-announced expand/collapse). HTML spec
+ *     requires <summary> as the FIRST child of <details>, so we
+ *     can NOT wrap it in the standard 4-layer .glass-card recipe
+ *     here. Instead each <details> gets a self-contained glass-ish
+ *     surface via backdrop-filter + border + radius applied on the
+ *     element itself.
+ *   - JSON-LD FAQPage schema below — Google + Bing render rich
+ *     snippets in SERP for matching FAQ markup.
+ */
+
+import { useTranslations, type Lang } from '../i18n/ui';
+
+interface Props {
+  lang: Lang;
+}
+
+const { lang } = Astro.props;
+const t = useTranslations(lang);
+
+// Six Q&A pairs. Order matters — most-asked first.
+const items = [
+  { q: t('faq.q1'), a: t('faq.a1') },
+  { q: t('faq.q2'), a: t('faq.a2') },
+  { q: t('faq.q3'), a: t('faq.a3') },
+  { q: t('faq.q4'), a: t('faq.a4') },
+  { q: t('faq.q5'), a: t('faq.a5') },
+  { q: t('faq.q6'), a: t('faq.a6') },
+];
+
+// JSON-LD FAQPage schema — gets rich-result eligibility in SERPs.
+// Schema.org spec: https://schema.org/FAQPage
+const faqSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'FAQPage',
+  mainEntity: items.map((item) => ({
+    '@type': 'Question',
+    name: item.q,
+    acceptedAnswer: { '@type': 'Answer', text: item.a },
+  })),
+};
+---
+
+<section class="faq-stage" aria-labelledby="faq-heading">
+  <div class="faq-stage__inner">
+    <p class="faq-stage__eyebrow">{t('faq.eyebrow')}</p>
+    <h2 id="faq-heading" class="faq-stage__headline">{t('faq.headline')}</h2>
+
+    <ul class="faq-stage__list" role="list">
+      {items.map((item) => (
+        <li class="faq-stage__item">
+          <details class="faq-stage__details">
+            <summary class="faq-stage__summary">
+              <span class="faq-stage__summary-text">{item.q}</span>
+              <svg
+                class="faq-stage__chevron"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                aria-hidden="true"
+              >
+                <path d="M6 9l6 6 6-6" />
+              </svg>
+            </summary>
+            <p class="faq-stage__answer">{item.a}</p>
+          </details>
+        </li>
+      ))}
+    </ul>
+  </div>
+
+  <script
+    type="application/ld+json"
+    set:html={JSON.stringify(faqSchema)}
+  />
+</section>
+
+<style>
+  .faq-stage {
+    position: relative;
+    isolation: isolate;
+    width: 100%;
+    background: var(--color-bg-canvas);
+    border-top: 1px solid var(--color-stroke-base);
+  }
+
+  .faq-stage__inner {
+    max-width: 56rem;
+    margin: 0 auto;
+    padding: clamp(4rem, 8vw, 6.5rem) clamp(1rem, 4vw, 2rem) clamp(4rem, 8vw, 6.5rem);
+  }
+
+  .faq-stage__eyebrow {
+    margin: 0 0 1rem;
+    color: var(--color-accent-primary);
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.4em;
+    text-transform: uppercase;
+    text-align: center;
+  }
+
+  .faq-stage__headline {
+    margin: 0 0 clamp(2rem, 4vw, 3rem);
+    font-size: clamp(2rem, 5vw, 3.25rem);
+    font-weight: 800;
+    line-height: 1;
+    letter-spacing: -0.04em;
+    text-align: center;
+  }
+
+  .faq-stage__list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: clamp(0.75rem, 1.5vw, 1rem);
+  }
+
+  .faq-stage__item {
+    /* Reset any list-derived margin */
+    margin: 0;
+    padding: 0;
+  }
+
+  /*
+    Self-contained glass surface on the <details> — we can't use the
+    standard 4-layer glass-card recipe here because <summary> must be
+    the FIRST child of <details> per HTML spec, and the glass layers
+    would push it down. Instead apply backdrop-blur + soft border +
+    overlay gradient directly to the <details> via background + filter.
+  */
+  .faq-stage__details {
+    position: relative;
+    border-radius: 1.25rem;
+    background: linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.045) 0%,
+      rgba(255, 255, 255, 0.025) 60%,
+      rgba(0, 240, 255, 0.018) 100%
+    );
+    border: 1px solid rgba(255, 255, 255, 0.07);
+    backdrop-filter: blur(14px) saturate(160%);
+    -webkit-backdrop-filter: blur(14px) saturate(160%);
+    box-shadow:
+      0 6px 18px rgba(0, 0, 0, 0.22),
+      inset 1px 1px 0 rgba(255, 255, 255, 0.05);
+    overflow: hidden;
+    transition:
+      border-color 220ms ease,
+      box-shadow 220ms ease;
+  }
+  .faq-stage__details[open] {
+    border-color: color-mix(in srgb, var(--color-accent-primary) 22%, transparent);
+    box-shadow:
+      0 8px 22px rgba(0, 0, 0, 0.28),
+      0 0 24px color-mix(in srgb, var(--color-accent-primary) 14%, transparent),
+      inset 1px 1px 0 rgba(255, 255, 255, 0.07);
+  }
+
+  .faq-stage__summary {
+    /*
+      Hide the native <summary> marker (▶ / ▼) across all browsers
+      — we render our own chevron SVG instead.
+    */
+    list-style: none;
+    cursor: pointer;
+    padding: clamp(1rem, 2vw, 1.25rem) clamp(1.25rem, 2.5vw, 1.5rem);
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .faq-stage__summary::-webkit-details-marker {
+    display: none;
+  }
+  .faq-stage__summary::marker {
+    content: '';
+  }
+  .faq-stage__summary:focus-visible {
+    outline: 2px solid var(--color-accent-primary);
+    outline-offset: -2px;
+    border-radius: inherit;
+  }
+
+  .faq-stage__summary-text {
+    flex: 1;
+    font-size: clamp(0.95rem, 1.5vw, 1.1rem);
+    font-weight: 600;
+    line-height: 1.4;
+    color: var(--color-text-primary);
+  }
+
+  .faq-stage__chevron {
+    flex-shrink: 0;
+    width: 1.25rem;
+    height: 1.25rem;
+    color: var(--color-accent-primary);
+    transition: transform 280ms cubic-bezier(0.32, 0.72, 0.24, 1);
+  }
+  .faq-stage__details[open] .faq-stage__chevron {
+    transform: rotate(180deg);
+  }
+
+  .faq-stage__answer {
+    margin: 0;
+    padding: 0 clamp(1.25rem, 2.5vw, 1.5rem) clamp(1rem, 2vw, 1.25rem);
+    color: var(--color-text-secondary);
+    font-size: clamp(0.9rem, 1.4vw, 1rem);
+    line-height: 1.6;
+    text-wrap: pretty;
+  }
+
+  /* Hover treatment — subtle border lift on cursor devices only.
+     Touch devices skip the hover via @media (hover: hover). */
+  @media (hover: hover) {
+    .faq-stage__details:hover {
+      border-color: rgba(255, 255, 255, 0.12);
+    }
+    .faq-stage__summary:hover .faq-stage__chevron {
+      transform: scale(1.1);
+    }
+    .faq-stage__details[open] .faq-stage__summary:hover .faq-stage__chevron {
+      transform: rotate(180deg) scale(1.1);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .faq-stage__chevron {
+      transition: none;
+    }
+    .faq-stage__details {
+      transition: none;
+    }
+  }
+</style>

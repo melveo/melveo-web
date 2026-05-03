@@ -134,6 +134,31 @@ export const ui = {
     'privacy.body':
       'Check-iny, docházka, RPE i sessions se zpracují do přehledů a signálů, se kterými může realizační tým hned pracovat.',
 
+    // Stage 8 — FAQ (added 2026-05-03)
+    // Six questions covering the most common things a club/coach
+    // asks before booking a pilot or downloading the app. Keep
+    // answers short — long answers go in the docs/blog later.
+    'faq.eyebrow': 'OTÁZKY',
+    'faq.headline': 'Časté otázky.',
+    'faq.q1': 'Kdo platí — klub nebo hráč?',
+    'faq.a1':
+      'Platí klub jednou licencí pro celý tým. Hráči ani trenéři nikdy neplatí — appka je pro ně zdarma. Klub může pilot zrušit kdykoliv.',
+    'faq.q2': 'Co všechno hráč pošle při check-inu?',
+    'faq.a2':
+      'Pětiosý formulář: energie, spánek, bolestivost, nálada, motivace. 30 vteřin ráno. Trenér vidí týmový signál — nikdy syrová čísla jednotlivce.',
+    'faq.q3': 'Jak je to s ochranou dat hráčů?',
+    'faq.a3':
+      'Data zůstávají v EU (Cloudflare Frankfurt + Supabase). Hráč může kdykoliv smazat účet a všechna data. Nikdy data neprodáváme ani nepoužíváme k marketingu.',
+    'faq.q4': 'Pro jaké sporty je Melveo?',
+    'faq.a4':
+      'Týmové sporty — fotbal, hokej, volejbal, basketbal, házená, ragby, lacrosse. Wellness check-in i RPE jsou sport-agnostic. Plánujeme i individuální sporty.',
+    'faq.q5': 'Co když některý hráč nechce check-in vyplňovat?',
+    'faq.a5':
+      'Žádný problém — appka funguje i s 60-70 % týmu. Trenér vidí kdo se zapojil. Většina hráčů ale po prvním týdnu navykne sama, je to 30 sekund.',
+    'faq.q6': 'Jak začneme?',
+    'faq.a6':
+      'Napiš nám na hello@melveo.app — domluvíme 15 minut hovor, ukážeme appku a nasadíme pilot pro tvůj tým. Pilot je 1 970 Kč na 30 dní s garancí vrácení peněz.',
+
     // Stage 9 — pilot CTA
     'pilot.headline': 'Pojďme to spustit.',
     'pilot.body': 'Krátký e-mail stačí.',
@@ -243,6 +268,28 @@ export const ui = {
     'privacy.headlineLine2': "coach-ready output.",
     'privacy.body':
       'Check-ins, attendance, RPE, and sessions become clear signals the coaching staff can use immediately.',
+
+    // FAQ (mirrors CS keys above)
+    'faq.eyebrow': 'QUESTIONS',
+    'faq.headline': 'Frequently asked.',
+    'faq.q1': 'Who pays — the club or the player?',
+    'faq.a1':
+      'The club pays one licence for the whole team. Players and coaches never pay — the app is free for them. The club can cancel a pilot at any time.',
+    'faq.q2': 'What does a player send during check-in?',
+    'faq.a2':
+      'A 5-axis form: energy, sleep, soreness, mood, motivation. 30 seconds in the morning. Coaches see a team signal — never raw individual numbers.',
+    'faq.q3': 'How is player data protected?',
+    'faq.a3':
+      'Data stays in the EU (Cloudflare Frankfurt + Supabase). Players can delete their account and all data at any time. We never sell data or use it for marketing.',
+    'faq.q4': 'Which sports does Melveo support?',
+    'faq.a4':
+      'Team sports — football/soccer, hockey, volleyball, basketball, handball, rugby, lacrosse. Wellness check-in and RPE are sport-agnostic. Individual sports are on the roadmap.',
+    'faq.q5': 'What if some players don’t want to check in?',
+    'faq.a5':
+      'No problem — the app works with 60–70 % team uptake too. Coaches see who joined. Most players settle in after the first week — it’s 30 seconds.',
+    'faq.q6': 'How do we start?',
+    'faq.a6':
+      'Write us at hello@melveo.app — we set up a 15-minute call, demo the app, and start a pilot for your team. The pilot is 1,970 CZK for 30 days with a money-back guarantee.',
 
     'pilot.headline': 'Let’s start it.',
     'pilot.body': 'A short email is enough.',

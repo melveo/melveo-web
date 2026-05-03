@@ -21,6 +21,7 @@ import OrbStage from './OrbStage.astro';
 import ParticleStatementStage from './ParticleStatementStage.astro';
 import PromiseStage from './PromiseStage.astro';
 import PricingStage from './PricingStage.astro';
+import FaqStage from './FaqStage.astro';
 import { useTranslations, type Lang } from '../i18n/ui';
 
 interface Props {
@@ -239,6 +240,14 @@ const feedbackItems =
       </div>
     </div>
   </section>
+
+  <!-- ============================================================== -->
+  <!-- STAGE 8 — FAQ (added 2026-05-03)                                -->
+  <!--   Six common questions before pilot booking. Native            -->
+  <!--   <details>/<summary> for accessibility + SEO FAQPage         -->
+  <!--   schema for Google rich results.                              -->
+  <!-- ============================================================== -->
+  <FaqStage lang={lang} />
 
   <!-- ============================================================== -->
   <!-- STAGE 9 — Pilot CTA                                             -->
