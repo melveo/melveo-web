@@ -245,12 +245,15 @@ const feedbackItems =
   </section>
 
   <!-- ============================================================== -->
-  <!-- STAGE 6.75 — App screenshot showcase (added 2026-05-03)         -->
-  <!--   Three iPhone-frame mockups (check-in, sessions, coach board). -->
-  <!--   Currently placeholder state — drop real PNG/WEBP into         -->
-  <!--   /public/images/app-shots/ + flip placeholder={false}.         -->
+  <!-- STAGE 6.75 — App screenshot showcase (HIDDEN 2026-05-04)         -->
+  <!--   Per user direction: don't show "what the app looks like"      -->
+  <!--   while we only have placeholder phone-frames. Showing empty    -->
+  <!--   wireframes signals "nothing to show yet" — cleanest is to     -->
+  <!--   hide the section until real iOS screenshots ship. Re-enable   -->
+  <!--   by uncommenting + dropping PNG/WEBP into                      -->
+  <!--   /public/images/app-shots/ + flipping placeholder={false}.     -->
   <!-- ============================================================== -->
-  <AppShotsStage lang={lang} placeholder={true} />
+  {/* <AppShotsStage lang={lang} placeholder={false} /> */}
 
   <!-- ============================================================== -->
   <!-- STAGE 7.5 — Customer testimonial (HIDDEN 2026-05-04)            -->
