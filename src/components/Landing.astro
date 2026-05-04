@@ -147,7 +147,7 @@ const feedbackItems =
         </a>
         <a
           href={`mailto:hello@melveo.app?subject=${encodeURIComponent(
-            lang === 'cs' ? 'Zájem o pilot' : 'Pilot enquiry'
+            lang === 'cs' ? 'Kontakt — Melveo' : 'Melveo — get in touch'
           )}`}
           class="hero-pill hero-pill--ghost"
         >
@@ -253,13 +253,16 @@ const feedbackItems =
   <AppShotsStage lang={lang} placeholder={true} />
 
   <!-- ============================================================== -->
-  <!-- STAGE 7.5 — Customer testimonial (added 2026-05-03)             -->
-  <!--   Single coach quote pull. Currently shows a placeholder       -->
-  <!--   "Citát bude doplněn po prvním pilotu". Once a real quote     -->
-  <!--   is ready, set placeholder={false} below + fill in            -->
-  <!--   testimonial.* i18n keys for both locales.                    -->
+  <!-- STAGE 7.5 — Customer testimonial (HIDDEN 2026-05-04)            -->
+  <!--   Per user direction: no fake/anonymous quotes while we have   -->
+  <!--   no real customers yet. The placeholder ("citát po prvním     -->
+  <!--   pilotu") signalled "we have nothing"; an anonymous coach      -->
+  <!--   quote would be deceptive. Cleanest = hide section entirely    -->
+  <!--   until a real, attributable testimonial arrives. Re-enable     -->
+  <!--   by uncommenting + setting placeholder={false} + filling       -->
+  <!--   testimonial.quote / .author / .role for both locales.         -->
   <!-- ============================================================== -->
-  <TestimonialStage lang={lang} placeholder={true} />
+  {/* <TestimonialStage lang={lang} placeholder={false} /> */}
 
   <!-- ============================================================== -->
   <!-- STAGE 8 — FAQ (added 2026-05-03)                                -->

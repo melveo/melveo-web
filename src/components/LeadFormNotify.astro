@@ -252,11 +252,13 @@ const t = useTranslations(lang);
 
 <script>
   /*
-    Lead form handler — works for BOTH the App Store notify form
-    (this component) and the Pilot inquiry form (LeadFormPilot.astro)
-    via shared data attributes:
+    Lead form handler — V2 simplified scope (pilot form retired
+    2026-05-04). Only the App Store notify form binds to this script
+    now; the multi-field pilot validation branch is gone, but we
+    leave the strings interface tolerant of optional pilot keys so
+    a stale render or future second form can re-use the same code.
       data-lead-form     — form root
-      data-lead-type     — "app-notify" | "pilot"
+      data-lead-type     — "app-notify" (only valid value)
       data-lead-strings  — JSON dictionary of localized UI strings
       data-lead-submit   — submit button
       data-lead-error    — inline error <p>
@@ -269,8 +271,6 @@ const t = useTranslations(lang);
     cta?: string;
     errEmailRequired: string;
     errEmailInvalid: string;
-    errClubRequired?: string;
-    errSportRequired?: string;
     errGeneric: string;
   };
 
@@ -309,13 +309,6 @@ const t = useTranslations(lang);
       const email = emailInput?.value.trim() ?? '';
       if (!email) return strings.errEmailRequired;
       if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)) return strings.errEmailInvalid;
-
-      if (type === 'pilot') {
-        const club = (form.elements.namedItem('club') as HTMLInputElement | null)?.value.trim() ?? '';
-        const sport = (form.elements.namedItem('sport') as HTMLInputElement | null)?.value.trim() ?? '';
-        if (!club) return strings.errClubRequired ?? 'Club required';
-        if (!sport) return strings.errSportRequired ?? 'Sport required';
-      }
       return null;
     };
 
@@ -330,12 +323,10 @@ const t = useTranslations(lang);
         return;
       }
 
-      // Read all fields the worker accepts
+      // App-notify form only collects email + honeypot. Worker
+      // accepts the other fields tolerantly so we don't have to
+      // change the contract — just don't send what we don't have.
       const email = emailInput?.value.trim() ?? '';
-      const club = (form.elements.namedItem('club') as HTMLInputElement | null)?.value.trim() ?? '';
-      const sport = (form.elements.namedItem('sport') as HTMLInputElement | null)?.value.trim() ?? '';
-      const role = (form.elements.namedItem('role') as HTMLInputElement | null)?.value.trim() ?? '';
-      const message = (form.elements.namedItem('message') as HTMLTextAreaElement | null)?.value.trim() ?? '';
       const honeypot = (form.elements.namedItem('website') as HTMLInputElement | null)?.value ?? '';
 
       setState('sending');
@@ -349,10 +340,6 @@ const t = useTranslations(lang);
           body: JSON.stringify({
             type,
             email,
-            club,
-            sport,
-            role,
-            message,
             website: honeypot,
             lang,
           }),

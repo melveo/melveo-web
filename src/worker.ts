@@ -102,15 +102,15 @@ async function handleLead(request: Request, env: Env): Promise<Response> {
   }
 
   // ─── Validate type + email ──────────────────────────────────────
-  if (type !== 'app-notify' && type !== 'pilot') {
+  // Pilot lead type was retired 2026-05-04 (pricing pilot offering
+  // sunset). Only `app-notify` is accepted now. Stale pilot POSTs
+  // (cached HTML on someone's machine) get a clear 400 rather than
+  // silently succeeding — UX falls through to the bottom-page mailto.
+  if (type !== 'app-notify') {
     return jsonError(400, 'invalid_type');
   }
   if (!isValidEmail(email)) {
     return jsonError(400, 'invalid_email');
-  }
-  // Pilot form requires more fields
-  if (type === 'pilot' && (!club || !sport)) {
-    return jsonError(400, 'missing_fields');
   }
 
   // ─── Rate limit (best-effort — needs KV binding) ────────────────
@@ -124,22 +124,20 @@ async function handleLead(request: Request, env: Env): Promise<Response> {
   }
 
   // ─── Compose + send ─────────────────────────────────────────────
-  const subject =
-    type === 'pilot'
-      ? `[Melveo pilot] ${club} · ${sport}`
-      : '[Melveo App Store notify]';
+  const subject = '[Melveo App Store notify]';
+
+  // `club / sport / role / message` fields are no longer collected by
+  // any form; left as no-ops in the parsing block above so a stale
+  // cached pilot POST gets a 400 rather than crashing the worker.
+  void club; void sport; void role; void message;
 
   const lines = [
     `Type: ${type}`,
     `Email: ${email}`,
-    type === 'pilot' && `Club: ${club}`,
-    type === 'pilot' && `Sport: ${sport}`,
-    type === 'pilot' && role && `Role: ${role}`,
-    type === 'pilot' && message && `Message: ${message}`,
     `Lang: ${lang}`,
     `IP: ${ip}`,
     `User-Agent: ${request.headers.get('User-Agent') ?? ''}`,
-  ].filter(Boolean) as string[];
+  ];
 
   const text = lines.join('\n');
   const html = `<pre style="font:14px/1.4 -apple-system,BlinkMacSystemFont,system-ui,sans-serif">${escapeHtml(text)}</pre>`;

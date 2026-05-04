@@ -1,23 +1,16 @@
 /**
  * Orb cursor-mask interaction (Giomgio codepen abxGyQX) — desktop
- * uses pointer-follow; phones use device orientation (gyro tilt)
- * because finger-drag conflicts with vertical scroll.
+ * uses pointer-follow on desktop and ambient auto-orbit on touch
+ * devices, with an optional long-press drag while the finger is held.
  *
  *   • Fine pointer (`(pointer: fine)`)  — mice, trackpads
  *     pointermove → rAF-batched write of percentage values into
  *     --x / --y on the secondary layer.
  *
  *   • Coarse pointer (`(pointer: coarse)`) — phones, tablets
- *     1. Default: ambient auto-orbit on a slow Lissajous path so
- *        the orb is alive without input.
- *     2. Mobile-only "Tilt phone" button (rendered in OrbStage):
- *        - On iOS 13+ DeviceOrientationEvent.requestPermission must
- *          be called from a user gesture; we do that here on tap.
- *        - On Android / older iOS the listener attaches directly.
- *        Once tilt is enabled we stop the auto-orbit and let
- *        deviceorientation drive --x / --y from gamma + beta.
- *     3. Touch is NOT wired — it would hijack scroll inside the
- *        section (user 2026-05-01: "tam bude problém se scrollem").
+ *     ambient auto-orbit on a slow Lissajous path so the orb is alive
+ *     without requiring gyro permissions. A long press activates
+ *     temporary finger control; releasing returns to auto-orbit.
  *
  * rAF batching: on rapid input devices pointermove can fire 200+ Hz,
  * which used to translate to 200+ style writes per second. Now we
@@ -27,6 +20,8 @@
 
 const ORBIT_PERIOD_X_MS = 10500;
 const ORBIT_PERIOD_Y_MS = 12800;
+const LONG_PRESS_MS = 420;
+const MOVE_CANCEL_PX = 12;
 
 export function mountOrbCursor() {
   const wrapper = document.querySelector<HTMLElement>('[data-orb-wrapper]');
@@ -52,11 +47,15 @@ export function mountOrbCursor() {
     if (writeRaf === 0) writeRaf = requestAnimationFrame(flushWrite);
   }
 
+  function setFromClientPoint(clientX: number, clientY: number) {
+    pendingX = Math.min(95, Math.max(5, (clientX / window.innerWidth) * 100));
+    pendingY = Math.min(95, Math.max(5, (clientY / window.innerHeight) * 100));
+    scheduleWrite();
+  }
+
   /* ── Fine-pointer path (mouse / trackpad) ───────────────────────── */
   function onPointerMove(event: PointerEvent) {
-    pendingX = (event.clientX / window.innerWidth) * 100;
-    pendingY = (event.clientY / window.innerHeight) * 100;
-    scheduleWrite();
+    setFromClientPoint(event.clientX, event.clientY);
   }
 
   function onPointerDown(event: PointerEvent) {
@@ -106,80 +105,88 @@ export function mountOrbCursor() {
     }
   }
 
-  /* ── Device-orientation tilt (mobile primary input) ─────────────
-     gamma: -90..+90 (left-right tilt), beta: -180..+180 (front-back).
-     We map to a centred range so the orb stays close to viewport
-     centre with reasonable tilt. Holding the phone naturally (beta
-     ≈ 30..60° forward) is the "neutral" pose. */
-  let tiltActive = false;
+  /* ── Touch long-press drag ────────────────────────────────────────
+     Short taps and scroll gestures keep normal page behavior. Only a
+     stationary long press takes over the orb until pointerup. */
+  let touchPointerId: number | null = null;
+  let touchStartX = 0;
+  let touchStartY = 0;
+  let longPressTimer = 0;
+  let touchDragActive = false;
 
-  function onDeviceOrientation(event: DeviceOrientationEvent) {
-    if (!tiltActive) return;
-    const gamma = event.gamma ?? 0;
-    const beta = event.beta ?? 30;
-    // Clamp to a comfortable tilt window so the orb doesn't pin to
-    // the viewport edges with small wrist movements.
-    const xTilt = Math.max(-30, Math.min(30, gamma)) / 30;     // -1..1
-    const yTilt = Math.max(-30, Math.min(30, beta - 45)) / 30; // -1..1, neutral at ~45° hold
-    pendingX = 50 + xTilt * 32;
-    pendingY = 50 + yTilt * 26;
-    scheduleWrite();
+  function preventTouchScroll(event: TouchEvent) {
+    if (touchDragActive) event.preventDefault();
   }
 
-  /* ── Tilt-button handler (mobile only) ─────────────────────────── */
-  async function enableTilt() {
-    /* iOS 13+: DeviceOrientationEvent.requestPermission must be
-       called from a user gesture. Older iOS / Android: not present,
-       just attach the listener. */
-    type DOEStatic = typeof DeviceOrientationEvent & {
-      requestPermission?: () => Promise<'granted' | 'denied'>;
-    };
-    const DOE = (typeof DeviceOrientationEvent !== 'undefined'
-      ? (DeviceOrientationEvent as DOEStatic)
-      : null);
-    if (!DOE) return false;
+  function clearLongPressTimer() {
+    if (longPressTimer !== 0) {
+      window.clearTimeout(longPressTimer);
+      longPressTimer = 0;
+    }
+  }
 
-    if (typeof DOE.requestPermission === 'function') {
-      try {
-        const state = await DOE.requestPermission();
-        if (state !== 'granted') return false;
-      } catch {
-        return false;
+  function endTouchDrag() {
+    clearLongPressTimer();
+    touchPointerId = null;
+    wrapper!.classList.remove('is-orb-touch-dragging');
+
+    if (touchDragActive) {
+      touchDragActive = false;
+      window.removeEventListener('touchmove', preventTouchScroll);
+      startOrbit();
+    }
+  }
+
+  function activateTouchDrag() {
+    if (touchPointerId === null) return;
+    clearLongPressTimer();
+    touchDragActive = true;
+    wrapper!.classList.add('is-orb-touch-dragging');
+    stopOrbit();
+    setFromClientPoint(touchStartX, touchStartY);
+    window.addEventListener('touchmove', preventTouchScroll, { passive: false });
+  }
+
+  function onTouchPointerDown(event: PointerEvent) {
+    if (event.pointerType !== 'touch' || touchPointerId !== null) return;
+
+    touchPointerId = event.pointerId;
+    touchStartX = event.clientX;
+    touchStartY = event.clientY;
+    clearLongPressTimer();
+    longPressTimer = window.setTimeout(activateTouchDrag, LONG_PRESS_MS);
+  }
+
+  function onTouchPointerMove(event: PointerEvent) {
+    if (event.pointerId !== touchPointerId) return;
+
+    if (!touchDragActive) {
+      const dx = event.clientX - touchStartX;
+      const dy = event.clientY - touchStartY;
+      if (Math.hypot(dx, dy) > MOVE_CANCEL_PX) {
+        endTouchDrag();
       }
+      return;
     }
 
-    stopOrbit();
-    tiltActive = true;
-    window.addEventListener('deviceorientation', onDeviceOrientation, { passive: true });
-    return true;
+    event.preventDefault();
+    setFromClientPoint(event.clientX, event.clientY);
   }
 
-  function bindTiltButton() {
-    const btn = document.querySelector<HTMLButtonElement>('[data-orb-tilt-toggle]');
-    if (!btn) return;
-    btn.addEventListener('click', async () => {
-      if (tiltActive) return;
-      const ok = await enableTilt();
-      if (ok) {
-        btn.dataset.state = 'on';
-        btn.setAttribute('aria-pressed', 'true');
-        const label = btn.querySelector<HTMLElement>('[data-orb-tilt-label]');
-        if (label) {
-          // Read the alternate label from a data attr on the button
-          // (set lang-aware in the markup) — fall back to a sensible
-          // default if not present.
-          label.textContent = btn.dataset.activeLabel ?? label.textContent;
-        }
-      }
-    });
+  function onTouchPointerEnd(event: PointerEvent) {
+    if (event.pointerId === touchPointerId) {
+      endTouchDrag();
+    }
   }
 
   /* ── Wire up depending on input class ──────────────────────────── */
   if (isCoarse) {
-    /* Touch devices: ambient auto-orbit by default. The "Tilt phone"
-       button (rendered in OrbStage) toggles to gyro-driven motion. */
+    /* Touch devices: ambient auto-orbit + optional long-press drag. */
     startOrbit();
-    bindTiltButton();
+    wrapper.addEventListener('pointerdown', onTouchPointerDown, { passive: true });
+    wrapper.addEventListener('pointermove', onTouchPointerMove, { passive: false });
+    wrapper.addEventListener('pointerup', onTouchPointerEnd);
+    wrapper.addEventListener('pointercancel', onTouchPointerEnd);
   } else {
     /* Mouse / trackpad — codepen-style cursor follow only. */
     window.addEventListener('pointermove', onPointerMove, { passive: true });
@@ -192,8 +199,9 @@ export function mountOrbCursor() {
     if (document.hidden) {
       if (writeRaf !== 0) cancelAnimationFrame(writeRaf);
       writeRaf = 0;
+      endTouchDrag();
       stopOrbit();
-    } else if (isCoarse && !tiltActive) {
+    } else if (isCoarse) {
       startOrbit();
     }
   });

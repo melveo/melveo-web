@@ -30,7 +30,9 @@ export const ui = {
     'hero.headlineSuffix': '.',
     'hero.subline': 'Wellness, sessions a coach board v jedné aplikaci.',
     'hero.cta.appstore': 'Stáhnout v App Store',
-    'hero.cta.pilot': 'Pilot pro klub →',
+    // Key kept as `pilot` for legacy reference; label is now generic
+    // contact CTA (pilot offering retired 2026-05-04).
+    'hero.cta.pilot': 'Kontakt →',
     'hero.beta': 'TestFlight beta · brzy',
 
     // Stage 2+3 — scroll-linked image grid morph (Kevin Gutowski codepen)
@@ -106,7 +108,7 @@ export const ui = {
     'pricing.headline': 'Začni zdarma.',
     'pricing.headlineAccent': 'Plať jen co potřebuješ.',
     'pricing.subline':
-      'Klub kupuje licenci pro celý tým. Hráči ani trenéři nikdy neplatí. Pilot a roční plány lze zrušit kdykoliv.',
+      'Klub kupuje jednu licenci, která pokryje celý tým — všichni hráči i trenéři mají plný přístup. Roční plány lze zrušit kdykoliv.',
     'pricing.toggleMonthly': 'Měsíčně',
     'pricing.toggleYearly': 'Ročně',
     'pricing.toggleSavings': '−17 %',
@@ -117,7 +119,7 @@ export const ui = {
     'pricing.popular': 'Nejoblíbenější',
     'pricing.included': 'Co je v plánu',
     'pricing.ctaFree': 'Začít zdarma',
-    'pricing.ctaPilot': 'Vyžádat pilot',
+    'pricing.ctaPilot': 'Mám zájem',
     'pricing.athleteHeading': 'Potřebujete víc hráčů?',
     'pricing.athleteBody':
       'Athlete Pack rozšíří tým o dalších 10 hráčů za 5 900 Kč/rok (max 1 pack na tým).',
@@ -203,7 +205,7 @@ export const ui = {
     'faq.headline': 'Časté otázky.',
     'faq.q1': 'Kdo platí — klub nebo hráč?',
     'faq.a1':
-      'Platí klub jednou licencí pro celý tým. Hráči ani trenéři nikdy neplatí — appka je pro ně zdarma. Klub může pilot zrušit kdykoliv.',
+      'Klub platí jednu licenci, která pokryje celý tým — všichni hráči i trenéři mají plný přístup zdarma. Roční plány lze zrušit kdykoliv.',
     'faq.q2': 'Co všechno hráč pošle při check-inu?',
     'faq.a2':
       'Pětiosý formulář: energie, spánek, bolestivost, nálada, motivace. 30 vteřin ráno. Trenér vidí týmový signál — nikdy syrová čísla jednotlivce.',
@@ -218,7 +220,7 @@ export const ui = {
       'Žádný problém — appka funguje i s 60-70 % týmu. Trenér vidí kdo se zapojil. Většina hráčů ale po prvním týdnu navykne sama, je to 30 sekund.',
     'faq.q6': 'Jak začneme?',
     'faq.a6':
-      'Napiš nám na hello@melveo.app — domluvíme 15 minut hovor, ukážeme appku a nasadíme pilot pro tvůj tým. Pilot je 1 970 Kč na 30 dní s garancí vrácení peněz.',
+      'Napiš nám na hello@melveo.app — domluvíme 15 minut hovor, ukážeme appku a probereme nejlepší plán pro tvůj klub. Po launch dostaneš zprávu hned, jak Melveo dorazí do App Store.',
 
     // Stage 9 — pilot CTA
     'pilot.headline': 'Pojďme to spustit.',
@@ -249,7 +251,7 @@ export const ui = {
     'hero.headlineSuffix': '.',
     'hero.subline': 'Wellness, sessions, and coach board in one app.',
     'hero.cta.appstore': 'Download on the App Store',
-    'hero.cta.pilot': 'Pilot for your club →',
+    'hero.cta.pilot': 'Get in touch →',
     'hero.beta': 'TestFlight beta · soon',
 
     'gridMorph.headlineLine1': "Let's",
@@ -303,7 +305,7 @@ export const ui = {
     'pricing.headline': 'Start free.',
     'pricing.headlineAccent': 'Pay only for what you need.',
     'pricing.subline':
-      "Clubs buy a licence for the whole team. Players and coaches never pay. Pilots and annual plans can be cancelled anytime.",
+      "Clubs buy one license that covers the whole team — every player and coach gets full access. Annual plans can be cancelled anytime.",
     'pricing.toggleMonthly': 'Monthly',
     'pricing.toggleYearly': 'Yearly',
     'pricing.toggleSavings': '−17 %',
@@ -314,7 +316,7 @@ export const ui = {
     'pricing.popular': 'Most popular',
     'pricing.included': "What's included",
     'pricing.ctaFree': 'Start free',
-    'pricing.ctaPilot': 'Request pilot',
+    'pricing.ctaPilot': 'Get in touch',
     'pricing.athleteHeading': 'Need more players?',
     'pricing.athleteBody':
       'The Athlete Pack adds 10 more players for 5,900 CZK / year (max 1 pack per team).',
@@ -387,7 +389,7 @@ export const ui = {
     'faq.headline': 'Frequently asked.',
     'faq.q1': 'Who pays — the club or the player?',
     'faq.a1':
-      'The club pays one licence for the whole team. Players and coaches never pay — the app is free for them. The club can cancel a pilot at any time.',
+      'The club pays one license that covers the whole team — every player and coach gets full access at no charge. Annual plans can be cancelled anytime.',
     'faq.q2': 'What does a player send during check-in?',
     'faq.a2':
       'A 5-axis form: energy, sleep, soreness, mood, motivation. 30 seconds in the morning. Coaches see a team signal — never raw individual numbers.',
@@ -402,7 +404,7 @@ export const ui = {
       'No problem — the app works with 60–70 % team uptake too. Coaches see who joined. Most players settle in after the first week — it’s 30 seconds.',
     'faq.q6': 'How do we start?',
     'faq.a6':
-      'Write us at hello@melveo.app — we set up a 15-minute call, demo the app, and start a pilot for your team. The pilot is 1,970 CZK for 30 days with a money-back guarantee.',
+      "Email us at hello@melveo.app — we'll set up a 15-minute call, demo the app, and walk through the right plan for your club. We'll also let you know the moment Melveo hits the App Store.",
 
     'pilot.headline': 'Let’s start it.',
     'pilot.body': 'A short email is enough.',

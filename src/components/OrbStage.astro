@@ -37,31 +37,6 @@ const t = useTranslations(lang);
     <p class="orb-heading">{t('orb.secondary')}</p>
   </div>
 
-  {/*
-    Mobile-only tilt CTA — touch-controlled orb dragging conflicts
-    with vertical scroll, so on phones we expose device orientation
-    instead. Button requests the iOS 13+ permission on tap (Android +
-    older iOS just enable directly). Hidden on cursor devices.
-    The data-state attr toggles between "off" (CTA "Hni telefonem")
-    and "on" (subtle confirmation "Náhni telefon"). */}
-  <button
-    type="button"
-    class="orb-tilt-button"
-    data-orb-tilt-toggle
-    data-state="off"
-    data-active-label={t('orb.tiltActive')}
-    aria-pressed="false"
-  >
-    <span class="orb-tilt-button__icon" aria-hidden="true">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
-        <rect x="6" y="2" width="12" height="20" rx="2.5"></rect>
-        <circle cx="12" cy="18" r="0.6" fill="currentColor"></circle>
-      </svg>
-    </span>
-    <span class="orb-tilt-button__label" data-orb-tilt-label>
-      {t('orb.tiltCta')}
-    </span>
-  </button>
 </section>
 
 <script>
@@ -94,6 +69,7 @@ const t = useTranslations(lang);
     -webkit-user-select: none;
     user-select: none;
     -webkit-tap-highlight-color: transparent;
+    -webkit-touch-callout: none;
   }
 
   .orb-hero {
@@ -114,7 +90,8 @@ const t = useTranslations(lang);
 
     /*
       Glass-marble orb body — pure brand-cyan radial gradient that
-      follows the cursor / device tilt (same --x / --y as the mask).
+      follows the cursor on desktop and ambient auto-orbit on touch
+      devices (same --x / --y as the mask).
       Per user feedback 2026-05-01: "tu kouli více do našich barev"
       — dropped the white-spec stop, every stop is now in the cyan
       ramp:
@@ -182,6 +159,12 @@ const t = useTranslations(lang);
     backface-visibility: hidden;
   }
 
+  .orb-wrapper.is-orb-touch-dragging .orb-hero--secondary {
+    transition:
+      --x 0.12s ease-out,
+      --y 0.12s ease-out;
+  }
+
   .orb-heading {
     margin: 0;
     text-align: center;
@@ -198,111 +181,4 @@ const t = useTranslations(lang);
     margin-right: auto;
   }
 
-  /*
-    Mobile-only tilt CTA — solid cyan pill anchored at the bottom of
-    the orb section. Without permission grant the gyroscope feature
-    silently fails on iOS, so the button needs to be unmissable.
-    User feedback 2026-05-01: "lidi donutit, aby tam klikli". Now:
-      - Filled cyan (matches hero filled pill, not a quiet ghost)
-      - Larger pill (44 px tap target + a bit more) with bold copy
-      - Breathing-glow animation drawing the eye every 2.4 s
-      - Phone-icon wiggle still runs while off
-    After tap: filled-cyan goes ghost-cyan, copy shifts to
-    confirmation, animations stop.
-  */
-  .orb-tilt-button {
-    display: none;
-  }
-
-  @media (pointer: coarse) {
-    .orb-tilt-button {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.6rem;
-      position: absolute;
-      bottom: clamp(1.5rem, 6vh, 3rem);
-      left: 50%;
-      transform: translateX(-50%);
-      z-index: 2;
-      min-height: 48px;
-      padding: 0.85rem 1.4rem;
-      border: 1px solid rgba(0, 240, 255, 0.7);
-      border-radius: 9999px;
-      background: var(--color-accent-primary);
-      color: var(--color-accent-primary-cta-fg);
-      box-shadow:
-        inset 0 1px 0 rgba(255, 255, 255, 0.4),
-        0 14px 36px -10px rgba(0, 240, 255, 0.7),
-        0 0 0 1px rgba(0, 240, 255, 0.45);
-      font: inherit;
-      font-size: 0.95rem;
-      font-weight: 700;
-      letter-spacing: 0.01em;
-      cursor: pointer;
-      -webkit-tap-highlight-color: transparent;
-      animation: orb-tilt-pulse 2.4s ease-in-out infinite;
-    }
-    /* After permission granted: switch to ghost glass treatment so
-       it reads as a confirmation, not a CTA still asking for action. */
-    .orb-tilt-button[data-state='on'] {
-      background: linear-gradient(
-        180deg,
-        rgba(0, 240, 255, 0.12) 0%,
-        rgba(0, 240, 255, 0.04) 60%,
-        rgba(255, 255, 255, 0.02) 100%
-      );
-      backdrop-filter: blur(14px) saturate(160%);
-      -webkit-backdrop-filter: blur(14px) saturate(160%);
-      color: var(--color-text-primary);
-      border-color: rgba(0, 240, 255, 0.32);
-      box-shadow:
-        inset 0 1px 0 rgba(255, 255, 255, 0.16),
-        0 6px 18px -10px rgba(0, 240, 255, 0.3);
-      animation: none;
-      font-weight: 600;
-    }
-    .orb-tilt-button:active {
-      transform: translateX(-50%) scale(0.96);
-    }
-  }
-
-  /* Breathing glow — subtle scale + box-shadow pulse so the button
-     "asks" to be tapped without animating constantly hard. */
-  @keyframes orb-tilt-pulse {
-    0%, 100% {
-      box-shadow:
-        inset 0 1px 0 rgba(255, 255, 255, 0.4),
-        0 14px 36px -10px rgba(0, 240, 255, 0.7),
-        0 0 0 1px rgba(0, 240, 255, 0.45);
-    }
-    50% {
-      box-shadow:
-        inset 0 1px 0 rgba(255, 255, 255, 0.5),
-        0 18px 50px -10px rgba(0, 240, 255, 0.85),
-        0 0 0 4px rgba(0, 240, 255, 0.18);
-    }
-  }
-
-  .orb-tilt-button__icon {
-    display: inline-flex;
-    width: 1.1rem;
-    height: 1.1rem;
-    color: var(--color-accent-primary-cta-fg);
-    /* Wiggle-rotate so the user reads "tilt me" — only while off.
-       Color matches the dark CTA fg for filled state, switches to
-       cyan when ghost (on state). */
-    animation: orb-tilt-wiggle 1.4s ease-in-out infinite;
-  }
-  .orb-tilt-button[data-state='on'] .orb-tilt-button__icon {
-    color: var(--color-accent-primary);
-    animation: none;
-  }
-  @keyframes orb-tilt-wiggle {
-    0%, 100% { transform: rotate(-15deg); }
-    50% { transform: rotate(15deg); }
-  }
-  @media (prefers-reduced-motion: reduce) {
-    .orb-tilt-button { animation: none !important; }
-    .orb-tilt-button__icon { animation: none; }
-  }
 </style>

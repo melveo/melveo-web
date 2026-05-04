@@ -1,22 +1,18 @@
 ---
 /**
- * ContactStage — two-column lead capture (T14 + T15).
+ * ContactStage — App Store launch notify form (single column, centered).
  *
- * Left column:  LeadFormNotify  — single-field App Store launch notify
- * Right column: LeadFormPilot   — multi-field pilot inquiry
+ * Pilot inquiry path was removed 2026-05-04 (pricing pilot offering
+ * sunset). What remains: single email field, "notify me at launch".
+ * The bottom-of-page mailto stage continues to handle direct contact
+ * for clubs that want to reach out before launch.
  *
- * Replaces the previous mailto-only CTAs with real on-page forms
- * (POSTs to /api/lead → Worker → Resend → hello@melveo.app).
- * The legacy pilot-cta-stage stays at the bottom of the page as a
- * quiet "email us directly" fallback for visitors who prefer it.
- *
- * Mobile: forms stack into a single column.
- * Tablet+: 2 columns side-by-side, notify is half-width.
+ * POSTs to /api/lead → Worker → Resend → hello@melveo.app via the
+ * `app-notify` lead type.
  */
 
 import { type Lang } from '../i18n/ui';
 import LeadFormNotify from './LeadFormNotify.astro';
-import LeadFormPilot from './LeadFormPilot.astro';
 
 interface Props {
   lang: Lang;
@@ -35,18 +31,13 @@ const { lang } = Astro.props;
     </h2>
     <p class="contact-stage__body">
       {lang === 'cs'
-        ? 'Buď ti dáme vědět při launchi v App Store, nebo rovnou zařídíme pilot pro tvůj klub.'
-        : 'Either we let you know at App Store launch, or we set up a pilot for your club right away.'}
+        ? 'Dáme ti vědět hned, jak Melveo dorazí do App Store.'
+        : 'We\'ll let you know the moment Melveo hits the App Store.'}
     </p>
   </div>
 
-  <div class="contact-stage__grid">
-    <div class="contact-stage__cell contact-stage__cell--notify">
-      <LeadFormNotify lang={lang} variant="card" />
-    </div>
-    <div class="contact-stage__cell contact-stage__cell--pilot">
-      <LeadFormPilot lang={lang} />
-    </div>
+  <div class="contact-stage__notify">
+    <LeadFormNotify lang={lang} variant="card" />
   </div>
 </section>
 
@@ -106,25 +97,14 @@ const { lang } = Astro.props;
     line-height: 1.6;
   }
 
-  .contact-stage__grid {
+  /* Single centered form — was a 2-col grid (notify + pilot) before
+     2026-05-04 pilot removal. Now the notify form sits alone in a
+     comfortable max-width container. */
+  .contact-stage__notify {
     position: relative;
     z-index: 1;
-    max-width: 76rem;
+    max-width: 32rem;
     margin: 0 auto;
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: clamp(2rem, 4vw, 3rem);
-    align-items: start;
-  }
-  @media (min-width: 880px) {
-    .contact-stage__grid {
-      /* Pilot form (right) is wider — multi-field — so give it more
-         space on tablet+. Notify form is compact. */
-      grid-template-columns: minmax(0, 0.85fr) minmax(0, 1.15fr);
-    }
-  }
-
-  .contact-stage__cell {
     display: flex;
     justify-content: center;
   }
