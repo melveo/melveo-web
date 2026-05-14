@@ -1,7 +1,8 @@
 // @ts-check
 import { defineConfig } from 'astro/config';
-import tailwindcss from '@tailwindcss/vite';
+import react from '@astrojs/react';
 import sitemap from '@astrojs/sitemap';
+import tailwindcss from '@tailwindcss/vite';
 
 // https://astro.build/config
 export default defineConfig({
@@ -17,6 +18,7 @@ export default defineConfig({
     },
   },
   integrations: [
+    react(),
     sitemap({
       i18n: {
         defaultLocale: 'cs',
@@ -31,6 +33,16 @@ export default defineConfig({
   devToolbar: { enabled: false },
   vite: {
     plugins: [tailwindcss()],
+    server: {
+      watch: {
+        ignored: [
+          '**/.playwright-cli/**',
+          '**/.playwright-mcp/**',
+          '**/output/playwright/**',
+          '**/melveo-*.png',
+        ],
+      },
+    },
   },
   build: {
     assets: 'assets',
