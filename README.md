@@ -46,6 +46,54 @@ bun install
 bun run dev   # http://localhost:4321
 ```
 
+First boot does Vite dep optimization (motion, react, three, gsap,
+tailwind…) which takes ~30s. Subsequent starts are ~3-5s because
+`node_modules/.vite/` caches the bundled deps.
+
+### Package-manager rules (avoid the 2026-05 bootstrap regression)
+
+- **Bun is canonical.** Always install with `bun install` and commit
+  the resulting `bun.lock`. Don't mix in `npm install` / `pnpm` —
+  parallel lockfiles drift and break CI silently.
+- **Adding/removing deps:** `bun add <pkg>` or `bun remove <pkg>`,
+  then commit `package.json` + `bun.lock` together in one commit.
+- **Don't hand-edit `"overrides"` in `package.json`** without verifying
+  the resolved version actually loads under Node ESM. The previous
+  `"overrides": { "zod": "4.3.5" }` pinned a build whose subdirectory
+  `package.json` is invalid under strict ESM resolution
+  (`ERR_INVALID_PACKAGE_CONFIG`) — astro never finished booting.
+- **Don't override `server.port` in `astro.config.mjs`.** The default
+  (`4321`) is wired into `.claude/launch.json`, all dev docs, and the
+  Cloudflare Pages preview URL. Changing it silently breaks the
+  Claude preview MCP (it tries `:4321` and gets `chrome-error://`).
+- **Astro config must stay wrapped in `defineConfig({…})`.** Without
+  it you lose type-safety and the `sitemap()` integration silently
+  drops its TypeScript shape — easy to forget to re-add when refactoring.
+
+### When dev start hangs or errors
+
+Symptom: `bun run dev` prints `$ astro dev` then sits silent, no
+"ready in …" line, port 4321 either isn't listening or replies with
+nothing. Standard recovery, in order:
+
+```sh
+# 1. Kill any zombie dev / install processes
+pkill -9 -f 'astro dev'; pkill -9 -f 'bun install'
+
+# 2. Clean reinstall
+rm -rf node_modules                # leave bun.lock in place
+bun install                        # rebuilds from lockfile, ~3-4s
+
+# 3. Verify with a verbose start
+node node_modules/.bin/astro dev --verbose
+```
+
+If `--verbose` reveals a Node error like `ERR_MODULE_NOT_FOUND` or
+`ERR_INVALID_PACKAGE_CONFIG`, the lockfile + a dependency are out of
+sync. Try `rm -rf node_modules bun.lock && bun install` to regenerate
+the lockfile from scratch (last resort — locks in the latest matching
+semver, so review the diff before committing).
+
 ## Build
 
 ```sh
