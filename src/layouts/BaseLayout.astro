@@ -114,23 +114,26 @@ const altUrls = {
     <link rel="canonical" href={canonicalUrl} />
 
     {/*
-      Brand wordmark font — Comfortaa.
-      User 2026-05-15 noticed the apparel / downloads use a font with
-      a distinct lowercase "l" that has a small curl/foot at the
-      bottom; Quicksand (which we'd previously been using) renders
-      "l" as a straight stick. Comfortaa is the closest match in
-      Google Fonts — rounded geometric sans with the signature "l"
-      tail + round "o" + closed-bowl "e". Loaded in weights 500/600/700
-      so we can use 600 as the standard weight (matches brand assets)
-      and have the bolder option for any heading needs.
-      Quicksand kept as a fallback inside --font-wordmark so the
-      stack degrades gracefully if Comfortaa fails to load.
+      Two-font stack — see docs/fonts.md for the full rationale.
+
+      Brand wordmark (Comfortaa) — applied to .melveo-wordmark + the
+        hero headline. Identified 2026-05-15 from the brand apparel /
+        downloads: rounded geometric sans with the signature lowercase
+        "l" that carries a small bottom curl (Quicksand's straight "l"
+        was the visible mismatch). Weights 500/600/700.
+
+      Body sans (Inter) — applied via --font-sans to everything else
+        (paragraphs, UI labels, buttons, pricing cards). Inter is the
+        de-facto SaaS body font in 2026 — Vercel, Linear, Notion,
+        GitHub Next, Stripe… all use it. Highly readable on screens,
+        excellent at small sizes, broad Czech diacritic support.
+        Weights 400/500/600/700.
     */}
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
       rel="stylesheet"
-      href="https://fonts.googleapis.com/css2?family=Comfortaa:wght@500;600;700&family=Quicksand:wght@500;600;700&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Comfortaa:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap"
     />
 
     <!-- Hreflang alternates -->
