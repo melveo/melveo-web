@@ -16,7 +16,10 @@ import HeroScene from './HeroScene.astro';
 import ImageGridScrollMorph from './ImageGridScrollMorph.astro';
 import GooeyStage from './GooeyStage.astro';
 import WordScrollStage from './WordScrollStage.astro';
-import ClubFlowStage from './ClubFlowStage.astro';
+// ClubFlowStage (JEDEN DEN V KLUBU) removed 2026-05-15 per user
+// request — section sat between WordScroll and OrbStage but was
+// redundant with the data-flow narrative the rest of the page
+// already tells.
 import OrbStage from './OrbStage.astro';
 import PromiseStage from './PromiseStage.astro';
 import PricingStage from './PricingStage.astro';
@@ -158,11 +161,6 @@ const t = useTranslations(lang);
   <!-- STAGE 3.75 — Scroll-linked word highlight (Daniel Haim codepen) -->
   <!-- ============================================================== -->
   <WordScrollStage lang={lang} />
-
-  <!-- ============================================================== -->
-  <!-- STAGE 4 — Sticky club workflow                                  -->
-  <!-- ============================================================== -->
-  <ClubFlowStage lang={lang} />
 
   <!-- ============================================================== -->
   <!-- STAGE 5 — Glass orb + rotating text (Giomgio codepen)           -->
