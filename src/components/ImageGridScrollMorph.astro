@@ -515,22 +515,26 @@ const t = useTranslations(lang);
 
   .image-grid-section {
     /*
-      Runway: 360vh desktop / 260vh mobile = 1 viewport pinned +
-      ~2.6× / ~1.6× scroll budget. Shortened from 620vh / 430vh
-      on 2026-05-15 (user feedback: "scroll trvá zbytečně dlouho,
-      ten morph je rychlý a pak už mi přijde jen zbytečný klik").
+      Runway: 280vh desktop / 220vh mobile = 1 viewport pinned +
+      ~1.8× / ~1.2× scroll budget. Shortened again 2026-05-15
+      because the data-flow section right below was sitting too
+      far down — users were scrolling through 4+ viewports of
+      morph runway and assuming the page ended. With 280vh, the
+      data-flow eyebrow sits within ~3 viewports of the hero,
+      which reads as "next section" instead of "buried".
 
-      Math at desktop (360vh, vh=900):
-        - section height: 3240
-        - scrollable: 3240 − 900 = 2340
-        - scaler morph completes at 62% scroll = 1450 → ~1.6 vh in
-        - layer reveal completes at 80% scroll = 1872 → ~2.1 vh in
-        - remaining 20% = 468 = ~0.5 vh of "rest" before next section
-      Tight but reads as deliberate pacing instead of empty scroll.
+      Math at desktop (280vh, vh=900):
+        - section height: 2520
+        - scrollable: 2520 − 900 = 1620
+        - scaler morph at 62% = 1004 (~1.1 vh in)
+        - layer reveal at 80% = 1296 (~1.4 vh in)
+        - remaining 20% = 324 (~0.36 vh rest)
+      Tight runway forces deliberate pacing — morph happens fast,
+      then the honeycomb sits briefly before next section arrives.
     */
     position: relative;
     width: 100%;
-    min-height: 360vh;
+    min-height: 280vh;
     background: var(--color-bg-canvas);
     border-top: 1px solid var(--color-stroke-base);
     overflow: clip;
@@ -538,7 +542,7 @@ const t = useTranslations(lang);
 
   @media (max-width: 1024px) {
     .image-grid-section {
-      min-height: 260vh;
+      min-height: 220vh;
     }
   }
 
