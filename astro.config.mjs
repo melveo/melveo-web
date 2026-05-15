@@ -32,7 +32,7 @@ export default defineConfig({
   // a clean dev preview too).
   devToolbar: { enabled: false },
   vite: {
-    plugins: [tailwindcss()],
+    plugins: [/** @type {any} */ (tailwindcss())],
     server: {
       watch: {
         ignored: [

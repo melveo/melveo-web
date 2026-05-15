@@ -18,7 +18,7 @@ const words = t('wordScroll.words').split('|');
 const startIndex = 0;
 const endIndex = words.length - 1;
 const remainingSteps = Math.max(1, endIndex - startIndex);
-const scrollFriction = 4;
+const scrollFriction = 1.65;
 const scrollDistance = `${remainingSteps * 6.09375 * scrollFriction}rem`;
 const scrollDistanceTablet = `${remainingSteps * 5.4375 * scrollFriction}rem`;
 const scrollDistanceMobile = `${remainingSteps * 3.125 * scrollFriction}rem`;
@@ -48,12 +48,9 @@ const hueStep = (hueEnd - hueStart) / Math.max(1, words.length - 1);
         <ul class="word-scroll-stage__list">
           {words.map((word, index) => (
             <li
-              class="word-scroll-stage__item glass-card glass-card--compact"
+              class="word-scroll-stage__item"
               style={`--i: ${index}; --word-hue: ${hueStart + index * hueStep}; --word-distance: ${Math.abs(index - startIndex)}; --word-focus: ${index === startIndex ? 1 : 0};`}
             >
-              <span class="glass-filter" aria-hidden="true"></span>
-              <span class="glass-overlay" aria-hidden="true"></span>
-              <span class="glass-specular" aria-hidden="true"></span>
               <span class="glass-content word-scroll-stage__word">{word}</span>
             </li>
           ))}
@@ -219,11 +216,9 @@ const hueStep = (hueEnd - hueStart) / Math.max(1, words.length - 1);
     color: var(--word-accent-muted);
     opacity: clamp(0.16, calc(0.2 + (var(--word-focus) * 0.8)), 1);
     filter: brightness(clamp(0.9, calc(0.94 + (var(--word-focus) * 0.2)), 1.14));
-    box-shadow:
-      0 10px 44px color-mix(in oklch, var(--word-accent) calc(var(--word-focus) * 32%), transparent),
-      0 4px 16px rgba(0, 0, 0, calc(var(--word-focus) * 0.2));
+    box-shadow: none;
     transition: none;
-    will-change: opacity, filter, box-shadow;
+    will-change: opacity, filter;
   }
 
   .word-scroll-stage__item:last-of-type {
@@ -243,35 +238,6 @@ const hueStep = (hueEnd - hueStart) / Math.max(1, words.length - 1);
 
   .word-scroll-stage__item:hover {
     transform: none;
-  }
-
-  .word-scroll-stage__item .glass-filter,
-  .word-scroll-stage__item .glass-overlay,
-  .word-scroll-stage__item .glass-specular {
-    inset: -0.08em -0.28em -0.12em;
-    border-radius: inherit;
-    opacity: var(--word-focus);
-  }
-
-  .word-scroll-stage__item .glass-filter {
-    backdrop-filter: blur(12px) saturate(190%);
-    -webkit-backdrop-filter: blur(12px) saturate(190%);
-  }
-
-  .word-scroll-stage__item .glass-overlay {
-    background: linear-gradient(
-      135deg,
-      rgba(255, 255, 255, 0.095),
-      color-mix(in oklch, var(--word-accent) 12%, transparent) 52%,
-      rgba(255, 255, 255, 0.02)
-    );
-  }
-
-  .word-scroll-stage__item .glass-specular {
-    box-shadow:
-      inset 1px 1px 0 rgba(255, 255, 255, 0.34),
-      inset 0 0 10px color-mix(in oklch, var(--word-accent) 30%, transparent),
-      inset -1px -1px 0 rgba(255, 255, 255, 0.05);
   }
 
   .word-scroll-stage__word {
@@ -338,12 +304,6 @@ const hueStep = (hueEnd - hueStart) / Math.max(1, words.length - 1);
     .word-scroll-stage__item,
     .word-scroll-stage__word {
       max-width: 94vw;
-    }
-
-    .word-scroll-stage__item .glass-filter,
-    .word-scroll-stage__item .glass-overlay,
-    .word-scroll-stage__item .glass-specular {
-      inset: -0.08em -0.2em -0.1em;
     }
   }
 
