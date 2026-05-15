@@ -1345,20 +1345,33 @@ const t = useTranslations(lang);
     translate: -50% -50%;
     object-fit: cover;
     /*
-      Image is sized to the END state (one grid cell) and the morph
-      scales it UP to viewport-fill via transform: scale(). Previously
-      this animated `width` + `height` in pixels which forced a layout
-      every scroll frame — janky on mobile (user feedback 2026-05-15:
-      "na telefonu se to seká"). transform: scale() runs on the
-      compositor and stays smooth on phones.
+      Aspect handling — the morph from "full-bleed landscape photo"
+      to "small portrait hex" needs to change the IMG BOX aspect
+      ratio, not just its size. We animate width/height in pixels
+      so object-fit:cover re-crops the source each frame and the
+      photo stays aspect-correct at every moment.
 
-      Width/height match var(--hex-w/h) so at scale=1 the image fits
-      perfectly into the hex cell. JS sets the inline transform on
-      mount (start scale = viewport / cell) and Motion's scroll() then
-      interpolates back to scale=1 over the morph window.
+      An earlier iteration animated transform: scaleX/scaleY non-
+      uniformly (smoother on mobile because compositor-only). But
+      with the img box CSS-sized to a hex cell (~180×203, portrait
+      hex aspect), object-fit:cover already cropped the 1672×941
+      landscape source to a vertical strip — and non-uniform scale
+      then stretched that strip back to viewport size. People in
+      the photo looked horizontally squashed (user 2026-05-15:
+      "fotka je v tom větším formátu hrozně divná, rozpixelovaná
+      jak je roztažená").
+
+      Width/height animation pays a per-frame layout cost on this
+      single element, but mobile is fine after the other perf wins
+      (no per-cell motion, glass-smoke hidden, shorter runway).
+
+      Defaults to viewport-sized via JS at mount, so the first
+      paint is full-bleed before Motion's scroll observer fires.
+      Falls back to 100vw/100vh if JS doesn't run.
     */
-    width: var(--hex-w);
-    height: var(--hex-h);
+    width: 100vw;
+    height: 100vh;
+    height: 100dvh;
     /* Start with rectangular clip-path so the full-bleed state shows
        the photo edge-to-edge; Motion morphs the polygon to the hex
        shape by the end keyframe. */
@@ -1369,12 +1382,11 @@ const t = useTranslations(lang);
        shrinks into the hex frame. */
     border-radius: 0;
     /* Tailwind preflight applies `img { max-width: 100% }`; explicit
-       override so the scale-up isn't clipped at parent width. */
+       override so the inline pixel sizing JS sets isn't clipped. */
     max-width: none;
     max-height: none;
-    /* will-change on `transform` promotes the image to its own GPU
-       layer; scroll-driven scale + clip-path then run off-thread. */
-    will-change: transform, clip-path, border-radius;
+    will-change: width, height, clip-path, border-radius;
+    transform: translateZ(0);
     backface-visibility: hidden;
     contain: paint;
   }
@@ -1478,9 +1490,9 @@ const t = useTranslations(lang);
         const viewportHeight = contentEl?.offsetHeight || window.innerHeight;
 
         // Cap the full-bleed display to the source image's native
-        // resolution (1672 × 941). Beyond that, transform: scale() up-
-        // samples the texture and the photo looks blurry on retina /
-        // 4K. Capping at source size keeps the photo crisp at the cost
+        // resolution (1672 × 941). Beyond that, the photo looks
+        // blurry on retina / 4K because we'd be upscaling the file.
+        // Capping at source size keeps the photo crisp at the cost
         // of a small letterbox on huge displays, which is the right
         // trade per user feedback ("rozpixelovaný"). When we ship a
         // 2x asset these caps can be lifted.
@@ -1489,17 +1501,14 @@ const t = useTranslations(lang);
         const displayWidth = Math.min(viewportWidth, sourceMaxW);
         const displayHeight = Math.min(viewportHeight, sourceMaxH);
 
-        // Image is sized to one grid cell via CSS (width/height =
-        // var(--hex-w/h)). The morph scales it UP from there to the
-        // chosen display size at the start of the scroll runway.
-        //
-        // scaleX/scaleY are independent so the photo's aspect ratio
-        // can stretch from the wide display box (~16:9) to the
-        // pointy-top hex aspect (~√3 : 2) without distorting the
-        // contained <img> object-fit.
-        const startScaleX = displayWidth / naturalWidth;
-        const startScaleY = displayHeight / naturalHeight;
-        image.style.transform = `scale(${startScaleX}, ${startScaleY})`;
+        // Force the start state directly — image starts at display
+        // size (≈ viewport, capped at source). object-fit:cover then
+        // fills the box with the landscape photo natively, so the
+        // first paint is the full clean photo. Motion's scroll()
+        // then interpolates the box back to cell size (var(--hex-w/h))
+        // and the clip-path morphs from rectangle to hex.
+        image.style.width = `${displayWidth}px`;
+        image.style.height = `${displayHeight}px`;
         image.style.clipPath = 'polygon(0% 0%, 100% 0%, 100% 50%, 100% 100%, 0% 100%, 0% 50%)';
         image.style.setProperty('-webkit-clip-path', 'polygon(0% 0%, 100% 0%, 100% 50%, 100% 100%, 0% 100%, 0% 50%)');
 
@@ -1515,11 +1524,11 @@ const t = useTranslations(lang);
 
         // ─── Scaler: hold full-bleed, then shrink to one hex cell ────
         //
-        // Transform scale (compositor-friendly) replaces the old
-        // width/height pixel animation that triggered layout every
-        // scroll frame and stuttered hard on phones (user 2026-05-15).
-        // The image is CSS-sized to its end state (one hex cell);
-        // scaleX/scaleY pull it back up to the viewport box at start.
+        // Width/height pixel keyframes — object-fit:cover on the IMG
+        // recrops the source per-frame so the photo stays aspect-
+        // correct as the box morphs from landscape (16:9-ish) to
+        // hex-cell (≈1:1.155). transform: scale() can't do this
+        // without distorting the photo content.
         //
         // clip-path morphs from rectangle (with the same 6 vertices
         // packed along the rectangle edges) to a pointy-top hexagon.
@@ -1533,8 +1542,8 @@ const t = useTranslations(lang);
           animate(
             image,
             {
-              scaleX: [startScaleX, startScaleX, 1],
-              scaleY: [startScaleY, startScaleY, 1],
+              width: [`${displayWidth}px`, `${displayWidth}px`, `${naturalWidth}px`],
+              height: [`${displayHeight}px`, `${displayHeight}px`, `${naturalHeight}px`],
               clipPath: [
                 'polygon(0% 0%, 100% 0%, 100% 50%, 100% 100%, 0% 100%, 0% 50%)',
                 'polygon(0% 0%, 100% 0%, 100% 50%, 100% 100%, 0% 100%, 0% 50%)',
