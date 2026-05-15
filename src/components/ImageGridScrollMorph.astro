@@ -481,9 +481,27 @@ const t = useTranslations(lang);
         <div><article class="tech-card tech-card--outer glass-card" aria-label={t('gridCard.team' as any)}><span class="glass-filter" aria-hidden="true" /><span class="glass-overlay" aria-hidden="true" /><span class="glass-specular" aria-hidden="true" /><div class="glass-content"><svg class="tech-card__icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="9" r="2.8" /><circle cx="16" cy="10" r="2.3" /><path d="M4.8 18c.7-3.4 2.6-5 4.2-5s3.5 1.6 4.2 5" /><path d="M13 17.6c.7-2.4 2-3.6 3.2-3.6 1.3 0 2.7 1.3 3.2 3.6" /></svg><h3>{t('gridCard.team' as any)}</h3></div></article></div>
       </div>
 
-      <!-- Scaler: starts viewport-sized, shrinks into the centre cell -->
+      <!--
+        Scaler: starts viewport-sized, shrinks into the centre cell.
+        Explicit width/height attributes match the source resolution
+        so the browser allocates the full texture instead of decoding
+        at the CSS box size (the var(--hex-w/h) cell sizing) and then
+        upscaling via transform: scale() — that's what made the photo
+        look pixelated even though the source file is sharp (user
+        feedback 2026-05-15: "primární obrázek je rozpixelovaný").
+        fetchpriority="high" pushes it ahead of the other grid
+        photos so the hero state is sharp on first paint.
+      -->
       <div class="scaler">
-        <img src="/images/melveo-grid/team-briefing-wide.webp" alt="" decoding="async" />
+        <img
+          src="/images/melveo-grid/team-briefing-wide.webp"
+          alt=""
+          width="1672"
+          height="941"
+          loading="eager"
+          fetchpriority="high"
+          decoding="async"
+        />
       </div>
     </div>
   </div>
@@ -496,24 +514,23 @@ const t = useTranslations(lang);
   */
 
   .image-grid-section {
-    /* 620vh desktop runway — 1× viewport pinned + 520vh scroll
-       budget. The extra height stretches the scaler's shrink phase
-       across more scroll, so the user has to keep scrolling for
-       longer to see the morph from full-bleed photo to grid.
-       Combined with the `'82% end'` scroll offset (animation
-       completes at 82 % of section), this leaves the last ~112vh
-       as rest where the fully formed grid sits before the next
-       section arrives.
+    /*
+      Runway: 360vh desktop / 260vh mobile = 1 viewport pinned +
+      ~2.6× / ~1.6× scroll budget. Shortened from 620vh / 430vh
+      on 2026-05-15 (user feedback: "scroll trvá zbytečně dlouho,
+      ten morph je rychlý a pak už mi přijde jen zbytečný klik").
 
-       Mobile gets a shorter runway (430vh) because:
-         a) Each "vh" on mobile is a smaller absolute pixel count,
-            so 620vh of scroll feels endless on a 6.5" screen.
-         b) Mobile only has 9 cells visible (3 cols × 3 rows; the
-            outer-edge layer is hidden by media query), so there's
-            less to "fade in" — animation can finish sooner. */
+      Math at desktop (360vh, vh=900):
+        - section height: 3240
+        - scrollable: 3240 − 900 = 2340
+        - scaler morph completes at 62% scroll = 1450 → ~1.6 vh in
+        - layer reveal completes at 80% scroll = 1872 → ~2.1 vh in
+        - remaining 20% = 468 = ~0.5 vh of "rest" before next section
+      Tight but reads as deliberate pacing instead of empty scroll.
+    */
     position: relative;
     width: 100%;
-    min-height: 620vh;
+    min-height: 360vh;
     background: var(--color-bg-canvas);
     border-top: 1px solid var(--color-stroke-base);
     overflow: clip;
@@ -521,7 +538,7 @@ const t = useTranslations(lang);
 
   @media (max-width: 1024px) {
     .image-grid-section {
-      min-height: 430vh;
+      min-height: 260vh;
     }
   }
 
@@ -1460,20 +1477,28 @@ const t = useTranslations(lang);
         const viewportWidth = contentEl?.offsetWidth || window.innerWidth;
         const viewportHeight = contentEl?.offsetHeight || window.innerHeight;
 
+        // Cap the full-bleed display to the source image's native
+        // resolution (1672 × 941). Beyond that, transform: scale() up-
+        // samples the texture and the photo looks blurry on retina /
+        // 4K. Capping at source size keeps the photo crisp at the cost
+        // of a small letterbox on huge displays, which is the right
+        // trade per user feedback ("rozpixelovaný"). When we ship a
+        // 2x asset these caps can be lifted.
+        const sourceMaxW = 1672;
+        const sourceMaxH = 941;
+        const displayWidth = Math.min(viewportWidth, sourceMaxW);
+        const displayHeight = Math.min(viewportHeight, sourceMaxH);
+
         // Image is sized to one grid cell via CSS (width/height =
-        // var(--hex-w/h)). The morph scales it UP from there to fill
-        // the viewport at the start of the scroll runway.
+        // var(--hex-w/h)). The morph scales it UP from there to the
+        // chosen display size at the start of the scroll runway.
         //
         // scaleX/scaleY are independent so the photo's aspect ratio
-        // can stretch from the wide viewport box (~16:9) to the
+        // can stretch from the wide display box (~16:9) to the
         // pointy-top hex aspect (~√3 : 2) without distorting the
         // contained <img> object-fit.
-        //
-        // Force the start pose synchronously so the first paint is
-        // already full-bleed (no flash of cell-sized photo before
-        // Motion's scroll observer fires).
-        const startScaleX = viewportWidth / naturalWidth;
-        const startScaleY = viewportHeight / naturalHeight;
+        const startScaleX = displayWidth / naturalWidth;
+        const startScaleY = displayHeight / naturalHeight;
         image.style.transform = `scale(${startScaleX}, ${startScaleY})`;
         image.style.clipPath = 'polygon(0% 0%, 100% 0%, 100% 50%, 100% 100%, 0% 100%, 0% 50%)';
         image.style.setProperty('-webkit-clip-path', 'polygon(0% 0%, 100% 0%, 100% 50%, 100% 100%, 0% 100%, 0% 50%)');
