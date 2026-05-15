@@ -113,18 +113,24 @@ const altUrls = {
     <link rel="manifest" href="/site.webmanifest" />
     <link rel="canonical" href={canonicalUrl} />
 
-    {/* Brand wordmark font — Quicksand (rounded geometric sans, every
-        terminal is a soft circle including the lowercase 'm').
-        Picked over Inter / Outfit / Open Sans per user feedback
-        2026-05-01: "asi bych šel do toho Quicksand fontu na všech
-        názvech melveo". Applied via --font-wordmark in global.css to
-        every visible "melveo" mark across the site (header logo,
-        intro overlay wordmark, index page wordmark). */}
+    {/*
+      Brand wordmark font — Comfortaa.
+      User 2026-05-15 noticed the apparel / downloads use a font with
+      a distinct lowercase "l" that has a small curl/foot at the
+      bottom; Quicksand (which we'd previously been using) renders
+      "l" as a straight stick. Comfortaa is the closest match in
+      Google Fonts — rounded geometric sans with the signature "l"
+      tail + round "o" + closed-bowl "e". Loaded in weights 500/600/700
+      so we can use 600 as the standard weight (matches brand assets)
+      and have the bolder option for any heading needs.
+      Quicksand kept as a fallback inside --font-wordmark so the
+      stack degrades gracefully if Comfortaa fails to load.
+    */}
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
       rel="stylesheet"
-      href="https://fonts.googleapis.com/css2?family=Quicksand:wght@500;600;700&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Comfortaa:wght@500;600;700&family=Quicksand:wght@500;600;700&display=swap"
     />
 
     <!-- Hreflang alternates -->

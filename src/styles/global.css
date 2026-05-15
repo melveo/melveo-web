@@ -51,12 +51,16 @@
   /* Typography */
   --font-sans: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
   --font-display: "Inter", -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
-  /* Brand wordmark font — Quicksand (loaded in BaseLayout). Rounded
-     geometric sans, soft circular terminals (the 'm' is what the
-     user picked it for). Used by every visible "melveo" wordmark
-     across the site. Falls back through the same chain as
-     --font-display if Quicksand fails to load. */
-  --font-wordmark: "Quicksand", "Inter", -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+  /*
+    Brand wordmark font — Comfortaa (loaded in BaseLayout).
+    Matched against the brand apparel / downloads: rounded geometric
+    sans with the signature "l" that has a small foot/curl at the
+    bottom — Quicksand's straight "l" was the visible mismatch
+    (user 2026-05-15). Used by every visible "melveo" wordmark
+    + the hero headline. Falls back to Quicksand (same family vibe,
+    still rounded) and then the system sans stack.
+  */
+  --font-wordmark: "Comfortaa", "Quicksand", "Inter", -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
 
   /* Spacing scale — 4px base, mirrors SwiftUI .spacing* tokens.
      NOTE: Tailwind 4 derives max-w-* / w-* / etc. from `--spacing-*`
