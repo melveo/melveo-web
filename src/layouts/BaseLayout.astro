@@ -99,11 +99,17 @@ const altUrls = {
     <meta name="format-detection" content="telephone=no" />
     <meta name="mobile-web-app-capable" content="yes" />
 
-    <link rel="icon" type="image/svg+xml" href="/app-icon-melveo.svg" />
-    <link rel="icon" type="image/png" href="/app-icon-melveo.png" sizes="1024x1024" />
-    <link rel="icon" type="image/x-icon" href="/favicon.ico" sizes="any" />
-    <link rel="shortcut icon" href="/favicon.ico" />
-    <link rel="apple-touch-icon" href="/app-icon-melveo.png" sizes="1024x1024" />
+    {/*
+      Favicon set — light-silver Melveo "M" icon. Includes a cache-
+      bust query param (v=2026-05-15) to force browsers off any
+      stale older favicon they may have pinned at /favicon.ico.
+      Update the value whenever the icon visuals change.
+    */}
+    <link rel="icon" type="image/svg+xml" href="/app-icon-melveo.svg?v=2026-05-15" />
+    <link rel="icon" type="image/png" href="/app-icon-melveo.png?v=2026-05-15" sizes="1024x1024" />
+    <link rel="icon" type="image/x-icon" href="/favicon.ico?v=2026-05-15" sizes="any" />
+    <link rel="shortcut icon" href="/favicon.ico?v=2026-05-15" />
+    <link rel="apple-touch-icon" href="/app-icon-melveo.png?v=2026-05-15" sizes="1024x1024" />
     <link rel="manifest" href="/site.webmanifest" />
     <link rel="canonical" href={canonicalUrl} />
 
