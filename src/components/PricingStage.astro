@@ -13,8 +13,13 @@
  * Toggle button just flips the data-attribute (one rAF, no reflow
  * cascade beyond the cards).
  *
- * Per-day price is featured big — clubs evaluate "X Kč denně" easier
- * than annual numbers. Per-month equivalent shown below for context.
+ * Full periodicity amount is featured big — monthly amount + "/měsíc"
+ * suffix on the monthly card, yearly amount + "/rok" on the yearly card.
+ * Previous iteration emphasised the daily price ("X Kč/den") with the
+ * monthly as secondary text, but clubs budget in months/years anyway
+ * (user feedback 2026-05-15). Effective monthly-equivalent is still
+ * shown as small secondary text on the yearly card so the savings
+ * vs the monthly plan are visible.
  *
  * Pricing source: project_pilot_pricing memory + planning docs
  * 02_pricing_strategy + 15_billing_and_licensed_scopes (provided
@@ -292,34 +297,47 @@ const currencyShort = lang === 'cs' ? 'Kč' : 'CZK';
               </p>
             </header>
 
+            {/*
+              Pricing display — full periodicity amount, no per-day.
+              Earlier iteration featured the daily price big with the
+              monthly amount as secondary text, but clubs budget in
+              monthly/yearly terms anyway and the daily framing felt
+              misleading (user feedback 2026-05-15: "dejme tam roční
+              a měsíční ceny, nikoliv denní").
+
+              Monthly card: 1 790 Kč / měsíc · Účtováno měsíčně
+              Yearly card:  17 900 Kč / rok · ~ 1 492 Kč / měsíc
+
+              Same `pricing-price-day` class name kept so the
+              :nth-child sizing rules still apply — it's a styling
+              hook now, not a literal "per-day" label.
+            */}
             <div class="pricing-card-price">
               {plan.free ? (
                 <div class="pricing-price-block pricing-price-block--free">
                   <span class="pricing-price-day">0&nbsp;{currencyShort}</span>
-                  <span class="pricing-price-suffix">{t('pricing.perDay')}</span>
                 </div>
               ) : (
                 <Fragment>
                   {/* MONTHLY view — visible when [data-period="monthly"] */}
                   <div class="pricing-price-block pricing-price-block--monthly">
                     <span class="pricing-price-day">
-                      {fmt(plan.perDayMonthly)}&nbsp;{currencyShort}
+                      {fmt(plan.priceMonthly)}&nbsp;{currencyShort}
                     </span>
-                    <span class="pricing-price-suffix">{t('pricing.perDay')}</span>
+                    <span class="pricing-price-suffix">{t('pricing.perMonth')}</span>
                     <span class="pricing-price-secondary">
-                      {fmt(plan.priceMonthly)}&nbsp;{currencyShort}{' '}
-                      {t('pricing.perMonth')} · {t('pricing.billedMonthly')}
+                      {t('pricing.billedMonthly')}
                     </span>
                   </div>
 
                   {/* YEARLY view — visible when [data-period="yearly"] (default) */}
                   <div class="pricing-price-block pricing-price-block--yearly">
                     <span class="pricing-price-day">
-                      {fmt(plan.perDayYearly)}&nbsp;{currencyShort}
+                      {fmt(plan.priceYearly)}&nbsp;{currencyShort}
                     </span>
-                    <span class="pricing-price-suffix">{t('pricing.perDay')}</span>
+                    <span class="pricing-price-suffix">{t('pricing.perYear')}</span>
                     <span class="pricing-price-secondary">
-                      {fmt(plan.perMonthFromYearly)}&nbsp;{currencyShort}{' '}
+                      ~ {fmt(plan.perMonthFromYearly)}&nbsp;{currencyShort}{' '}
                       {t('pricing.perMonth')} · {t('pricing.billedYearly')}
                     </span>
                   </div>

@@ -743,8 +743,8 @@ const t = useTranslations(lang);
     */
     --gutter: clamp(0.125rem, 0.35vw, 0.5rem);
     --hex-clip: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
-    --hex-gap: clamp(2px, 0.22vw, 5px);
-    --hex-w: clamp(6.2rem, min(calc(var(--available-w) * 0.123), calc(var(--available-h) * 0.214)), 18rem);
+    --hex-gap: clamp(4px, 0.28vw, 8px);
+    --hex-w: clamp(6.6rem, min(calc(var(--available-w) * 0.126), calc(var(--available-h) * 0.218)), 18.5rem);
     --hex-h: calc(var(--hex-w) / 0.8660254038);
     --available-w: calc(100vw - (2 * var(--gutter)));
     --available-h: calc(100vh - (2 * var(--gutter)));
@@ -802,10 +802,6 @@ const t = useTranslations(lang);
     contain: layout style;
   }
 
-  .image-grid-section .grid > .layer > div:hover {
-    z-index: 20;
-  }
-
   /* Landscape/default map: wider 5-row honeycomb, 7 / 8 / 7 / 8 / 7.
      This fills desktop and tablet landscape viewports far better than
      the old tall diamond while keeping every hex adjacent. */
@@ -853,34 +849,34 @@ const t = useTranslations(lang);
   @media (max-width: 1024px) {
     .image-grid-section .grid {
       --gutter: clamp(0.125rem, 0.45vw, 0.5rem);
-      --hex-gap: clamp(2px, 0.34vw, 5px);
+      --hex-gap: clamp(3px, 0.3vw, 6px);
     }
   }
 
   @media (max-width: 900px) {
     .image-grid-section .grid {
       --gutter: clamp(0.125rem, 0.5vw, 0.45rem);
-      --hex-gap: clamp(2px, 0.48vw, 4px);
+      --hex-gap: clamp(2.5px, 0.34vw, 5px);
     }
   }
 
   @media (max-width: 1200px) and (max-height: 690px) {
     .image-grid-section .grid {
-      --hex-gap: clamp(2px, 0.45vw, 4px);
+      --hex-gap: clamp(2px, 0.3vw, 4px);
       --hex-w: clamp(4.35rem, min(10.2vw, 12.8vh), 5.65rem);
     }
   }
 
   @media (max-width: 640px) {
     .image-grid-section .grid {
-      --hex-gap: clamp(2px, 0.85vw, 3px);
-      --hex-w: clamp(3.45rem, min(calc(var(--available-w) * 0.123), calc(var(--available-h) * 0.214)), 4.8rem);
+      --hex-gap: clamp(2px, 0.55vw, 4px);
+      --hex-w: clamp(3.65rem, min(calc(var(--available-w) * 0.128), calc(var(--available-h) * 0.218)), 5rem);
     }
   }
 
   @media (orientation: portrait) {
     .image-grid-section .grid {
-      --hex-w: clamp(3.85rem, min(calc(var(--available-w) * 0.192), calc(var(--available-h) * 0.121)), 18rem);
+      --hex-w: clamp(4rem, min(calc(var(--available-w) * 0.2), calc(var(--available-h) * 0.126)), 18.5rem);
       --honeycomb-width: calc((var(--hex-x-step) * 4) + var(--hex-w));
       --honeycomb-height: calc((var(--hex-y-step) * 8) + var(--hex-h));
     }
@@ -944,7 +940,7 @@ const t = useTranslations(lang);
   @media (max-height: 460px) {
     .image-grid-section .grid {
       --hex-gap: 2px;
-      --hex-w: clamp(2.45rem, min(12vw, 21vh), 4.8rem);
+      --hex-w: clamp(2.55rem, min(12.6vw, 22vh), 5rem);
     }
 
     .image-grid-section .glass-smoke {
@@ -954,7 +950,7 @@ const t = useTranslations(lang);
 
   @media (max-height: 300px) {
     .image-grid-section .grid {
-      --hex-gap: 2px;
+      --hex-gap: 1px;
       --hex-w: clamp(1.15rem, min(6.5vw, 12vh), 2.5rem);
     }
 
@@ -999,13 +995,28 @@ const t = useTranslations(lang);
     backface-visibility: hidden;
   }
 
-  /* Hover lift happens on the individual hex cell while the Motion
-     scroll animation scales the parent layer. That keeps hover local
-     and preserves the honeycomb layout. */
+  /* No hover lift in this section. The global .glass-card hover
+     recipe is useful elsewhere, but here it breaks the calm
+     honeycomb composition and creates uneven gaps between cells. */
+  .image-grid-section .grid-photo.glass-card,
+  .image-grid-section .tech-card.glass-card {
+    transition: none;
+  }
+
   .image-grid-section .grid-photo.glass-card:hover,
   .image-grid-section .tech-card.glass-card:hover {
-    transform: scale(1.08);
-    z-index: 10;
+    transform: none;
+    box-shadow:
+      0 6px 6px rgba(0, 0, 0, 0.28),
+      0 0 24px rgba(0, 0, 0, 0.18);
+  }
+
+  .image-grid-section .grid-photo.glass-card:hover .glass-specular,
+  .image-grid-section .tech-card.glass-card:hover .glass-specular {
+    box-shadow:
+      inset 1px 1px 0 rgba(255, 255, 255, 0.28),
+      inset 0 0 8px rgba(255, 255, 255, 0.12),
+      inset -1px -1px 0 rgba(255, 255, 255, 0.05);
   }
 
   /* Photo content is the <img> filling the .glass-content. Inherit
@@ -1294,26 +1305,38 @@ const t = useTranslations(lang);
     left: 50%;
     translate: -50% -50%;
     object-fit: cover;
-    /* Match the .glass-card radius so the scaler photo lands cleanly
-       into the grid frame at the end of the morph. */
-    border-radius: 1.75rem;
+    /*
+      Image is sized to the END state (one grid cell) and the morph
+      scales it UP to viewport-fill via transform: scale(). Previously
+      this animated `width` + `height` in pixels which forced a layout
+      every scroll frame — janky on mobile (user feedback 2026-05-15:
+      "na telefonu se to seká"). transform: scale() runs on the
+      compositor and stays smooth on phones.
+
+      Width/height match var(--hex-w/h) so at scale=1 the image fits
+      perfectly into the hex cell. JS sets the inline transform on
+      mount (start scale = viewport / cell) and Motion's scroll() then
+      interpolates back to scale=1 over the morph window.
+    */
+    width: var(--hex-w);
+    height: var(--hex-h);
+    /* Start with rectangular clip-path so the full-bleed state shows
+       the photo edge-to-edge; Motion morphs the polygon to the hex
+       shape by the end keyframe. */
     clip-path: polygon(0% 0%, 100% 0%, 100% 50%, 100% 100%, 0% 100%, 0% 50%);
     -webkit-clip-path: polygon(0% 0%, 100% 0%, 100% 50%, 100% 100%, 0% 100%, 0% 50%);
-    width: 100vw;
-    height: 100vh;
-    height: 100dvh;
-    /*
-      CRITICAL: Tailwind preflight applies `img { max-width: 100% }`
-      which would clamp the scaler to its grid-cell parent (~256px)
-      even when JS sets inline width: 1700px. The animation looked
-      like only height was working — width inline was being silently
-      capped. Explicit override here lets the JS-driven pixel sizing
-      run free across the whole viewport.
-    */
+    /* No border-radius at start (full-bleed photo wants sharp edges);
+       Motion animates this to the glass-card radius as the image
+       shrinks into the hex frame. */
+    border-radius: 0;
+    /* Tailwind preflight applies `img { max-width: 100% }`; explicit
+       override so the scale-up isn't clipped at parent width. */
     max-width: none;
     max-height: none;
-    transform: translateZ(0);
-    will-change: width, height, clip-path, border-radius;
+    /* will-change on `transform` promotes the image to its own GPU
+       layer; scroll-driven scale + clip-path then run off-thread. */
+    will-change: transform, clip-path, border-radius;
+    backface-visibility: hidden;
     contain: paint;
   }
 
@@ -1394,7 +1417,7 @@ const t = useTranslations(lang);
       requestAnimationFrame(() => {
         const scalerEl = section.querySelector<HTMLElement>('.scaler');
         const naturalWidth = scalerEl?.offsetWidth ?? 280;
-        const hexHeight = naturalWidth / 0.8660254038;
+        const naturalHeight = scalerEl?.offsetHeight ?? naturalWidth / 0.8660254038;
 
         /*
           Use the .content's measured size, NOT window.innerHeight.
@@ -1415,14 +1438,21 @@ const t = useTranslations(lang);
         const viewportWidth = contentEl?.offsetWidth || window.innerWidth;
         const viewportHeight = contentEl?.offsetHeight || window.innerHeight;
 
-        // Force the start state directly — Motion v12's scroll() pre-
-        // applies the first keyframe value on mount, but in some
-        // configurations the inline write happens after first paint,
-        // showing a brief frame of the natural cell size before the
-        // observer fires. Setting inline width/height eagerly here
-        // means full-bleed from the first paint.
-        image.style.width = `${viewportWidth}px`;
-        image.style.height = `${viewportHeight}px`;
+        // Image is sized to one grid cell via CSS (width/height =
+        // var(--hex-w/h)). The morph scales it UP from there to fill
+        // the viewport at the start of the scroll runway.
+        //
+        // scaleX/scaleY are independent so the photo's aspect ratio
+        // can stretch from the wide viewport box (~16:9) to the
+        // pointy-top hex aspect (~√3 : 2) without distorting the
+        // contained <img> object-fit.
+        //
+        // Force the start pose synchronously so the first paint is
+        // already full-bleed (no flash of cell-sized photo before
+        // Motion's scroll observer fires).
+        const startScaleX = viewportWidth / naturalWidth;
+        const startScaleY = viewportHeight / naturalHeight;
+        image.style.transform = `scale(${startScaleX}, ${startScaleY})`;
         image.style.clipPath = 'polygon(0% 0%, 100% 0%, 100% 50%, 100% 100%, 0% 100%, 0% 50%)';
         image.style.setProperty('-webkit-clip-path', 'polygon(0% 0%, 100% 0%, 100% 50%, 100% 100%, 0% 100%, 0% 50%)');
 
@@ -1433,39 +1463,37 @@ const t = useTranslations(lang);
         const power3InOut = [0.76, 0, 0.24, 1] as const;
         const power4InOut = [0.87, 0, 0.13, 1] as const;
         const sineOut = [0.61, 1, 0.88, 1] as const;
-        const scrollCompletionRatio = 0.82;
+        const scalerEndRatio = 0.62;
+        const revealEndRatio = 0.8;
 
-        // ─── Scaler: hold at viewport, then shrink to natural ──────────
-        //     Width AND height in a SINGLE animate() call. Splitting
-        //     them into two scroll(animate()) registrations on the same
-        //     element broke things — Motion v12 treats the second call
-        //     as a takeover and cancels the first, which is why width
-        //     stayed at its CSS default while height morphed to viewport.
-        //     Using one combined call with shared options preserves
-        //     both axes; we sacrifice the codepen's per-axis asymmetric
-        //     easing (power2 width vs power1 height) for correctness.
-        //     The asymmetry is recovered visually anyway because the
-        //     start delta differs between width and height.
+        // ─── Scaler: hold full-bleed, then shrink to one hex cell ────
+        //
+        // Transform scale (compositor-friendly) replaces the old
+        // width/height pixel animation that triggered layout every
+        // scroll frame and stuttered hard on phones (user 2026-05-15).
+        // The image is CSS-sized to its end state (one hex cell);
+        // scaleX/scaleY pull it back up to the viewport box at start.
+        //
+        // clip-path morphs from rectangle (with the same 6 vertices
+        // packed along the rectangle edges) to a pointy-top hexagon.
+        // Both polygons keep matching vertex counts so Motion can
+        // interpolate vertex-to-vertex via WAAPI off the main thread.
+        //
+        // borderRadius animates 0 → 28px so the photo sits flat at
+        // full-bleed and rounds into the glass-card silhouette at
+        // the end. Composited in Blink + Safari for static values.
         scroll(
           animate(
             image,
             {
-              width: [
-                `${viewportWidth}px`,
-                `${viewportWidth}px`,
-                `${naturalWidth}px`,
-              ],
-              height: [
-                `${viewportHeight}px`,
-                `${viewportHeight}px`,
-                `${hexHeight}px`,
-              ],
+              scaleX: [startScaleX, startScaleX, 1],
+              scaleY: [startScaleY, startScaleY, 1],
               clipPath: [
                 'polygon(0% 0%, 100% 0%, 100% 50%, 100% 100%, 0% 100%, 0% 50%)',
                 'polygon(0% 0%, 100% 0%, 100% 50%, 100% 100%, 0% 100%, 0% 50%)',
                 'polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)',
               ],
-              borderRadius: ['1.75rem', '1.75rem', '0rem'],
+              borderRadius: ['0px', '0px', '28px'],
             },
             {
               times: [0, 0.18, 1],
@@ -1474,13 +1502,11 @@ const t = useTranslations(lang);
           ),
           {
             target: section,
-            // Animation completes at 82 % of section's scroll travel,
-            // leaving the last 18 % as a "rest" runway where the fully
-            // formed grid sits at its final state before the next
-            // section arrives. Scaler + every layer end inside this
-            // 0–82 % window so the grid is visually frozen for the
-            // whole rest period.
-            offset: ['start start', `${scrollCompletionRatio * 100}% end`] as any,
+            // The centre image must already be the exact same size as
+            // every other hex before the surrounding cells become the
+            // hero visual. If the scaler finishes later than the reveal,
+            // the middle photo visibly stays larger than the grid.
+            offset: ['start start', `${scalerEndRatio * 100}% end`] as any,
           },
         );
 
@@ -1511,7 +1537,7 @@ const t = useTranslations(lang);
 
         cellItems.forEach(({ cell }) => {
           cell.style.opacity = '0';
-          cell.style.scale = compactMotion ? '0.94' : '0.82';
+          cell.style.scale = '1';
           cell.style.y = compactMotion ? '5px' : '18px';
         });
 
@@ -1521,21 +1547,20 @@ const t = useTranslations(lang);
           // formed when the rest period begins. Outer edges (index 0)
           // end last; inner-most cells (index 2) finish earliest, same
           // ordering as codepen but compressed before the rest zone.
-          const endOffset = `${scrollCompletionRatio * 0.9 - index * 0.04} end`;
+          const endOffset = `${revealEndRatio - index * 0.035} end`;
 
-          // Compact devices keep the motion lighter: opacity only.
-          // Larger devices add a tiny upward settle/scale so the cells
-          // feel alive without breaking the connected honeycomb shape.
+          // Keep cell size locked while revealing. Earlier versions
+          // scaled layers/cells during reveal, which made the central
+          // scaler appear larger than surrounding hexagons mid-scroll.
           scroll(
             animate(
               layer,
-              compactMotion
-                ? { opacity: [0, 0, 1] }
-                : {
-                    opacity: [0, 0, 1],
-                    scale: [0.972, 0.972, 1],
-                    y: ['10px', '10px', '0px'],
-                  },
+                compactMotion
+                  ? { opacity: [0, 0, 1] }
+                  : {
+                      opacity: [0, 0, 1],
+                      y: ['10px', '10px', '0px'],
+                    },
               {
                 times: [0, compactMotion ? 0.52 : 0.58, 1],
                 ease: sineOut as any,
@@ -1551,7 +1576,7 @@ const t = useTranslations(lang);
         // ─── Individual cells: centre-out honeycomb assembly ──────────
         // Layer animation alone made the surrounding grid feel static.
         // Each cell now joins the composition with a small compositor-
-        // friendly scale/y/opacity reveal, staggered by distance from
+        // friendly y/opacity reveal, staggered by distance from
         // the central scaler. This preserves the final honeycomb
         // geometry because no layout properties are animated.
         cellItems.forEach(({ cell }, index) => {
@@ -1565,12 +1590,10 @@ const t = useTranslations(lang);
               compactMotion
                 ? {
                     opacity: [0, 0, 1],
-                    scale: [0.94, 0.94, 1],
                     y: ['5px', '5px', '0px'],
                   }
                 : {
                     opacity: [0, 0, 1],
-                    scale: [0.82, 0.82, 1],
                     y: ['18px', '18px', '0px'],
                   },
               {
@@ -1580,7 +1603,7 @@ const t = useTranslations(lang);
             ),
             {
               target: section,
-              offset: ['start start', `${scrollCompletionRatio * 0.9} end`] as any,
+              offset: ['start start', `${revealEndRatio} end`] as any,
             },
           );
         });
