@@ -73,7 +73,7 @@ const t = useTranslations(lang);
       </p>
 
       <h1
-        class="hero-headline font-bold leading-[0.95] tracking-tight text-[var(--color-text-primary)]"
+        class="hero-headline leading-[0.95] tracking-tight text-[var(--color-text-primary)]"
       >
         <span class="hero-headline-static">
           <span>{t('hero.headlineLine1')}</span>
@@ -329,8 +329,20 @@ const t = useTranslations(lang);
     flex-direction: column;
     align-items: center;
     gap: 0.03em;
+    /*
+      Hero headline uses the brand wordmark font (Quicksand) so it
+      shares the same visual DNA as the "melveo" logo across the
+      site + brand assets — rounded geometric sans, lowercase, the
+      letterforms users already associate with the brand. Tighter
+      letter-spacing pulls the round counters together so a long
+      headline doesn't sprawl.
+    */
+    font-family: var(--font-wordmark);
+    font-weight: 600;
+    font-feature-settings: "ss01" on;
+    text-transform: lowercase;
     font-size: clamp(2.55rem, 7vw, 7rem);
-    letter-spacing: -0.035em;
+    letter-spacing: -0.025em;
     line-height: 0.98;
     word-spacing: 0.06em;
     /*
