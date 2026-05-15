@@ -163,7 +163,23 @@ const t = useTranslations(lang);
     backface-visibility: hidden;
   }
 
-  .orb-wrapper.is-orb-touch-dragging .orb-hero--secondary {
+  /*
+    Manual-mode interpolation — when the user has taken control
+    (post click / tap) we tighten the transition so the orb tracks
+    the pointer closely instead of trailing behind. In auto-orbit
+    the 0.48s transition feels organic; when a finger is on it the
+    same easing feels laggy.
+
+    Class is added by mountOrbCursor() in src/scripts/orb-cursor.ts
+    on the wrapper for the duration of manual mode.
+  */
+  .orb-wrapper.is-orb-manual {
+    cursor: grab;
+  }
+  .orb-wrapper.is-orb-manual:active {
+    cursor: grabbing;
+  }
+  .orb-wrapper.is-orb-manual .orb-hero--secondary {
     transition:
       --x 0.12s ease-out,
       --y 0.12s ease-out;

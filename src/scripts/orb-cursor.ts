@@ -1,27 +1,30 @@
 /**
- * Orb cursor-mask interaction (Giomgio codepen abxGyQX) — desktop
- * uses pointer-follow on desktop and ambient auto-orbit on touch
- * devices, with an optional long-press drag while the finger is held.
+ * Orb cursor-mask interaction (Giomgio codepen abxGyQX).
  *
- *   • Fine pointer (`(pointer: fine)`)  — mice, trackpads
- *     pointermove → rAF-batched write of percentage values into
- *     --x / --y on the secondary layer.
+ * Behaviour (2026-05-15 redesign per user request — section should
+ * move on its own and only respond to the user after a deliberate
+ * click; previously desktop tracked the cursor at all times which
+ * meant the orb was already in motion before users noticed they
+ * could interact at all):
  *
- *   • Coarse pointer (`(pointer: coarse)`) — phones, tablets
- *     ambient auto-orbit on a slow Lissajous path so the orb is alive
- *     without requiring gyro permissions. A long press activates
- *     temporary finger control; releasing returns to auto-orbit.
+ *   Default state: auto-orbit on a slow Lissajous path so the
+ *   hex/orb mask drifts side-to-side across the middle of the
+ *   section by itself.
  *
- * rAF batching: on rapid input devices pointermove can fire 200+ Hz,
- * which used to translate to 200+ style writes per second. Now we
- * stash the latest values in plain variables and flush at most once
- * per frame.
+ *   Click / tap inside the section: takes manual control. The orb
+ *   follows the pointer (desktop) or finger (mobile) until the user
+ *   either clicks outside the section, leaves the section with
+ *   their pointer, or sits idle long enough for the auto-orbit to
+ *   resume.
+ *
+ * Idle release: 1.6 s of no pointer movement (desktop) or pointer
+ * leave (mobile) hands control back to auto-orbit so the section
+ * never gets "stuck" if the user wanders off mid-interaction.
  */
 
 const ORBIT_PERIOD_X_MS = 10500;
 const ORBIT_PERIOD_Y_MS = 12800;
-const LONG_PRESS_MS = 420;
-const MOVE_CANCEL_PX = 12;
+const IDLE_RELEASE_MS = 1600;
 
 export function mountOrbCursor() {
   const wrapper = document.querySelector<HTMLElement>('[data-orb-wrapper]');
@@ -31,9 +34,11 @@ export function mountOrbCursor() {
   const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   if (reduceMotion) return;
 
-  const isCoarse = window.matchMedia('(pointer: coarse)').matches;
-
-  let pendingX = 70;
+  // ─── rAF-batched style writer ───────────────────────────────────
+  // Pointer events on a fast input device fire at 200+ Hz; we
+  // coalesce into one style write per frame so the compositor
+  // isn't pinged for every input sample.
+  let pendingX = 50;
   let pendingY = 50;
   let writeRaf = 0;
 
@@ -48,160 +53,197 @@ export function mountOrbCursor() {
   }
 
   function setFromClientPoint(clientX: number, clientY: number) {
-    pendingX = Math.min(95, Math.max(5, (clientX / window.innerWidth) * 100));
-    pendingY = Math.min(95, Math.max(5, (clientY / window.innerHeight) * 100));
+    // Use the wrapper's box, not window, so the orb tracks the section
+    // it lives in. Section is typically full-width but pinning to its
+    // bounding rect means the math stays correct even if the section
+    // ever lives inside a wider container.
+    const rect = wrapper!.getBoundingClientRect();
+    const xPct = ((clientX - rect.left) / rect.width) * 100;
+    const yPct = ((clientY - rect.top) / rect.height) * 100;
+    pendingX = Math.min(95, Math.max(5, xPct));
+    pendingY = Math.min(95, Math.max(5, yPct));
     scheduleWrite();
   }
 
-  /* ── Fine-pointer path (mouse / trackpad) ───────────────────────── */
-  function onPointerMove(event: PointerEvent) {
-    setFromClientPoint(event.clientX, event.clientY);
-  }
-
-  function onPointerDown(event: PointerEvent) {
-    if (event.pointerType === 'mouse' || event.pointerType === 'pen') {
-      event.preventDefault();
-    }
-  }
-
-  /* ── Coarse-pointer path (touch) ────────────────────────────────── */
+  // ─── Auto-orbit (default state) ─────────────────────────────────
   let orbitRaf = 0;
   let orbitStart = 0;
-  let orbitPaused = false;
 
   function orbitFrame(t: number) {
-    if (orbitPaused || document.hidden) {
+    if (document.hidden) {
       orbitRaf = 0;
       return;
     }
     if (!orbitStart) orbitStart = t;
     const elapsed = t - orbitStart;
 
-    /*
-      Two out-of-phase sinusoids → smooth Lissajous wandering inside
-      a 30%-amplitude box centred on (50%, 50%). Slow enough to feel
-      ambient, not distracting.
-    */
+    // Two out-of-phase sinusoids → smooth wandering inside a
+    // 30%-amplitude box around (50%, 50%). The X period is shorter
+    // so the dominant motion reads as left↔right pacing across
+    // the headline, which is what the user asked for.
     const ax = (elapsed / ORBIT_PERIOD_X_MS) * Math.PI * 2;
     const ay = (elapsed / ORBIT_PERIOD_Y_MS) * Math.PI * 2;
-    pendingX = 50 + Math.sin(ax) * 30;
-    pendingY = 50 + Math.cos(ay) * 24;
+    pendingX = 50 + Math.sin(ax) * 32;
+    pendingY = 50 + Math.cos(ay) * 18;
     scheduleWrite();
     orbitRaf = requestAnimationFrame(orbitFrame);
   }
 
   function startOrbit() {
     if (orbitRaf !== 0) return;
-    orbitPaused = false;
+    // Resume the Lissajous at a phase that matches the current
+    // pending position so the orb doesn't snap back to centre when
+    // we hand control back from manual mode.
     orbitStart = 0;
     orbitRaf = requestAnimationFrame(orbitFrame);
   }
 
   function stopOrbit() {
-    orbitPaused = true;
     if (orbitRaf !== 0) {
       cancelAnimationFrame(orbitRaf);
       orbitRaf = 0;
     }
   }
 
-  /* ── Touch long-press drag ────────────────────────────────────────
-     Short taps and scroll gestures keep normal page behavior. Only a
-     stationary long press takes over the orb until pointerup. */
-  let touchPointerId: number | null = null;
-  let touchStartX = 0;
-  let touchStartY = 0;
-  let longPressTimer = 0;
-  let touchDragActive = false;
+  // ─── Manual mode (post-click cursor / finger follow) ────────────
+  let manualMode = false;
+  let idleTimer = 0;
 
-  function preventTouchScroll(event: TouchEvent) {
-    if (touchDragActive) event.preventDefault();
+  function bumpIdleTimer() {
+    if (idleTimer !== 0) window.clearTimeout(idleTimer);
+    idleTimer = window.setTimeout(exitManual, IDLE_RELEASE_MS);
   }
 
-  function clearLongPressTimer() {
-    if (longPressTimer !== 0) {
-      window.clearTimeout(longPressTimer);
-      longPressTimer = 0;
+  function clearIdleTimer() {
+    if (idleTimer !== 0) {
+      window.clearTimeout(idleTimer);
+      idleTimer = 0;
     }
   }
 
-  function endTouchDrag() {
-    clearLongPressTimer();
-    touchPointerId = null;
-    wrapper!.classList.remove('is-orb-touch-dragging');
-
-    if (touchDragActive) {
-      touchDragActive = false;
-      window.removeEventListener('touchmove', preventTouchScroll);
-      startOrbit();
-    }
-  }
-
-  function activateTouchDrag() {
-    if (touchPointerId === null) return;
-    clearLongPressTimer();
-    touchDragActive = true;
-    wrapper!.classList.add('is-orb-touch-dragging');
-    stopOrbit();
-    setFromClientPoint(touchStartX, touchStartY);
-    window.addEventListener('touchmove', preventTouchScroll, { passive: false });
-  }
-
-  function onTouchPointerDown(event: PointerEvent) {
-    if (event.pointerType !== 'touch' || touchPointerId !== null) return;
-
-    touchPointerId = event.pointerId;
-    touchStartX = event.clientX;
-    touchStartY = event.clientY;
-    clearLongPressTimer();
-    longPressTimer = window.setTimeout(activateTouchDrag, LONG_PRESS_MS);
-  }
-
-  function onTouchPointerMove(event: PointerEvent) {
-    if (event.pointerId !== touchPointerId) return;
-
-    if (!touchDragActive) {
-      const dx = event.clientX - touchStartX;
-      const dy = event.clientY - touchStartY;
-      if (Math.hypot(dx, dy) > MOVE_CANCEL_PX) {
-        endTouchDrag();
-      }
+  function enterManual(clientX: number, clientY: number) {
+    if (manualMode) {
+      // Already manual — just refresh position + idle timer.
+      setFromClientPoint(clientX, clientY);
+      bumpIdleTimer();
       return;
     }
-
-    event.preventDefault();
-    setFromClientPoint(event.clientX, event.clientY);
+    manualMode = true;
+    wrapper!.classList.add('is-orb-manual');
+    stopOrbit();
+    setFromClientPoint(clientX, clientY);
+    window.addEventListener('pointermove', onManualPointerMove, { passive: true });
+    bumpIdleTimer();
   }
 
-  function onTouchPointerEnd(event: PointerEvent) {
-    if (event.pointerId === touchPointerId) {
-      endTouchDrag();
+  function exitManual() {
+    if (!manualMode) return;
+    manualMode = false;
+    wrapper!.classList.remove('is-orb-manual');
+    window.removeEventListener('pointermove', onManualPointerMove);
+    clearIdleTimer();
+    startOrbit();
+  }
+
+  function onManualPointerMove(event: PointerEvent) {
+    setFromClientPoint(event.clientX, event.clientY);
+    bumpIdleTimer();
+  }
+
+  // ─── Activation: click inside section enters manual ─────────────
+  function onWrapperPointerDown(event: PointerEvent) {
+    // Don't preventDefault on touch — the user could be scrolling
+    // through the section. We only take control on stationary
+    // taps / clicks. mousedown / pen always activate; touch needs
+    // the pointerup to land near pointerdown (small move tolerance).
+    if (event.pointerType === 'mouse' || event.pointerType === 'pen') {
+      event.preventDefault();
+      enterManual(event.clientX, event.clientY);
+      return;
+    }
+    // Touch — wait for a non-scrolling tap.
+    handleTouchTap(event);
+  }
+
+  // Touch-specific tap detection: tracks pointerup near pointerdown.
+  let pendingTouchId: number | null = null;
+  let touchStartX = 0;
+  let touchStartY = 0;
+  const TAP_MOVE_TOLERANCE = 14;
+
+  function handleTouchTap(event: PointerEvent) {
+    pendingTouchId = event.pointerId;
+    touchStartX = event.clientX;
+    touchStartY = event.clientY;
+  }
+
+  function onWrapperPointerMove(event: PointerEvent) {
+    // If we're tracking a touch for tap, cancel it once the user
+    // moves past tolerance — they're scrolling, not tapping.
+    if (
+      event.pointerType === 'touch' &&
+      pendingTouchId === event.pointerId &&
+      !manualMode
+    ) {
+      const dx = event.clientX - touchStartX;
+      const dy = event.clientY - touchStartY;
+      if (Math.hypot(dx, dy) > TAP_MOVE_TOLERANCE) {
+        pendingTouchId = null;
+      }
+    }
+    // While in manual mode, touch moves follow the finger.
+    if (manualMode && event.pointerType === 'touch') {
+      event.preventDefault?.();
+      setFromClientPoint(event.clientX, event.clientY);
+      bumpIdleTimer();
     }
   }
 
-  /* ── Wire up depending on input class ──────────────────────────── */
-  if (isCoarse) {
-    /* Touch devices: ambient auto-orbit + optional long-press drag. */
-    startOrbit();
-    wrapper.addEventListener('pointerdown', onTouchPointerDown, { passive: true });
-    wrapper.addEventListener('pointermove', onTouchPointerMove, { passive: false });
-    wrapper.addEventListener('pointerup', onTouchPointerEnd);
-    wrapper.addEventListener('pointercancel', onTouchPointerEnd);
-  } else {
-    /* Mouse / trackpad — codepen-style cursor follow only. */
-    window.addEventListener('pointermove', onPointerMove, { passive: true });
+  function onWrapperPointerUp(event: PointerEvent) {
+    if (
+      event.pointerType === 'touch' &&
+      pendingTouchId === event.pointerId
+    ) {
+      // The touch never moved past tolerance — treat as tap.
+      enterManual(event.clientX, event.clientY);
+      pendingTouchId = null;
+    }
   }
 
-  wrapper.addEventListener('pointerdown', onPointerDown);
+  // ─── Deactivation: click outside or leave section ───────────────
+  function onDocumentPointerDown(event: PointerEvent) {
+    if (!manualMode) return;
+    if (event.target instanceof Node && wrapper!.contains(event.target)) return;
+    exitManual();
+  }
 
-  /* Pause RAFs when the tab goes to background. */
+  function onWrapperPointerLeave() {
+    if (!manualMode) return;
+    exitManual();
+  }
+
+  // ─── Wire-up ────────────────────────────────────────────────────
+  startOrbit();
+  wrapper.addEventListener('pointerdown', onWrapperPointerDown);
+  wrapper.addEventListener('pointermove', onWrapperPointerMove, { passive: false });
+  wrapper.addEventListener('pointerup', onWrapperPointerUp);
+  wrapper.addEventListener('pointercancel', () => {
+    pendingTouchId = null;
+  });
+  wrapper.addEventListener('pointerleave', onWrapperPointerLeave);
+  document.addEventListener('pointerdown', onDocumentPointerDown);
+
+  // Pause/resume around tab visibility so we don't burn CPU when
+  // the user is in another tab.
   document.addEventListener('visibilitychange', () => {
     if (document.hidden) {
-      if (writeRaf !== 0) cancelAnimationFrame(writeRaf);
-      writeRaf = 0;
-      endTouchDrag();
+      if (writeRaf !== 0) {
+        cancelAnimationFrame(writeRaf);
+        writeRaf = 0;
+      }
       stopOrbit();
-    } else if (isCoarse) {
+      if (manualMode) exitManual();
+    } else if (!manualMode) {
       startOrbit();
     }
   });
