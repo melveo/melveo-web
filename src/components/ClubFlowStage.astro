@@ -29,67 +29,69 @@ const { lang } = Astro.props;
   mobile — the JS scroll handler still cycles between media slots
   by index.
 */
+/*
+  Card copy trimmed 2026-05-15 per user feedback ("zbytečně moc
+  informací, design těch čísel není ideální"):
+    - dropped the "Výstup: …" action line (redundant with metrics)
+    - reduced metrics from 3 → 2 per card so the eye lands on the
+      one number that matters per step
+    - tightened bodies to one short sentence
+  The big numbered "01–04" stays but is restyled smaller in CSS
+  below (was a 3rem glowing cyan slab, now a tag-style chip).
+*/
 const copy = {
   cs: {
     eyebrow: 'JEDEN DEN V KLUBU',
     headline: 'Od check-inu k rozhodnutí.',
-    body: 'Jeden tok od ranního signálu po rozhodnutí na hřišti.',
+    body: 'Jeden tok od ranního signálu po rozhodnutí.',
     mediaLabel: 'Živý klubový tok',
     progressLabel: 'Průběh dne',
     steps: [
       {
         number: '01',
-        kicker: 'Ráno · 30 sekund',
+        kicker: 'Ráno',
         title: 'Pětiosý check-in',
-        body: 'Hráč pošle stav těla i hlavy. Melveo z něj vytvoří týmový signál pro trenéra.',
+        body: '30 sekund v telefonu hráče. Melveo z toho vyrobí týmový signál.',
         metrics: [
           { value: '18/24', label: 'hráčů odeslalo' },
           { value: '86', label: 'readiness' },
-          { value: '3', label: 'bolestivé signály' },
         ],
-        action: 'Výstup: první týmový signál ještě před tréninkem.',
         image: '/images/club-flow/check-in.webp',
         alt: 'Hráč v šatně vyplňuje týmový check-in v telefonu.',
       },
       {
         number: '02',
-        kicker: 'Trénink · plán',
+        kicker: 'Trénink',
         title: 'Sessions',
-        body: 'Plán, docházka a RPE drží celý trénink v jednom kontextu.',
+        body: 'Plán, docházka, RPE — všechno v jednom kontextu.',
         metrics: [
           { value: '21/24', label: 'účast' },
-          { value: '7.2', label: 'avg RPE' },
-          { value: '+12%', label: 'zátěž týdne' },
+          { value: '+12 %', label: 'zátěž týdne' },
         ],
-        action: 'Výstup: tréninková zátěž v kontextu týdne.',
         image: '/images/club-flow/sessions.webp',
         alt: 'Trenér sleduje trénink a drží tablet s analytikou týmu.',
       },
       {
         number: '03',
-        kicker: 'Kontext · 1 minuta',
+        kicker: 'Kontext',
         title: 'Coach board',
-        body: 'Check-iny, docházka a zátěž se spojí do přehledu pro realizační tým.',
+        body: 'Check-iny, docházka a zátěž se sloučí do jednoho přehledu.',
         metrics: [
           { value: '3', label: 'watchlist' },
           { value: '2', label: 'recovery flags' },
-          { value: '1', label: 'chybějící signál' },
         ],
-        action: 'Výstup: trenér ví, koho řešit jako prvního.',
         image: '/images/club-flow/coach-board.webp',
         alt: 'Dva trenéři na palubovce společně kontrolují týmový coach board na tabletu.',
       },
       {
         number: '04',
-        kicker: 'Rozhodnutí · akce',
+        kicker: 'Rozhodnutí',
         title: 'Správné rozhodnutí',
-        body: 'Trenér vidí souvislosti a může upravit zátěž, roli nebo regeneraci.',
+        body: 'Trenér upraví zátěž, roli nebo regeneraci — s kontextem.',
         metrics: [
-          { value: '2', label: 'upravit zátěž' },
-          { value: '1', label: 'indiv. regenerace' },
           { value: '14', label: 'ready dnes' },
+          { value: '2', label: 'upravit zátěž' },
         ],
-        action: 'Výstup: jasný plán pro dnešní jednotku.',
         image: '/images/club-flow/decision.webp',
         alt: 'Trenér sleduje trénující tým a na tabletu kontroluje analytiku.',
       },
@@ -104,57 +106,49 @@ const copy = {
     steps: [
       {
         number: '01',
-        kicker: 'Morning · 30 seconds',
+        kicker: 'Morning',
         title: '5-axis check-in',
-        body: 'Players send a body-and-mind signal. Melveo turns it into coach-ready context.',
+        body: '30 seconds on the player’s phone. Melveo turns it into a team signal.',
         metrics: [
           { value: '18/24', label: 'players sent' },
           { value: '86', label: 'readiness' },
-          { value: '3', label: 'pain signals' },
         ],
-        action: 'Output: first team signal before training starts.',
         image: '/images/club-flow/check-in.webp',
         alt: 'A player in a locker room completes a team check-in on a phone.',
       },
       {
         number: '02',
-        kicker: 'Training · plan',
+        kicker: 'Training',
         title: 'Sessions',
-        body: 'Plan, attendance, and RPE keep the whole session in one context.',
+        body: 'Plan, attendance, RPE — all in one context.',
         metrics: [
           { value: '21/24', label: 'attendance' },
-          { value: '7.2', label: 'avg RPE' },
-          { value: '+12%', label: 'weekly load' },
+          { value: '+12 %', label: 'weekly load' },
         ],
-        action: 'Output: training load in weekly context.',
         image: '/images/club-flow/sessions.webp',
         alt: 'A coach watches practice while holding a tablet with team analytics.',
       },
       {
         number: '03',
-        kicker: 'Context · 1 minute',
+        kicker: 'Context',
         title: 'Coach board',
-        body: 'Check-ins, attendance, and load become one view for the coaching staff.',
+        body: 'Check-ins, attendance and load merge into one view.',
         metrics: [
           { value: '3', label: 'watchlist' },
           { value: '2', label: 'recovery flags' },
-          { value: '1', label: 'missing signal' },
         ],
-        action: 'Output: coaches know who needs attention first.',
         image: '/images/club-flow/coach-board.webp',
         alt: 'Two coaches review a team coach board on a tablet courtside.',
       },
       {
         number: '04',
-        kicker: 'Decision · action',
+        kicker: 'Decision',
         title: 'The right decision',
-        body: 'Coaches see the context and can adjust load, role, or recovery.',
+        body: 'Coach adjusts load, role or recovery — with context.',
         metrics: [
-          { value: '2', label: 'load changes' },
-          { value: '1', label: 'individual recovery' },
           { value: '14', label: 'ready today' },
+          { value: '2', label: 'load changes' },
         ],
-        action: 'Output: a clear plan for today’s session.',
         image: '/images/club-flow/decision.webp',
         alt: 'A coach watches the team train while checking analytics on a tablet.',
       },
@@ -237,14 +231,9 @@ const steps = content.steps;
                 </div>
               </div>
 
-              <div class="club-flow-stage__mini-board" aria-hidden="true">
-                <span>{content.progressLabel}</span>
-                <div class="club-flow-stage__mini-lines">
-                  <i></i>
-                  <i></i>
-                  <i></i>
-                </div>
-              </div>
+              {/* "Průběh dne" mini-board removed 2026-05-15 —
+                  decorative noise that didn't add information
+                  beyond the HUD dot pagination above. */}
             </div>
           </div>
         </div>
@@ -303,7 +292,9 @@ const steps = content.steps;
                         </div>
                       ))}
                     </dl>
-                    <p class="club-flow-stage__action">{step.action}</p>
+                    {/* "Výstup: …" action line removed 2026-05-15
+                        per user feedback — it was a repeat of what
+                        the metrics already showed. */}
                   </div>
                 </article>
               ))
@@ -758,14 +749,29 @@ const steps = content.steps;
     border-bottom: 1px solid color-mix(in srgb, var(--color-accent-primary) 28%, transparent);
   }
 
+  /*
+    Step number — was a 3rem glowing cyan slab that competed visually
+    with the card title. User 2026-05-15 ("design těch čísel není
+    úplně ideální") preferred a small tag chip that just marks
+    "step N of N" without shouting. Cyan kept, glow dropped, sized
+    to align with the kicker label next to it.
+  */
   .club-flow-stage__card-number {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 1.85rem;
+    height: 1.45rem;
+    padding: 0 0.5rem;
+    border: 1px solid color-mix(in srgb, var(--color-accent-primary) 38%, transparent);
+    border-radius: 0.5rem;
+    background: color-mix(in srgb, var(--color-accent-primary) 12%, transparent);
     color: var(--color-accent-primary);
-    font-size: clamp(1.9rem, 3.8vw, 3.35rem);
+    font-size: clamp(0.7rem, 0.85vw, 0.82rem);
     font-weight: 700;
-    line-height: 0.9;
-    letter-spacing: -0.04em;
-    /* Subtle cyan glow to match the card backdrop. */
-    text-shadow: 0 0 24px color-mix(in srgb, var(--color-accent-primary) 30%, transparent);
+    line-height: 1;
+    letter-spacing: 0.06em;
+    font-variant-numeric: tabular-nums;
   }
 
   .club-flow-stage__card-kicker {
@@ -1245,10 +1251,11 @@ const steps = content.steps;
       gap: clamp(0.75rem, 2.6vw, 1rem);
     }
 
+    /* Mobile override redundant now — desktop chip styling above
+       already scales via clamp(). Keeping the rule empty as a hook
+       for any phone-specific tweak later. */
     .club-flow-stage__card-number {
-      font-size: clamp(2rem, 8vw, 2.45rem);
-      letter-spacing: -0.03em;
-      text-shadow: 0 0 22px color-mix(in srgb, var(--color-accent-primary) 32%, transparent);
+      letter-spacing: 0.06em;
     }
 
     .club-flow-stage__card-kicker {

@@ -25,16 +25,24 @@ export const ui = {
     'footer.cookieSettings': 'Nastavení cookies',
 
     // Hero
-    'hero.eyebrow': 'OPERAČNÍ SYSTÉM PRO TÝMOVÉ SPORTY',
+    /*
+      Hero copy 2026-05-15 — trimmed per user feedback ("strašně moc
+      informací, texty splývají s pozadím"). Shorter eyebrow (3 words),
+      3-variant rotation instead of 6 (the weak ones never read because
+      users left before the cycle reached them), and subline cut from
+      28 → 13 words. Pair with a text-shadow on the headline + subline
+      in Landing.astro for legibility against the particle backdrop.
+    */
+    'hero.eyebrow': 'KLUBOVÝ SYSTÉM',
     'hero.headlinePrefix': 'Hráčské signály měníme na',
     'hero.headlineLine1': 'Hráčské signály',
     'hero.headlineLine2': 'měníme na',
     'hero.headlineSuffix': '.',
     'hero.headlineInitial': 'trenérská rozhodnutí',
     'hero.headlineRotations':
-      'trenérská rozhodnutí|readiness týmu|úpravy zátěže|kontext pro zápas|riziková upozornění|jasný plán',
+      'trenérská rozhodnutí|readiness týmu|jasný plán dne',
     'hero.subline':
-      'Melveo sbírá check-iny, readiness, wellness a tréninkovou zátěž a převádí je do jasného denního kontextu pro trenéry.',
+      'Check-iny, zátěž, docházka. Jeden přehled pro trenéra každý den.',
     'hero.cta.appstore': 'Stáhnout v App Store',
     // Key kept as `pilot` for legacy reference; label is now generic
     // contact CTA (pilot offering retired 2026-05-04).
@@ -293,16 +301,17 @@ export const ui = {
     'footer.terms': 'Terms',
     'footer.cookieSettings': 'Cookie settings',
 
-    'hero.eyebrow': 'COACH OPERATING SYSTEM FOR TEAM SPORTS',
+    /* See CS comment above — same trim applied in English. */
+    'hero.eyebrow': 'CLUB OPERATING SYSTEM',
     'hero.headlinePrefix': 'Player signals become',
     'hero.headlineLine1': 'Player signals',
     'hero.headlineLine2': 'become',
     'hero.headlineSuffix': '.',
     'hero.headlineInitial': 'coach decisions',
     'hero.headlineRotations':
-      'coach decisions|team readiness|load adjustments|match-day clarity|risk alerts|coach context',
+      'coach decisions|team readiness|clear daily plan',
     'hero.subline':
-      'Melveo collects check-ins, readiness, wellness and training load, then turns them into clear daily context for coaches.',
+      'Check-ins, load, attendance. One daily view your coach actually uses.',
     'hero.cta.appstore': 'Download on the App Store',
     'hero.cta.pilot': 'Get in touch →',
     'hero.beta': 'TestFlight beta · soon',

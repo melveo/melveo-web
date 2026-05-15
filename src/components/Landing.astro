@@ -90,7 +90,7 @@ const t = useTranslations(lang);
         </span>
       </h1>
 
-      <p class="mx-auto mt-10 max-w-[36rem] text-pretty text-lg font-medium text-[var(--color-text-primary)] sm:text-xl">
+      <p class="hero-subline mx-auto mt-10 max-w-[36rem] text-pretty text-lg font-medium text-[var(--color-text-primary)] sm:text-xl">
         {t('hero.subline')}
       </p>
 
@@ -335,6 +335,18 @@ const t = useTranslations(lang);
     letter-spacing: -0.035em;
     line-height: 0.98;
     word-spacing: 0.06em;
+    /*
+      Hero text sits over an animated particle / shader scene
+      (HeroScene canvas). Without a backdrop the white text drifts
+      into the cyan particles and becomes hard to read — user feedback
+      2026-05-15 ("texty občas trošku splývají s pozadím"). A subtle
+      dark text-shadow gives every glyph its own pseudo-stroke so the
+      headline stays legible across whatever the canvas happens to be
+      drawing behind it.
+    */
+    text-shadow:
+      0 1px 2px rgba(0, 0, 0, 0.55),
+      0 4px 24px rgba(0, 0, 0, 0.45);
   }
 
   .hero-headline-static {
@@ -342,6 +354,14 @@ const t = useTranslations(lang);
     justify-content: center;
     gap: 0.18em;
     white-space: nowrap;
+  }
+
+  /* Subline gets the same shadow treatment as the headline so the
+     full copy block reads as one legible unit over the canvas. */
+  .hero-subline {
+    text-shadow:
+      0 1px 2px rgba(0, 0, 0, 0.55),
+      0 2px 14px rgba(0, 0, 0, 0.4);
   }
 
   .hero-rotate-cluster {
