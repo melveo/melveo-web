@@ -28,14 +28,14 @@ interface Props {
 const { lang } = Astro.props;
 const t = useTranslations(lang);
 
-// Six Q&A pairs. Order matters — most-asked first.
+// 4 Q&A pairs (trimmed from 6 on 2026-05-15 per content audit —
+// kept the four real objections: engagement, competition, missing
+// data, privacy; dropped the time-cost + scope-of-org questions).
 const items = [
   { q: t('faq.q1'), a: t('faq.a1') },
   { q: t('faq.q2'), a: t('faq.a2') },
   { q: t('faq.q3'), a: t('faq.a3') },
   { q: t('faq.q4'), a: t('faq.a4') },
-  { q: t('faq.q5'), a: t('faq.a5') },
-  { q: t('faq.q6'), a: t('faq.a6') },
 ];
 
 // JSON-LD FAQPage schema — gets rich-result eligibility in SERPs.

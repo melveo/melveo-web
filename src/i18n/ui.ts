@@ -99,9 +99,9 @@ export const ui = {
     // Stage 3.75 — scroll-timeline word highlight (Daniel Haim codepen)
     'wordScroll.prefix': 'Spojí',
     'wordScroll.screenReader':
-      'Spojí ranní check-in s kontextem pro trenéra, RPE z tréninku se zátěží na další týden a docházku s wellness s readiness týmu.',
+      'Spojí check-in, wellness, RPE, docházku, symptomy a zápasový kontext do výstupů pro trenéra.',
     'wordScroll.words':
-      'check-in → kontext trenéra.|RPE → další zátěž.|wellness → readiness týmu.',
+      'check-in → stav hráče.|wellness → readiness týmu.|RPE → plán zátěže.|docházka → kontext tréninku.|symptomy → watchlist.|zápas → rozhodnutí trenéra.',
 
     // Stage 4 — wellness
     'wellness.eyebrow': 'RÁNO · 30 SEKUND',
@@ -136,8 +136,12 @@ export const ui = {
     'pricing.eyebrow': 'CENÍK',
     'pricing.headline': 'Začni zdarma.',
     'pricing.headlineAccent': 'Plať jen co potřebuješ.',
-    'pricing.subline':
-      'Klub kupuje jednu licenci pro celý tým. Free Starter slouží jako test s menší skupinou, placené plány pokryjí běžný týmový provoz.',
+    /*
+      Subline trimmed 2026-05-15 — was 24 words explaining the Free
+      Starter vs paid model. Cards say all of that themselves; the
+      headline just needs a one-line pitch.
+    */
+    'pricing.subline': 'Jedna licence pro celý tým. Roční plány zruš kdykoliv.',
     'pricing.toggleMonthly': 'Měsíčně',
     'pricing.toggleYearly': 'Ročně',
     'pricing.toggleSavings': '−17 %',
@@ -256,26 +260,27 @@ export const ui = {
     // Six questions covering the most common things a club/coach
     // asks before booking a pilot or downloading the app. Keep
     // answers short — long answers go in the docs/blog later.
+    /*
+      FAQ trimmed 2026-05-15 — 6 questions → 4. Answers cut to one
+      tight sentence each. Removed: "Kolik času stojí trenéra denně"
+      (answer was filler) and "Pro tým/akademii/klub" (pricing page
+      already answers this). Kept the four real objections:
+      engagement, competition, missing data, privacy.
+    */
     'faq.eyebrow': 'OTÁZKY',
     'faq.headline': 'Časté otázky.',
     'faq.q1': 'Budou hráči check-in opravdu dělat?',
     'faq.a1':
-      'Check-in je krátký a opakuje se ve stejném rytmu. Zabere přibližně 30 sekund a trenér vidí zapojení týmu, takže není nutné hráče nahánět ručně.',
-    'faq.q2': 'Kolik času to stojí trenéra denně?',
+      'Check-in trvá ~30 sekund, opakuje se ve stejném rytmu. Trenér rovnou vidí, kdo poslal a kdo ne.',
+    'faq.q2': 'Co když už používáme jiný nástroj?',
     'faq.a2':
-      'Cílem je šetřit čas, ne přidat další administrativu. Trenér neprochází jednotlivé formuláře, ale dostane týmový kontext, watchlist a doporučené oblasti pozornosti.',
-    'faq.q3': 'Co když už používáme jiný týmový nástroj?',
+      'Melveo nenahrazuje komunikaci ani klubovou administrativu — jen sbírá denní signály a dělá z nich kontext pro trenéra.',
+    'faq.q3': 'Co když hráč vynechá den?',
     'faq.a3':
-      'Melveo nemá nahradit všechno. Zaměřuje se na denní signály hráčů, zátěž, readiness a výstup pro trenéra. Komunikace nebo klubová administrativa může dál běžet v nástrojích, které už používáte.',
-    'faq.q4': 'Co se stane, když hráč vynechá den?',
+      'Melveo pracuje i s neúplnými daty. Trenér uvidí, kdo signál poslal, a trend týmu zůstane viditelný.',
+    'faq.q4': 'Kdo vidí hráčská data?',
     'faq.a4':
-      'Melveo pracuje i s neúplnými vstupy. Trenér vidí, kdo signál poslal, a systém pořád umí ukázat trend týmu místo toho, aby se celý den rozpadl kvůli jednomu chybějícímu check-inu.',
-    'faq.q5': 'Kdo vidí hráčská data?',
-    'faq.a5':
-      'Data jsou zpracovaná do rolí a týmového kontextu. Klub spravuje workspace, hráči mají kontrolu nad svými vstupy a data neprodáváme ani nepoužíváme k marketingu.',
-    'faq.q6': 'Je Melveo pro jeden tým, akademii, nebo celý klub?',
-    'faq.a6':
-      'Začít můžete s jedním týmem nebo menší skupinou hráčů. Jakmile proces funguje, dává smysl rozšířit Melveo na celý klub, akademii nebo více realizačních týmů.',
+      'Klub spravuje workspace, hráč má kontrolu nad svým vstupem. Data neprodáváme a nepoužíváme k marketingu.',
 
     // Stage 9 — pilot CTA
     'pilot.headline': 'Pojďme to spustit.',
@@ -360,9 +365,9 @@ export const ui = {
 
     'wordScroll.prefix': 'Connects',
     'wordScroll.screenReader':
-      'Connects morning check-in to coach-ready context, training RPE to next-week load, and attendance plus wellness to team readiness.',
+      'Connects check-in, wellness, RPE, attendance, symptoms and match context into coach-ready outputs.',
     'wordScroll.words':
-      'check-in → coach context.|RPE → next-week load.|wellness → team readiness.',
+      'check-in → player state.|wellness → team readiness.|RPE → load plan.|attendance → training context.|symptoms → watchlist.|match context → coach decision.',
 
     'wellness.eyebrow': 'MORNING · 30 SECONDS',
     'wellness.headline': '5-axis check-in.',
@@ -385,8 +390,7 @@ export const ui = {
     'pricing.eyebrow': 'PRICING',
     'pricing.headline': 'Start free.',
     'pricing.headlineAccent': 'Pay only for what you need.',
-    'pricing.subline':
-      "Clubs buy one license for the team. Free Starter is a small-group test; paid plans cover day-to-day team operations.",
+    'pricing.subline': 'One license for the whole team. Yearly plans, cancel anytime.',
     'pricing.toggleMonthly': 'Monthly',
     'pricing.toggleYearly': 'Yearly',
     'pricing.toggleSavings': '−17 %',
@@ -488,26 +492,21 @@ export const ui = {
     'testimonial.role': 'Head coach · SK Melveo · football U19',
 
     // FAQ (mirrors CS keys above)
+    /* See CS comment — same trim, 4 strongest objections. */
     'faq.eyebrow': 'QUESTIONS',
     'faq.headline': 'Frequently asked.',
     'faq.q1': 'Will players actually check in?',
     'faq.a1':
-      'The check-in is short and repeats in the same daily rhythm. It takes about 30 seconds, and coaches can see team uptake without chasing players manually.',
-    'faq.q2': 'How much time does it cost coaches every day?',
+      'The check-in takes ~30 seconds and repeats in the same daily rhythm. Coaches see who sent and who didn’t — no manual chasing.',
+    'faq.q2': 'What if we already use another tool?',
     'faq.a2':
-      'The goal is to save time, not create admin. Coaches do not read every form; they get team context, a watchlist, and the areas that need attention.',
-    'faq.q3': 'What if we already use another team tool?',
+      'Melveo doesn’t replace communication or club admin — it just collects daily signals and turns them into coach context.',
+    'faq.q3': 'What if a player misses a day?',
     'faq.a3':
-      'Melveo does not need to replace everything. It focuses on daily player signals, load, readiness, and coach output. Communication or club admin can stay in the tools you already use.',
-    'faq.q4': 'What happens when a player misses a day?',
+      'Melveo works with incomplete data. Coaches see who sent a signal and the team trend stays visible.',
+    'faq.q4': 'Who can see player data?',
     'faq.a4':
-      'Melveo still works with incomplete inputs. Coaches see who sent a signal, and the team trend remains useful instead of the whole day depending on one missing check-in.',
-    'faq.q5': 'Who can see player data?',
-    'faq.a5':
-      'Data is translated into role-based team context. The club manages the workspace, players keep control of their inputs, and we never sell data or use it for marketing.',
-    'faq.q6': 'Is Melveo for one team, an academy, or a whole club?',
-    'faq.a6':
-      'You can start with one team or a smaller player group. Once the process works, Melveo can expand to the whole club, academy, or multiple staff groups.',
+      'The club runs the workspace, players control their own input. We never sell data or use it for marketing.',
 
     'pilot.headline': 'Let’s start it.',
     'pilot.body': 'A short email is enough.',
