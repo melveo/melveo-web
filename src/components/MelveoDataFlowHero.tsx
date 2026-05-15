@@ -581,7 +581,32 @@ export default function MelveoDataFlowHero({ lang = "en" }: Props) {
     if (typeof window === "undefined" || reduced) return;
     let cancelled = false;
     let ctx: { revert: () => void } | null = null;
+    let gsapInstance: GsapInstance | null = null;
+    let io: IntersectionObserver | null = null;
+    let onVisibilityChange: (() => void) | null = null;
     const isMobile = window.matchMedia("(max-width: 900px)").matches;
+
+    /*
+      Pause GSAP globally while the section is out of the viewport
+      OR while the tab is hidden. The 8 input-hex pulse loops use
+      MotionPathPlugin which is expensive (curve sampling per tick)
+      and they kept firing even when the section was scrolled past,
+      taxing the browser's main thread for nothing (user 2026-05-15:
+      "ty 2 sekce se docela lagují"). gsap.ticker.sleep / wake stops
+      *all* tweens in this context without losing schedules.
+    */
+    let isVisible = false;
+    let tabHidden = document.hidden;
+    function syncPlayState() {
+      const g = gsapInstance;
+      if (!g) return;
+      const shouldPlay = isVisible && !tabHidden;
+      if (shouldPlay) {
+        g.ticker.wake?.();
+      } else {
+        g.ticker.sleep?.();
+      }
+    }
 
     void (async () => {
       const [{ gsap }, { MotionPathPlugin }] = await Promise.all([
@@ -590,6 +615,26 @@ export default function MelveoDataFlowHero({ lang = "en" }: Props) {
       ]);
       if (cancelled || !rootRef.current) return;
       gsap.registerPlugin(MotionPathPlugin);
+      gsapInstance = gsap;
+
+      // Pause when scrolled out of viewport. rootMargin gives a
+      // small "warm-up" zone so the animation is already running
+      // by the time the section reaches the edge of the screen.
+      io = new IntersectionObserver(
+        ([entry]) => {
+          isVisible = !!entry?.isIntersecting;
+          syncPlayState();
+        },
+        { rootMargin: "200px 0px" },
+      );
+      io.observe(rootRef.current);
+
+      // Also pause on tab hide.
+      onVisibilityChange = () => {
+        tabHidden = document.hidden;
+        syncPlayState();
+      };
+      document.addEventListener("visibilitychange", onVisibilityChange);
 
       ctx = gsap.context(() => {
         if (isMobile) {
@@ -873,6 +918,12 @@ export default function MelveoDataFlowHero({ lang = "en" }: Props) {
     return () => {
       cancelled = true;
       ctx?.revert();
+      io?.disconnect();
+      if (onVisibilityChange) {
+        document.removeEventListener("visibilitychange", onVisibilityChange);
+      }
+      // Make sure ticker wakes if another GSAP user mounts later
+      gsapInstance?.ticker?.wake?.();
     };
   }, [reduced]);
 
