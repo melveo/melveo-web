@@ -2,9 +2,10 @@
  * Hero scene — TC5550 CodePen metaballs port.
  *
  * This keeps the supplied CodePen metaball mechanics:
- * - internal canvas resolution is viewport * 0.75
- * - 30 metaballs
- * - radius/velocity formulas match the pen
+ * - internal canvas resolution is viewport-scaled per device
+ * - metaball count is quality-tiered per device
+ * - radius/velocity formulas match the pen, then get a tiny quality
+ *   tier multiplier so lower-cost mobile scenes still read full
  * - fragment shader threshold logic matches the pen
  * - mouse coordinates are not used for motion
  *
@@ -28,7 +29,52 @@ interface Metaball {
   r: number;
 }
 
-const NUM_METABALLS = 30;
+interface HeroQualityProfile {
+  metaballCount: number;
+  resolutionScale: number;
+  dprCap: number;
+  radiusBoost: number;
+}
+
+function getHeroQualityProfile(): HeroQualityProfile {
+  const width = window.innerWidth;
+  const cores = navigator.hardwareConcurrency || 8;
+  const lowPower = cores <= 4;
+
+  if (width < 480) {
+    return {
+      metaballCount: 16,
+      resolutionScale: 0.58,
+      dprCap: 1.25,
+      radiusBoost: 1.22,
+    };
+  }
+
+  if (width < 768) {
+    return {
+      metaballCount: 18,
+      resolutionScale: 0.62,
+      dprCap: 1.35,
+      radiusBoost: 1.16,
+    };
+  }
+
+  if (width < 1180 || lowPower) {
+    return {
+      metaballCount: 24,
+      resolutionScale: 0.68,
+      dprCap: 1.5,
+      radiusBoost: 1.1,
+    };
+  }
+
+  return {
+    metaballCount: 30,
+    resolutionScale: 0.72,
+    dprCap: 1.75,
+    radiusBoost: 1.02,
+  };
+}
 
 const VERTEX_SHADER = `
 attribute vec2 position;
@@ -38,14 +84,14 @@ void main() {
 }
 `;
 
-function fragmentShaderSource(width: number, height: number): string {
+function fragmentShaderSource(width: number, height: number, metaballCount: number): string {
   return `
 precision highp float;
 
 const float WIDTH = ${width >> 0}.0;
 const float HEIGHT = ${height >> 0}.0;
 
-uniform vec3 metaballs[${NUM_METABALLS}];
+uniform vec3 metaballs[${metaballCount}];
 
 const vec3 BRAND_CYAN = vec3(0.0, 0.941176, 1.0);
 const vec3 BRAND_ICE = vec3(0.45, 0.86, 0.90);
@@ -57,7 +103,7 @@ void main() {
   float y = gl_FragCoord.y;
 
   float sum = 0.0;
-  for (int i = 0; i < ${NUM_METABALLS}; i++) {
+  for (int i = 0; i < ${metaballCount}; i++) {
     vec3 metaball = metaballs[i];
     float dx = metaball.x - x;
     float dy = metaball.y - y;
@@ -155,16 +201,18 @@ export function mountHeroScene({ canvas }: MountOptions): SceneHandle | null {
   if (!context) return null;
   const gl: WebGLRenderingContext = context;
 
+  const quality = getHeroQualityProfile();
+
   // DPR-aware canvas backing — without this, canvas runs at CSS-pixel
   // size and gets stretched on retina mobile, producing the blocky /
   // pixelated metaballs the user noticed (feedback 2026-05-01:
   // "bubliny v pozadí jsou neúplně ostré, jako kdyby byly
-  // rozpixelované na mobilním zařízení"). Cap at 2× so a 3× iPhone
-  // screen doesn't quadruple the shader workload.
-  const dpr = Math.min(window.devicePixelRatio || 1, 2);
+  // rozpixelované na mobilním zařízení"). Cap DPR by quality tier so
+  // a 3× iPhone doesn't spend the first load on a huge shader surface.
+  const dpr = Math.min(window.devicePixelRatio || 1, quality.dprCap);
 
-  let width = Math.max(1, Math.floor(window.innerWidth * 0.75 * dpr));
-  let height = Math.max(1, Math.floor(window.innerHeight * 0.75 * dpr));
+  let width = Math.max(1, Math.floor(window.innerWidth * quality.resolutionScale * dpr));
+  let height = Math.max(1, Math.floor(window.innerHeight * quality.resolutionScale * dpr));
   canvas.width = width;
   canvas.height = height;
   gl.viewport(0, 0, canvas.width, canvas.height);
@@ -180,13 +228,13 @@ export function mountHeroScene({ canvas }: MountOptions): SceneHandle | null {
     if (w >= 768) base = 1;
     else if (w <= 360) base = 0.5;
     else base = 0.5 + (w - 360) * (0.5 / (768 - 360));
-    return base * dpr;
+    return base * dpr * quality.radiusBoost;
   }
 
   const metaballs: Metaball[] = [];
 
   const initialScale = radiusScale();
-  for (let i = 0; i < NUM_METABALLS; i += 1) {
+  for (let i = 0; i < quality.metaballCount; i += 1) {
     const radius = (Math.random() * 60 + 10) * initialScale;
     metaballs.push({
       x: Math.random() * (width - 2 * radius) + radius,
@@ -199,15 +247,20 @@ export function mountHeroScene({ canvas }: MountOptions): SceneHandle | null {
     });
   }
 
-  const vertexShader = createShader(gl, gl.VERTEX_SHADER, VERTEX_SHADER);
-  let fragmentShader = createShader(gl, gl.FRAGMENT_SHADER, fragmentShaderSource(width, height));
+  const initialVertexShader = createShader(gl, gl.VERTEX_SHADER, VERTEX_SHADER);
+  let fragmentShader = createShader(
+    gl,
+    gl.FRAGMENT_SHADER,
+    fragmentShaderSource(width, height, quality.metaballCount),
+  );
 
-  if (!vertexShader || !fragmentShader) {
-    if (vertexShader) gl.deleteShader(vertexShader);
+  if (!initialVertexShader || !fragmentShader) {
+    if (initialVertexShader) gl.deleteShader(initialVertexShader);
     if (fragmentShader) gl.deleteShader(fragmentShader);
     return null;
   }
 
+  const vertexShader = initialVertexShader;
   let program = createProgram(gl, vertexShader, fragmentShader);
   if (!program) {
     gl.deleteShader(vertexShader);
@@ -267,12 +320,12 @@ export function mountHeroScene({ canvas }: MountOptions): SceneHandle | null {
   let canvasInView = true;
   let targetSpeed = 1;
   let speed = 1;
-  const dataToSendToGPU = new Float32Array(3 * NUM_METABALLS);
+  const dataToSendToGPU = new Float32Array(3 * quality.metaballCount);
 
   function rebuildProgramForSize() {
-    const nextDpr = Math.min(window.devicePixelRatio || 1, 2);
-    const nextWidth = Math.max(1, Math.floor(window.innerWidth * 0.75 * nextDpr));
-    const nextHeight = Math.max(1, Math.floor(window.innerHeight * 0.75 * nextDpr));
+    const nextDpr = Math.min(window.devicePixelRatio || 1, quality.dprCap);
+    const nextWidth = Math.max(1, Math.floor(window.innerWidth * quality.resolutionScale * nextDpr));
+    const nextHeight = Math.max(1, Math.floor(window.innerHeight * quality.resolutionScale * nextDpr));
 
     const widthDelta = Math.abs(nextWidth - width);
     const heightDelta = Math.abs(nextHeight - height);
@@ -298,7 +351,11 @@ export function mountHeroScene({ canvas }: MountOptions): SceneHandle | null {
     canvas.height = height;
     gl.viewport(0, 0, canvas.width, canvas.height);
 
-    const nextFragmentShader = createShader(gl, gl.FRAGMENT_SHADER, fragmentShaderSource(width, height));
+    const nextFragmentShader = createShader(
+      gl,
+      gl.FRAGMENT_SHADER,
+      fragmentShaderSource(width, height, quality.metaballCount),
+    );
     if (!nextFragmentShader) return;
 
     const nextProgram = createProgram(gl, vertexShader, nextFragmentShader);
@@ -382,7 +439,7 @@ export function mountHeroScene({ canvas }: MountOptions): SceneHandle | null {
 
     speed += (targetSpeed - speed) * 0.08;
 
-    for (let i = 0; i < NUM_METABALLS; i += 1) {
+    for (let i = 0; i < quality.metaballCount; i += 1) {
       const metaball = metaballs[i];
       if (!metaball) continue;
 
@@ -397,7 +454,7 @@ export function mountHeroScene({ canvas }: MountOptions): SceneHandle | null {
       }
     }
 
-    for (let i = 0; i < NUM_METABALLS; i += 1) {
+    for (let i = 0; i < quality.metaballCount; i += 1) {
       const baseIndex = 3 * i;
       const metaball = metaballs[i];
       if (!metaball) continue;

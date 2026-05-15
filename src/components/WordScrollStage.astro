@@ -120,7 +120,7 @@ const hueStep = (hueEnd - hueStart) / Math.max(1, words.length - 1);
     height: 100%;
     min-width: min-content;
     padding-inline: 1.5rem;
-    font-size: 4.875rem;
+    font-size: clamp(3.35rem, 5.6vw, 4.875rem);
     font-weight: 500;
     line-height: 1.25;
     letter-spacing: 0;
@@ -162,6 +162,7 @@ const hueStep = (hueEnd - hueStart) / Math.max(1, words.length - 1);
     height: 1.25em;
     align-self: center;
     min-width: 0;
+    max-width: min(72vw, 58rem);
     overflow: visible;
   }
 
@@ -186,6 +187,7 @@ const hueStep = (hueEnd - hueStart) / Math.max(1, words.length - 1);
     top: 50%;
     left: 0;
     width: max-content;
+    max-width: min(72vw, 58rem);
     transform: translate3d(
       0,
       calc(-0.625em - (var(--word-scroll-active-index) * 1.25em)),
@@ -204,6 +206,7 @@ const hueStep = (hueEnd - hueStart) / Math.max(1, words.length - 1);
     position: relative;
     display: block;
     width: max-content;
+    max-width: min(72vw, 58rem);
     overflow: visible;
     border-radius: 0.34em;
     background: transparent;
@@ -274,6 +277,9 @@ const hueStep = (hueEnd - hueStart) / Math.max(1, words.length - 1);
   .word-scroll-stage__word {
     display: inline-block;
     flex: none;
+    max-width: min(72vw, 58rem);
+    overflow: visible;
+    white-space: nowrap;
     text-shadow: 0 0 calc(30px * var(--word-focus)) color-mix(in oklch, var(--word-accent) 46%, transparent);
   }
 
@@ -295,7 +301,7 @@ const hueStep = (hueEnd - hueStart) / Math.max(1, words.length - 1);
     }
 
     .word-scroll-stage__inner {
-      font-size: 4.35rem;
+      font-size: clamp(2.75rem, 5.4vw, 4.2rem);
     }
   }
 
@@ -307,7 +313,7 @@ const hueStep = (hueEnd - hueStart) / Math.max(1, words.length - 1);
     .word-scroll-stage__inner {
       gap: 0.18em;
       padding-inline: 1rem;
-      font-size: 2.5rem;
+      font-size: clamp(1.65rem, 5.25vw, 2.45rem);
     }
   }
 
@@ -317,7 +323,21 @@ const hueStep = (hueEnd - hueStart) / Math.max(1, words.length - 1);
     }
 
     .word-scroll-stage__inner {
-      font-size: 1.9rem;
+      flex-direction: column;
+      gap: 0.18em;
+      font-size: clamp(1.05rem, 4.55vw, 1.55rem);
+      line-height: 1.22;
+    }
+
+    .word-scroll-stage__prefix {
+      line-height: 1;
+    }
+
+    .word-scroll-stage__list-viewport,
+    .word-scroll-stage__list,
+    .word-scroll-stage__item,
+    .word-scroll-stage__word {
+      max-width: 94vw;
     }
 
     .word-scroll-stage__item .glass-filter,
@@ -336,10 +356,11 @@ const hueStep = (hueEnd - hueStart) / Math.max(1, words.length - 1);
 </style>
 
 <script>
-  const clampWordScroll = (value, min, max) => Math.min(Math.max(value, min), max);
+  const clampWordScroll = (value: number, min: number, max: number) =>
+    Math.min(Math.max(value, min), max);
 
   const updateWordScrollStages = () => {
-    document.querySelectorAll('[data-word-scroll-stage]').forEach((root) => {
+    document.querySelectorAll<HTMLElement>('[data-word-scroll-stage]').forEach((root) => {
       const startIndex = Number(root.getAttribute('data-start-index') || 0);
       const endIndex = Number(root.getAttribute('data-end-index') || startIndex);
       const rect = root.getBoundingClientRect();
@@ -349,7 +370,7 @@ const hueStep = (hueEnd - hueStart) / Math.max(1, words.length - 1);
 
       root.style.setProperty('--word-scroll-active-index', activeIndex.toFixed(4));
 
-      root.querySelectorAll('.word-scroll-stage__item').forEach((item, index) => {
+      root.querySelectorAll<HTMLElement>('.word-scroll-stage__item').forEach((item, index) => {
         const distance = Math.abs(index - activeIndex);
         const focus = clampWordScroll(1 - distance * 1.08, 0, 1);
 

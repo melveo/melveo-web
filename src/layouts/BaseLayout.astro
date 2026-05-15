@@ -18,7 +18,7 @@
  * pilot enquiry email, and legal pages.
  */
 
-import { useTranslations, type Lang, ui } from '../i18n/ui';
+import { useTranslations, type Lang } from '../i18n/ui';
 import LocaleSwitcher from '../components/LocaleSwitcher.astro';
 import CookieBanner from '../components/CookieBanner.astro';
 import AnalyticsHead from '../components/AnalyticsHead.astro';
@@ -97,10 +97,14 @@ const altUrls = {
         in copy (some pricing strings get mistaken for phone numbers
         and turn blue + clickable on iOS Safari). */}
     <meta name="format-detection" content="telephone=no" />
+    <meta name="mobile-web-app-capable" content="yes" />
 
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="icon" type="image/svg+xml" href="/app-icon-melveo.svg" />
+    <link rel="icon" type="image/png" href="/app-icon-melveo.png" sizes="1024x1024" />
     <link rel="icon" type="image/x-icon" href="/favicon.ico" sizes="any" />
-    <link rel="apple-touch-icon" href="/favicon.svg" />
+    <link rel="shortcut icon" href="/favicon.ico" />
+    <link rel="apple-touch-icon" href="/app-icon-melveo.png" sizes="1024x1024" />
+    <link rel="manifest" href="/site.webmanifest" />
     <link rel="canonical" href={canonicalUrl} />
 
     {/* Brand wordmark font — Quicksand (rounded geometric sans, every
@@ -145,6 +149,7 @@ const altUrls = {
 
     {/* JSON-LD — SoftwareApplication schema for App Store discoverability */}
     <script
+      is:inline
       type="application/ld+json"
       set:html={JSON.stringify({
         '@context': 'https://schema.org',
@@ -181,7 +186,9 @@ const altUrls = {
   </head>
   <body class="min-h-screen bg-[var(--color-bg-canvas)] text-[var(--color-text-primary)]">
     <AnalyticsBody />
-    <slot />
+    <main>
+      <slot />
+    </main>
     <CookieBanner lang={lang} />
 
     {
@@ -192,14 +199,8 @@ const altUrls = {
               height, well under 44 px guideline. py-2 gives 8 px above
               + below the 14 px text → 30 px content + padding = 46 px
               total clickable height. */}
-          <div class="flex flex-col items-center gap-4 px-6 py-10 text-center text-sm text-[var(--color-text-tertiary)] sm:flex-row sm:flex-wrap sm:justify-center sm:gap-x-8 sm:gap-y-4">
+          <div class="flex flex-col items-center gap-4 px-6 py-10 text-center text-sm text-[var(--color-text-secondary)] sm:flex-row sm:flex-wrap sm:justify-center sm:gap-x-8 sm:gap-y-4">
             <span>{t('footer.copyright')}</span>
-            <a
-              href="mailto:hello@melveo.app"
-              class="inline-flex items-center min-h-[44px] py-2 transition-colors hover:text-[var(--color-text-primary)]"
-            >
-              hello@melveo.app
-            </a>
             <a
               href={`/${lang}/privacy`}
               class="inline-flex items-center min-h-[44px] py-2 transition-colors hover:text-[var(--color-text-primary)]"
@@ -215,7 +216,7 @@ const altUrls = {
             <button
               type="button"
               data-cookie-reopen
-              class="inline-flex items-center min-h-[44px] py-2 bg-transparent border-0 cursor-pointer text-[var(--color-text-tertiary)] transition-colors hover:text-[var(--color-text-primary)] font-inherit text-inherit"
+              class="inline-flex items-center min-h-[44px] py-2 bg-transparent border-0 cursor-pointer text-[var(--color-text-secondary)] transition-colors hover:text-[var(--color-text-primary)] font-inherit text-inherit"
             >
               {t('footer.cookieSettings')}
             </button>

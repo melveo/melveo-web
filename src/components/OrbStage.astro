@@ -89,16 +89,12 @@ const t = useTranslations(lang);
     height: 100%;
 
     /*
-      Glass-marble orb body — pure brand-cyan radial gradient that
+      Glass-hexagon body — pure brand-cyan radial gradient that
       follows the cursor on desktop and ambient auto-orbit on touch
-      devices (same --x / --y as the mask).
-      Per user feedback 2026-05-01: "tu kouli více do našich barev"
-      — dropped the white-spec stop, every stop is now in the cyan
-      ramp:
-        0 %    cyan-subtle     → bright cyan-white centre
-        18 %   accent-primary  → brand cyan body
-        55 %   cyan ↔ canvas   → deepening teal
-        100 %  cyan ↔ canvas   → bottom-of-orb shadow
+      devices (same --x / --y as the clip-path).
+      Updated 2026-05: replaced the circular orb with a hexagon clip
+      so the reveal shape matches the hexagonal brand identity used
+      throughout the rest of the site (input + Coach hexes).
     */
     --x: 70%;
     --y: 50%;
@@ -111,50 +107,58 @@ const t = useTranslations(lang);
     );
 
     /*
-      Dark text inside the circle. Codepen uses canvas-dark
-      (rgb(9, 14, 23)); we use our canvas variable so it tracks if
-      the brand canvas changes.
+      Dark text inside the hexagon — same canvas variable as before
+      so it tracks any brand-bg change.
     */
     color: var(--color-bg-canvas);
 
     /*
-      Radial mask — sharper rim per user feedback 2026-05-01 ("ne
-      tak rozostřené kraje"). Was a 3 % feathered transition; now
-      a 1 % feather so the orb has a crisp glass edge instead of
-      a soft blob.
+      Hexagon-shaped reveal. Flat-top hexagon centred at (--x, --y)
+      with "radius" 25vmin (matches the previous circular reveal so
+      the heading still fits inside). Vertex math:
+        right        = (x + R, y)
+        bottom-right = (x + R/2, y + R*√3/2)
+        bottom-left  = (x - R/2, y + R*√3/2)
+        left         = (x - R, y)
+        top-left     = (x - R/2, y - R*√3/2)
+        top-right    = (x + R/2, y - R*√3/2)
+      With R = 25vmin, √3/2 ≈ 0.866, so half-height = 21.65vmin.
+      The clip-path transitions smoothly because --x and --y are
+      typed @property percentages.
     */
-    --mask: radial-gradient(
-      circle at var(--x) var(--y),
-      black 0%,
-      black 25%,
-      rgba(0, 0, 0, 0.4) 25.7%,
-      transparent 26%
+    clip-path: polygon(
+      calc(var(--x) + 25vmin) var(--y),
+      calc(var(--x) + 12.5vmin) calc(var(--y) + 21.65vmin),
+      calc(var(--x) - 12.5vmin) calc(var(--y) + 21.65vmin),
+      calc(var(--x) - 25vmin) var(--y),
+      calc(var(--x) - 12.5vmin) calc(var(--y) - 21.65vmin),
+      calc(var(--x) + 12.5vmin) calc(var(--y) - 21.65vmin)
     );
-    -webkit-mask-image: var(--mask);
-    mask-image: var(--mask);
 
     /* Overlay shouldn't capture cursor events; pointermove lives on
        window. */
     pointer-events: none;
 
     /*
-      Smoothness budget:
+      Smoothness budget — same logic as the previous circular orb,
+      just transitioning the typed --x/--y now drives a clip-path
+      polygon instead of a radial mask:
         - --x / --y are typed @property values so the browser can
           actually transition them (untyped custom props would snap)
         - cubic-bezier matches GSAP's sine.out feel from codepen
         - 0.4s reads as smoother than 0.3s when the underlying
           movement is sample-throttled to one rAF per frame
-        - will-change: mask-image promotes this layer to its own
-          compositor surface so mask updates don't re-paint the
+        - will-change: clip-path promotes this layer to its own
+          compositor surface so clip recomputes don't re-paint the
           surrounding section
         - translate3d is the canonical "force GPU layer" hack for
-          older WebKit (otherwise mask repaints can jank)
+          older WebKit (otherwise repaints can jank)
         - backface-visibility hidden helps Safari coalesce layers
     */
     transition:
       --x 0.48s cubic-bezier(0.39, 0.575, 0.565, 1),
       --y 0.48s cubic-bezier(0.39, 0.575, 0.565, 1);
-    will-change: mask-image, -webkit-mask-image;
+    will-change: clip-path;
     transform: translate3d(0, 0, 0);
     backface-visibility: hidden;
   }

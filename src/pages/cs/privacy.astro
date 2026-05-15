@@ -165,11 +165,12 @@ const lastUpdated = '2026-04-30';
 
     <h2>5. Princip agregace dat (privacy by design)</h2>
     <p>
-      Trenéři a klubové vedení <strong>nikdy nevidí syrová wellness data
-      jednotlivých hráčů</strong>. Vidí pouze agregát (průměry, počty
-      odeslaných check-inů, přítomné varovné příznaky) za celý tým. Tato
-      pravidla jsou zakotvena v interním dokumentu „doc 174 §3" a vynucována
-      na úrovni databáze (RLS politiky a SECURITY DEFINER RPC funkce).
+      Trenéři a klubové vedení pracují s <strong>týmovými agregáty a
+      signály</strong> (průměry, počty odeslaných check-inů, přítomné
+      varovné příznaky) za celý tým. Individuální wellness vstup zůstává
+      oddělený od klubového reportingu. Tato pravidla jsou zakotvena v
+      interním dokumentu „doc 174 §3" a vynucována na úrovni databáze
+      (RLS politiky a SECURITY DEFINER RPC funkce).
     </p>
     <p>
       Hráč má přístup pouze ke svým vlastním datům. Klub má přístup k

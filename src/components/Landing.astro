@@ -18,13 +18,10 @@ import GooeyStage from './GooeyStage.astro';
 import WordScrollStage from './WordScrollStage.astro';
 import ClubFlowStage from './ClubFlowStage.astro';
 import OrbStage from './OrbStage.astro';
-import ParticleStatementStage from './ParticleStatementStage.astro';
 import PromiseStage from './PromiseStage.astro';
 import PricingStage from './PricingStage.astro';
-import AppShotsStage from './AppShotsStage.astro';
-import TestimonialStage from './TestimonialStage.astro';
+import MelveoDataFlowHero from './MelveoDataFlowHero';
 import FaqStage from './FaqStage.astro';
-import ContactStage from './ContactStage.astro';
 import { useTranslations, type Lang } from '../i18n/ui';
 
 interface Props {
@@ -33,36 +30,6 @@ interface Props {
 
 const { lang } = Astro.props;
 const t = useTranslations(lang);
-const feedbackItems =
-  lang === 'cs'
-    ? [
-        {
-          input: 'Check-in hráče',
-          output: 'Signál pro dnešní zátěž, regeneraci a riziko přetížení.',
-        },
-        {
-          input: 'Docházka + RPE',
-          output: 'Přehled účasti a zatížení týmu po každé session.',
-        },
-        {
-          input: 'Sessions',
-          output: 'Konkrétní feedback pro trenéra před dalším tréninkem.',
-        },
-      ]
-    : [
-        {
-          input: 'Player check-in',
-          output: 'A signal for today’s load, recovery, and overload risk.',
-        },
-        {
-          input: 'Attendance + RPE',
-          output: 'A clear view of team presence and load after every session.',
-        },
-        {
-          input: 'Sessions',
-          output: 'Concrete coaching feedback before the next training.',
-        },
-      ];
 ---
 
 <BaseLayout title="Melveo" lang={lang}>
@@ -103,17 +70,24 @@ const feedbackItems =
       </p>
 
       <h1
-        class="font-bold leading-[0.95] tracking-tight text-[var(--color-text-primary)] whitespace-nowrap"
-        style="font-size: clamp(1.85rem, 7.5vw, 7.5rem); letter-spacing: -0.04em;"
+        class="hero-headline font-bold leading-[0.95] tracking-tight text-[var(--color-text-primary)]"
       >
-        {t('hero.headlinePrefix')}{' '}
-        <span
-          class="text-[var(--color-accent-primary)]"
-          data-rotate-word
-          aria-live="polite"
-        >
-          {lang === 'cs' ? 'tréninky' : 'trainings'}
-        </span>{t('hero.headlineSuffix')}
+        <span class="hero-headline-static">
+          <span>{t('hero.headlineLine1')}</span>
+          <span>{t('hero.headlineLine2')}</span>
+        </span>
+        <span class="hero-rotate-cluster">
+          <span class="hero-rotate-current">
+            <span
+              class="text-[var(--color-accent-primary)]"
+              data-rotate-word
+              data-rotate-words={t('hero.headlineRotations')}
+              aria-live="polite"
+            >
+              {t('hero.headlineInitial')}
+            </span><span class="hero-headline-dot" aria-hidden="true">{t('hero.headlineSuffix')}</span>
+          </span>
+        </span>
       </h1>
 
       <p class="mx-auto mt-10 max-w-[36rem] text-pretty text-lg font-medium text-[var(--color-text-primary)] sm:text-xl">
@@ -122,9 +96,11 @@ const feedbackItems =
 
       <div class="hero-cta-row">
         <a
-          href="mailto:hello@melveo.app?subject=App%20Store%20notification"
+          href="#contact"
           aria-label={t('hero.cta.appstore')}
           class="hero-pill hero-pill--filled"
+          data-appstore-notify
+          data-notice={t('hero.appstoreNotice')}
         >
           <span class="hero-pill-shimmer" aria-hidden="true"></span>
           <span class="hero-pill-content">
@@ -155,6 +131,7 @@ const feedbackItems =
           <span class="hero-pill-content">{t('hero.cta.pilot')}</span>
         </a>
       </div>
+      <div class="appstore-toast" data-appstore-toast role="status" aria-live="polite" hidden></div>
     </div>
 
   </section>
@@ -164,6 +141,13 @@ const feedbackItems =
   <!--               (Kevin Gutowski codepen QwNZYzL)                  -->
   <!-- ============================================================== -->
   <ImageGridScrollMorph lang={lang} />
+
+  <!-- ============================================================== -->
+  <!-- STAGE 2.5 — Data → Feedback product story                      -->
+  <!--   Keep high on page: explains player signals → melveo → coach  -->
+  <!--   output before the more atmospheric sections continue.         -->
+  <!-- ============================================================== -->
+  <MelveoDataFlowHero lang={lang} client:visible />
 
   <!-- ============================================================== -->
   <!-- STAGE 3.5 — Gooey metaball (Ahmad Awais codepen)                -->
@@ -186,63 +170,16 @@ const feedbackItems =
   <OrbStage lang={lang} />
 
   <!-- ============================================================== -->
-  <!-- STAGE 5.5 — Particles statement (Ahmad Awais codepen)           -->
-  <!-- ============================================================== -->
-  <ParticleStatementStage lang={lang} />
-
-  <!-- ============================================================== -->
-  <!-- STAGE 6.25 — Billing-promise mini bridge (gooey-family)         -->
-  <!--               "Klub platí. Hráč nikdy."                         -->
+  <!-- STAGE 6.5 — Billing-promise mini bridge (gooey-family)         -->
+  <!--               "Klub platí. Hráč nikdy."                        -->
+  <!--   Sits right before pricing as a positioning beat.             -->
   <!-- ============================================================== -->
   <PromiseStage lang={lang} />
 
   <!-- ============================================================== -->
-  <!-- STAGE 6.5 — Pricing                                             -->
+  <!-- STAGE 7 — Pricing                                               -->
   <!-- ============================================================== -->
   <PricingStage lang={lang} />
-
-  <!-- ============================================================== -->
-  <!-- STAGE 7 — Data feedback promise                                 -->
-  <!-- ============================================================== -->
-  <section class="feedback-stage">
-    <div class="halo-cyan feedback-stage__halo"></div>
-
-    <div class="feedback-stage__inner">
-      <div class="feedback-stage__copy">
-        <p class="feedback-stage__eyebrow">
-          {t('privacy.eyebrow')}
-        </p>
-        <h2 class="feedback-stage__headline">
-          {t('privacy.headlineLine1')}<br />
-          <span>{t('privacy.headlineLine2')}</span>
-        </h2>
-        <p class="feedback-stage__body">
-          {t('privacy.body')}
-        </p>
-      </div>
-
-      <div class="feedback-stage__flow" aria-label={lang === 'cs' ? 'Vstupy a výstupy v Melveo' : 'Inputs and outputs in Melveo'}>
-        {feedbackItems.map((item) => (
-          <article class="feedback-card glass-card">
-            <span class="glass-filter" aria-hidden="true"></span>
-            <span class="glass-overlay" aria-hidden="true"></span>
-            <span class="glass-specular" aria-hidden="true"></span>
-            <div class="glass-content">
-              <span class="feedback-card__label">
-                {lang === 'cs' ? 'Vstup' : 'Input'}
-              </span>
-              <h3 class="feedback-card__input">{item.input}</h3>
-              <span class="feedback-card__divider" aria-hidden="true"></span>
-              <span class="feedback-card__label feedback-card__label--out">
-                {lang === 'cs' ? 'Výstup' : 'Output'}
-              </span>
-              <p class="feedback-card__output">{item.output}</p>
-            </div>
-          </article>
-        ))}
-      </div>
-    </div>
-  </section>
 
   <!-- ============================================================== -->
   <!-- STAGE 6.75 — App screenshot showcase (HIDDEN 2026-05-04)         -->
@@ -276,23 +213,11 @@ const feedbackItems =
   <FaqStage lang={lang} />
 
   <!-- ============================================================== -->
-  <!-- STAGE 8.5 — Contact / Lead capture (added 2026-05-03)           -->
-  <!--   Two real on-page forms (App Store notify + Pilot inquiry).   -->
-  <!--   POSTs to /api/lead → Worker → Resend → hello@melveo.app.     -->
-  <!--   Replaces the previous mailto-only CTAs as primary lead       -->
-  <!--   capture path. The pilot-cta-stage below stays as a quiet     -->
-  <!--   "email us directly" fallback.                                -->
+  <!-- STAGE 9 — Direct contact                                        -->
+  <!--   Final page action. Keep this as the only bottom CTA: no       -->
+  <!--   operator/company block and no duplicate notify form.           -->
   <!-- ============================================================== -->
-  <ContactStage lang={lang} />
-
-  <!-- ============================================================== -->
-  <!-- STAGE 9 — Pilot CTA                                             -->
-  <!--   Quiet closing section — no smoke backdrop, no pill button.    -->
-  <!--   Per user 2026-05-01: the email is the only thing that         -->
-  <!--   needs to dominate. Headline + body are tiny eyebrows above    -->
-  <!--   it; everything else is removed.                               -->
-  <!-- ============================================================== -->
-  <section class="pilot-cta-stage">
+  <section id="contact" class="pilot-cta-stage">
     <div class="pilot-cta-stage__inner">
       <h2 class="pilot-cta-stage__headline">
         {t('pilot.headline')}
@@ -312,157 +237,6 @@ const feedbackItems =
 </BaseLayout>
 
 <style>
-  .feedback-stage {
-    position: relative;
-    isolation: isolate;
-    width: 100%;
-    overflow: hidden;
-    border-top: 1px solid var(--color-stroke-base);
-    background: var(--color-bg-canvas);
-  }
-
-  .feedback-stage__halo {
-    opacity: 0.45;
-    inset: 4% auto auto 50%;
-  }
-
-  /*
-    Centred layout (was a 2-col left/right grid on desktop). Per user
-    feedback 2026-05-01: "všechny sekce situované na střed… i ty
-    tabulky." Headline + body stack centred at the top, then a 3-col
-    grid of feedback cards centred below.
-  */
-  .feedback-stage__inner {
-    position: relative;
-    z-index: 1;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: clamp(2.5rem, 6vw, 4.5rem);
-    width: min(100% - 2rem, 78rem);
-    margin: 0 auto;
-    padding: clamp(6rem, 12vw, 10rem) 0;
-    text-align: center;
-  }
-
-  .feedback-stage__copy {
-    text-align: center;
-    max-width: 56rem;
-  }
-
-  .feedback-stage__eyebrow {
-    margin: 0 0 1.25rem;
-    font-size: 0.75rem;
-    font-weight: 700;
-    letter-spacing: 0.4em;
-    color: var(--color-accent-primary);
-  }
-
-  .feedback-stage__headline {
-    margin: 0;
-    font-weight: 700;
-    line-height: 1.03;
-    letter-spacing: -0.04em;
-    color: var(--color-text-primary);
-    font-size: clamp(2.6rem, 6vw, 6rem);
-    text-wrap: balance;
-  }
-
-  .feedback-stage__headline span {
-    color: var(--color-accent-primary);
-  }
-
-  .feedback-stage__body {
-    margin: 1.5rem auto 0;
-    max-width: 42rem;
-    font-size: clamp(1.05rem, 1.5vw, 1.25rem);
-    line-height: 1.65;
-    color: var(--color-text-secondary);
-    text-wrap: pretty;
-  }
-
-  /* Cards in a centred grid — single column on phones, multi-column
-     on tablets+ so the three input/output pairs read as a row. */
-  .feedback-stage__flow {
-    display: grid;
-    gap: 1rem;
-    width: 100%;
-    max-width: 72rem;
-  }
-  @media (min-width: 720px) {
-    .feedback-stage__flow {
-      grid-template-columns: repeat(3, 1fr);
-      gap: 1.25rem;
-    }
-  }
-
-  /*
-    Feedback card — premium "input → output" layout with no arrow
-    (per user 2026-05-01: "ty šipky jsou zbytečné"). Stack format:
-       Vstup           ← cyan caps eyebrow
-       Title           ← input subject, primary-text
-       ─────           ← hairline cyan divider
-       Výstup          ← cyan caps eyebrow
-       Body sentence   ← output description, soft secondary
-    Same .glass-card recipe as pricing for visual cohesion.
-  */
-  .feedback-card .glass-content {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    text-align: center;
-    gap: 0.55rem;
-    padding: clamp(1.5rem, 2vw, 1.85rem);
-  }
-
-  .feedback-card__label {
-    margin: 0;
-    font-size: 0.7rem;
-    font-weight: 600;
-    letter-spacing: 0.22em;
-    text-transform: uppercase;
-    color: var(--color-accent-primary);
-  }
-
-  .feedback-card__label--out {
-    margin-top: 0.25rem;
-  }
-
-  .feedback-card__input {
-    margin: 0;
-    font-size: clamp(1.2rem, 1.9vw, 1.55rem);
-    font-weight: 700;
-    line-height: 1.15;
-    letter-spacing: -0.025em;
-    color: var(--color-text-primary);
-  }
-
-  /* Hairline cyan divider — replaces the old arrow. Reads as a
-     soft gradient line so it has the brand glow without
-     dominating the card. */
-  .feedback-card__divider {
-    display: block;
-    width: 100%;
-    height: 1px;
-    margin: 0.85rem 0 0.25rem;
-    background: linear-gradient(
-      90deg,
-      transparent,
-      color-mix(in srgb, var(--color-accent-primary) 55%, transparent) 30%,
-      color-mix(in srgb, var(--color-accent-primary) 55%, transparent) 70%,
-      transparent
-    );
-  }
-
-  .feedback-card__output {
-    margin: 0;
-    max-width: 30rem;
-    font-size: 0.98rem;
-    line-height: 1.55;
-    color: color-mix(in srgb, var(--color-text-secondary) 92%, var(--color-text-primary));
-    text-wrap: pretty;
-  }
-
   /*
     Pilot CTA — quiet closing footer. No smoke, no pill button, no
     decorative cyan halo (user 2026-05-01: "možná bych tam nedával
@@ -547,26 +321,124 @@ const feedbackItems =
   /*
     Hero rotating word — wrap so y-translate during cycle stays within
     the line. Typewriter version writes characters in-place via
-    `el.textContent = ...`, so no slide-shell needed — just a small
-    caret to mark the typing position.
+    `el.textContent = ...`. The dot lives in the same isolated paint
+    layer as the mutable word; otherwise Chromium can leave tiny
+    white suffix-dot remnants while the large headline repaints.
   */
-  [data-rotate-word] {
-    display: inline-block;
-    /* Trailing caret while typing — subtle blinking bar */
-    border-right: 0.05em solid currentColor;
-    margin-right: -0.05em;
-    animation: caret-blink 1.05s steps(2) infinite;
+  .hero-headline {
+    display: flex;
+    max-width: min(100%, 76rem);
+    flex-direction: column;
+    align-items: center;
+    gap: 0.03em;
+    font-size: clamp(2.55rem, 7vw, 7rem);
+    letter-spacing: -0.035em;
+    line-height: 0.98;
+    word-spacing: 0.06em;
   }
 
-  @keyframes caret-blink {
-    50% { border-right-color: transparent; }
+  .hero-headline-static {
+    display: flex;
+    justify-content: center;
+    gap: 0.18em;
+    white-space: nowrap;
+  }
+
+  .hero-rotate-cluster {
+    display: inline-grid;
+    min-height: 1.24em;
+    justify-content: center;
+    align-items: center;
+    overflow: visible;
+    white-space: nowrap;
+    isolation: isolate;
+    transform: translateZ(0);
+  }
+
+  .hero-rotate-cluster::before {
+    content: attr(data-rotate-measure);
+    grid-area: 1 / 1;
+    visibility: hidden;
+    padding-block: 0.16em 0.24em;
+    line-height: 1.14;
+    white-space: nowrap;
+  }
+
+  .hero-rotate-current {
+    grid-area: 1 / 1;
+    display: inline-flex;
+    align-items: baseline;
+    justify-self: center;
+    white-space: nowrap;
+  }
+
+  [data-rotate-word] {
+    display: inline-block;
+    position: relative;
+    padding-block: 0.16em 0.24em;
+    line-height: 1.14;
+    text-align: center;
+    transform: translateZ(0);
+  }
+
+  [data-rotate-word]::after {
+    content: none;
+  }
+
+  .hero-headline-dot {
+    color: var(--color-text-primary);
+    line-height: 1.14;
+    padding-block: 0.16em 0.24em;
+    transform: translateZ(0);
+    opacity: 0.98;
+    animation: hero-dot-pulse 1.05s ease-in-out infinite;
+    text-shadow: 0 0 0.18em rgba(245, 254, 255, 0.42);
+    will-change: opacity;
+  }
+
+  .hero-rotate-cluster[data-rotate-state='deleting'] .hero-headline-dot,
+  .hero-rotate-cluster[data-rotate-state='idle'] .hero-headline-dot {
+    opacity: 1;
+    animation-duration: 0.72s;
+  }
+
+  @keyframes hero-dot-pulse {
+    0%,
+    100% {
+      opacity: 0.42;
+    }
+
+    45%,
+    70% {
+      opacity: 1;
+    }
   }
 
   @media (prefers-reduced-motion: reduce) {
     [data-rotate-word] {
+      padding-right: 0;
+    }
+
+    .hero-headline-dot {
       animation: none;
-      border-right: 0;
-      margin-right: 0;
+      opacity: 1;
+    }
+  }
+
+  @media (max-width: 520px) {
+    .hero-headline {
+      font-size: clamp(2.05rem, 9.4vw, 3rem);
+      letter-spacing: -0.025em;
+      line-height: 1;
+    }
+
+    .hero-headline-static {
+      flex-direction: column;
+      gap: 0;
+    }
+
+    .hero-rotate-cluster {
+      min-height: 1.34em;
     }
   }
 
@@ -594,11 +466,62 @@ const feedbackItems =
      pointer-tracking handler below in mountHeroButtons() runs on every
      .hero-pill in the DOM, so pricing CTAs get the same effect for
      free as long as they live on the same page. */
+
+  .appstore-toast {
+    position: fixed;
+    left: 50%;
+    bottom: max(1.25rem, env(safe-area-inset-bottom));
+    z-index: 80;
+    width: min(calc(100% - 2rem), 28rem);
+    transform: translate(-50%, 0);
+    border: 1px solid color-mix(in srgb, var(--color-accent-primary) 24%, var(--color-stroke-emphasized));
+    border-radius: 999px;
+    padding: 0.9rem 1.15rem;
+    background:
+      linear-gradient(135deg, rgba(0, 240, 255, 0.16), rgba(255, 255, 255, 0.055)),
+      rgba(5, 6, 8, 0.86);
+    color: var(--color-text-primary);
+    box-shadow:
+      0 22px 70px rgba(0, 240, 255, 0.16),
+      inset 0 1px 0 rgba(255, 255, 255, 0.16);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    font-size: 0.9rem;
+    font-weight: 600;
+    line-height: 1.35;
+    text-align: center;
+    opacity: 0;
+    pointer-events: none;
+    transition:
+      opacity 0.22s ease,
+      transform 0.22s ease;
+  }
+
+  .appstore-toast.is-visible {
+    opacity: 1;
+    transform: translate(-50%, -0.35rem);
+  }
+
+  .appstore-toast[hidden] {
+    display: block;
+    visibility: hidden;
+  }
+
+  @media (min-width: 640px) {
+    .appstore-toast {
+      font-size: 0.95rem;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .appstore-toast {
+      transition: none;
+    }
+  }
 </style>
 
 <script>
   import { mountRotateWord } from '../scripts/rotate-word';
-  import { mountTextReveal } from '../scripts/text-reveal';
 
   function mountHeroButtons() {
     document.querySelectorAll<HTMLElement>('.hero-pill').forEach((button) => {
@@ -612,11 +535,66 @@ const feedbackItems =
     });
   }
 
+  function mountAppStoreNotifyCta() {
+    const cta = document.querySelector<HTMLAnchorElement>('[data-appstore-notify]');
+    const target = document.querySelector<HTMLElement>('#contact');
+    const toast = document.querySelector<HTMLElement>('[data-appstore-toast]');
+    let toastTimer: number | undefined;
+
+    if (!cta || !toast) return;
+
+    cta.addEventListener('click', (event) => {
+      event.preventDefault();
+
+      const message = cta.dataset.notice || '';
+      toast.textContent = message;
+      toast.hidden = false;
+      requestAnimationFrame(() => toast.classList.add('is-visible'));
+
+      window.clearTimeout(toastTimer);
+      toastTimer = window.setTimeout(() => {
+        toast.classList.remove('is-visible');
+        window.setTimeout(() => {
+          toast.hidden = true;
+        }, 240);
+      }, 4200);
+
+      target?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+  }
+
+  function mountTextRevealWhenNeeded() {
+    const targets = document.querySelectorAll<HTMLElement>('[data-text-reveal]');
+    if (targets.length === 0) return;
+
+    const load = async () => {
+      const { mountTextReveal } = await import('../scripts/text-reveal');
+      mountTextReveal();
+    };
+
+    if (!('IntersectionObserver' in window)) {
+      globalThis.setTimeout(load, 2400);
+      return;
+    }
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (!entries.some((entry) => entry.isIntersecting)) return;
+        observer.disconnect();
+        load();
+      },
+      { rootMargin: '700px 0px' },
+    );
+
+    targets.forEach((target) => observer.observe(target));
+  }
+
   // Defer to idle so hero LCP is unaffected
   function init() {
     mountHeroButtons();
+    mountAppStoreNotifyCta();
     mountRotateWord();
-    mountTextReveal();
+    mountTextRevealWhenNeeded();
   }
 
   if ('requestIdleCallback' in window) {

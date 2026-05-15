@@ -147,12 +147,12 @@ const lastUpdated = '2026-04-30';
 
     <h2>5. Data aggregation principle (privacy by design)</h2>
     <p>
-      Coaches and club leadership <strong>never see raw wellness data of
-      individual players</strong>. They see only aggregates (averages,
-      submission counts, warning flags) for the entire team. These rules
-      are encoded in our internal contract "doc 174 §3" and enforced
-      at the database level (RLS policies and SECURITY DEFINER RPC
-      functions).
+      Coaches and club leadership work with <strong>team-level aggregates
+      and signals</strong> (averages, submission counts, warning flags)
+      for the entire team. Individual wellness input stays separate from
+      club reporting. These rules are encoded in our internal contract
+      "doc 174 §3" and enforced at the database level (RLS policies and
+      SECURITY DEFINER RPC functions).
     </p>
     <p>
       A player has access only to their own data. A club has access to

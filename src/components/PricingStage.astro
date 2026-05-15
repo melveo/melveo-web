@@ -56,28 +56,28 @@ const featuresFreeCs = [
   'Plánování sessions',
   'Docházka + post-session RPE',
   'Základní coach board (today)',
-  '1 tým × 1 sezóna',
+  'Test s menší skupinou do 8 hráčů',
 ];
 const featuresFreeEn = [
   '5-axis morning check-in',
   'Session planning',
   'Attendance + post-session RPE',
   'Basic coach board (today)',
-  '1 team × 1 season',
+  'Small-group test with up to 8 players',
 ];
 
 const featuresCoreCs = [
   'Vše z Free Starter',
   'Plný coach board s historií',
   'Agregovaná readiness týmu',
-  'Privacy-by-design (doc 174)',
+  'Role-based týmový kontext',
   'E-mail podpora',
 ];
 const featuresCoreEn = [
   'Everything in Free Starter',
   'Full coach board with history',
   'Aggregate team readiness',
-  'Privacy-by-design (doc 174)',
+  'Role-based team context',
   'Email support',
 ];
 
@@ -133,7 +133,7 @@ const plans: Plan[] = [
     limits: { players: 8, staff: 2 },
     features: lang === 'cs' ? featuresFreeCs : featuresFreeEn,
     ctaLabel: ctaLabelFree,
-    ctaHref: '#brzy',
+    ctaHref: '#contact',
   },
   {
     id: 'core',
@@ -391,19 +391,36 @@ const currencyShort = lang === 'cs' ? 'Kč' : 'CZK';
 
 <script>
   import { mountPricingToggle } from '../scripts/pricing-toggle';
-  import { mountGlassSmoke } from '../scripts/glass-smoke';
   mountPricingToggle();
 
-  // Defer the smoke field to idle so the toggle + LCP go through first.
-  // Smoke is decorative; nothing in the page depends on it being up.
-  function startSmoke() {
+  // Smoke is decorative; keep its canvas module out of the initial hero
+  // load and start it only when pricing is getting close.
+  async function startSmoke() {
+    const { mountGlassSmoke } = await import('../scripts/glass-smoke');
     mountGlassSmoke();
   }
-  if ('requestIdleCallback' in window) {
-    (window as any).requestIdleCallback(startSmoke, { timeout: 1500 });
-  } else {
-    setTimeout(startSmoke, 250);
+
+  function startSmokeWhenNear() {
+    const pricingStage = document.querySelector<HTMLElement>('.pricing-stage');
+    if (!pricingStage) return;
+
+    const supportsObserver = 'IntersectionObserver' in globalThis;
+    if (!supportsObserver) {
+      globalThis.addEventListener('scroll', startSmoke, { once: true, passive: true });
+      return;
+    }
+
+    const smokeObserver = new window.IntersectionObserver(
+      (entries) => {
+        if (!entries.some((entry) => entry.isIntersecting)) return;
+        smokeObserver.disconnect();
+        startSmoke();
+      },
+      { rootMargin: '560px 0px' },
+    );
+    smokeObserver.observe(pricingStage);
   }
+  startSmokeWhenNear();
 </script>
 
 <style>

@@ -21,9 +21,9 @@
  */
 
 const TYPE_SPEED = 70;
-const BACK_SPEED = 25;
-const BACK_DELAY = 1800;
-const NEXT_DELAY = 200;
+const BACK_SPEED = 22;
+const BACK_DELAY = 2100;
+const NEXT_DELAY = 260;
 
 const wordsByLang = {
   cs: ['tréninky', 'rozhodnutí', 'ráno', 'klub', 'sezóna'],
@@ -50,9 +50,19 @@ function getPhrases(el: HTMLElement, lang: Lang): readonly string[] {
 function mountTypedWord(el: HTMLElement, phrases: readonly string[]) {
   if (phrases.length === 0) return;
 
+  const longestPhrase = phrases.reduce((longest, phrase) =>
+    phrase.length > longest.length ? phrase : longest,
+  phrases[0]);
+  el.closest<HTMLElement>('.hero-rotate-cluster')?.setAttribute(
+    'data-rotate-measure',
+    `${longestPhrase}.`,
+  );
+
   // Start by treating the SSR-rendered word as already typed; the
   // first scripted action will be backspace.
   const initial = el.textContent?.trim() ?? phrases[0];
+  el.textContent = initial;
+  const cluster = el.closest<HTMLElement>('.hero-rotate-cluster');
   let phraseIdx = Math.max(0, phrases.indexOf(initial));
   let charIdx = phrases[phraseIdx].length;
   let isDeleting = true;
@@ -68,6 +78,7 @@ function mountTypedWord(el: HTMLElement, phrases: readonly string[]) {
   function tick() {
     timer = null;
     const phrase = phrases[phraseIdx];
+    cluster?.setAttribute('data-rotate-state', isDeleting ? 'deleting' : 'typing');
 
     if (!isDeleting) {
       // Typing forward
@@ -75,6 +86,7 @@ function mountTypedWord(el: HTMLElement, phrases: readonly string[]) {
       el.textContent = phrase.slice(0, charIdx);
       if (charIdx >= phrase.length) {
         // Finished typing — hold, then start deleting
+        cluster?.setAttribute('data-rotate-state', 'hold');
         timer = window.setTimeout(() => {
           isDeleting = true;
           tick();
@@ -91,6 +103,7 @@ function mountTypedWord(el: HTMLElement, phrases: readonly string[]) {
         isDeleting = false;
         phraseIdx = (phraseIdx + 1) % phrases.length;
         charIdx = 0;
+        cluster?.setAttribute('data-rotate-state', 'idle');
         timer = window.setTimeout(tick, NEXT_DELAY);
         return;
       }

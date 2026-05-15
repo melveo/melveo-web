@@ -44,11 +44,11 @@ export function mountTextReveal() {
 
       animate(
         chars,
-        { y: ['110%', '0%'], opacity: [0, 1] },
+        { transform: ['translateY(110%)', 'translateY(0%)'], opacity: [0, 1] },
         {
           duration: 0.7,
           delay: stagger(0.018),
-          easing: [0.32, 0.72, 0, 1],
+          ease: [0.32, 0.72, 0, 1],
         },
       );
     }, { threshold: 0.4 });

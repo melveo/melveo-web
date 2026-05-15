@@ -29,6 +29,13 @@ bun-debug.log*
 # Cloudflare Pages local dev
 .wrangler/
 
+# local browser / visual QA artifacts
+.playwright-cli/
+.playwright-mcp/
+output/playwright/
+output/unused-public-duplicates/
+melveo-*.png
+
 # IDE
 .vscode/*
 !.vscode/extensions.json

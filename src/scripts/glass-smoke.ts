@@ -131,8 +131,10 @@ function makePuff(width: number, height: number): Puff {
 function mount(section: HTMLElement): Handle | null {
   const canvas = section.querySelector<HTMLCanvasElement>('[data-glass-smoke-canvas]');
   if (!canvas) return null;
-  const ctx = canvas.getContext('2d', { alpha: true });
-  if (!ctx) return null;
+  const context = canvas.getContext('2d', { alpha: true });
+  if (!context) return null;
+  const canvasEl = canvas;
+  const ctx = context;
 
   const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   const cyan = getCyanSprite();
@@ -164,12 +166,12 @@ function mount(section: HTMLElement): Handle | null {
     // grid section is 620vh tall but the canvas sits at sticky
     // 100vh — measuring the section there would give a 11000+ px
     // canvas and disperse the smoke into invisibility.
-    const rect = canvas.getBoundingClientRect();
+    const rect = canvasEl.getBoundingClientRect();
     width = Math.max(1, rect.width || section.clientWidth);
     height = Math.max(1, rect.height || window.innerHeight);
     dpr = Math.min(window.devicePixelRatio || 1, 2);
-    canvas.width = Math.round(width * dpr);
-    canvas.height = Math.round(height * dpr);
+    canvasEl.width = Math.round(width * dpr);
+    canvasEl.height = Math.round(height * dpr);
     // Don't override style.width/height — the host CSS already sets
     // those (sticky 100vh on image grid, 100% of section on pricing),
     // and overwriting can break the sticky positioning.
@@ -253,7 +255,7 @@ function mount(section: HTMLElement): Handle | null {
   // — the image grid section is 620vh, the canvas is 100vh sticky, and
   // we want to react to the latter.
   const ro = new ResizeObserver(() => resize());
-  ro.observe(canvas);
+  ro.observe(canvasEl);
 
   const io = new IntersectionObserver(
     (entries) => {

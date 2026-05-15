@@ -1,0 +1,17 @@
+{
+  "name": "Melveo",
+  "short_name": "Melveo",
+  "description": "Melveo sports team operating system.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#06090f",
+  "theme_color": "#06090f",
+  "icons": [
+    {
+      "src": "/app-icon-melveo.png",
+      "sizes": "1024x1024",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

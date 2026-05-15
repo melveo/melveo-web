@@ -40,7 +40,8 @@ function mountParticleStage(stage: HTMLElement): ParticleStageHandle | null {
   let height = 1;
   let pixelRatio = 1;
   let rafId = 0;
-  let running = !reduceMotion;
+  let running = false;
+  let visible = false;
 
   function particleCount() {
     const area = width * height;
@@ -180,6 +181,20 @@ function mountParticleStage(stage: HTMLElement): ParticleStageHandle | null {
     rafId = requestAnimationFrame(tick);
   }
 
+  function start() {
+    if (reduceMotion || running) return;
+    running = true;
+    rafId = requestAnimationFrame(tick);
+  }
+
+  function stop() {
+    running = false;
+    if (rafId) {
+      cancelAnimationFrame(rafId);
+      rafId = 0;
+    }
+  }
+
   function onPointerMove(event: PointerEvent) {
     const rect = canvasEl.getBoundingClientRect();
     pointer.x = event.clientX - rect.left;
@@ -204,16 +219,24 @@ function mountParticleStage(stage: HTMLElement): ParticleStageHandle | null {
     if (reduceMotion) return;
 
     if (document.hidden) {
-      running = false;
-      cancelAnimationFrame(rafId);
-    } else if (!running) {
-      running = true;
-      rafId = requestAnimationFrame(tick);
+      stop();
+    } else if (visible) {
+      start();
     }
   }
 
   const resizeObserver = new ResizeObserver(resize);
   resizeObserver.observe(stage);
+  const intersectionObserver = new IntersectionObserver(
+    (entries) => {
+      const entry = entries[0];
+      visible = Boolean(entry?.isIntersecting);
+      if (visible && !document.hidden) start();
+      else stop();
+    },
+    { rootMargin: '240px 0px' },
+  );
+  intersectionObserver.observe(stage);
   window.addEventListener('resize', resize, { passive: true });
   stage.addEventListener('pointermove', onPointerMove, { passive: true });
   stage.addEventListener('pointerleave', onPointerLeave);
@@ -221,15 +244,14 @@ function mountParticleStage(stage: HTMLElement): ParticleStageHandle | null {
   document.addEventListener('visibilitychange', onVisibilityChange);
 
   resize();
-  if (!reduceMotion) {
-    rafId = requestAnimationFrame(tick);
-  }
+  if (reduceMotion) draw();
 
   return {
     dispose() {
       running = false;
-      cancelAnimationFrame(rafId);
+      stop();
       resizeObserver.disconnect();
+      intersectionObserver.disconnect();
       window.removeEventListener('resize', resize);
       stage.removeEventListener('pointermove', onPointerMove);
       stage.removeEventListener('pointerleave', onPointerLeave);

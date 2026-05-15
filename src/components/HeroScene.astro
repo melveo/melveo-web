@@ -3,33 +3,24 @@
  * HeroScene — WebGL metaballs shader + black SSR fallback.
  *
  * Behavior:
- *   - SSR renders a black fallback (visible on first paint +
- *     reduced-motion + JS-disabled clients), matching the CodePen body.
- *   - On client, after IntersectionObserver fires + reduced-motion
- *     check passes, mounts the custom metaballs shader over the canvas.
- *     SVG fallback fades out on mount.
+ *   - SSR renders a black fallback for the short moment before client JS.
+ *   - On client, as soon as the hero is in viewport, mount the custom
+ *     metaballs shader. No SVG preview, no CSS replacement layer.
  *   - Per PLAN.md §7.9: pause RAF on document.hidden, cap pixel ratio,
- *     reduce-motion stays SVG only.
- *
- * Bundle impact: no 3D runtime dependency in the hero; SVG fallback is
- * inline (~1kB).
+ *     reduce-motion stays fallback only.
  */
 ---
 
 <div class="hero-scene-wrap" aria-hidden="true">
-  <!-- SSR fallback — visible until JS mounts the scene -->
   <svg
     class="hero-fallback"
     viewBox="0 0 100 100"
     preserveAspectRatio="xMidYMid slice"
     role="presentation"
   >
-    <defs>
-    </defs>
-    <rect width="100" height="100" fill="#000"/>
+    <rect width="100" height="100" fill="#000" />
   </svg>
 
-  <!-- WebGL metaballs canvas (mounted client-side) -->
   <canvas class="hero-canvas" data-hero-canvas></canvas>
 </div>
 
@@ -48,7 +39,7 @@
     inset: 0;
     width: 100%;
     height: 100%;
-    transition: opacity 0.6s ease;
+    transition: opacity 0.45s ease;
   }
 
   .hero-canvas {
@@ -59,11 +50,9 @@
     opacity: 1;
   }
 
-  .hero-canvas[data-mounted="true"] + .hero-fallback,
   .hero-scene-wrap[data-mounted="true"] .hero-fallback {
     opacity: 0;
   }
-
 </style>
 
 <script>
@@ -72,33 +61,35 @@
   const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
   if (wrap && canvas && !prefersReducedMotion) {
-    // Lazy-init only after the hero is in viewport. On a /cs/ root visit
-    // this fires immediately, then waits for idle before loading WebGL.
-    const obs = new IntersectionObserver((entries) => {
-      const entry = entries[0];
-      if (!entry?.isIntersecting) return;
-      obs.disconnect();
+    let started = false;
 
-      // Defer to idle to avoid LCP impact
-      const start = async () => {
-        const { mountHeroScene } = await import('../scripts/hero-scene');
-        const handle = mountHeroScene({ canvas });
-        if (!handle) return;
-        canvas.setAttribute('data-mounted', 'true');
-        wrap.setAttribute('data-mounted', 'true');
-        // Expose dispose for HMR (Vite calls this on hot reload)
-        if (import.meta.hot) {
-          import.meta.hot.dispose(() => handle.dispose());
-        }
-      };
+    const start = async () => {
+      if (started) return;
+      started = true;
 
-      if ('requestIdleCallback' in window) {
-        (window as any).requestIdleCallback(start, { timeout: 1500 });
-      } else {
-        setTimeout(start, 100);
+      const { mountHeroScene } = await import('../scripts/hero-scene');
+      const handle = mountHeroScene({ canvas });
+      if (!handle) return;
+
+      canvas.setAttribute('data-mounted', 'true');
+      wrap.setAttribute('data-mounted', 'true');
+
+      if (import.meta.hot) {
+        import.meta.hot.dispose(() => handle.dispose());
       }
-    });
+    };
 
-    obs.observe(wrap);
+    if ('IntersectionObserver' in window) {
+      const observer = new IntersectionObserver((entries) => {
+        const entry = entries[0];
+        if (!entry?.isIntersecting) return;
+        observer.disconnect();
+        start();
+      });
+
+      observer.observe(wrap);
+    } else {
+      start();
+    }
   }
 </script>
