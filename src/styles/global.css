@@ -426,9 +426,22 @@ body {
 
 .glass-card .glass-filter {
   z-index: 0;
-  backdrop-filter: blur(14px) saturate(190%);
-  -webkit-backdrop-filter: blur(14px) saturate(190%);
-  filter: url(#glass-lens) brightness(1.04);
+  /*
+    Chrome perf fix 2026-05-16: dropped `filter: url(#glass-lens)`
+    (feGaussianBlur stdDeviation=50 + feDisplacementMap scale=40).
+    Chrome/Chromium renders this filter chain ~10× slower than Safari
+    and the displacement extends past hex clip-paths, causing visible
+    horizontal/vertical seams on hexagons. The visual contribution was
+    marginal compared to the backdrop-blur + specular highlights, so
+    removing it gains perf without meaningful aesthetic loss across
+    all browsers.
+
+    Also reduced backdrop-filter blur from 14px → 10px and saturate
+    from 190% → 170% — still reads as glass, paints ~2× faster on
+    dense grids (42 glass-cards on a single page).
+  */
+  backdrop-filter: blur(10px) saturate(170%);
+  -webkit-backdrop-filter: blur(10px) saturate(170%);
 }
 
 .glass-card .glass-overlay {

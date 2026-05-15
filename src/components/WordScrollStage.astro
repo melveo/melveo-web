@@ -271,15 +271,62 @@ const hueStep = (hueEnd - hueStart) / Math.max(1, words.length - 1);
     }
   }
 
-  @media (max-width: 780px) {
+  /*
+    Below 860px the prefix + word list can no longer share a row
+    cleanly: long phrases ("rozhodnutí trenéra.", "what to change
+    in the plan.") overflow the viewport's width cap and bleed
+    horizontally through the pinned prefix, making it look as if
+    the active word passes through "Trenér ví." / "Coach knows.".
+    Stack them vertically and centre the list under the prefix.
+  */
+  @media (max-width: 860px) {
     .word-scroll-stage {
       --word-scroll-distance: var(--word-scroll-distance-mobile);
     }
 
     .word-scroll-stage__inner {
-      gap: 0.18em;
+      flex-direction: column;
+      gap: 0.22em;
       padding-inline: 1rem;
-      font-size: clamp(1.65rem, 5.25vw, 2.45rem);
+      font-size: clamp(2rem, 5.6vw, 2.85rem);
+      line-height: 1.22;
+      text-align: center;
+    }
+
+    .word-scroll-stage__prefix {
+      line-height: 1.1;
+    }
+
+    /*
+      In column mode the prefix sits above the viewport; if the
+      viewport keeps `overflow: visible` (as on desktop) the faded
+      items above the active one bleed upward and overlap the
+      prefix line. Clip vertically so only the active word renders
+      under the prefix — this is the real fix for the "Spojí gets
+      centred and words pass through it" bug on phones.
+    */
+    .word-scroll-stage__list-viewport {
+      width: 100%;
+      max-width: 94vw;
+      overflow: hidden;
+    }
+
+    .word-scroll-stage__list {
+      width: 100%;
+      max-width: 94vw;
+      left: 50%;
+      transform: translate3d(
+        -50%,
+        calc(-0.625em - (var(--word-scroll-active-index) * 1.25em)),
+        0
+      );
+    }
+
+    .word-scroll-stage__item,
+    .word-scroll-stage__word {
+      width: 100%;
+      max-width: 94vw;
+      text-align: center;
     }
   }
 
@@ -289,21 +336,8 @@ const hueStep = (hueEnd - hueStart) / Math.max(1, words.length - 1);
     }
 
     .word-scroll-stage__inner {
-      flex-direction: column;
       gap: 0.18em;
-      font-size: clamp(1.05rem, 4.55vw, 1.55rem);
-      line-height: 1.22;
-    }
-
-    .word-scroll-stage__prefix {
-      line-height: 1;
-    }
-
-    .word-scroll-stage__list-viewport,
-    .word-scroll-stage__list,
-    .word-scroll-stage__item,
-    .word-scroll-stage__word {
-      max-width: 94vw;
+      font-size: clamp(1.25rem, 5.4vw, 1.85rem);
     }
   }
 

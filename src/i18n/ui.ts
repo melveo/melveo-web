@@ -33,16 +33,16 @@ export const ui = {
       28 → 13 words. Pair with a text-shadow on the headline + subline
       in Landing.astro for legibility against the particle backdrop.
     */
-    'hero.eyebrow': 'KLUBOVÝ SYSTÉM',
-    'hero.headlinePrefix': 'Hráčské signály měníme na',
-    'hero.headlineLine1': 'Hráčské signály',
-    'hero.headlineLine2': 'měníme na',
+    'hero.eyebrow': '',
+    'hero.headlinePrefix': 'Z hráčských signálů vzniká jasné rozhodnutí.',
+    'hero.headlineLine1': 'Z hráčských signálů',
+    'hero.headlineLine2': 'vzniká',
     'hero.headlineSuffix': '.',
-    'hero.headlineInitial': 'trenérská rozhodnutí',
+    'hero.headlineInitial': 'jasné rozhodnutí',
     'hero.headlineRotations':
-      'trenérská rozhodnutí|readiness týmu|jasný plán dne',
+      'jasné rozhodnutí|lepší trénink|včasné upozornění|plán regenerace|akce pro trenéra|kontext pro celý tým',
     'hero.subline':
-      'Check-iny, zátěž, docházka. Jeden přehled pro trenéra každý den.',
+      'Melveo propojí check-iny, wellness, zátěž a kontext zápasu, aby trenér věděl, co udělat dál.',
     'hero.cta.appstore': 'Stáhnout v App Store',
     // Key kept as `pilot` for legacy reference; label is now generic
     // contact CTA (pilot offering retired 2026-05-04).
@@ -60,7 +60,7 @@ export const ui = {
     // Stage 2/3 — product-proof labels inside the honeycomb morph.
     // These now read as a flow: player inputs → team signal → coach
     // output, matching WEB-REVIEW-2026-05-12 §2.
-    'gridCard.checkin': 'Check-in',
+    'gridCard.checkin': 'Ráno',
     'gridCard.sessions': 'Stav',
     'gridCard.attendance': 'Signál',
     'gridCard.load': 'Zátěž',
@@ -97,18 +97,18 @@ export const ui = {
     'gooey.headlineAccent': 'Synced.',
 
     // Stage 3.75 — scroll-timeline word highlight (Daniel Haim codepen)
-    'wordScroll.prefix': 'Spojí',
+    'wordScroll.prefix': 'Trenér ví',
     'wordScroll.screenReader':
-      'Spojí check-in, wellness, RPE, docházku, symptomy a zápasový kontext do výstupů pro trenéra.',
+      'Trenér ví, kdo je unavený, kdo se bojí o roli, koho dnes hlídat, kdo je připravený, co změnit v plánu a kde rozhodnout.',
     'wordScroll.words':
-      'check-in → stav hráče.|wellness → readiness týmu.|RPE → plán zátěže.|docházka → kontext tréninku.|symptomy → watchlist.|zápas → rozhodnutí trenéra.',
+      'kdo je unavený|kdo se bojí o roli|koho dnes hlídat|kdo je připravený|co změnit v plánu|kde rozhodnout',
 
     // Stage 4 — wellness
-    'wellness.eyebrow': 'RÁNO · 30 SEKUND',
-    'wellness.headline': 'Pětiosý check-in.',
+    'wellness.eyebrow': '',
+    'wellness.headline': 'Wellness za 30 sekund.',
     'wellness.body':
-      'Hráč rychle ohodnotí energii, spánek, bolestivost, náladu a motivaci. Melveo z toho vytvoří týmový kontext pro trenéra.',
-    'wellness.tag': 'Doc 174 §3 — privacy contract',
+      'Hráč ohodnotí energii, spánek, bolest, náladu a motivaci. Z toho vidíš stav celého týmu.',
+    'wellness.tag': '',
 
     // Stage 5 — cursor-mask (Giomgio codepen abxGyQX). Two layered
     // static headlines per the codepen ("Have a nice day!" + "It will
@@ -127,21 +127,16 @@ export const ui = {
     'promise.headlineAccent': 'Bez papíru.',
 
     // Stage 6 — sessions + coach board
-    'sessions.eyebrow': 'TRÉNINK · ROZHODNUTÍ',
+    'sessions.eyebrow': '',
     'sessions.headline': 'Sessions a coach board.',
     'sessions.body':
-      'Plánuj tréninky, zaznamenej účast, sleduj zátěž (RPE). Než přijedeš na hřiště, víš co tým potřebuje.',
+      'Naplánuj trénink, zaznamenej účast, sleduj zátěž. Než dojdeš na hřiště, víš co tým potřebuje.',
 
     // Stage 6.5 — Pricing
-    'pricing.eyebrow': 'CENÍK',
+    'pricing.eyebrow': '',
     'pricing.headline': 'Začni zdarma.',
-    'pricing.headlineAccent': 'Plať jen co potřebuješ.',
-    /*
-      Subline trimmed 2026-05-15 — was 24 words explaining the Free
-      Starter vs paid model. Cards say all of that themselves; the
-      headline just needs a one-line pitch.
-    */
-    'pricing.subline': 'Jedna licence pro celý tým. Roční plány zruš kdykoliv.',
+    'pricing.headlineAccent': 'Plať jen za to, co používáš.',
+    'pricing.subline': 'Jedna licence pro celý tým. Transparentní ceny v Kč.',
     'pricing.toggleMonthly': 'Měsíčně',
     'pricing.toggleYearly': 'Ročně',
     'pricing.toggleSavings': '−17 %',
@@ -155,33 +150,34 @@ export const ui = {
     'pricing.included': 'Co je v plánu',
     'pricing.ctaFree': 'Test s menší skupinou',
     'pricing.ctaPilot': 'Mám zájem',
+    'pricing.free': 'Zdarma',
     'pricing.athleteHeading': 'Potřebujete víc hráčů?',
     'pricing.athleteBody':
       'Athlete Pack rozšíří tým o dalších 10 hráčů za 5 900 Kč/rok (max 1 pack na tým).',
-    'pricing.clubHeading': 'Pro celý klub',
+    'pricing.clubHeading': 'Individuální plán',
     'pricing.clubBody':
-      'Klubový balíček pokrývá více týmů najednou. Core 49 900 / Live 89 900 / Intelligence 129 900 Kč/rok.',
+      'Pro více týmů, akademii nebo celý klub. Vlastní podmínky, integrace a osobní podpora. Napiš nám.',
     'pricing.disclaimer':
       'Ceny jsou v Kč bez DPH. Provozovatel není plátcem DPH. Všechny platby zpracovává Stripe.',
 
     // Stage 6.75 — Data-flow visualization.
     // Standalone section for now; planned replacement for the simpler
     // DATA -> FEEDBACK promise after visual validation.
-    'dataFlow.eyebrow': 'DATOVÝ TOK KLUBU',
+    'dataFlow.eyebrow': '',
     'dataFlow.headline':
-      'Z každého hráčského vstupu vzniká trenérský kontext.',
+      'Z hráčských vstupů vzniká kontext pro trenéra.',
     'dataFlow.body':
-      'Melveo sbírá signály z check-inů, docházky, RPE a sessions. Spojí je do jednoho přehledu, se kterým trenér pracuje při tréninku i zápase.',
+      'Wellness, docházka, RPE a sessions. Vše v jednom přehledu — při tréninku i zápase.',
     'dataFlow.playersTitle': 'Hráči posílají signály',
     'dataFlow.playersBody':
-      'Každý bod je hráč. Krátké vstupy posílají stav týmu průběžně během dne.',
+      'Každý bod je hráč. Krátké vstupy průběžně během dne.',
     'dataFlow.coreTitle': 'melveo',
-    'dataFlow.coreBody': 'Spojený týmový signál v jednom místě.',
+    'dataFlow.coreBody': 'Týmový signál v jednom místě.',
     'dataFlow.coachTitle': 'Trenér dostává kontext',
     'dataFlow.coachBody':
-      'Coach board ukáže, co je potřeba řešit před tréninkem nebo zápasem.',
+      'Coach board ukáže, co řešit před tréninkem i zápasem.',
     'dataFlow.signals':
-      'Check-in|RPE|Docházka|Wellness|Readiness|Spánek|Bolest|Motivace',
+      'Wellness|RPE|Docházka|Readiness|Spánek|Bolest|Motivace|Únava',
     'dataFlow.decisions':
       'Upravit zátěž|Individuální regenerace|Změnit roli v zápase|Zvýšit monitoring|Pustit do plného tréninku',
     'dataFlow.mobileStep1': 'Hráč pošle krátký vstup',
@@ -189,11 +185,11 @@ export const ui = {
     'dataFlow.mobileStep3': 'Trenér vidí kontext pro rozhodnutí',
 
     // Stage 7 — data feedback promise
-    'privacy.eyebrow': 'DATA → FEEDBACK',
+    'privacy.eyebrow': '',
     'privacy.headlineLine1': 'Každý vstup má',
     'privacy.headlineLine2': 'výstup pro trenéra.',
     'privacy.body':
-      'Check-iny, docházka, RPE i sessions se zpracují do přehledů a signálů, se kterými může realizační tým hned pracovat.',
+      'Wellness, docházka, RPE a sessions se mění v přehledy, se kterými může trenér hned pracovat.',
 
     // Lead capture forms (App Store notify + Pilot inquiry, T14 + T15)
     'lead.notifyHeading': 'Dej nám e-mail.',
@@ -231,11 +227,11 @@ export const ui = {
     // se zobrazí 3 prázdné phone-frame placeholdery v správném layoutu
     // — když přijdou skutečné obrázky, stačí je dropnout do
     // /public/images/app-shots/ a v komponentě prohodit src.
-    'appShots.eyebrow': 'JAK VYPADÁ APPKA',
+    'appShots.eyebrow': '',
     'appShots.headline': 'V telefonu hráče i trenéra.',
     'appShots.body':
-      'Tři klíčové obrazovky: ranní check-in pro hráče, sessions plán pro trenéra, coach board pro realizační tým.',
-    'appShots.shot1Title': 'Ranní check-in',
+      'Tři obrazovky: ranní wellness pro hráče, sessions pro trenéra, coach board pro realizační tým.',
+    'appShots.shot1Title': 'Ranní wellness',
     'appShots.shot1Caption': 'Pětiosé hodnocení za 30 vteřin.',
     'appShots.shot2Title': 'Sessions',
     'appShots.shot2Caption': 'Plán tréninku, docházka, RPE.',
@@ -248,11 +244,11 @@ export const ui = {
     // Do té doby běží placeholder ve stejné stylové rodině; když přijde
     // skutečný citát, stačí přepsat hodnoty zde a vyměnit avatar v
     // /public/images/testimonials/.
-    'testimonial.eyebrow': 'OD KLUBU',
+    'testimonial.eyebrow': '',
     'testimonial.placeholder': 'Citát bude doplněn po prvním pilotu.',
     'testimonial.placeholderAuthor': 'Trenér · klub · sport',
     'testimonial.quote':
-      '„Melveo je první nástroj, který nám dal kontext na trénink, ne jenom čísla. Ranní check-in zabere 30 vteřin a my víme, koho ten den šetřit a koho zatížit."',
+      '„Melveo je první nástroj, který nám dal kontext na trénink, ne jenom čísla. Ranní wellness zabere 30 vteřin a my víme, koho ten den šetřit a koho zatížit."',
     'testimonial.author': 'Jan Novák',
     'testimonial.role': 'Hlavní trenér · SK Melveo · fotbal U19',
 
@@ -267,11 +263,11 @@ export const ui = {
       already answers this). Kept the four real objections:
       engagement, competition, missing data, privacy.
     */
-    'faq.eyebrow': 'OTÁZKY',
+    'faq.eyebrow': '',
     'faq.headline': 'Časté otázky.',
-    'faq.q1': 'Budou hráči check-in opravdu dělat?',
+    'faq.q1': 'Budou hráči wellness opravdu vyplňovat?',
     'faq.a1':
-      'Check-in trvá ~30 sekund, opakuje se ve stejném rytmu. Trenér rovnou vidí, kdo poslal a kdo ne.',
+      'Wellness trvá ~30 sekund a opakuje se ve stejném rytmu. Trenér rovnou vidí, kdo poslal a kdo ne.',
     'faq.q2': 'Co když už používáme jiný nástroj?',
     'faq.a2':
       'Melveo nenahrazuje komunikaci ani klubovou administrativu — jen sbírá denní signály a dělá z nich kontext pro trenéra.',
@@ -307,16 +303,16 @@ export const ui = {
     'footer.cookieSettings': 'Cookie settings',
 
     /* See CS comment above — same trim applied in English. */
-    'hero.eyebrow': 'CLUB OPERATING SYSTEM',
-    'hero.headlinePrefix': 'Player signals become',
-    'hero.headlineLine1': 'Player signals',
+    'hero.eyebrow': '',
+    'hero.headlinePrefix': 'Athlete signals become clear decisions.',
+    'hero.headlineLine1': 'Athlete signals',
     'hero.headlineLine2': 'become',
     'hero.headlineSuffix': '.',
-    'hero.headlineInitial': 'coach decisions',
+    'hero.headlineInitial': 'clear decisions',
     'hero.headlineRotations':
-      'coach decisions|team readiness|clear daily plan',
+      'clear decisions|better training|early alerts|recovery plans|coach actions|team context',
     'hero.subline':
-      'Check-ins, load, attendance. One daily view your coach actually uses.',
+      'Melveo connects check-ins, wellness, load and match context, so coaches know what to do next.',
     'hero.cta.appstore': 'Download on the App Store',
     'hero.cta.pilot': 'Get in touch →',
     'hero.beta': 'TestFlight beta · soon',
@@ -329,7 +325,7 @@ export const ui = {
     'gridMorph.scrollHint': 'Scroll',
 
     // 8 product-proof honeycomb labels (matches CS keys above)
-    'gridCard.checkin': 'Check-in',
+    'gridCard.checkin': 'Morning',
     'gridCard.sessions': 'Status',
     'gridCard.attendance': 'Signal',
     'gridCard.load': 'Load',
@@ -363,17 +359,17 @@ export const ui = {
     'gooey.headlinePrefix': 'Coach + player.',
     'gooey.headlineAccent': 'Synced.',
 
-    'wordScroll.prefix': 'Connects',
+    'wordScroll.prefix': 'Coach knows',
     'wordScroll.screenReader':
-      'Connects check-in, wellness, RPE, attendance, symptoms and match context into coach-ready outputs.',
+      'The coach knows who is tired, who fears the bench, who to watch, who is ready, what to change in the plan and when to call it.',
     'wordScroll.words':
-      'check-in → player state.|wellness → team readiness.|RPE → load plan.|attendance → training context.|symptoms → watchlist.|match context → coach decision.',
+      "who's tired|who fears the bench|who to watch today|who's ready to play|what to change in the plan|when to call it",
 
-    'wellness.eyebrow': 'MORNING · 30 SECONDS',
-    'wellness.headline': '5-axis check-in.',
+    'wellness.eyebrow': '',
+    'wellness.headline': 'Wellness in 30 seconds.',
     'wellness.body':
-      'Players rate energy, sleep, soreness, mood, and motivation. Melveo turns it into team context for the coach.',
-    'wellness.tag': 'Doc 174 §3 — privacy contract',
+      'Players rate energy, sleep, soreness, mood, and motivation. You see the team status at a glance.',
+    'wellness.tag': '',
 
     'orb.primary': 'For the whole club.',
     'orb.secondary': 'For every player.',
@@ -381,16 +377,16 @@ export const ui = {
     'promise.headlinePrefix': 'Real-time data.',
     'promise.headlineAccent': 'No paper.',
 
-    'sessions.eyebrow': 'TRAINING · DECISIONS',
+    'sessions.eyebrow': '',
     'sessions.headline': 'Sessions and coach board.',
     'sessions.body':
-      'Plan trainings, log attendance, track load (RPE). Before you arrive at the pitch, you know what the team needs.',
+      'Plan training, log attendance, track load. Before you arrive at the pitch, you know what the team needs.',
 
     // Stage 6.5 — Pricing
-    'pricing.eyebrow': 'PRICING',
+    'pricing.eyebrow': '',
     'pricing.headline': 'Start free.',
-    'pricing.headlineAccent': 'Pay only for what you need.',
-    'pricing.subline': 'One license for the whole team. Yearly plans, cancel anytime.',
+    'pricing.headlineAccent': 'Pay only for what you use.',
+    'pricing.subline': 'One license for the whole team. Transparent CZK pricing.',
     'pricing.toggleMonthly': 'Monthly',
     'pricing.toggleYearly': 'Yearly',
     'pricing.toggleSavings': '−17 %',
@@ -404,40 +400,41 @@ export const ui = {
     'pricing.included': "What's included",
     'pricing.ctaFree': 'Start with small group',
     'pricing.ctaPilot': 'Get in touch',
+    'pricing.free': 'Free',
     'pricing.athleteHeading': 'Need more players?',
     'pricing.athleteBody':
       'The Athlete Pack adds 10 more players for 5,900 CZK / year (max 1 pack per team).',
-    'pricing.clubHeading': 'For the whole club',
+    'pricing.clubHeading': 'Enterprise',
     'pricing.clubBody':
-      'The club bundle covers multiple teams at once. Core 49,900 / Live 89,900 / Intelligence 129,900 CZK / year.',
+      'For multiple teams, an academy or a whole club. Custom terms, integrations and dedicated support. Get in touch.',
     'pricing.disclaimer':
       'Prices in CZK, VAT not applicable. Operator is not a VAT payer. All payments processed by Stripe.',
 
-    'dataFlow.eyebrow': 'CLUB DATA FLOW',
-    'dataFlow.headline': 'Every player input becomes coaching context.',
+    'dataFlow.eyebrow': '',
+    'dataFlow.headline': 'Player inputs become coaching context.',
     'dataFlow.body':
-      'Melveo collects signals from check-ins, attendance, RPE, and sessions. It combines them into one view coaches can use in training and on match day.',
+      'Wellness, attendance, RPE, and sessions. One view for training and match day.',
     'dataFlow.playersTitle': 'Players send signals',
     'dataFlow.playersBody':
-      'Each dot is a player. Short inputs keep the staff close to the team during the day.',
+      'Each dot is a player. Short inputs throughout the day.',
     'dataFlow.coreTitle': 'melveo',
     'dataFlow.coreBody': 'One connected team signal.',
     'dataFlow.coachTitle': 'Coaches get context',
     'dataFlow.coachBody':
-      'The coach board shows what needs attention before training or match decisions.',
+      'The coach board shows what needs attention before training or match.',
     'dataFlow.signals':
-      'Check-in|RPE|Attendance|Wellness|Readiness|Sleep|Pain|Motivation',
+      'Wellness|RPE|Attendance|Readiness|Sleep|Pain|Motivation|Fatigue',
     'dataFlow.decisions':
       'Adjust load|Individual recovery|Change match role|Increase monitoring|Full training clearance',
     'dataFlow.mobileStep1': 'Player sends a short input',
     'dataFlow.mobileStep2': 'Melveo combines it with team signals',
     'dataFlow.mobileStep3': 'Coach sees decision-ready context',
 
-    'privacy.eyebrow': 'DATA → FEEDBACK',
+    'privacy.eyebrow': '',
     'privacy.headlineLine1': "Every input creates",
     'privacy.headlineLine2': "coach-ready output.",
     'privacy.body':
-      'Check-ins, attendance, RPE, and sessions become clear signals the coaching staff can use immediately.',
+      'Wellness, attendance, RPE, and sessions become signals the coach can use immediately.',
 
     // Lead capture forms — App Store notify + Pilot inquiry
     'lead.notifyHeading': 'Drop us your email.',
@@ -470,11 +467,11 @@ export const ui = {
     'lead.errSportRequired': 'Sport is required.',
 
     // App screenshot showcase — placeholder + final-shape strings
-    'appShots.eyebrow': 'WHAT THE APP LOOKS LIKE',
+    'appShots.eyebrow': '',
     'appShots.headline': 'On the player\'s and coach\'s phone.',
     'appShots.body':
-      'Three key screens: morning check-in for the player, sessions plan for the coach, coach board for the staff.',
-    'appShots.shot1Title': 'Morning check-in',
+      'Three screens: morning wellness for the player, sessions for the coach, coach board for the staff.',
+    'appShots.shot1Title': 'Morning wellness',
     'appShots.shot1Caption': '5-axis rating in 30 seconds.',
     'appShots.shot2Title': 'Sessions',
     'appShots.shot2Caption': 'Plan, attendance, RPE.',
@@ -483,21 +480,21 @@ export const ui = {
     'appShots.placeholder': 'Screenshot coming',
 
     // Customer testimonial — placeholder + final-shape strings
-    'testimonial.eyebrow': 'FROM A CLUB',
+    'testimonial.eyebrow': '',
     'testimonial.placeholder': 'Quote coming after the first pilot.',
     'testimonial.placeholderAuthor': 'Coach · club · sport',
     'testimonial.quote':
-      '"Melveo is the first tool that gave us context for training, not just numbers. The morning check-in takes 30 seconds and we know who to spare and who to load that day."',
+      '"Melveo is the first tool that gave us context for training, not just numbers. Morning wellness takes 30 seconds and we know who to spare and who to load that day."',
     'testimonial.author': 'Jan Novák',
     'testimonial.role': 'Head coach · SK Melveo · football U19',
 
     // FAQ (mirrors CS keys above)
     /* See CS comment — same trim, 4 strongest objections. */
-    'faq.eyebrow': 'QUESTIONS',
+    'faq.eyebrow': '',
     'faq.headline': 'Frequently asked.',
-    'faq.q1': 'Will players actually check in?',
+    'faq.q1': 'Will players actually do wellness daily?',
     'faq.a1':
-      'The check-in takes ~30 seconds and repeats in the same daily rhythm. Coaches see who sent and who didn’t — no manual chasing.',
+      'Wellness takes ~30 seconds and repeats in the same daily rhythm. Coaches see who sent and who didn’t — no manual chasing.',
     'faq.q2': 'What if we already use another tool?',
     'faq.a2':
       'Melveo doesn’t replace communication or club admin — it just collects daily signals and turns them into coach context.',

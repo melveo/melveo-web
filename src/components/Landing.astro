@@ -68,10 +68,6 @@ const t = useTranslations(lang);
       do the actual centring work.
     */}
     <div class="relative z-10 flex flex-1 flex-col items-center justify-center px-6 py-6 text-center sm:py-10">
-      <p class="mb-8 text-xs font-semibold uppercase tracking-[0.4em] text-[var(--color-accent-primary)]">
-        {t('hero.eyebrow')}
-      </p>
-
       <h1
         class="hero-headline leading-[0.95] tracking-tight text-[var(--color-text-primary)]"
       >
@@ -217,9 +213,6 @@ const t = useTranslations(lang);
   <!-- ============================================================== -->
   <section id="contact" class="pilot-cta-stage">
     <div class="pilot-cta-stage__inner">
-      <h2 class="pilot-cta-stage__headline">
-        {t('pilot.headline')}
-      </h2>
       <p class="pilot-cta-stage__body">
         {t('pilot.body')}
       </p>
@@ -325,26 +318,33 @@ const t = useTranslations(lang);
   */
   .hero-headline {
     display: flex;
-    max-width: min(100%, 76rem);
+    width: min(100%, 76rem);
+    max-width: calc(100vw - 2rem);
     flex-direction: column;
     align-items: center;
     gap: 0.03em;
     /*
-      Hero headline uses the brand wordmark font (Quicksand) so it
-      shares the same visual DNA as the "melveo" logo across the
-      site + brand assets — rounded geometric sans, lowercase, the
-      letterforms users already associate with the brand. Tighter
-      letter-spacing pulls the round counters together so a long
-      headline doesn't sprawl.
+      Hero headline uses the site display font (Inter) to match
+      every other section heading — only the "melveo" wordmark
+      (logo top-left + brand mark) stays in the Comfortaa/Quicksand
+      family. Per user direction 2026-05-15: headline previously
+      rode the wordmark face and looked like a second logo.
     */
-    font-family: var(--font-wordmark);
-    font-weight: 600;
-    font-feature-settings: "ss01" on;
-    text-transform: lowercase;
-    font-size: clamp(2.55rem, 7vw, 7rem);
-    letter-spacing: -0.025em;
+    font-family: var(--font-display);
+    font-weight: 700;
+    /*
+      Keep the hero claim as exactly two visual lines:
+        1. static setup
+        2. rotating outcome
+
+      The previous 7vw sizing let the Czech setup line wrap at medium
+      desktop widths ("Z hráčských signálů" / "vzniká" / outcome).
+      Size now follows the viewport more conservatively instead of
+      allowing a third line.
+    */
+    font-size: clamp(2.05rem, min(5.55vw, 10.5vh), 5.9rem);
+    letter-spacing: -0.04em;
     line-height: 0.98;
-    word-spacing: 0.06em;
     /*
       Hero text sits over an animated particle / shader scene
       (HeroScene canvas). Without a backdrop the white text drifts
@@ -361,6 +361,8 @@ const t = useTranslations(lang);
 
   .hero-headline-static {
     display: flex;
+    flex-direction: row;
+    align-items: center;
     justify-content: center;
     gap: 0.18em;
     white-space: nowrap;
@@ -457,14 +459,14 @@ const t = useTranslations(lang);
 
   @media (max-width: 520px) {
     .hero-headline {
-      font-size: clamp(2.05rem, 9.4vw, 3rem);
+      font-size: clamp(1.45rem, 6.4vw, 2.2rem);
       letter-spacing: -0.025em;
       line-height: 1;
     }
 
     .hero-headline-static {
-      flex-direction: column;
-      gap: 0;
+      flex-direction: row;
+      gap: 0.18em;
     }
 
     .hero-rotate-cluster {

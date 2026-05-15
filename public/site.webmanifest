@@ -8,7 +8,7 @@
   "theme_color": "#06090f",
   "icons": [
     {
-      "src": "/app-icon-melveo.png",
+      "src": "/app-icon-melveo.png?v=2026-05-15d",
       "sizes": "1024x1024",
       "type": "image/png",
       "purpose": "any maskable"

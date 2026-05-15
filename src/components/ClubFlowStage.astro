@@ -41,8 +41,8 @@ const { lang } = Astro.props;
 */
 const copy = {
   cs: {
-    eyebrow: 'JEDEN DEN V KLUBU',
-    headline: 'Od check-inu k rozhodnutí.',
+    eyebrow: '',
+    headline: 'Od rána k rozhodnutí.',
     body: 'Jeden tok od ranního signálu po rozhodnutí.',
     mediaLabel: 'Živý klubový tok',
     progressLabel: 'Průběh dne',
@@ -50,14 +50,14 @@ const copy = {
       {
         number: '01',
         kicker: 'Ráno',
-        title: 'Pětiosý check-in',
-        body: '30 sekund v telefonu hráče. Melveo z toho vyrobí týmový signál.',
+        title: 'Wellness za 30 sekund',
+        body: '30 sekund v telefonu hráče. Z toho vznikne týmový signál.',
         metrics: [
           { value: '18/24', label: 'hráčů odeslalo' },
           { value: '86', label: 'readiness' },
         ],
         image: '/images/club-flow/check-in.webp',
-        alt: 'Hráč v šatně vyplňuje týmový check-in v telefonu.',
+        alt: 'Hráč v šatně vyplňuje ranní wellness v telefonu.',
       },
       {
         number: '02',
@@ -75,7 +75,7 @@ const copy = {
         number: '03',
         kicker: 'Kontext',
         title: 'Coach board',
-        body: 'Check-iny, docházka a zátěž se sloučí do jednoho přehledu.',
+        body: 'Wellness, docházka a zátěž se sloučí do jednoho přehledu.',
         metrics: [
           { value: '3', label: 'watchlist' },
           { value: '2', label: 'recovery flags' },
@@ -98,8 +98,8 @@ const copy = {
     ],
   },
   en: {
-    eyebrow: 'ONE CLUB DAY',
-    headline: 'From check-in to decision.',
+    eyebrow: '',
+    headline: 'From morning to decision.',
     body: 'One flow, from the morning signal to the call on the pitch.',
     mediaLabel: 'Live club workflow',
     progressLabel: 'Day progress',
@@ -107,14 +107,14 @@ const copy = {
       {
         number: '01',
         kicker: 'Morning',
-        title: '5-axis check-in',
-        body: '30 seconds on the player’s phone. Melveo turns it into a team signal.',
+        title: 'Wellness in 30 seconds',
+        body: '30 seconds on the player’s phone. Becomes a team signal.',
         metrics: [
           { value: '18/24', label: 'players sent' },
           { value: '86', label: 'readiness' },
         ],
         image: '/images/club-flow/check-in.webp',
-        alt: 'A player in a locker room completes a team check-in on a phone.',
+        alt: 'A player in a locker room completes morning wellness on a phone.',
       },
       {
         number: '02',
@@ -132,7 +132,7 @@ const copy = {
         number: '03',
         kicker: 'Context',
         title: 'Coach board',
-        body: 'Check-ins, attendance and load merge into one view.',
+        body: 'Wellness, attendance and load merge into one view.',
         metrics: [
           { value: '3', label: 'watchlist' },
           { value: '2', label: 'recovery flags' },
@@ -184,7 +184,6 @@ const steps = content.steps;
   <div class="club-flow-stage__halo club-flow-stage__halo--bottom" aria-hidden="true"></div>
 
   <div class="club-flow-stage__intro">
-    <p class="club-flow-stage__eyebrow">{content.eyebrow}</p>
     <h2>{content.headline}</h2>
     <p>{content.body}</p>
   </div>

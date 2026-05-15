@@ -41,12 +41,7 @@ const t = useTranslations(lang);
 
 ---
 
-<section
-  class="image-grid-section"
-  data-grid-section
-  data-glass-smoke
-  data-glass-smoke-density="0.85"
->
+<section class="image-grid-section" data-grid-section data-glass-smoke data-glass-smoke-density="0.85">
   {/* Cyan smoke field behind the grid — same recipe + same component
       as the pricing section (glass-smoke.ts). Density bumped to 1.2×
       per user feedback 2026-05-01 ("více molekul"): the image grid
@@ -463,21 +458,21 @@ const t = useTranslations(lang);
       <!-- Layer 5 — radius-3 perimeter. These 16 cells complete a true
            4 / 5 / 6 / 7 / 6 / 5 / 4 honeycomb on every viewport. -->
       <div class="layer layer--desktop-extra layer--outer-ring" aria-hidden="false">
-        <div><article class="tech-card tech-card--outer glass-card" aria-label={t('gridCard.sleep' as any)}><span class="glass-filter" aria-hidden="true" /><span class="glass-overlay" aria-hidden="true" /><span class="glass-specular" aria-hidden="true" /><div class="glass-content"><svg class="tech-card__icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M17.8 15.8A7.2 7.2 0 0 1 8.2 6.2a6.7 6.7 0 1 0 9.6 9.6Z" /></svg><h3>{t('gridCard.sleep' as any)}</h3></div></article></div>
+        <div><figure class="grid-photo glass-card" aria-hidden="true"><span class="glass-filter" aria-hidden="true" /><span class="glass-overlay" aria-hidden="true" /><span class="glass-specular" aria-hidden="true" /><div class="glass-content"><img src="/images/melveo-grid/player-portrait.webp" alt="" loading="lazy" decoding="async" /></div></figure></div>
         <div><article class="tech-card tech-card--outer glass-card" aria-label={t('gridCard.mood' as any)}><span class="glass-filter" aria-hidden="true" /><span class="glass-overlay" aria-hidden="true" /><span class="glass-specular" aria-hidden="true" /><div class="glass-content"><svg class="tech-card__icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="7.4" /><path d="M8.8 10h.1M15.1 10h.1" /><path d="M8.6 14.2c1.7 1.8 5.1 1.8 6.8 0" /></svg><h3>{t('gridCard.mood' as any)}</h3></div></article></div>
-        <div><article class="tech-card tech-card--outer glass-card" aria-label={t('gridCard.pain' as any)}><span class="glass-filter" aria-hidden="true" /><span class="glass-overlay" aria-hidden="true" /><span class="glass-specular" aria-hidden="true" /><div class="glass-content"><svg class="tech-card__icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v16M4 12h16" /><path d="M7 7l10 10M17 7 7 17" opacity="0.62" /></svg><h3>{t('gridCard.pain' as any)}</h3></div></article></div>
+        <div><figure class="grid-photo glass-card" aria-hidden="true"><span class="glass-filter" aria-hidden="true" /><span class="glass-overlay" aria-hidden="true" /><span class="glass-specular" aria-hidden="true" /><div class="glass-content"><img src="/images/melveo-grid/player-action.webp" alt="" loading="lazy" decoding="async" /></div></figure></div>
         <div><article class="tech-card tech-card--outer glass-card" aria-label={t('gridCard.fatigue' as any)}><span class="glass-filter" aria-hidden="true" /><span class="glass-overlay" aria-hidden="true" /><span class="glass-specular" aria-hidden="true" /><div class="glass-content"><svg class="tech-card__icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="3.6" y="8" width="14.5" height="8" rx="2" /><path d="M20.2 10.5v3" /><path d="M7 12h5" opacity="0.65" /></svg><h3>{t('gridCard.fatigue' as any)}</h3></div></article></div>
-        <div><article class="tech-card tech-card--outer glass-card" aria-label={t('gridCard.hrv' as any)}><span class="glass-filter" aria-hidden="true" /><span class="glass-overlay" aria-hidden="true" /><span class="glass-specular" aria-hidden="true" /><div class="glass-content"><svg class="tech-card__icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 13h3l1.8-4 3.2 8 2.2-5H20" /><path d="M7.6 7.7c1.1-2 3.2-2.4 4.4-.8 1.2-1.6 3.3-1.2 4.4.8" opacity="0.7" /></svg><h3>{t('gridCard.hrv' as any)}</h3></div></article></div>
+        <div><figure class="grid-photo glass-card" aria-hidden="true"><span class="glass-filter" aria-hidden="true" /><span class="glass-overlay" aria-hidden="true" /><span class="glass-specular" aria-hidden="true" /><div class="glass-content"><img src="/images/melveo-grid/player-defense.webp" alt="" loading="lazy" decoding="async" /></div></figure></div>
         <div><article class="tech-card tech-card--outer glass-card" aria-label={t('gridCard.symptoms' as any)}><span class="glass-filter" aria-hidden="true" /><span class="glass-overlay" aria-hidden="true" /><span class="glass-specular" aria-hidden="true" /><div class="glass-content"><svg class="tech-card__icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M10 4h4v8.2a5 5 0 1 1-4 0V4Z" /><path d="M12 8h3M12 11h3" opacity="0.68" /></svg><h3>{t('gridCard.symptoms' as any)}</h3></div></article></div>
-        <div><article class="tech-card tech-card--outer glass-card" aria-label={t('gridCard.match' as any)}><span class="glass-filter" aria-hidden="true" /><span class="glass-overlay" aria-hidden="true" /><span class="glass-specular" aria-hidden="true" /><div class="glass-content"><svg class="tech-card__icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="6" width="16" height="12" rx="2" /><path d="M12 6v12M4 12h4M16 12h4" /><circle cx="12" cy="12" r="2" /></svg><h3>{t('gridCard.match' as any)}</h3></div></article></div>
+        <div><figure class="grid-photo glass-card" aria-hidden="true"><span class="glass-filter" aria-hidden="true" /><span class="glass-overlay" aria-hidden="true" /><span class="glass-specular" aria-hidden="true" /><div class="glass-content"><img src="/images/melveo-grid/coach-hall-tablet.webp" alt="" loading="lazy" decoding="async" /></div></figure></div>
         <div><article class="tech-card tech-card--outer glass-card" aria-label={t('gridCard.rotation' as any)}><span class="glass-filter" aria-hidden="true" /><span class="glass-overlay" aria-hidden="true" /><span class="glass-specular" aria-hidden="true" /><div class="glass-content"><svg class="tech-card__icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 8a6.5 6.5 0 0 1 10.5 1.5" /><path d="M17.5 5v4.5H13" /><path d="M17 16a6.5 6.5 0 0 1-10.5-1.5" /><path d="M6.5 19v-4.5H11" /></svg><h3>{t('gridCard.rotation' as any)}</h3></div></article></div>
-        <div><article class="tech-card tech-card--outer glass-card" aria-label={t('gridCard.readiness' as any)}><span class="glass-filter" aria-hidden="true" /><span class="glass-overlay" aria-hidden="true" /><span class="glass-specular" aria-hidden="true" /><div class="glass-content"><svg class="tech-card__icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="7.8" /><path d="M8.2 12.3l2.4 2.4 5.2-5.4" /></svg><h3>{t('gridCard.readiness' as any)}</h3></div></article></div>
+        <div><figure class="grid-photo glass-card" aria-hidden="true"><span class="glass-filter" aria-hidden="true" /><span class="glass-overlay" aria-hidden="true" /><span class="glass-specular" aria-hidden="true" /><div class="glass-content"><img src="/images/melveo-grid/player-locker.webp" alt="" loading="lazy" decoding="async" /></div></figure></div>
         <div><article class="tech-card tech-card--outer glass-card" aria-label={t('gridCard.rpe' as any)}><span class="glass-filter" aria-hidden="true" /><span class="glass-overlay" aria-hidden="true" /><span class="glass-specular" aria-hidden="true" /><div class="glass-content"><svg class="tech-card__icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 16a7 7 0 0 1 14 0" /><path d="M12 12l4-4" /><path d="M7.2 16h9.6" /></svg><h3>{t('gridCard.rpe' as any)}</h3></div></article></div>
-        <div><article class="tech-card tech-card--outer glass-card" aria-label={t('gridCard.attendance2' as any)}><span class="glass-filter" aria-hidden="true" /><span class="glass-overlay" aria-hidden="true" /><span class="glass-specular" aria-hidden="true" /><div class="glass-content"><svg class="tech-card__icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="5.5" width="16" height="14" rx="2.2" /><path d="M8 4v4M16 4v4M7 10h10" /><path d="M8.5 14l2 2 4.5-4.6" /></svg><h3>{t('gridCard.attendance2' as any)}</h3></div></article></div>
+        <div><figure class="grid-photo glass-card" aria-hidden="true"><span class="glass-filter" aria-hidden="true" /><span class="glass-overlay" aria-hidden="true" /><span class="glass-specular" aria-hidden="true" /><div class="glass-content"><img src="/images/melveo-grid/jersey-brand.webp" alt="" loading="lazy" decoding="async" /></div></figure></div>
         <div><article class="tech-card tech-card--outer glass-card" aria-label={t('gridCard.notes' as any)}><span class="glass-filter" aria-hidden="true" /><span class="glass-overlay" aria-hidden="true" /><span class="glass-specular" aria-hidden="true" /><div class="glass-content"><svg class="tech-card__icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 4.5h9l3 3V19.5H6Z" /><path d="M15 4.5v3h3" /><path d="M8.5 11h7M8.5 14h7M8.5 17h4" /></svg><h3>{t('gridCard.notes' as any)}</h3></div></article></div>
-        <div><article class="tech-card tech-card--outer glass-card" aria-label={t('gridCard.export' as any)}><span class="glass-filter" aria-hidden="true" /><span class="glass-overlay" aria-hidden="true" /><span class="glass-specular" aria-hidden="true" /><div class="glass-content"><svg class="tech-card__icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v10" /><path d="M8.5 7.5 12 4l3.5 3.5" /><path d="M5.5 13.5v5h13v-5" /></svg><h3>{t('gridCard.export' as any)}</h3></div></article></div>
+        <div><figure class="grid-photo glass-card" aria-hidden="true"><span class="glass-filter" aria-hidden="true" /><span class="glass-overlay" aria-hidden="true" /><span class="glass-specular" aria-hidden="true" /><div class="glass-content"><img src="/images/melveo-grid/coach-team-dialogue.webp" alt="" loading="lazy" decoding="async" /></div></figure></div>
         <div><article class="tech-card tech-card--outer glass-card" aria-label={t('gridCard.alerts' as any)}><span class="glass-filter" aria-hidden="true" /><span class="glass-overlay" aria-hidden="true" /><span class="glass-specular" aria-hidden="true" /><div class="glass-content"><svg class="tech-card__icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M6.5 17h11l-1.2-2V10a4.3 4.3 0 0 0-8.6 0v5Z" /><path d="M10 19h4" /><path d="M12 3.7v1.4" /></svg><h3>{t('gridCard.alerts' as any)}</h3></div></article></div>
-        <div><article class="tech-card tech-card--outer glass-card" aria-label={t('gridCard.calendar' as any)}><span class="glass-filter" aria-hidden="true" /><span class="glass-overlay" aria-hidden="true" /><span class="glass-specular" aria-hidden="true" /><div class="glass-content"><svg class="tech-card__icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="5.5" width="16" height="14" rx="2.2" /><path d="M8 4v4M16 4v4M4 10h16" /><path d="M8 13h2M12 13h2M16 13h1M8 16h2M12 16h2" /></svg><h3>{t('gridCard.calendar' as any)}</h3></div></article></div>
+        <div><figure class="grid-photo glass-card" aria-hidden="true"><span class="glass-filter" aria-hidden="true" /><span class="glass-overlay" aria-hidden="true" /><span class="glass-specular" aria-hidden="true" /><div class="glass-content"><img src="/images/melveo-grid/coach-evening-tablet.webp" alt="" loading="lazy" decoding="async" /></div></figure></div>
         <div><article class="tech-card tech-card--outer glass-card" aria-label={t('gridCard.team' as any)}><span class="glass-filter" aria-hidden="true" /><span class="glass-overlay" aria-hidden="true" /><span class="glass-specular" aria-hidden="true" /><div class="glass-content"><svg class="tech-card__icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="9" r="2.8" /><circle cx="16" cy="10" r="2.3" /><path d="M4.8 18c.7-3.4 2.6-5 4.2-5s3.5 1.6 4.2 5" /><path d="M13 17.6c.7-2.4 2-3.6 3.2-3.6 1.3 0 2.7 1.3 3.2 3.6" /></svg><h3>{t('gridCard.team' as any)}</h3></div></article></div>
       </div>
 
@@ -515,26 +510,17 @@ const t = useTranslations(lang);
 
   .image-grid-section {
     /*
-      Runway: 280vh desktop / 220vh mobile = 1 viewport pinned +
-      ~1.8× / ~1.2× scroll budget. Shortened again 2026-05-15
-      because the data-flow section right below was sitting too
-      far down — users were scrolling through 4+ viewports of
-      morph runway and assuming the page ended. With 280vh, the
-      data-flow eyebrow sits within ~3 viewports of the hero,
-      which reads as "next section" instead of "buried".
-
-      Math at desktop (280vh, vh=900):
-        - section height: 2520
-        - scrollable: 2520 − 900 = 1620
-        - scaler morph at 62% = 1004 (~1.1 vh in)
-        - layer reveal at 80% = 1296 (~1.4 vh in)
-        - remaining 20% = 324 (~0.36 vh rest)
-      Tight runway forces deliberate pacing — morph happens fast,
-      then the honeycomb sits briefly before next section arrives.
+      Runway: 230vh desktop / 190vh mobile = 1 viewport pinned +
+      a compact scroll budget. Shortened 2026-05-15 after visual
+      review: the image already settled into the centre hex, but
+      the sticky section still had a long inert tail before the
+      Data → Feedback section arrived. Keep enough runway for the
+      full-bleed photo → honeycomb transformation, but remove the
+      dead scroll pause after the honeycomb is assembled.
     */
     position: relative;
     width: 100%;
-    min-height: 280vh;
+    min-height: 215vh;
     background: var(--color-bg-canvas);
     border-top: 1px solid var(--color-stroke-base);
     overflow: clip;
@@ -542,7 +528,7 @@ const t = useTranslations(lang);
 
   @media (max-width: 1024px) {
     .image-grid-section {
-      min-height: 220vh;
+      min-height: 175vh;
     }
   }
 
@@ -557,12 +543,10 @@ const t = useTranslations(lang);
     left: 0;
     width: 100vw;
     height: 100vh;
-    margin-bottom: -100vh; /* take it out of normal flow so .content sits where it would naturally */
+    margin-bottom: -100vh;
     pointer-events: none;
     z-index: 0;
     filter: saturate(120%) brightness(1.05);
-    /* Soft fade at top + bottom so the smoke doesn't hard-cut against
-       neighbouring sections. */
     mask-image: linear-gradient(
       180deg,
       transparent 0%,
@@ -997,8 +981,10 @@ const t = useTranslations(lang);
       filter: drop-shadow(0 0 6px rgba(0, 240, 255, 0.4));
     }
     .image-grid-section .glass-filter {
+      display: none;
       backdrop-filter: none;
       -webkit-backdrop-filter: none;
+      filter: none;
     }
   }
 
@@ -1036,6 +1022,34 @@ const t = useTranslations(lang);
       drop-shadow(0 0 22px rgba(0, 240, 255, 0.11));
     contain: layout paint;
     backface-visibility: hidden;
+  }
+
+  /*
+    Chrome/Blink performance guard.
+
+    The global liquid-glass recipe uses backdrop-filter + an SVG
+    displacement filter. That looks fine on static cards, but in this
+    scroll-morph section Chrome has to repaint dozens of clipped
+    hexagons while the centre image is animating. The result was the
+    reported Chrome-only jank and occasional horizontal/vertical
+    filter seams inside cells. Safari renders this stack differently,
+    which is why it looked OK there.
+
+    Keep the glass feel with local gradients/specular rims, but remove
+    the expensive refractive layer for this section only.
+  */
+  .image-grid-section .glass-filter {
+    display: none;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    filter: none;
+  }
+
+  .image-grid-section .glass-overlay {
+    background:
+      radial-gradient(circle at 50% 28%, rgba(0, 240, 255, 0.16), transparent 48%),
+      linear-gradient(180deg, rgba(255, 255, 255, 0.055) 0%, rgba(255, 255, 255, 0.018) 48%, rgba(0, 240, 255, 0.04) 100%),
+      rgba(4, 12, 15, 0.48);
   }
 
   /* No hover lift in this section. The global .glass-card hover
@@ -1194,6 +1208,15 @@ const t = useTranslations(lang);
     .image-grid-section .grid > .layer:nth-of-type(5) .tech-card__icon {
       animation-delay: 1.7s;
     }
+  }
+
+  /* Keep this morph section deterministic while scrolling. Continuous
+     per-card breathe/pulse animations made Chrome repaint clipped
+     hexagons during the width/height/clip-path morph and caused visible
+     stutter. Other sections keep their decorative motion. */
+  .image-grid-section .grid-photo img,
+  .image-grid-section .tech-card__icon {
+    animation: none;
   }
 
   @keyframes gridIconPulse {
@@ -1525,8 +1548,8 @@ const t = useTranslations(lang);
         const power3InOut = [0.76, 0, 0.24, 1] as const;
         const power4InOut = [0.87, 0, 0.13, 1] as const;
         const sineOut = [0.61, 1, 0.88, 1] as const;
-        const scalerEndRatio = 0.62;
-        const revealEndRatio = 0.8;
+        const scalerEndRatio = 0.82;
+        const revealEndRatio = 0.95;
 
         // ─── Scaler: hold full-bleed, then shrink to one hex cell ────
         //
@@ -1603,34 +1626,30 @@ const t = useTranslations(lang);
           })
           .sort((a, b) => a.distance - b.distance);
 
-        // Cell base state. On desktop each cell animates individually
-        // (motion.scroll() per-cell below), so we start them at 0 and
-        // let the per-cell animation drive them. On mobile we skip
-        // the per-cell animation (perf), so set opacity to 1 inline
-        // — the CSS rule has opacity:0, and we want the LAYER's
-        // opacity animation to drive the group reveal. With cells
-        // at opacity:1 and layer opacity animating 0→1, effective
-        // visibility tracks the layer cleanly.
-        if (compactMotion) {
-          cellItems.forEach(({ cell }) => {
-            cell.style.opacity = '1';
-            cell.style.scale = '';
-            cell.style.y = '';
-          });
-        } else {
-          cellItems.forEach(({ cell }) => {
-            cell.style.opacity = '0';
-            cell.style.scale = '1';
-            cell.style.y = '18px';
-          });
-        }
+        // Cell base state.
+        //
+        // Earlier desktop versions animated every individual cell with
+        // its own scroll() binding. That looked nice in Safari but was
+        // too expensive in Chrome when combined with clipped glass
+        // hexagons and the centre image morph; Chrome would sometimes
+        // skip frames and display the final state after a freeze. Keep
+        // cells in their rest pose and let the five parent layers drive
+        // the reveal. This preserves the composition while removing
+        // dozens of scroll-linked observers.
+        cellItems.forEach(({ cell }) => {
+          cell.style.opacity = '1';
+          cell.style.scale = '';
+          cell.style.y = '';
+        });
 
         layers.forEach((layer, index) => {
           // Endpoint shifts per layer for a subtle cascade. All layers
-          // finish BEFORE the scaler's end (82 %) so the grid is fully
-          // formed when the rest period begins. Outer edges (index 0)
-          // end last; inner-most cells (index 2) finish earliest, same
-          // ordering as codepen but compressed before the rest zone.
+          // finish shortly after the scaler morph so the final
+          // honeycomb state appears, breathes briefly, then the next
+          // section arrives without a long inert sticky tail. Outer
+          // edges (index 0) end last; inner-most cells finish earlier,
+          // same ordering as the codepen but compressed before the
+          // rest zone.
           const endOffset = `${revealEndRatio - index * 0.035} end`;
 
           // Keep cell size locked while revealing. Earlier versions
@@ -1657,49 +1676,8 @@ const t = useTranslations(lang);
           );
         });
 
-        // ─── Individual cells: centre-out honeycomb assembly ──────────
-        //
-        // On compact / pointer-coarse devices we SKIP the per-cell
-        // motion.scroll registrations entirely — they meant 36
-        // separate scroll listeners on a phone (one per cell), which
-        // was the dominant cause of the morph scroll-stutter users
-        // reported (2026-05-15: "na telefonu se to seká, není to
-        // plynulé"). On mobile the parent layer's opacity reveal is
-        // enough to bring the honeycomb in; the staggered per-cell
-        // settle is desktop polish.
-        //
-        // Set cells to their rest pose immediately on mobile so the
-        // layer reveal carries them in. (Mobile rest-pose opacity is
-        // set by the EARLIER cellItems.forEach branch — don't clear
-        // it here or the cells fall back to the CSS opacity:0 rule.)
-        if (compactMotion) {
-          // no-op — cells already at opacity:1 from base-state block;
-          // layer animation provides the group reveal.
-        } else {
-          cellItems.forEach(({ cell }, index) => {
-            const ringDelay = Math.min(0.14, Math.floor(index / 5) * 0.026);
-            const localDelay = (index % 5) * 0.008;
-            const hold = Math.min(0.58, 0.3 + ringDelay + localDelay);
-
-            scroll(
-              animate(
-                cell,
-                {
-                  opacity: [0, 0, 1],
-                  y: ['18px', '18px', '0px'],
-                },
-                {
-                  times: [0, hold, 1],
-                  ease: sineOut as any,
-                },
-              ),
-              {
-                target: section,
-                offset: ['start start', `${revealEndRatio} end`] as any,
-              },
-            );
-          });
-        }
+        // Individual per-cell scroll animations intentionally removed:
+        // the parent layer reveal is the stable cross-browser path.
 
         // ─── Intro overlay: hold full → fade out + drift up ─────────────
         //     Wordmark + scroll-pill stay at full opacity for the first

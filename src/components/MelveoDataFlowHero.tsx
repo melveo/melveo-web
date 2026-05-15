@@ -937,7 +937,6 @@ export default function MelveoDataFlowHero({ lang = "en" }: Props) {
     >
       <div className="data-flow-inner">
         <header className="data-flow-header">
-          <p className="data-flow-eyebrow">{t("privacy.eyebrow")}</p>
           <h2 id="melveo-flow-heading" className="data-flow-headline">
             {t("privacy.headlineLine1")} <span>{t("privacy.headlineLine2")}</span>
           </h2>
@@ -1128,9 +1127,11 @@ export default function MelveoDataFlowHero({ lang = "en" }: Props) {
                 textAnchor="middle"
                 fill="url(#melveo-shimmer)"
                 style={{
+                  fontFamily: "var(--font-wordmark)",
                   fontSize: "70px",
-                  fontWeight: 900,
+                  fontWeight: 700,
                   letterSpacing: "-0.02em",
+                  textTransform: "lowercase",
                   filter: "drop-shadow(0 0 30px rgba(0,240,255,0.55))",
                 }}
               >
