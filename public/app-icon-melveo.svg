@@ -23,10 +23,16 @@
         <feMergeNode in="SourceGraphic"/>
       </feMerge>
     </filter>
+    <!-- iOS-style rounded corners (22.37% of side = ~229 of 1024). -->
+    <clipPath id="iconSquircle">
+      <rect width="1024" height="1024" rx="229" ry="229"/>
+    </clipPath>
   </defs>
 
-  <rect width="1024" height="1024" fill="url(#background)"/>
-  <rect width="1024" height="1024" fill="url(#surface)"/>
+  <g clip-path="url(#iconSquircle)">
+    <rect width="1024" height="1024" fill="url(#background)"/>
+    <rect width="1024" height="1024" fill="url(#surface)"/>
+  </g>
   <path
     d="M256 660V500C256 424 314 374 392 374C470 374 520 428 520 500V660M520 500C520 424 578 374 656 374C734 374 788 428 788 500V660"
     fill="none"

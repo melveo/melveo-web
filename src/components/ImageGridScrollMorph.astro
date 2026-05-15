@@ -1377,10 +1377,12 @@ const t = useTranslations(lang);
        shape by the end keyframe. */
     clip-path: polygon(0% 0%, 100% 0%, 100% 50%, 100% 100%, 0% 100%, 0% 50%);
     -webkit-clip-path: polygon(0% 0%, 100% 0%, 100% 50%, 100% 100%, 0% 100%, 0% 50%);
-    /* No border-radius at start (full-bleed photo wants sharp edges);
-       Motion animates this to the glass-card radius as the image
-       shrinks into the hex frame. */
-    border-radius: 0;
+    /* Full-bleed photo carries the same 28px glass-card radius
+       all the way through the morph (user feedback 2026-05-15:
+       "fotka by měla mít zaoblené rohy, vypadá to tak lepe").
+       Motion's keyframes hold this value at every stage so there's
+       no transition flicker. */
+    border-radius: 28px;
     /* Tailwind preflight applies `img { max-width: 100% }`; explicit
        override so the inline pixel sizing JS sets isn't clipped. */
     max-width: none;
@@ -1549,7 +1551,13 @@ const t = useTranslations(lang);
                 'polygon(0% 0%, 100% 0%, 100% 50%, 100% 100%, 0% 100%, 0% 50%)',
                 'polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)',
               ],
-              borderRadius: ['0px', '0px', '28px'],
+              // User feedback 2026-05-15: the full-bleed photo wants
+              // rounded corners too — same radius family as the
+              // glass-card rim (28px). Both start AND end keyframes
+              // now keep the radius, so the photo reads as a single
+              // soft-cornered card across the morph instead of going
+              // square→hex with a flat-edge start.
+              borderRadius: ['28px', '28px', '28px'],
             },
             {
               times: [0, 0.18, 1],
