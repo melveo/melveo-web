@@ -942,10 +942,6 @@ const t = useTranslations(lang);
       --hex-gap: 2px;
       --hex-w: clamp(2.55rem, min(12.6vw, 22vh), 5rem);
     }
-
-    .image-grid-section .glass-smoke {
-      display: none;
-    }
   }
 
   @media (max-height: 300px) {
@@ -953,9 +949,35 @@ const t = useTranslations(lang);
       --hex-gap: 1px;
       --hex-w: clamp(1.15rem, min(6.5vw, 12vh), 2.5rem);
     }
+  }
 
+  /* ─── Mobile perf overrides ──────────────────────────────────────
+     Phones can't afford the same backdrop-filter + drop-shadow
+     stack the desktop layout uses while motion.scroll is
+     dragging the scaler through scaleX/scaleY + clipPath.
+     We strip the most expensive effects on small viewports +
+     coarse pointer so the scroll-driven morph stays at 60 fps
+     (user feedback 2026-05-15: "na telefonu se to seká").
+
+     Kept: cyan accents, glass-card body, photo cover.
+     Dropped: glass-smoke canvas (separate rAF loop), most
+     drop-shadow stacks (each is a paint), backdrop-filter
+     blur on cells (forces compositor layer recomposite).
+  */
+  @media (max-width: 900px), (pointer: coarse) {
     .image-grid-section .glass-smoke {
       display: none;
+    }
+    .image-grid-section .grid-photo,
+    .image-grid-section .tech-card {
+      filter: drop-shadow(0 6px 14px rgba(0, 0, 0, 0.32));
+    }
+    .image-grid-section .tech-card__icon {
+      filter: drop-shadow(0 0 6px rgba(0, 240, 255, 0.4));
+    }
+    .image-grid-section .glass-filter {
+      backdrop-filter: none;
+      -webkit-backdrop-filter: none;
     }
   }
 
@@ -1535,11 +1557,27 @@ const t = useTranslations(lang);
           })
           .sort((a, b) => a.distance - b.distance);
 
-        cellItems.forEach(({ cell }) => {
-          cell.style.opacity = '0';
-          cell.style.scale = '1';
-          cell.style.y = compactMotion ? '5px' : '18px';
-        });
+        // Cell base state. On desktop each cell animates individually
+        // (motion.scroll() per-cell below), so we start them at 0 and
+        // let the per-cell animation drive them. On mobile we skip
+        // the per-cell animation (perf), so set opacity to 1 inline
+        // — the CSS rule has opacity:0, and we want the LAYER's
+        // opacity animation to drive the group reveal. With cells
+        // at opacity:1 and layer opacity animating 0→1, effective
+        // visibility tracks the layer cleanly.
+        if (compactMotion) {
+          cellItems.forEach(({ cell }) => {
+            cell.style.opacity = '1';
+            cell.style.scale = '';
+            cell.style.y = '';
+          });
+        } else {
+          cellItems.forEach(({ cell }) => {
+            cell.style.opacity = '0';
+            cell.style.scale = '1';
+            cell.style.y = '18px';
+          });
+        }
 
         layers.forEach((layer, index) => {
           // Endpoint shifts per layer for a subtle cascade. All layers
@@ -1574,39 +1612,48 @@ const t = useTranslations(lang);
         });
 
         // ─── Individual cells: centre-out honeycomb assembly ──────────
-        // Layer animation alone made the surrounding grid feel static.
-        // Each cell now joins the composition with a small compositor-
-        // friendly y/opacity reveal, staggered by distance from
-        // the central scaler. This preserves the final honeycomb
-        // geometry because no layout properties are animated.
-        cellItems.forEach(({ cell }, index) => {
-          const ringDelay = Math.min(0.14, Math.floor(index / 5) * 0.026);
-          const localDelay = (index % 5) * 0.008;
-          const hold = Math.min(0.58, (compactMotion ? 0.38 : 0.3) + ringDelay + localDelay);
+        //
+        // On compact / pointer-coarse devices we SKIP the per-cell
+        // motion.scroll registrations entirely — they meant 36
+        // separate scroll listeners on a phone (one per cell), which
+        // was the dominant cause of the morph scroll-stutter users
+        // reported (2026-05-15: "na telefonu se to seká, není to
+        // plynulé"). On mobile the parent layer's opacity reveal is
+        // enough to bring the honeycomb in; the staggered per-cell
+        // settle is desktop polish.
+        //
+        // Set cells to their rest pose immediately on mobile so the
+        // layer reveal carries them in. (Mobile rest-pose opacity is
+        // set by the EARLIER cellItems.forEach branch — don't clear
+        // it here or the cells fall back to the CSS opacity:0 rule.)
+        if (compactMotion) {
+          // no-op — cells already at opacity:1 from base-state block;
+          // layer animation provides the group reveal.
+        } else {
+          cellItems.forEach(({ cell }, index) => {
+            const ringDelay = Math.min(0.14, Math.floor(index / 5) * 0.026);
+            const localDelay = (index % 5) * 0.008;
+            const hold = Math.min(0.58, 0.3 + ringDelay + localDelay);
 
-          scroll(
-            animate(
-              cell,
-              compactMotion
-                ? {
-                    opacity: [0, 0, 1],
-                    y: ['5px', '5px', '0px'],
-                  }
-                : {
-                    opacity: [0, 0, 1],
-                    y: ['18px', '18px', '0px'],
-                  },
+            scroll(
+              animate(
+                cell,
+                {
+                  opacity: [0, 0, 1],
+                  y: ['18px', '18px', '0px'],
+                },
+                {
+                  times: [0, hold, 1],
+                  ease: sineOut as any,
+                },
+              ),
               {
-                times: [0, hold, 1],
-                ease: sineOut as any,
+                target: section,
+                offset: ['start start', `${revealEndRatio} end`] as any,
               },
-            ),
-            {
-              target: section,
-              offset: ['start start', `${revealEndRatio} end`] as any,
-            },
-          );
-        });
+            );
+          });
+        }
 
         // ─── Intro overlay: hold full → fade out + drift up ─────────────
         //     Wordmark + scroll-pill stay at full opacity for the first
