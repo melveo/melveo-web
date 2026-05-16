@@ -42,7 +42,7 @@ export const ui = {
     'hero.headlineRotations':
       'jasné rozhodnutí|lepší trénink|včasné upozornění|plán regenerace|akce pro trenéra|kontext pro celý tým',
     'hero.subline':
-      'Melveo propojí [[check-iny]], [[wellness]], [[zátěž]] a [[kontext zápasu]], aby trenér věděl, co udělat dál.',
+      'Melveo propojí [[wellness]], [[readiness]], [[zátěž]] a [[kontext zápasu]], aby trenér věděl, co udělat dál.',
     'hero.cta.appstore': 'Stáhnout v App Store',
     // Key kept as `pilot` for legacy reference; label is now generic
     // contact CTA (pilot offering retired 2026-05-04).
@@ -315,7 +315,7 @@ export const ui = {
     'hero.headlineRotations':
       'clear decisions|better training|early alerts|recovery plans|coach actions|team context',
     'hero.subline':
-      'Melveo connects [[check-ins]], [[wellness]], [[load]] and [[match context]], so coaches know what to do next.',
+      'Melveo connects [[wellness]], [[readiness]], [[load]] and [[match context]], so coaches know what to do next.',
     'hero.cta.appstore': 'Download on the App Store',
     'hero.cta.pilot': 'Get in touch →',
     'hero.beta': 'TestFlight beta · soon',
