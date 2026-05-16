@@ -42,6 +42,16 @@ const t = useTranslations(lang);
   <section class="relative isolate flex min-h-screen w-full flex-col overflow-hidden bg-[var(--color-bg-canvas)]">
     <HeroScene />
 
+    {/*
+      Readability vignette — soft dark radial behind the hero copy.
+      Sits between the canvas (z-index 0) and the content layer
+      (z-index 10) so the headline + subline + pills get a calm
+      background pool while the canvas still bleeds out to the
+      edges. User feedback 2026-05-16: hero text was getting
+      visually competed by the busy line trails.
+    */}
+    <div class="hero-readability-veil" aria-hidden="true"></div>
+
     <header class="relative z-10 flex w-full items-center justify-between px-6 pt-6 sm:px-12 sm:pt-10">
       <a
         href={`/${lang}/`}
@@ -372,8 +382,32 @@ const t = useTranslations(lang);
       drawing behind it.
     */
     text-shadow:
-      0 1px 2px rgba(0, 0, 0, 0.55),
-      0 4px 24px rgba(0, 0, 0, 0.45);
+      0 1px 2px rgba(0, 0, 0, 0.85),
+      0 2px 4px rgba(0, 0, 0, 0.65),
+      0 0 18px rgba(0, 0, 0, 0.55),
+      0 6px 36px rgba(0, 0, 0, 0.5);
+  }
+
+  /*
+    Readability vignette — between canvas (z:0) and content (z:10).
+    Soft radial dark pool centered horizontally, denser in the
+    middle vertical band where the headline + subline sit.
+    Edges fade to transparent so the canvas trails still bleed
+    out to the section corners.
+  */
+  .hero-readability-veil {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    pointer-events: none;
+    background:
+      radial-gradient(
+        ellipse 75% 50% at 50% 55%,
+        rgba(0, 0, 0, 0.72) 0%,
+        rgba(0, 0, 0, 0.55) 28%,
+        rgba(0, 0, 0, 0.25) 55%,
+        transparent 78%
+      );
   }
 
   .hero-headline-static {
@@ -395,9 +429,10 @@ const t = useTranslations(lang);
     line-height: 1.4;
     letter-spacing: -0.005em;
     text-shadow:
-      0 1px 2px rgba(0, 0, 0, 0.75),
-      0 2px 4px rgba(0, 0, 0, 0.55),
-      0 4px 18px rgba(0, 0, 0, 0.5);
+      0 1px 2px rgba(0, 0, 0, 0.9),
+      0 2px 4px rgba(0, 0, 0, 0.7),
+      0 0 14px rgba(0, 0, 0, 0.55),
+      0 4px 24px rgba(0, 0, 0, 0.5);
   }
   @media (max-width: 520px) {
     .hero-subline {

@@ -52,15 +52,15 @@ const DEFAULT_OPTS = {
 };
 
 /*
-  Hue range kept = [60°, 240°] = yellow → green → cyan → teal →
-  blue. Excludes red / orange (0°-60°) and purple / magenta
-  (240°-360°) — both flagged by the user as off-brand. Hue
-  advances at the codepen's full 0.1 / tick and wraps within
-  this band via modulo (the 240→60 wrap is a hue jump but it
-  happens every ~30 s, barely noticeable in motion).
+  Hue range kept = [140°, 230°] = lime-green → green → cyan →
+  teal → blue. Tightened 2026-05-16 per user direction "ani do
+  žluté bych moc nešel" — was [60°, 240°] which included yellow
+  / olive. Now palette stays firmly in brand-cyan territory.
+  Excludes red / orange (0°-60°), yellow (60°-120°), and purple
+  / magenta (240°-360°).
 */
-const HUE_MIN = 60;
-const HUE_SPAN = 180;
+const HUE_MIN = 140;
+const HUE_SPAN = 90;
 
 const BASE_RAD = (Math.PI * 2) / 6;
 
