@@ -89,8 +89,17 @@ const t = useTranslations(lang);
         </span>
       </h1>
 
-      <p class="hero-subline mx-auto mt-10 max-w-[36rem] text-pretty text-lg font-medium text-[var(--color-text-primary)] sm:text-xl">
-        {t('hero.subline')}
+      <p class="hero-subline mx-auto mt-10 max-w-[38rem] text-pretty text-xl font-medium text-[var(--color-text-primary)] sm:text-2xl">
+        {/*
+          Subline supports inline pill chips via [[word]] markers.
+          Split on the marker, render odd-indexed pieces as cyan
+          tag pills. Lets us highlight feature terms (check-ins,
+          wellness, load, match context) without losing flexibility
+          in the i18n string itself.
+        */}
+        {t('hero.subline').split(/\[\[|\]\]/).map((part, i) =>
+          i % 2 === 1 ? <span class="hero-keyword">{part}</span> : part
+        )}
       </p>
 
       <div class="hero-cta-row">
@@ -371,9 +380,39 @@ const t = useTranslations(lang);
   /* Subline gets the same shadow treatment as the headline so the
      full copy block reads as one legible unit over the canvas. */
   .hero-subline {
+    line-height: 1.55;
     text-shadow:
       0 1px 2px rgba(0, 0, 0, 0.55),
       0 2px 14px rgba(0, 0, 0, 0.4);
+  }
+
+  /*
+    Pill chip for highlighted keywords in the subline (check-ins,
+    wellness, load, match context). Subtle cyan tint + rounded
+    capsule shape — reads as a feature tag without screaming.
+    Inline-block so it wraps naturally with surrounding text.
+  */
+  .hero-keyword {
+    display: inline-block;
+    padding: 0.06em 0.55em;
+    margin: 0 0.05em;
+    border-radius: 999px;
+    background: color-mix(in oklch, var(--color-accent-primary) 14%, transparent);
+    border: 1px solid color-mix(in oklch, var(--color-accent-primary) 38%, transparent);
+    color: var(--color-accent-primary);
+    font-weight: 600;
+    letter-spacing: -0.005em;
+    line-height: 1.3;
+    box-shadow:
+      inset 0 0 0 1px color-mix(in oklch, var(--color-accent-primary) 12%, transparent),
+      0 0 12px color-mix(in oklch, var(--color-accent-primary) 16%, transparent);
+    backdrop-filter: blur(2px);
+    -webkit-backdrop-filter: blur(2px);
+    text-shadow: none;
+    transition: background 0.25s ease, transform 0.25s ease;
+  }
+  .hero-keyword:hover {
+    background: color-mix(in oklch, var(--color-accent-primary) 22%, transparent);
   }
 
   .hero-rotate-cluster {
@@ -459,7 +498,7 @@ const t = useTranslations(lang);
 
   @media (max-width: 520px) {
     .hero-headline {
-      font-size: clamp(1.45rem, 6.4vw, 2.2rem);
+      font-size: clamp(2rem, 8.4vw, 2.9rem);
       letter-spacing: -0.025em;
       line-height: 1;
     }
@@ -471,6 +510,11 @@ const t = useTranslations(lang);
 
     .hero-rotate-cluster {
       min-height: 1.34em;
+    }
+
+    /* Keyword pills slightly tighter on phone for line balance */
+    .hero-keyword {
+      padding: 0.05em 0.45em;
     }
   }
 
