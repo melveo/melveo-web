@@ -341,9 +341,19 @@ body {
   small viewports while keeping desktop generous.
 */
 @media (max-width: 520px) {
+  /*
+    Phone-tight pills — match visual weight between the simple-text
+    "Get in touch" pill and the icon+two-line "App Store" pill.
+    Equalise font-size on the pill root so default content inherits
+    the same size as .hero-pill-title (0.78rem). Without this,
+    Get in touch read as 1rem (inherited from body) while App Store
+    title was 0.78rem — visible asymmetry per user feedback
+    2026-05-16 ("text na kontakt mi přijde zbytečně velky").
+  */
   .hero-pill {
     min-width: 0;
-    padding: 0.6rem 0.85rem;
+    padding: 0.6rem 0.95rem;
+    font-size: 0.78rem;
     letter-spacing: 0.02em;
   }
   .hero-pill-icon {
