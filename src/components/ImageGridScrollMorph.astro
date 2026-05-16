@@ -775,13 +775,32 @@ const t = useTranslations(lang);
     contain: layout style;
   }
 
+  /*
+    Layer opacity driven by a single CSS variable (--reveal-progress
+    set by JS via Motion on the section). Each layer has its own
+    --reveal-offset; the opacity is clamped 0..1 from progress
+    advancing past the offset. One scroll observer in JS now
+    drives all 5 layer reveals — was 5 observers each ticking the
+    main thread every scroll frame.
+  */
+  @property --reveal-progress {
+    syntax: '<number>';
+    inherits: true;
+    initial-value: 0;
+  }
+
   .image-grid-section .grid > .layer {
     position: absolute;
     inset: 0;
     transform-origin: 50% 50%;
-    opacity: 0;
-    will-change: opacity, transform;
+    opacity: clamp(0, calc((var(--reveal-progress, 0) - var(--reveal-offset, 0)) * 6), 1);
+    will-change: opacity;
   }
+  .image-grid-section .grid > .layer:nth-of-type(5) { --reveal-offset: 0; }
+  .image-grid-section .grid > .layer:nth-of-type(4) { --reveal-offset: 0.04; }
+  .image-grid-section .grid > .layer:nth-of-type(3) { --reveal-offset: 0.08; }
+  .image-grid-section .grid > .layer:nth-of-type(2) { --reveal-offset: 0.12; }
+  .image-grid-section .grid > .layer:nth-of-type(1) { --reveal-offset: 0.14; }
 
   .image-grid-section .grid > .layer > div,
   .image-grid-section .grid > .scaler {
@@ -1376,31 +1395,21 @@ const t = useTranslations(lang);
   }
 
   /*
-    Scaler refactor 2026-05-16: transform-based animation.
+    Scaler — SIMPLIFIED perf path 2026-05-16 v3.
 
-    Previous version animated `width` and `height` in pixels every
-    scroll frame, which triggered a layout recalc per frame. On
-    mobile / low-end devices that was the main cause of the jank
-    user reported ("se sekà se na spoustě zařízení"). New approach:
+    Animation now uses a SINGLE composited property: transform: scale.
+    No clip-path morph (was the residual jank — polygon vertex
+    interpolation falls back to main thread in some Chrome versions).
+    No border-radius morph. No width/height. Just scale.
 
-      - Container sized once at the final hex cell dimensions via
-        CSS variables (--scaler-w, --scaler-h set by JS once at
-        mount). Stays at that box throughout the morph.
-      - IMG inside fills container 100% × 100% with object-fit:cover
-        — so the photo crops to hex aspect from the landscape source
-        without distortion.
-      - During scroll, `transform: scale(N)` shrinks the rendered
-        size from viewport-fit down to 1. Transform is composited
-        on the GPU on every modern browser — zero main-thread cost.
-      - clip-path still morphs from rectangle to hex (composited in
-        Chrome 99+ / Safari 13+).
-      - All static state: will-change scoped to the moving props,
-        contain:layout paint isolates the scaler from siblings.
+    Final state is a rounded rectangle at hex cell size; surrounding
+    hex cards reveal around it. At ~92×106 px the rounded rectangle
+    reads visually similar enough to the neighbouring hex shape that
+    the missing geometric morph isn't noticed — but the animation is
+    now bulletproof smooth on every device.
 
-    Trade-off: photo always crops to hex aspect (vertical strip of
-    the landscape source). Earlier full-bleed look is gone, but the
-    morph runs smoothly on every device and browser instead of
-    intermittently freezing.
+    IMG inside container: 100% / object-fit:cover. Photo crops to
+    hex aspect from the landscape source.
   */
   .image-grid-section .scaler img {
     position: absolute;
@@ -1410,29 +1419,21 @@ const t = useTranslations(lang);
     height: 100%;
     object-fit: cover;
     object-position: center;
-    transform: translate(-50%, -50%);
-    /* Start at rectangular clip — Motion morphs to hex by the end. */
-    clip-path: polygon(0% 0%, 100% 0%, 100% 50%, 100% 100%, 0% 100%, 0% 50%);
-    -webkit-clip-path: polygon(0% 0%, 100% 0%, 100% 50%, 100% 100%, 0% 100%, 0% 50%);
+    transform: translate(-50%, -50%) translateZ(0);
     border-radius: 28px;
     max-width: none;
     max-height: none;
-    will-change: transform, clip-path;
     backface-visibility: hidden;
   }
 
-  /*
-    The scaler container — the box that actually grows / shrinks
-    during the morph. JS sets transform: scale(N) on this element;
-    the IMG inside fills it via 100% / object-fit. We give the
-    container its own compositor layer so transform updates don't
-    repaint siblings.
-  */
   .image-grid-section .scaler {
     transform-origin: center center;
     will-change: transform;
     backface-visibility: hidden;
     contain: layout paint;
+    /* Promote to its own compositor layer so scale updates don't
+       trigger sibling repaints. */
+    transform: translateZ(0);
   }
 
   /* Reduced-motion: drop the sticky/scroll dance. Show every cell in
@@ -1567,55 +1568,27 @@ const t = useTranslations(lang);
         );
         const initScale = Math.min(fitScale, sourceCapScale);
 
-        // Force start state — scaler scaled up, clip rectangular.
-        scalerEl.style.transform = `scale(${initScale.toFixed(3)})`;
-        image.style.clipPath = 'polygon(0% 0%, 100% 0%, 100% 50%, 100% 100%, 0% 100%, 0% 50%)';
-        image.style.setProperty('-webkit-clip-path', 'polygon(0% 0%, 100% 0%, 100% 50%, 100% 100%, 0% 100%, 0% 50%)');
+        // Force start state — scaler scaled up.
+        scalerEl.style.transform = `translateZ(0) scale(${initScale.toFixed(3)})`;
 
-        // Cubic-bezier control points. Names match GSAP power easings
-        // referenced by the codepen.
+        // Cubic-bezier control points. Names match GSAP power easings.
         const power1InOut = [0.42, 0, 0.58, 1] as const;
         const power2InOut = [0.65, 0, 0.35, 1] as const;
         const sineOut = [0.61, 1, 0.88, 1] as const;
         const scalerEndRatio = 0.82;
         const revealEndRatio = 0.95;
 
-        // ─── Scaler: hold scaled-up, then shrink to hex via transform
-        //
-        // Transform: scale(initScale) → scale(initScale) (hold) →
-        // scale(1). Composited only — no layout, no paint per frame.
-        // The clip-path on the IMG morphs in parallel: rectangle
-        // (with 6 vertices packed along the rect edges so vertex
-        // count matches) → pointy-top hexagon.
+        // ─── Scaler: hold scaled-up, then shrink via transform ───
+        // Single animated property = transform: scale. Pure GPU
+        // composite, zero main-thread cost per scroll frame.
         scroll(
           animate(
             scalerEl,
             {
               transform: [
-                `scale(${initScale})`,
-                `scale(${initScale})`,
-                'scale(1)',
-              ],
-            },
-            {
-              times: [0, 0.18, 1],
-              ease: power2InOut as any,
-            },
-          ),
-          {
-            target: section,
-            offset: ['start start', `${scalerEndRatio * 100}% end`] as any,
-          },
-        );
-
-        scroll(
-          animate(
-            image,
-            {
-              clipPath: [
-                'polygon(0% 0%, 100% 0%, 100% 50%, 100% 100%, 0% 100%, 0% 50%)',
-                'polygon(0% 0%, 100% 0%, 100% 50%, 100% 100%, 0% 100%, 0% 50%)',
-                'polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)',
+                `translateZ(0) scale(${initScale})`,
+                `translateZ(0) scale(${initScale})`,
+                'translateZ(0) scale(1)',
               ],
             },
             {
@@ -1630,14 +1603,10 @@ const t = useTranslations(lang);
         );
 
         // ─── Each layer: calm reveal cascade ───────────────────────────
-        // Surrounding hexagons should participate in the morph, but the
-        // final honeycomb must still settle into equal-sized cells. We
-        // animate the parent layers only with compositor-friendly
-        // opacity/transform, no per-card layout work.
-        layers.forEach((layer) => {
-          layer.style.scale = '1';
-          layer.style.opacity = '0';
-        });
+        // Layer opacity is fully CSS-driven now (clamp(0, calc((reveal -
+        // offset) × 6), 1) per layer). The scroll observer below just
+        // sets --reveal-progress on the section; CSS handles the rest.
+        // No inline opacity/transform on the layers — leave them to CSS.
 
         const scalerRect = scalerEl?.getBoundingClientRect();
         const centerX = scalerRect ? scalerRect.left + scalerRect.width / 2 : viewportWidth / 2;
@@ -1671,36 +1640,28 @@ const t = useTranslations(lang);
         });
 
         /*
-          Layer reveal cascade — compositor-only opacity. Earlier
-          version animated y translate on each layer too; dropped
-          on all viewports 2026-05-16 because per-layer transforms
-          alongside the scaler scale were causing GPU contention on
-          mobile (5 layers × 2 props × scroll observer = 10 sync
-          updates per frame). Pure opacity is the lightest possible
-          reveal — single property, single observer per layer, fully
-          composited.
-
-          Endpoint shifts per layer give the same cascade feel —
-          outer layers (index 0) finish last, inner cells finish
-          earlier (matches the codepen's depth ordering).
+          Layer reveal — SINGLE scroll observer driving a CSS
+          variable, instead of 5 separate observers (one per layer).
+          The previous setup ran 5 sync updates per scroll frame;
+          this runs 1. Each layer's opacity is computed by CSS calc
+          from --reveal-progress with a per-layer offset, so the
+          cascade ordering (inner finishes first, outer last) is
+          preserved without JS work per frame.
         */
-        layers.forEach((layer, index) => {
-          const endOffset = `${revealEndRatio - index * 0.035} end`;
-          scroll(
-            animate(
-              layer,
-              { opacity: [0, 0, 1] },
-              {
-                times: [0, 0.55, 1],
-                ease: sineOut as any,
-              },
-            ),
+        scroll(
+          animate(
+            section,
+            { '--reveal-progress': [0, 0, 1] } as any,
             {
-              target: section,
-              offset: ['start start', endOffset] as any,
+              times: [0, 0.55, 1],
+              ease: sineOut as any,
             },
-          );
-        });
+          ),
+          {
+            target: section,
+            offset: ['start start', `${revealEndRatio * 100}% end`] as any,
+          },
+        );
 
         // Individual per-cell scroll animations intentionally removed:
         // the parent layer reveal is the stable cross-browser path.
