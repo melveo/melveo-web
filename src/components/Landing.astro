@@ -68,14 +68,6 @@ const t = useTranslations(lang);
       do the actual centring work.
     */}
     <div class="relative z-10 flex flex-1 flex-col items-center justify-center px-6 py-6 text-center sm:py-10">
-      {/*
-        Premium minimal hero 2026-05-16: dropped the typewriter
-        rotation so the headline reads as one complete static
-        sentence (Linear / Vercel / Notion style). User feedback:
-        the rotating cluster was getting caught mid-typing ("team c")
-        which read as a bug. Headline accent (last word) stays in
-        brand cyan for the visual anchor.
-      */}
       <h1
         class="hero-headline leading-[0.95] tracking-tight text-[var(--color-text-primary)]"
       >
@@ -83,8 +75,17 @@ const t = useTranslations(lang);
           <span>{t('hero.headlineLine1')}</span>
           <span>{t('hero.headlineLine2')}</span>
         </span>
-        <span class="hero-headline-accent">
-          {t('hero.headlineInitial')}<span class="hero-headline-dot" aria-hidden="true">{t('hero.headlineSuffix')}</span>
+        <span class="hero-rotate-cluster">
+          <span class="hero-rotate-current">
+            <span
+              class="text-[var(--color-accent-primary)]"
+              data-rotate-word
+              data-rotate-words={t('hero.headlineRotations')}
+              aria-live="polite"
+            >
+              {t('hero.headlineInitial')}
+            </span><span class="hero-headline-dot" aria-hidden="true">{t('hero.headlineSuffix')}</span>
+          </span>
         </span>
       </h1>
 
@@ -147,17 +148,6 @@ const t = useTranslations(lang);
         </a>
       </div>
       <div class="appstore-toast" data-appstore-toast role="status" aria-live="polite" hidden></div>
-
-      {/*
-        Micro-badge — TestFlight beta indicator. Small piece of
-        credibility / momentum signal under the CTAs (premium hero
-        pattern à la Linear "Backed by Sequoia"). Subtle, lowercase,
-        with a tiny pulsing dot to suggest "imminent".
-      */}
-      <p class="hero-beta">
-        <span class="hero-beta-dot" aria-hidden="true"></span>
-        {t('hero.beta')}
-      </p>
     </div>
 
   </section>
@@ -395,17 +385,6 @@ const t = useTranslations(lang);
     white-space: nowrap;
   }
 
-  /*
-    Static accent — the final phrase ("jasné rozhodnutí." / "coach
-    decisions.") rendered in brand cyan as the visual anchor of the
-    headline. Replaces the old rotating typewriter cluster.
-  */
-  .hero-headline-accent {
-    display: inline-block;
-    color: var(--color-accent-primary);
-    white-space: nowrap;
-    margin-top: 0.05em;
-  }
 
   /* Subline gets the same shadow treatment as the headline so the
      full copy block reads as one legible unit over the canvas.
@@ -565,46 +544,6 @@ const t = useTranslations(lang);
   @media (min-width: 640px) {
     .hero-cta-row {
       gap: 1.5rem;
-    }
-  }
-
-  /*
-    TestFlight beta badge — micro credibility signal beneath the
-    CTAs (Linear-style "Backed by Sequoia" pattern). Small, lower-
-    case, lightly tracked. The pulsing cyan dot suggests imminence.
-  */
-  .hero-beta {
-    margin: 1.5rem auto 0;
-    display: inline-flex;
-    align-items: center;
-    gap: 0.5rem;
-    padding: 0.4rem 0.85rem;
-    border-radius: 999px;
-    background: color-mix(in oklch, var(--color-accent-primary) 6%, transparent);
-    border: 1px solid color-mix(in oklch, var(--color-accent-primary) 22%, transparent);
-    color: var(--color-text-secondary);
-    font-size: 0.78rem;
-    font-weight: 500;
-    letter-spacing: 0.04em;
-    text-transform: lowercase;
-    text-shadow: none;
-  }
-  .hero-beta-dot {
-    width: 0.45rem;
-    height: 0.45rem;
-    border-radius: 50%;
-    background: var(--color-accent-primary);
-    box-shadow: 0 0 8px color-mix(in oklch, var(--color-accent-primary) 60%, transparent);
-    animation: hero-beta-pulse 2.4s ease-in-out infinite;
-  }
-  @keyframes hero-beta-pulse {
-    0%, 100% { opacity: 0.55; transform: scale(1); }
-    50% { opacity: 1; transform: scale(1.18); }
-  }
-  @media (prefers-reduced-motion: reduce) {
-    .hero-beta-dot {
-      animation: none;
-      opacity: 1;
     }
   }
 
