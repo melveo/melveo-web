@@ -895,12 +895,16 @@ const t = useTranslations(lang);
     */
     .image-grid-section .grid {
       /*
-        9 portrait rows = ~7×hex-h tall (with gaps). To fit in
-        available-h: hex-w ≤ available-h × 0.107 × 0.866 ≈ ×0.107.
-        Use 0.11 with a 3rem floor so very short phones (320×480)
-        still don't overflow vertically.
+        9 portrait rows = ~7×hex-h tall (with gaps). User feedback
+        2026-05-16 ("hexagony tak velké aby byly od okraje obrazovky
+        po okraj"): pump width multiplier to 0.244 so a 4-row fully
+        fills viewport on tall modern phones. Height multiplier
+        0.117 keeps the 9-row stack inside viewport without overflow
+        on the short ones; the min() picks whichever constraint
+        binds (width-edge-to-edge on tall phones, height-fit on
+        short phones / foldables).
       */
-      --hex-w: clamp(3rem, min(calc(var(--available-w) * 0.235), calc(var(--available-h) * 0.107)), 18.5rem);
+      --hex-w: clamp(3rem, min(calc(var(--available-w) * 0.244), calc(var(--available-h) * 0.117)), 18.5rem);
       --honeycomb-width: calc((var(--hex-x-step) * 3) + var(--hex-w));
       --honeycomb-height: calc((var(--hex-y-step) * 8) + var(--hex-h));
     }
@@ -1464,8 +1468,17 @@ const t = useTranslations(lang);
   // setup below runs first. mountGlassSmoke scans for [data-glass-smoke]
   // sections so the same call also re-attaches new sections if the page
   // adds them later.
+  //
+  // 2026-05-16: removed phone/coarse-pointer skip. The original
+  // perf guard was for the SVG glass-lens displacement filter
+  // (now gone from .glass-card .glass-filter); the canvas itself
+  // uses composite="lighter" which is GPU-cheap. Skip caused a
+  // visible bug: image-grid had black background until user scrolled
+  // to pricing (whose own startSmoke had no skip and scanned ALL
+  // [data-glass-smoke] sections, retroactively mounting the grid).
+  // Mount unconditionally so the grid has its cyan smoke on first
+  // approach, matching pricing on every viewport.
   function startSmoke() {
-    if (window.matchMedia('(max-width: 640px), (max-height: 460px) and (max-width: 950px), (pointer: coarse)').matches) return;
     mountGlassSmoke();
   }
   if ('requestIdleCallback' in window) {

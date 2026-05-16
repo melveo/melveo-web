@@ -57,13 +57,15 @@
   /*
     Reduce blob dominance on phone — at small viewports the
     metaballs were covering most of the screen behind hero copy
-    (user feedback 2026-05-16: "na telefonu asi méně té hmoty").
-    Drop opacity so headline + keyword pills + CTAs stay the
-    focal layer; blob still reads as background atmosphere.
+    (user feedback 2026-05-16 ×2: "na telefonu asi méně té hmoty").
+    Drop opacity AND blur slightly so the blob reads as background
+    atmosphere only; headline + keyword pills + CTAs stay the
+    focal layer.
   */
   @media (max-width: 520px) {
     .hero-canvas[data-mounted="true"] {
-      opacity: 0.55;
+      opacity: 0.32;
+      filter: blur(1px);
     }
   }
 </style>
