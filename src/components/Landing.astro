@@ -538,21 +538,45 @@ const t = useTranslations(lang);
   }
 
   @media (max-width: 520px) {
+    /*
+      Phone bug fix 2026-05-16: the static cluster forced flex-direction:row
+      + white-space:nowrap, which made long CZ phrases ("Z hráčských signálů
+      vzniká") overflow the viewport horizontally. Stack the two static
+      lines vertically on phone so each fits within the viewport.
+    */
     .hero-headline {
-      font-size: clamp(2rem, 8.4vw, 2.9rem);
+      font-size: clamp(1.85rem, 8vw, 2.7rem);
       letter-spacing: -0.025em;
-      line-height: 1;
+      line-height: 1.05;
     }
 
     .hero-headline-static {
-      flex-direction: row;
-      gap: 0.18em;
+      flex-direction: column;
+      gap: 0.05em;
+    }
+    .hero-headline-static > span {
+      white-space: normal;
+      text-wrap: balance;
     }
 
     .hero-rotate-cluster {
       min-height: 1.34em;
+      max-width: 92vw;
+      white-space: normal;
+    }
+    .hero-rotate-cluster::before {
+      white-space: normal;
+    }
+    .hero-rotate-current {
+      max-width: 92vw;
+      white-space: normal;
     }
 
+    [data-rotate-word] {
+      max-width: 92vw;
+      white-space: normal;
+      text-wrap: balance;
+    }
   }
 
   /*
