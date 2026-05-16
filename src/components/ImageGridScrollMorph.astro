@@ -894,7 +894,13 @@ const t = useTranslations(lang);
       etc.) kept.
     */
     .image-grid-section .grid {
-      --hex-w: clamp(4rem, min(calc(var(--available-w) * 0.235), calc(var(--available-h) * 0.115)), 18.5rem);
+      /*
+        9 portrait rows = ~7×hex-h tall (with gaps). To fit in
+        available-h: hex-w ≤ available-h × 0.107 × 0.866 ≈ ×0.107.
+        Use 0.11 with a 3rem floor so very short phones (320×480)
+        still don't overflow vertically.
+      */
+      --hex-w: clamp(3rem, min(calc(var(--available-w) * 0.235), calc(var(--available-h) * 0.107)), 18.5rem);
       --honeycomb-width: calc((var(--hex-x-step) * 3) + var(--hex-w));
       --honeycomb-height: calc((var(--hex-y-step) * 8) + var(--hex-h));
     }
