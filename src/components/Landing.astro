@@ -539,43 +539,45 @@ const t = useTranslations(lang);
 
   @media (max-width: 520px) {
     /*
-      Phone bug fix 2026-05-16: the static cluster forced flex-direction:row
-      + white-space:nowrap, which made long CZ phrases ("Z hráčských signálů
-      vzniká") overflow the viewport horizontally. Stack the two static
-      lines vertically on phone so each fits within the viewport.
+      Phone layout 2026-05-16 (revised per user "na 2 řádky to musí byt"):
+      Strict 2-line headline — static prefix on line 1, rotating outcome
+      on line 2. Font scales via vw so the longest CZ static phrase
+      ("Z hráčských signálů vzniká", 26 chars) fits a 320 px viewport
+      on one line. Rotation cluster also nowrap.
     */
     .hero-headline {
-      font-size: clamp(1.85rem, 8vw, 2.7rem);
+      font-size: clamp(1.25rem, 6.4vw, 2.3rem);
       letter-spacing: -0.025em;
-      line-height: 1.05;
+      line-height: 1.08;
     }
 
     .hero-headline-static {
-      flex-direction: column;
-      gap: 0.05em;
+      flex-direction: row;
+      flex-wrap: nowrap;
+      gap: 0.22em;
+      white-space: nowrap;
+      max-width: 100vw;
     }
     .hero-headline-static > span {
-      white-space: normal;
-      text-wrap: balance;
+      white-space: nowrap;
     }
 
     .hero-rotate-cluster {
       min-height: 1.34em;
-      max-width: 92vw;
-      white-space: normal;
+      max-width: 100vw;
+      white-space: nowrap;
     }
     .hero-rotate-cluster::before {
-      white-space: normal;
+      white-space: nowrap;
     }
     .hero-rotate-current {
-      max-width: 92vw;
-      white-space: normal;
+      max-width: 100vw;
+      white-space: nowrap;
     }
 
     [data-rotate-word] {
-      max-width: 92vw;
-      white-space: normal;
-      text-wrap: balance;
+      max-width: 100vw;
+      white-space: nowrap;
     }
   }
 
