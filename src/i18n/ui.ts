@@ -117,6 +117,9 @@ export const ui = {
     // the cursor sweeping across.
     'orb.primary': 'Pro celý klub.',
     'orb.secondary': 'Pro každého hráče.',
+    'orb.hint': 'Klikni a nakláněním ovládej',
+    'orb.hintActive': 'Nakláněj telefon nebo táhni prstem',
+    'orb.gyroPermission': 'Povolit ovládání nakláněním?',
 
     // Stage 6.25 — Technical-feature mini bridge before pricing.
     // Same visual family as gooey stage. Pairs the live-data feature
@@ -373,6 +376,9 @@ export const ui = {
 
     'orb.primary': 'For the whole club.',
     'orb.secondary': 'For every player.',
+    'orb.hint': 'Tap and tilt to control',
+    'orb.hintActive': 'Tilt your phone or drag',
+    'orb.gyroPermission': 'Allow tilt control?',
 
     'promise.headlinePrefix': 'Real-time data.',
     'promise.headlineAccent': 'No paper.',

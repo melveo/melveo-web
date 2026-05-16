@@ -134,6 +134,7 @@ export function mountOrbCursor() {
     setFromClientPoint(clientX, clientY);
     window.addEventListener('pointermove', onManualPointerMove, { passive: true });
     bumpIdleTimer();
+    syncHintLabel();
   }
 
   function exitManual() {
@@ -143,6 +144,16 @@ export function mountOrbCursor() {
     window.removeEventListener('pointermove', onManualPointerMove);
     clearIdleTimer();
     startOrbit();
+    syncHintLabel();
+  }
+
+  function syncHintLabel() {
+    const hb = wrapper!.querySelector<HTMLButtonElement>('[data-orb-hint]');
+    const hl = wrapper!.querySelector<HTMLElement>('[data-orb-hint-label]');
+    if (!hb || !hl) return;
+    const active = hb.dataset.hintActive;
+    const def = hb.dataset.hintDefault;
+    hl.textContent = manualMode ? active ?? '' : def ?? '';
   }
 
   function onManualPointerMove(event: PointerEvent) {
@@ -221,6 +232,65 @@ export function mountOrbCursor() {
     if (!manualMode) return;
     exitManual();
   }
+
+  // ─── Gyroscope / DeviceOrientation tilt control ─────────────────
+  // After the user explicitly opts in via the hint button (mobile
+  // user gesture is required by iOS DeviceOrientation API), we
+  // listen to device tilt and map it to --x / --y. Gamma (-90 to
+  // +90, left-right tilt) drives X; beta (-180 to +180, front-back)
+  // drives Y. Tilt is in addition to touch/mouse — whichever input
+  // last fired wins.
+  let gyroEnabled = false;
+  let gyroPermissionRequested = false;
+
+  function onDeviceOrientation(event: DeviceOrientationEvent) {
+    if (!gyroEnabled || !manualMode) return;
+    const gamma = event.gamma ?? 0; // -90 → +90
+    const beta = event.beta ?? 0;   // -180 → +180
+    // Map ±30° of tilt to the full orb travel; clamp aggressively
+    // so a phone held normally lands near centre.
+    const xRaw = 50 + (gamma / 30) * 45;
+    const yRaw = 50 + ((beta - 45) / 30) * 45;
+    pendingX = Math.min(95, Math.max(5, xRaw));
+    pendingY = Math.min(95, Math.max(5, yRaw));
+    scheduleWrite();
+    bumpIdleTimer();
+  }
+
+  async function enableGyroscope(): Promise<boolean> {
+    if (gyroEnabled) return true;
+    if (typeof DeviceOrientationEvent === 'undefined') return false;
+    const DOEv = DeviceOrientationEvent as unknown as {
+      requestPermission?: () => Promise<'granted' | 'denied'>;
+    };
+    // iOS Safari 13+ — must be triggered by user gesture.
+    if (typeof DOEv.requestPermission === 'function' && !gyroPermissionRequested) {
+      gyroPermissionRequested = true;
+      try {
+        const status = await DOEv.requestPermission();
+        if (status !== 'granted') return false;
+      } catch {
+        return false;
+      }
+    }
+    window.addEventListener('deviceorientation', onDeviceOrientation, true);
+    gyroEnabled = true;
+    return true;
+  }
+
+  // ─── Hint button — surfaces the click+tilt affordance ──────────
+  const hintButton = wrapper.querySelector<HTMLButtonElement>('[data-orb-hint]');
+  hintButton?.addEventListener('click', (event) => {
+    event.stopPropagation();
+    if (manualMode) {
+      exitManual();
+      return;
+    }
+    const rect = wrapper!.getBoundingClientRect();
+    enterManual(rect.left + rect.width / 2, rect.top + rect.height / 2);
+    // Try gyroscope in parallel — silent if unavailable / denied.
+    enableGyroscope().catch(() => undefined);
+  });
 
   // ─── Wire-up ────────────────────────────────────────────────────
   startOrbit();

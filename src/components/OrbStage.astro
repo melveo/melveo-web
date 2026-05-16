@@ -37,6 +37,24 @@ const t = useTranslations(lang);
     <p class="orb-heading">{t('orb.secondary')}</p>
   </div>
 
+  {/*
+    Hint button — surfaced by default while orb auto-orbits.
+    Clicking it (or anywhere in the section) enters manual mode.
+    On phones with gyroscope support we also try to enable
+    DeviceOrientation tilt control after the user gesture (iOS
+    requires explicit permission).
+  */}
+  <button
+    type="button"
+    class="orb-hint"
+    data-orb-hint
+    data-hint-default={t('orb.hint')}
+    data-hint-active={t('orb.hintActive')}
+    aria-label={t('orb.hint')}
+  >
+    <span class="orb-hint__dot" aria-hidden="true"></span>
+    <span class="orb-hint__label" data-orb-hint-label>{t('orb.hint')}</span>
+  </button>
 </section>
 
 <script>
@@ -201,4 +219,67 @@ const t = useTranslations(lang);
     margin-right: auto;
   }
 
+  /*
+    Hint pill — anchored to the bottom-centre of the orb section
+    so it doesn't interfere with the cyan hex orb that's drifting
+    around in the upper 80 % of the viewport. Subtle backdrop blur
+    + cyan tint match the brand. Hidden once the user is in
+    manual mode (label state still updates so accessibility tree
+    knows the new interaction model).
+  */
+  .orb-hint {
+    position: absolute;
+    left: 50%;
+    bottom: clamp(1.25rem, 3vw, 2.5rem);
+    transform: translateX(-50%);
+    display: inline-flex;
+    align-items: center;
+    gap: 0.55rem;
+    padding: 0.6rem 1.05rem;
+    border-radius: 999px;
+    background: color-mix(in oklch, var(--color-bg-canvas) 60%, transparent);
+    border: 1px solid color-mix(in oklch, var(--color-accent-primary) 38%, transparent);
+    color: var(--color-text-primary);
+    font-family: inherit;
+    font-size: 0.82rem;
+    font-weight: 500;
+    letter-spacing: 0.02em;
+    cursor: pointer;
+    backdrop-filter: blur(10px) saturate(160%);
+    -webkit-backdrop-filter: blur(10px) saturate(160%);
+    box-shadow:
+      0 6px 26px rgba(0, 0, 0, 0.35),
+      0 0 18px color-mix(in oklch, var(--color-accent-primary) 18%, transparent);
+    z-index: 3;
+    transition:
+      opacity 0.35s ease,
+      transform 0.35s ease,
+      background 0.25s ease;
+    pointer-events: auto;
+  }
+  .orb-hint:hover {
+    background: color-mix(in oklch, var(--color-accent-primary) 12%, var(--color-bg-canvas));
+  }
+  .orb-hint__dot {
+    width: 0.5rem;
+    height: 0.5rem;
+    border-radius: 50%;
+    background: var(--color-accent-primary);
+    box-shadow: 0 0 10px color-mix(in oklch, var(--color-accent-primary) 65%, transparent);
+    animation: orb-hint-pulse 2s ease-in-out infinite;
+  }
+  @keyframes orb-hint-pulse {
+    0%, 100% { opacity: 0.55; transform: scale(1); }
+    50% { opacity: 1; transform: scale(1.2); }
+  }
+  .orb-wrapper.is-orb-manual .orb-hint {
+    /* User has taken control — fade hint out but keep clickable
+       so they can release manual mode by tapping it. */
+    opacity: 0.45;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .orb-hint__dot {
+      animation: none;
+    }
+  }
 </style>
