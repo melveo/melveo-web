@@ -24,23 +24,18 @@ interface HeroLinesOpts {
 }
 
 /*
-  Defaults — close to towc's codepen but two adjustments per user
-  direction 2026-05-16:
-
-    1. Slowed phase length (baseTime 10→22, addedTime 10→24) so
-       lines hold each step ~2.3× longer. Hue rotation also halved
-       (0.1→0.045) so the colour drift is calmer.
-
-    2. Hue clamped to a 160°–220° band (cyan/teal/aqua only) instead
-       of cycling the full 360° wheel. The HUE_BASE + HUE_RANGE
-       constants below drive that — the original `hsl(hue,…)` value
-       string still works because we just feed clamped hues into it.
+  Defaults — 1:1 with towc's codepen mJzOWJ. Speed / timing /
+  brightness all kept exactly as the reference. The ONLY local
+  change is hue range (see HUE_MIN / HUE_SPAN below) so the
+  palette excludes red (0°-60°) and orange — user direction
+  2026-05-16: "jen prostě barevnost nechceme třeba červenou nebo
+  oranžovou".
 */
 const DEFAULT_OPTS = {
   len: 20,
   count: 50,
-  baseTime: 22,
-  addedTime: 24,
+  baseTime: 10,
+  addedTime: 10,
   dieChance: 0.05,
   spawnChance: 1,
   sparkChance: 0.1,
@@ -50,17 +45,22 @@ const DEFAULT_OPTS = {
   baseLight: 50,
   addedLight: 10,
   shadowToTimePropMult: 6,
-  baseLightInputMultiplier: 0.005,
-  addedLightInputMultiplier: 0.01,
+  baseLightInputMultiplier: 0.01,
+  addedLightInputMultiplier: 0.02,
   repaintAlpha: 0.04,
-  hueChange: 0.045,
+  hueChange: 0.1,
 };
 
-/* Brand-only hue band — cyan (180°), teal (175°), aqua (190°),
-   with a little drift either side. Eliminates the codepen's
-   purple/red/orange sweep. */
-const HUE_BASE = 165;
-const HUE_RANGE = 55;
+/*
+  Hue range kept = [60°, 240°] = yellow → green → cyan → teal →
+  blue. Excludes red / orange (0°-60°) and purple / magenta
+  (240°-360°) — both flagged by the user as off-brand. Hue
+  advances at the codepen's full 0.1 / tick and wraps within
+  this band via modulo (the 240→60 wrap is a hue jump but it
+  happens every ~30 s, barely noticeable in motion).
+*/
+const HUE_MIN = 60;
+const HUE_SPAN = 180;
 
 const BASE_RAD = (Math.PI * 2) / 6;
 
@@ -126,10 +126,10 @@ export function mountHeroLines({ canvas }: HeroLinesOpts): HeroLinesHandle | nul
       this.lightInputMultiplier =
         opts.baseLightInputMultiplier +
         opts.addedLightInputMultiplier * Math.random();
-      // Clamp the hue to the brand band — oscillate within HUE_RANGE
-      // around HUE_BASE so we get cyan/teal/aqua only, never the
-      // codepen's purple/red/orange.
-      const hue = HUE_BASE + ((tick * opts.hueChange) % HUE_RANGE);
+      // Hue advances at codepen rate (0.1 / tick) but bounded to
+      // [HUE_MIN, HUE_MIN + HUE_SPAN] via modulo so red / orange
+      // (and far magenta) never appear.
+      const hue = HUE_MIN + ((tick * opts.hueChange) % HUE_SPAN);
       this.color = opts.color.replace('hue', String(hue));
       this.cumulativeTime = 0;
       this.beginPhase();
