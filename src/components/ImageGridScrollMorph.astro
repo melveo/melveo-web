@@ -880,60 +880,84 @@ const t = useTranslations(lang);
   }
 
   @media (orientation: portrait) {
+    /*
+      Portrait pattern 2026-05-16: strict 3-4-3-4-3-4-3-4-3 honeycomb
+      per user direction ("maximálně 4 vedle sebe, střídat 3 a 4,
+      vždy zabíralo celý viewport"). The 4-row spans the full available
+      width on phone — hex-w sized so 4 cells + gaps reach 100 % of
+      viewport. Six layer-5 outer-ring icons hidden so the 30 visible
+      cards + scaler fit the new pattern.
+
+      Hidden on portrait: mood, symptoms, rotation, notes, alerts,
+      team — the least product-defining icons. All 14 photos kept,
+      all core feature icons (wellness, sessions, coach board, RPE,
+      etc.) kept.
+    */
     .image-grid-section .grid {
-      --hex-w: clamp(4rem, min(calc(var(--available-w) * 0.2), calc(var(--available-h) * 0.126)), 18.5rem);
-      --honeycomb-width: calc((var(--hex-x-step) * 4) + var(--hex-w));
+      --hex-w: clamp(4rem, min(calc(var(--available-w) * 0.235), calc(var(--available-h) * 0.115)), 18.5rem);
+      --honeycomb-width: calc((var(--hex-x-step) * 3) + var(--hex-w));
       --honeycomb-height: calc((var(--hex-y-step) * 8) + var(--hex-h));
     }
 
-    /* Portrait devices use a compact vertical honeycomb:
-       3 / 4 / 5 / 4 / 5 / 4 / 5 / 4 / 3. The centre row has five
-       slots and the scaler remains the middle hex, so the section no
-       longer visually splits into two separate clusters on phones. */
-    .image-grid-section .grid > .layer:nth-of-type(5) > div:nth-child(1) { --hx: -1; --hr: -4; }
-    .image-grid-section .grid > .layer:nth-of-type(5) > div:nth-child(2) { --hx: 0; --hr: -4; }
-    .image-grid-section .grid > .layer:nth-of-type(5) > div:nth-child(3) { --hx: 1; --hr: -4; }
+    /* 6 layer-5 outer-ring icons hidden on portrait — keeps card
+       count at 30 + scaler = 31, matching 3-4-3-4-3-4-3-4-3 grid. */
+    .image-grid-section .grid > .layer:nth-of-type(5) > div:nth-child(2),
+    .image-grid-section .grid > .layer:nth-of-type(5) > div:nth-child(6),
+    .image-grid-section .grid > .layer:nth-of-type(5) > div:nth-child(8),
+    .image-grid-section .grid > .layer:nth-of-type(5) > div:nth-child(12),
+    .image-grid-section .grid > .layer:nth-of-type(5) > div:nth-child(14),
+    .image-grid-section .grid > .layer:nth-of-type(5) > div:nth-child(16) {
+      display: none;
+    }
 
-    .image-grid-section .grid > .layer:nth-of-type(5) > div:nth-child(4) { --hx: -1.5; --hr: -3; }
-    .image-grid-section .grid > .layer:nth-of-type(4) > div:nth-child(1) { --hx: -0.5; --hr: -3; }
-    .image-grid-section .grid > .layer:nth-of-type(1) > div:nth-child(1) { --hx: 0.5; --hr: -3; }
-    .image-grid-section .grid > .layer:nth-of-type(4) > div:nth-child(2) { --hx: 1.5; --hr: -3; }
+    /* Row -4: 3 cards (3 player portrait photos for top-row punch) */
+    .image-grid-section .grid > .layer:nth-of-type(5) > div:nth-child(1)  { --hx: -1;   --hr: -4; }
+    .image-grid-section .grid > .layer:nth-of-type(5) > div:nth-child(3)  { --hx:  0;   --hr: -4; }
+    .image-grid-section .grid > .layer:nth-of-type(5) > div:nth-child(5)  { --hx:  1;   --hr: -4; }
 
-    .image-grid-section .grid > .layer:nth-of-type(5) > div:nth-child(5) { --hx: -2; --hr: -2; }
-    .image-grid-section .grid > .layer:nth-of-type(1) > div:nth-child(2) { --hx: -1; --hr: -2; }
-    .image-grid-section .grid > .layer:nth-of-type(2) > div:nth-child(1) { --hx: 0; --hr: -2; }
-    .image-grid-section .grid > .layer:nth-of-type(1) > div:nth-child(3) { --hx: 1; --hr: -2; }
-    .image-grid-section .grid > .layer:nth-of-type(5) > div:nth-child(6) { --hx: 2; --hr: -2; }
+    /* Row -3: 4 cards */
+    .image-grid-section .grid > .layer:nth-of-type(4) > div:nth-child(1)  { --hx: -1.5; --hr: -3; }
+    .image-grid-section .grid > .layer:nth-of-type(1) > div:nth-child(1)  { --hx: -0.5; --hr: -3; }
+    .image-grid-section .grid > .layer:nth-of-type(4) > div:nth-child(2)  { --hx:  0.5; --hr: -3; }
+    .image-grid-section .grid > .layer:nth-of-type(5) > div:nth-child(7)  { --hx:  1.5; --hr: -3; }
 
-    .image-grid-section .grid > .layer:nth-of-type(5) > div:nth-child(7) { --hx: -1.5; --hr: -1; }
-    .image-grid-section .grid > .layer:nth-of-type(2) > div:nth-child(3) { --hx: -0.5; --hr: -1; }
-    .image-grid-section .grid > .layer:nth-of-type(2) > div:nth-child(2) { --hx: 0.5; --hr: -1; }
-    .image-grid-section .grid > .layer:nth-of-type(5) > div:nth-child(8) { --hx: 1.5; --hr: -1; }
+    /* Row -2: 3 cards */
+    .image-grid-section .grid > .layer:nth-of-type(1) > div:nth-child(2)  { --hx: -1;   --hr: -2; }
+    .image-grid-section .grid > .layer:nth-of-type(5) > div:nth-child(9)  { --hx:  0;   --hr: -2; }
+    .image-grid-section .grid > .layer:nth-of-type(4) > div:nth-child(3)  { --hx:  1;   --hr: -2; }
 
-    .image-grid-section .grid > .layer:nth-of-type(4) > div:nth-child(3) { --hx: -2; --hr: 0; }
-    .image-grid-section .grid > .layer:nth-of-type(2) > div:nth-child(4) { --hx: -1; --hr: 0; }
-    .image-grid-section .grid > .layer:nth-of-type(2) > div:nth-child(6) { --hx: 1; --hr: 0; }
-    .image-grid-section .grid > .layer:nth-of-type(4) > div:nth-child(4) { --hx: 2; --hr: 0; }
+    /* Row -1: 4 cards */
+    .image-grid-section .grid > .layer:nth-of-type(5) > div:nth-child(11) { --hx: -1.5; --hr: -1; }
+    .image-grid-section .grid > .layer:nth-of-type(1) > div:nth-child(3)  { --hx: -0.5; --hr: -1; }
+    .image-grid-section .grid > .layer:nth-of-type(2) > div:nth-child(1)  { --hx:  0.5; --hr: -1; }
+    .image-grid-section .grid > .layer:nth-of-type(5) > div:nth-child(4)  { --hx:  1.5; --hr: -1; }
 
-    .image-grid-section .grid > .layer:nth-of-type(5) > div:nth-child(9) { --hx: -1.5; --hr: 1; }
-    .image-grid-section .grid > .layer:nth-of-type(3) > div:first-of-type { --hx: -0.5; --hr: 1; }
-    .image-grid-section .grid > .layer:nth-of-type(3) > div:last-of-type { --hx: 0.5; --hr: 1; }
-    .image-grid-section .grid > .layer:nth-of-type(5) > div:nth-child(10) { --hx: 1.5; --hr: 1; }
+    /* Row 0: scaler at centre + 2 cards flanking */
+    .image-grid-section .grid > .layer:nth-of-type(4) > div:nth-child(4)  { --hx: -1;   --hr:  0; }
+    .image-grid-section .grid > .layer:nth-of-type(5) > div:nth-child(13) { --hx:  1;   --hr:  0; }
+    /* scaler at 0,0 default */
 
-    .image-grid-section .grid > .layer:nth-of-type(5) > div:nth-child(11) { --hx: -2; --hr: 2; }
-    .image-grid-section .grid > .layer:nth-of-type(1) > div:nth-child(4) { --hx: -1; --hr: 2; }
-    .image-grid-section .grid > .layer:nth-of-type(2) > div:nth-child(5) { --hx: 0; --hr: 2; }
-    .image-grid-section .grid > .layer:nth-of-type(1) > div:nth-child(6) { --hx: 1; --hr: 2; }
-    .image-grid-section .grid > .layer:nth-of-type(5) > div:nth-child(12) { --hx: 2; --hr: 2; }
+    /* Row 1: 4 cards */
+    .image-grid-section .grid > .layer:nth-of-type(2) > div:nth-child(2)  { --hx: -1.5; --hr:  1; }
+    .image-grid-section .grid > .layer:nth-of-type(3) > div:first-of-type { --hx: -0.5; --hr:  1; }
+    .image-grid-section .grid > .layer:nth-of-type(3) > div:last-of-type  { --hx:  0.5; --hr:  1; }
+    .image-grid-section .grid > .layer:nth-of-type(2) > div:nth-child(4)  { --hx:  1.5; --hr:  1; }
 
-    .image-grid-section .grid > .layer:nth-of-type(5) > div:nth-child(13) { --hx: -1.5; --hr: 3; }
-    .image-grid-section .grid > .layer:nth-of-type(4) > div:nth-child(5) { --hx: -0.5; --hr: 3; }
-    .image-grid-section .grid > .layer:nth-of-type(1) > div:nth-child(5) { --hx: 0.5; --hr: 3; }
-    .image-grid-section .grid > .layer:nth-of-type(4) > div:nth-child(6) { --hx: 1.5; --hr: 3; }
+    /* Row 2: 3 cards */
+    .image-grid-section .grid > .layer:nth-of-type(4) > div:nth-child(5)  { --hx: -1;   --hr:  2; }
+    .image-grid-section .grid > .layer:nth-of-type(5) > div:nth-child(15) { --hx:  0;   --hr:  2; }
+    .image-grid-section .grid > .layer:nth-of-type(4) > div:nth-child(6)  { --hx:  1;   --hr:  2; }
 
-    .image-grid-section .grid > .layer:nth-of-type(5) > div:nth-child(14) { --hx: -1; --hr: 4; }
-    .image-grid-section .grid > .layer:nth-of-type(5) > div:nth-child(15) { --hx: 0; --hr: 4; }
-    .image-grid-section .grid > .layer:nth-of-type(5) > div:nth-child(16) { --hx: 1; --hr: 4; }
+    /* Row 3: 4 cards */
+    .image-grid-section .grid > .layer:nth-of-type(1) > div:nth-child(5)  { --hx: -1.5; --hr:  3; }
+    .image-grid-section .grid > .layer:nth-of-type(2) > div:nth-child(3)  { --hx: -0.5; --hr:  3; }
+    .image-grid-section .grid > .layer:nth-of-type(2) > div:nth-child(5)  { --hx:  0.5; --hr:  3; }
+    .image-grid-section .grid > .layer:nth-of-type(2) > div:nth-child(6)  { --hx:  1.5; --hr:  3; }
+
+    /* Row 4: 3 cards (bottom) */
+    .image-grid-section .grid > .layer:nth-of-type(1) > div:nth-child(4)  { --hx: -1;   --hr:  4; }
+    .image-grid-section .grid > .layer:nth-of-type(1) > div:nth-child(6)  { --hx:  0;   --hr:  4; }
+    .image-grid-section .grid > .layer:nth-of-type(5) > div:nth-child(10) { --hx:  1;   --hr:  4; }
   }
 
   @media (max-height: 430px) and (max-width: 900px) {
