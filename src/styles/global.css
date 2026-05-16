@@ -334,6 +334,33 @@ body {
   margin-top: 0.1rem;
 }
 
+/*
+  Phone-tight pill — user wants both CTAs side-by-side at every
+  viewport (2026-05-16). Default min-width 12rem + padding 1rem
+  2.5rem won't fit two pills on a 320–414px phone. Slim them on
+  small viewports while keeping desktop generous.
+*/
+@media (max-width: 520px) {
+  .hero-pill {
+    min-width: 0;
+    padding: 0.6rem 0.85rem;
+    letter-spacing: 0.02em;
+  }
+  .hero-pill-icon {
+    width: 0.95rem;
+    height: 0.95rem;
+  }
+  .hero-pill-eyebrow {
+    font-size: 0.5rem;
+  }
+  .hero-pill-title {
+    font-size: 0.78rem;
+  }
+  .hero-pill-content {
+    gap: 0.4rem;
+  }
+}
+
 @keyframes hero-pill-border-flow {
   0% { background-position: 0% 50%; }
   100% { background-position: 200% 50%; }

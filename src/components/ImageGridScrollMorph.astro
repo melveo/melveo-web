@@ -956,35 +956,23 @@ const t = useTranslations(lang);
     }
   }
 
-  /* ─── Mobile perf overrides ──────────────────────────────────────
-     Phones can't afford the same backdrop-filter + drop-shadow
-     stack the desktop layout uses while motion.scroll is
-     dragging the scaler through scaleX/scaleY + clipPath.
-     We strip the most expensive effects on small viewports +
-     coarse pointer so the scroll-driven morph stays at 60 fps
-     (user feedback 2026-05-15: "na telefonu se to seká").
-
-     Kept: cyan accents, glass-card body, photo cover.
-     Dropped: glass-smoke canvas (separate rAF loop), most
-     drop-shadow stacks (each is a paint), backdrop-filter
-     blur on cells (forces compositor layer recomposite).
+  /* ─── Mobile light-touch overrides ──────────────────────────────
+     User feedback 2026-05-16: smoke field + premium glass effect
+     should match pricing on every viewport (was previously stripped
+     on phone for perf). Now that the global glass recipe has
+     dropped the SVG displacement filter (the actual Chrome killer)
+     and reduced backdrop-blur to 10px, the remaining cost is
+     manageable on modern phones too. Keep just the cyan drop-shadow
+     touch-ups for icons so they pop, but no longer kill the
+     smoke canvas or backdrop-blur.
   */
   @media (max-width: 900px), (pointer: coarse) {
-    .image-grid-section .glass-smoke {
-      display: none;
-    }
     .image-grid-section .grid-photo,
     .image-grid-section .tech-card {
       filter: drop-shadow(0 6px 14px rgba(0, 0, 0, 0.32));
     }
     .image-grid-section .tech-card__icon {
       filter: drop-shadow(0 0 6px rgba(0, 240, 255, 0.4));
-    }
-    .image-grid-section .glass-filter {
-      display: none;
-      backdrop-filter: none;
-      -webkit-backdrop-filter: none;
-      filter: none;
     }
   }
 
@@ -1025,26 +1013,14 @@ const t = useTranslations(lang);
   }
 
   /*
-    Chrome/Blink performance guard.
-
-    The global liquid-glass recipe uses backdrop-filter + an SVG
-    displacement filter. That looks fine on static cards, but in this
-    scroll-morph section Chrome has to repaint dozens of clipped
-    hexagons while the centre image is animating. The result was the
-    reported Chrome-only jank and occasional horizontal/vertical
-    filter seams inside cells. Safari renders this stack differently,
-    which is why it looked OK there.
-
-    Keep the glass feel with local gradients/specular rims, but remove
-    the expensive refractive layer for this section only.
+    User feedback 2026-05-16: restore the premium glass effect on
+    hexagons (was previously killed unconditionally for Chrome perf).
+    The actual Chrome killer was filter: url(#glass-lens) with SVG
+    feDisplacementMap — that's gone now (removed from global
+    .glass-card .glass-filter). The remaining backdrop-blur(10px) is
+    cheap enough to keep here, restoring the pricing-card feel
+    in the hexagons.
   */
-  .image-grid-section .glass-filter {
-    display: none;
-    backdrop-filter: none;
-    -webkit-backdrop-filter: none;
-    filter: none;
-  }
-
   .image-grid-section .glass-overlay {
     background:
       radial-gradient(circle at 50% 28%, rgba(0, 240, 255, 0.16), transparent 48%),
@@ -1280,9 +1256,9 @@ const t = useTranslations(lang);
   }
 
   @media (max-width: 640px) {
-    .image-grid-section .glass-smoke {
-      display: none;
-    }
+    /* Smoke field now stays visible on phone (user feedback 2026-05-16
+       — "na menších devices je jen černé pozadí, proč?"). Cyan smoke
+       reads as the same premium background as the pricing section. */
 
     .image-grid-section .tech-card {
       --card-pad: 0.34rem;
