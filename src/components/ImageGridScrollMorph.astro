@@ -1375,59 +1375,64 @@ const t = useTranslations(lang);
     --hr: 0;
   }
 
+  /*
+    Scaler refactor 2026-05-16: transform-based animation.
+
+    Previous version animated `width` and `height` in pixels every
+    scroll frame, which triggered a layout recalc per frame. On
+    mobile / low-end devices that was the main cause of the jank
+    user reported ("se sekà se na spoustě zařízení"). New approach:
+
+      - Container sized once at the final hex cell dimensions via
+        CSS variables (--scaler-w, --scaler-h set by JS once at
+        mount). Stays at that box throughout the morph.
+      - IMG inside fills container 100% × 100% with object-fit:cover
+        — so the photo crops to hex aspect from the landscape source
+        without distortion.
+      - During scroll, `transform: scale(N)` shrinks the rendered
+        size from viewport-fit down to 1. Transform is composited
+        on the GPU on every modern browser — zero main-thread cost.
+      - clip-path still morphs from rectangle to hex (composited in
+        Chrome 99+ / Safari 13+).
+      - All static state: will-change scoped to the moving props,
+        contain:layout paint isolates the scaler from siblings.
+
+    Trade-off: photo always crops to hex aspect (vertical strip of
+    the landscape source). Earlier full-bleed look is gone, but the
+    morph runs smoothly on every device and browser instead of
+    intermittently freezing.
+  */
   .image-grid-section .scaler img {
     position: absolute;
     top: 50%;
     left: 50%;
-    translate: -50% -50%;
+    width: 100%;
+    height: 100%;
     object-fit: cover;
-    /*
-      Aspect handling — the morph from "full-bleed landscape photo"
-      to "small portrait hex" needs to change the IMG BOX aspect
-      ratio, not just its size. We animate width/height in pixels
-      so object-fit:cover re-crops the source each frame and the
-      photo stays aspect-correct at every moment.
-
-      An earlier iteration animated transform: scaleX/scaleY non-
-      uniformly (smoother on mobile because compositor-only). But
-      with the img box CSS-sized to a hex cell (~180×203, portrait
-      hex aspect), object-fit:cover already cropped the 1672×941
-      landscape source to a vertical strip — and non-uniform scale
-      then stretched that strip back to viewport size. People in
-      the photo looked horizontally squashed (user 2026-05-15:
-      "fotka je v tom větším formátu hrozně divná, rozpixelovaná
-      jak je roztažená").
-
-      Width/height animation pays a per-frame layout cost on this
-      single element, but mobile is fine after the other perf wins
-      (no per-cell motion, glass-smoke hidden, shorter runway).
-
-      Defaults to viewport-sized via JS at mount, so the first
-      paint is full-bleed before Motion's scroll observer fires.
-      Falls back to 100vw/100vh if JS doesn't run.
-    */
-    width: 100vw;
-    height: 100vh;
-    height: 100dvh;
-    /* Start with rectangular clip-path so the full-bleed state shows
-       the photo edge-to-edge; Motion morphs the polygon to the hex
-       shape by the end keyframe. */
+    object-position: center;
+    transform: translate(-50%, -50%);
+    /* Start at rectangular clip — Motion morphs to hex by the end. */
     clip-path: polygon(0% 0%, 100% 0%, 100% 50%, 100% 100%, 0% 100%, 0% 50%);
     -webkit-clip-path: polygon(0% 0%, 100% 0%, 100% 50%, 100% 100%, 0% 100%, 0% 50%);
-    /* Full-bleed photo carries the same 28px glass-card radius
-       all the way through the morph (user feedback 2026-05-15:
-       "fotka by měla mít zaoblené rohy, vypadá to tak lepe").
-       Motion's keyframes hold this value at every stage so there's
-       no transition flicker. */
     border-radius: 28px;
-    /* Tailwind preflight applies `img { max-width: 100% }`; explicit
-       override so the inline pixel sizing JS sets isn't clipped. */
     max-width: none;
     max-height: none;
-    will-change: width, height, clip-path, border-radius;
-    transform: translateZ(0);
+    will-change: transform, clip-path;
     backface-visibility: hidden;
-    contain: paint;
+  }
+
+  /*
+    The scaler container — the box that actually grows / shrinks
+    during the morph. JS sets transform: scale(N) on this element;
+    the IMG inside fills it via 100% / object-fit. We give the
+    container its own compositor layer so transform updates don't
+    repaint siblings.
+  */
+  .image-grid-section .scaler {
+    transform-origin: center center;
+    will-change: transform;
+    backface-visibility: hidden;
+    contain: layout paint;
   }
 
   /* Reduced-motion: drop the sticky/scroll dance. Show every cell in
@@ -1515,48 +1520,55 @@ const t = useTranslations(lang);
       // grid cell size after layout commits.
       requestAnimationFrame(() => {
         const scalerEl = section.querySelector<HTMLElement>('.scaler');
-        const naturalWidth = scalerEl?.offsetWidth ?? 280;
-        const naturalHeight = scalerEl?.offsetHeight ?? naturalWidth / 0.8660254038;
+        if (!scalerEl) return;
 
         /*
-          Use the .content's measured size, NOT window.innerHeight.
-          On iOS Safari and Chrome mobile the URL bar dynamically
-          resizes the viewport — window.innerHeight returns the
-          CURRENTLY visible area (e.g. 700 px when URL bar is shown),
-          while CSS `100vh` resolves to the LARGEST possible viewport
-          (e.g. 852 px). The .content element is sized via CSS
-          `min-height: 100vh`, so its offsetHeight matches the static
-          large viewport. If we use innerHeight here the start-state
-          image renders smaller than the .content sticky pin, leaving
-          a dark band above and below the photo (user feedback
-          2026-05-01: "ta sekce jakoby posunutá dolů"). Reading the
-          .content's actual size keeps the image in lockstep with
-          the pin regardless of the URL-bar state.
+          Transform-based morph (2026-05-16 refactor).
+
+          Container stays at its natural hex-cell size (set by CSS
+          --hex-w / --hex-h vars and grid layout). The IMG inside
+          fills container 100%/100% with object-fit:cover.
+
+          During scroll we animate `transform: scale(N)` on the
+          container — N starts at the value that visually fits the
+          viewport, ends at 1. Transform is composited on the GPU on
+          every modern browser, so there's zero layout/paint cost
+          per frame. The browser just composites the same texture
+          at a different size.
+
+          clip-path on the IMG morphs from rectangle → hex (still
+          composited in Chrome 99+ / Safari 13+).
+
+          Note we read .content's measured size instead of
+          window.innerHeight so iOS Safari URL-bar collapse doesn't
+          desync the start-state coverage (same reasoning as before).
         */
         const contentEl = section.querySelector<HTMLElement>('.content');
         const viewportWidth = contentEl?.offsetWidth || window.innerWidth;
         const viewportHeight = contentEl?.offsetHeight || window.innerHeight;
 
-        // Cap the full-bleed display to the source image's native
-        // resolution (1672 × 941). Beyond that, the photo looks
-        // blurry on retina / 4K because we'd be upscaling the file.
-        // Capping at source size keeps the photo crisp at the cost
-        // of a small letterbox on huge displays, which is the right
-        // trade per user feedback ("rozpixelovaný"). When we ship a
-        // 2x asset these caps can be lifted.
+        // Box dimensions of the scaler at rest (= one hex cell).
+        const hexW = scalerEl.offsetWidth || 92;
+        const hexH = scalerEl.offsetHeight || hexW / 0.8660254038;
+
+        // Initial scale = the larger of (viewport-width / hex-w) and
+        // (viewport-height / hex-h) so the rendered scaler covers
+        // the viewport (with overflow clipped by the section). Cap
+        // against source resolution so we never upscale beyond the
+        // photo's native pixels (which looks blurry).
         const sourceMaxW = 1672;
         const sourceMaxH = 941;
-        const displayWidth = Math.min(viewportWidth, sourceMaxW);
-        const displayHeight = Math.min(viewportHeight, sourceMaxH);
+        const scaleByWidth = viewportWidth / hexW;
+        const scaleByHeight = viewportHeight / hexH;
+        const fitScale = Math.max(scaleByWidth, scaleByHeight);
+        const sourceCapScale = Math.min(
+          sourceMaxW / hexW,
+          sourceMaxH / hexH,
+        );
+        const initScale = Math.min(fitScale, sourceCapScale);
 
-        // Force the start state directly — image starts at display
-        // size (≈ viewport, capped at source). object-fit:cover then
-        // fills the box with the landscape photo natively, so the
-        // first paint is the full clean photo. Motion's scroll()
-        // then interpolates the box back to cell size (var(--hex-w/h))
-        // and the clip-path morphs from rectangle to hex.
-        image.style.width = `${displayWidth}px`;
-        image.style.height = `${displayHeight}px`;
+        // Force start state — scaler scaled up, clip rectangular.
+        scalerEl.style.transform = `scale(${initScale.toFixed(3)})`;
         image.style.clipPath = 'polygon(0% 0%, 100% 0%, 100% 50%, 100% 100%, 0% 100%, 0% 50%)';
         image.style.setProperty('-webkit-clip-path', 'polygon(0% 0%, 100% 0%, 100% 50%, 100% 100%, 0% 100%, 0% 50%)');
 
@@ -1564,46 +1576,26 @@ const t = useTranslations(lang);
         // referenced by the codepen.
         const power1InOut = [0.42, 0, 0.58, 1] as const;
         const power2InOut = [0.65, 0, 0.35, 1] as const;
-        const power3InOut = [0.76, 0, 0.24, 1] as const;
-        const power4InOut = [0.87, 0, 0.13, 1] as const;
         const sineOut = [0.61, 1, 0.88, 1] as const;
         const scalerEndRatio = 0.82;
         const revealEndRatio = 0.95;
 
-        // ─── Scaler: hold full-bleed, then shrink to one hex cell ────
+        // ─── Scaler: hold scaled-up, then shrink to hex via transform
         //
-        // Width/height pixel keyframes — object-fit:cover on the IMG
-        // recrops the source per-frame so the photo stays aspect-
-        // correct as the box morphs from landscape (16:9-ish) to
-        // hex-cell (≈1:1.155). transform: scale() can't do this
-        // without distorting the photo content.
-        //
-        // clip-path morphs from rectangle (with the same 6 vertices
-        // packed along the rectangle edges) to a pointy-top hexagon.
-        // Both polygons keep matching vertex counts so Motion can
-        // interpolate vertex-to-vertex via WAAPI off the main thread.
-        //
-        // borderRadius animates 0 → 28px so the photo sits flat at
-        // full-bleed and rounds into the glass-card silhouette at
-        // the end. Composited in Blink + Safari for static values.
+        // Transform: scale(initScale) → scale(initScale) (hold) →
+        // scale(1). Composited only — no layout, no paint per frame.
+        // The clip-path on the IMG morphs in parallel: rectangle
+        // (with 6 vertices packed along the rect edges so vertex
+        // count matches) → pointy-top hexagon.
         scroll(
           animate(
-            image,
+            scalerEl,
             {
-              width: [`${displayWidth}px`, `${displayWidth}px`, `${naturalWidth}px`],
-              height: [`${displayHeight}px`, `${displayHeight}px`, `${naturalHeight}px`],
-              clipPath: [
-                'polygon(0% 0%, 100% 0%, 100% 50%, 100% 100%, 0% 100%, 0% 50%)',
-                'polygon(0% 0%, 100% 0%, 100% 50%, 100% 100%, 0% 100%, 0% 50%)',
-                'polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)',
+              transform: [
+                `scale(${initScale})`,
+                `scale(${initScale})`,
+                'scale(1)',
               ],
-              // User feedback 2026-05-15: the full-bleed photo wants
-              // rounded corners too — same radius family as the
-              // glass-card rim (28px). Both start AND end keyframes
-              // now keep the radius, so the photo reads as a single
-              // soft-cornered card across the morph instead of going
-              // square→hex with a flat-edge start.
-              borderRadius: ['28px', '28px', '28px'],
             },
             {
               times: [0, 0.18, 1],
@@ -1612,10 +1604,27 @@ const t = useTranslations(lang);
           ),
           {
             target: section,
-            // The centre image must already be the exact same size as
-            // every other hex before the surrounding cells become the
-            // hero visual. If the scaler finishes later than the reveal,
-            // the middle photo visibly stays larger than the grid.
+            offset: ['start start', `${scalerEndRatio * 100}% end`] as any,
+          },
+        );
+
+        scroll(
+          animate(
+            image,
+            {
+              clipPath: [
+                'polygon(0% 0%, 100% 0%, 100% 50%, 100% 100%, 0% 100%, 0% 50%)',
+                'polygon(0% 0%, 100% 0%, 100% 50%, 100% 100%, 0% 100%, 0% 50%)',
+                'polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)',
+              ],
+            },
+            {
+              times: [0, 0.18, 1],
+              ease: power2InOut as any,
+            },
+          ),
+          {
+            target: section,
             offset: ['start start', `${scalerEndRatio * 100}% end`] as any,
           },
         );
@@ -1661,30 +1670,28 @@ const t = useTranslations(lang);
           cell.style.y = '';
         });
 
-        layers.forEach((layer, index) => {
-          // Endpoint shifts per layer for a subtle cascade. All layers
-          // finish shortly after the scaler morph so the final
-          // honeycomb state appears, breathes briefly, then the next
-          // section arrives without a long inert sticky tail. Outer
-          // edges (index 0) end last; inner-most cells finish earlier,
-          // same ordering as the codepen but compressed before the
-          // rest zone.
-          const endOffset = `${revealEndRatio - index * 0.035} end`;
+        /*
+          Layer reveal cascade — compositor-only opacity. Earlier
+          version animated y translate on each layer too; dropped
+          on all viewports 2026-05-16 because per-layer transforms
+          alongside the scaler scale were causing GPU contention on
+          mobile (5 layers × 2 props × scroll observer = 10 sync
+          updates per frame). Pure opacity is the lightest possible
+          reveal — single property, single observer per layer, fully
+          composited.
 
-          // Keep cell size locked while revealing. Earlier versions
-          // scaled layers/cells during reveal, which made the central
-          // scaler appear larger than surrounding hexagons mid-scroll.
+          Endpoint shifts per layer give the same cascade feel —
+          outer layers (index 0) finish last, inner cells finish
+          earlier (matches the codepen's depth ordering).
+        */
+        layers.forEach((layer, index) => {
+          const endOffset = `${revealEndRatio - index * 0.035} end`;
           scroll(
             animate(
               layer,
-                compactMotion
-                  ? { opacity: [0, 0, 1] }
-                  : {
-                      opacity: [0, 0, 1],
-                      y: ['10px', '10px', '0px'],
-                    },
+              { opacity: [0, 0, 1] },
               {
-                times: [0, compactMotion ? 0.52 : 0.58, 1],
+                times: [0, 0.55, 1],
                 ease: sineOut as any,
               },
             ),
