@@ -102,11 +102,28 @@ const t = useTranslations(lang);
         )}
       </p>
 
+      {/*
+        CTA hierarchy 2026-05-16: flipped primary to "Kontakt / Get
+        in touch" because the App Store button currently only opens
+        an "app isn't on App Store yet" notice — misleading as a
+        primary action. Mailto link is the honest primary path
+        right now. App Store stays as secondary ghost button so the
+        notify-me option remains visible without competing.
+      */}
       <div class="hero-cta-row">
+        <a
+          href={`mailto:hello@melveo.app?subject=${encodeURIComponent(
+            lang === 'cs' ? 'Kontakt — Melveo' : 'Melveo — get in touch'
+          )}`}
+          class="hero-pill hero-pill--filled"
+        >
+          <span class="hero-pill-shimmer" aria-hidden="true"></span>
+          <span class="hero-pill-content">{t('hero.cta.pilot')}</span>
+        </a>
         <a
           href="#contact"
           aria-label={t('hero.cta.appstore')}
-          class="hero-pill hero-pill--filled"
+          class="hero-pill hero-pill--ghost"
           data-appstore-notify
           data-notice={t('hero.appstoreNotice')}
         >
@@ -128,15 +145,6 @@ const t = useTranslations(lang);
               <span class="hero-pill-title">App Store</span>
             </span>
           </span>
-        </a>
-        <a
-          href={`mailto:hello@melveo.app?subject=${encodeURIComponent(
-            lang === 'cs' ? 'Kontakt — Melveo' : 'Melveo — get in touch'
-          )}`}
-          class="hero-pill hero-pill--ghost"
-        >
-          <span class="hero-pill-shimmer" aria-hidden="true"></span>
-          <span class="hero-pill-content">{t('hero.cta.pilot')}</span>
         </a>
       </div>
       <div class="appstore-toast" data-appstore-toast role="status" aria-live="polite" hidden></div>
