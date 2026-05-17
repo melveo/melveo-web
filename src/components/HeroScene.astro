@@ -44,12 +44,46 @@
 </style>
 
 <script>
+  /*
+    Diagnostic + viewport-pause refactor 2026-05-17.
+
+    Prior behaviour: the hero canvas mounted once via an
+    IntersectionObserver that immediately disconnected. After
+    that the rAF loop ran for the entire session — even when
+    the user was 6000+ px past the hero. The only pause hook
+    was visibilitychange (tab-hidden), nothing for "scrolled
+    away". That kept the GPU rAF + composite-operation:lighter
+    paint cost alive for every scroll-frame on the rest of the
+    page (user-reported post-section jank that persisted even
+    after disabling every other suspect).
+
+    Two URL flags for isolating jank during debugging:
+
+      ?hero=off    don't mount the canvas at all (the wrap is
+                   still there as a black backdrop). Confirms
+                   whether the hero canvas is the jank source.
+      ?hero=no-pause  mount, but DON'T pause when scrolled away
+                   (the old behaviour). Combined with the above,
+                   lets us A/B test the pause path.
+  */
+  const heroFlags = new Set(
+    new URLSearchParams(window.location.search)
+      .get('hero')
+      ?.split(',')
+      .map((s) => s.trim()) ?? [],
+  );
+  const HERO_OFF = heroFlags.has('off');
+  const HERO_NO_PAUSE = heroFlags.has('no-pause');
+  if (heroFlags.size > 0) {
+    console.info('[hero] diagnostic flags:', [...heroFlags]);
+  }
+
   const wrap = document.querySelector<HTMLDivElement>('.hero-scene-wrap');
   const canvas = document.querySelector<HTMLCanvasElement>('[data-hero-canvas]');
 
-  if (wrap && canvas) {
+  if (wrap && canvas && !HERO_OFF) {
     let mounted = false;
-    let handle: { dispose: () => void } | null = null;
+    let handle: { dispose: () => void; pause: () => void; resume: () => void } | null = null;
 
     const start = async () => {
       if (mounted) return;
@@ -64,15 +98,36 @@
     };
 
     if ('IntersectionObserver' in window) {
-      const observer = new IntersectionObserver((entries) => {
-        const entry = entries[0];
-        if (!entry?.isIntersecting) return;
-        observer.disconnect();
-        start();
-      });
+      const observer = new IntersectionObserver(
+        (entries) => {
+          const entry = entries[0];
+          if (!entry) return;
+          if (entry.isIntersecting) {
+            // First intersection mounts the canvas; subsequent
+            // intersections (after a pause) just resume.
+            if (!mounted) {
+              start();
+            } else if (!HERO_NO_PAUSE) {
+              handle?.resume();
+            }
+          } else if (mounted && !HERO_NO_PAUSE) {
+            // Scrolled out of view (with the default rootMargin 0).
+            // Pause the rAF loop so the canvas stops drawing.
+            // Composite-operation:lighter paint cost goes to zero
+            // for the rest of the page until the user scrolls back.
+            handle?.pause();
+          }
+        },
+        // Small bottom margin so we don't churn pause/resume right
+        // at the boundary, but the canvas stops well before the
+        // user has scrolled into the next section.
+        { rootMargin: '0px 0px 10% 0px', threshold: 0 },
+      );
       observer.observe(wrap);
     } else {
       start();
     }
+  } else if (HERO_OFF) {
+    canvas?.setAttribute('data-mounted', 'true');
   }
 </script>
