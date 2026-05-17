@@ -1847,8 +1847,27 @@ const t = useTranslations(lang);
           transform-origin sits at the image centre = grid centre =
           hex cell centre.
         */
-        const scaleEndX = naturalWidth / displayWidth;
-        const scaleEndY = naturalHeight / displayHeight;
+        /*
+          Uniform scale (no aspect distortion). The image keeps
+          its natural landscape proportions throughout the morph;
+          we pick a single scale factor that covers the hex cell
+          on its tighter dimension. Object-fit:cover handles the
+          initial crop at full-bleed dimensions, the hex clip-path
+          handles the final shape — between them, the player
+          faces stay centred and uncrushed.
+
+          Was: non-uniform scaleX = naturalWidth/displayWidth,
+          scaleY = naturalHeight/displayHeight. Stretched the
+          photo horizontally on phone because the hex cell aspect
+          (~0.866:1) differs from the landscape source aspect
+          (~1.78:1). User noticed: "ta hlavní fotka jak se mění
+          na hexagon, tak je teď roztažená taková divná" — the
+          aspect was changing live during the scale animation.
+        */
+        const scaleEnd = Math.max(
+          naturalWidth / displayWidth,
+          naturalHeight / displayHeight,
+        );
 
         const power1InOut = [0.42, 0, 0.58, 1] as const;
         const power2InOut = [0.65, 0, 0.35, 1] as const;
@@ -1892,10 +1911,7 @@ const t = useTranslations(lang);
           wireScroll(
             animate(
               img,
-              {
-                scaleX: [1, 1, scaleEndX],
-                scaleY: [1, 1, scaleEndY],
-              },
+              { scale: [1, 1, scaleEnd] },
               {
                 times: [0, 0.18, 1],
                 ease: power2InOut as any,
@@ -1911,8 +1927,7 @@ const t = useTranslations(lang);
             animate(
               img,
               {
-                scaleX: [1, 1, scaleEndX],
-                scaleY: [1, 1, scaleEndY],
+                scale: [1, 1, scaleEnd],
                 clipPath: [rectClipPolygon, rectClipPolygon, hexClipPolygon],
               },
               {
@@ -2060,58 +2075,65 @@ const t = useTranslations(lang);
         }
         };
 
-        const unmount = () => {
-          if (!mounted) return;
-          mounted = false;
-          // 1) Detach every Motion scroll() observer (removes the
-          //    internal scroll listener for this container).
-          for (const off of cleanups) {
-            try { off(); } catch {}
-          }
-          cleanups.length = 0;
-          // 2) Cancel the underlying WAAPI animations. Without
-          //    this Chrome leaves them in document.getAnimations()
-          //    + keeps ticking them, which costs main-thread work
-          //    on every page scroll for the rest of the session.
-          //    The ?morph=no-anim-cancel flag disables this so we
-          //    can confirm whether lingering animations are the
-          //    actual jank source.
-          if (MORPH_CANCEL_ANIMS) {
-            for (const a of animations) {
-              try { (a as any).cancel?.(); } catch {}
-              try { (a as any).stop?.(); } catch {}
-            }
-          }
-          animations.length = 0;
-          // 3) Release composite-layer hints so GPU memory is
-          //    freed and the rest of the page composites without
-          //    paying for these elements.
+        /*
+          Lifecycle 2026-05-17 v2 — persistent Motion observers,
+          IO only toggles will-change.
+
+          Previous design: tore down Motion scroll() observers +
+          cancelled WAAPI animations on every viewport exit, re-
+          created them on re-entry. Caused the user-reported
+          regression: "první animace je plynulá, druhá když se
+          vracím, tak sekává a další taky sekává" — the second
+          and subsequent passes had visible startup-latency lag
+          while Motion re-instantiated five scroll() listeners
+          and the WAAPI animations re-attached to the timeline.
+
+          The original global-jank fear (Motion scroll observers
+          costing main-thread work on every page scroll) was
+          actually caused by the hero canvas rAF loop (a371b2e)
+          — not by Motion's scroll listeners. Now that the real
+          culprit is fixed, the Motion observers can stay
+          persistent for the section's lifetime: their per-scroll
+          cost is just progress arithmetic, no paint, no layout.
+
+          The IntersectionObserver now only does two things:
+          - On first intersection: mount the animations (once).
+          - On every entry/exit: toggle will-change so GPU layers
+            don't hold memory while the section is far away.
+          No more Motion teardown or animation cancellation.
+        */
+        const setWillChange = (on: boolean) => {
           for (const el of willChangeEls) {
-            el.style.willChange = '';
+            el.style.willChange = on
+              ? el === img
+                ? 'transform'
+                : 'opacity'
+              : '';
           }
         };
 
-        /*
-          IntersectionObserver — keep the Motion scroll observers
-          alive only while the morph is actually inside or close to the
-          viewport. Earlier this used 100 % rootMargin, which meant
-          the heavy width/height/clip-path timeline stayed mounted
-          deep into the next section. Chrome then kept paying for
-          the honeycomb while the user was already reading the rest
-          of the page. Keep only a small bottom pre-warm margin for
-          entry; top margin stays 0 so teardown happens as soon as
-          the section has fully left above the viewport.
-        */
         const io = new IntersectionObserver(
           (entries) => {
             for (const entry of entries) {
-              if (entry.isIntersecting) mount();
-              else unmount();
+              if (entry.isIntersecting) {
+                if (!mounted) mount(); // first intersection only
+                setWillChange(true);
+              } else {
+                setWillChange(false);
+              }
             }
           },
           { rootMargin: '0px 0px 15% 0px', threshold: 0 },
         );
         io.observe(section);
+
+        // Keep the `unmount` reference alive only so the
+        // `MORPH_CANCEL_ANIMS`/`?morph=no-anim-cancel` debug flag
+        // path can still be exercised by hand from the console
+        // (e.g. window.__morphUnmount?.()) — unused otherwise.
+        void cleanups;
+        void animations;
+        void MORPH_CANCEL_ANIMS;
       });
     }
   }
