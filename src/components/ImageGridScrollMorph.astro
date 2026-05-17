@@ -41,13 +41,19 @@ const t = useTranslations(lang);
 
 ---
 
-<section class="image-grid-section" data-grid-section data-glass-smoke data-glass-smoke-density="0.85">
+<section
+  class="image-grid-section"
+  data-grid-section
+  data-glass-smoke
+  data-glass-smoke-density="0.65"
+  data-glass-smoke-fps="20"
+  data-glass-smoke-static="compact"
+>
   {/* Cyan smoke field behind the grid — same recipe + same component
-      as the pricing section (glass-smoke.ts). Density bumped to 1.2×
-      per user feedback 2026-05-01 ("více molekul"): the image grid
-      has 14 cards and a lot of card surface, so the smoke needs a
-      bit more presence than the pricing section to still register
-      between cards. */}
+      as the pricing section (glass-smoke.ts). Kept calmer here and
+      frame-capped because the section already runs a scroll morph and
+      clipped glass honeycomb; the smoke should add depth without
+      competing with scroll performance. */}
   <canvas class="glass-smoke" data-glass-smoke-canvas aria-hidden="true"></canvas>
 
   <div class="content">

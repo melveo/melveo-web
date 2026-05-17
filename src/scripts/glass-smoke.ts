@@ -137,6 +137,13 @@ function mount(section: HTMLElement): Handle | null {
   const ctx = context;
 
   const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const compactStatic =
+    section.dataset.glassSmokeStatic === 'compact' &&
+    window.matchMedia('(max-width: 700px), (pointer: coarse)').matches;
+  const targetFps = Math.max(
+    0,
+    Math.min(60, parseFloat(section.dataset.glassSmokeFps ?? '24')),
+  );
   const cyan = getCyanSprite();
   const teal = getTealSprite();
 
@@ -153,6 +160,7 @@ function mount(section: HTMLElement): Handle | null {
   let puffs: Puff[] = [];
   let raf = 0;
   let last = 0;
+  let lastPaint = 0;
   let visible = false;
 
   function targetCount(): number {
@@ -187,8 +195,13 @@ function mount(section: HTMLElement): Handle | null {
   function frame(now: number) {
     raf = 0;
     if (!visible) return;
+    if (targetFps > 0 && lastPaint > 0 && now - lastPaint < 1000 / targetFps) {
+      raf = requestAnimationFrame(frame);
+      return;
+    }
     const dt = last === 0 ? 0.016 : Math.min(0.05, (now - last) / 1000);
     last = now;
+    lastPaint = now;
 
     // Clear with the page bg colour so blends below stay clean. The
     // section CSS already paints `--color-bg-canvas`, so a clearRect
@@ -240,11 +253,12 @@ function mount(section: HTMLElement): Handle | null {
 
   // Seed sizes + initial draw
   resize();
-  if (reduce) {
+  if (reduce || compactStatic) {
     // One static frame, no animation.
     visible = true;
     last = performance.now();
     frame(last);
+    stop();
     visible = false;
     return {
       dispose: () => {},
