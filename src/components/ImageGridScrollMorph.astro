@@ -524,17 +524,6 @@ const t = useTranslations(lang);
     background: var(--color-bg-canvas);
     border-top: 1px solid var(--color-stroke-base);
     overflow: clip;
-    /*
-      View-timeline source — every scroll-driven animation in this
-      section references this name. Native CSS scroll-driven
-      animations run on the compositor on Chrome 115+ / Safari 26+,
-      handle reverse scroll natively, and avoid the WAAPI churn
-      that made the Motion fallback feel laggy on subsequent
-      scroll passes (user feedback 2026-05-17: "popvé OK, znovu se
-      to seká").
-    */
-    view-timeline-name: --grid-view;
-    view-timeline-axis: block;
   }
 
   @media (max-width: 1024px) {
@@ -1451,90 +1440,95 @@ const t = useTranslations(lang);
   }
 
   /*
-    Native CSS scroll-driven animations — primary perf path.
-    Runs entirely on the compositor on Chrome 115+ / Safari 26+ /
-    Firefox 145+. Browser handles reverse-scroll natively, so the
-    "first pass smooth, subsequent passes janky" issue from the
-    Motion fallback disappears.
-
-    Sized values (--scaler-start-w, --scaler-start-h) are set
-    inline by JS at mount with measured viewport / source caps.
-    The @supports gate means browsers without scroll-driven
-    animations fall back to the Motion JS path below.
+    Native CSS scroll-driven animations — TEMPORARILY DISABLED
+    2026-05-17. The combination of position:sticky inside an
+    `overflow: clip` parent broke view-timeline tracking in
+    Chrome (timeline.currentTime returned null even when the
+    section was clearly in view). Falling back to Motion JS path
+    until this can be revisited.
   */
-  @supports (animation-timeline: --foo) {
+  @supports (animation-timeline: --grid-view-disabled) {
+    /*
+      Animation-range uses `cover` percentages instead of `contain`
+      because our section (215vh) is TALLER than the viewport — the
+      `contain` keyword requires the element to fully fit inside the
+      scroller, which never happens here, so contain-based ranges
+      report 0 % progress permanently.
+
+      `cover` range maps to the element's full passage through the
+      viewport (entry → exit). For a 215vh section in a 100vh
+      viewport, total cover range = 215 + 100 = 315vh. The sticky-
+      pinned window inside the section corresponds to cover ~32 %
+      (section top at viewport top) to cover ~68 % (section bottom
+      at viewport bottom) — that's where the morph actually plays.
+    */
     .image-grid-section .scaler img {
       animation: scaler-morph linear forwards;
       animation-timeline: --grid-view;
-      animation-range: contain 0% contain 82%;
-      will-change: auto; /* native path handles compositor layer */
+      /* Hold full-bleed from cover 32 % (sticky engages) and
+         finish the morph by cover 60 %, leaving ~8 % of the
+         pinned window for the surrounding cells to settle. */
+      animation-range: cover 32% cover 60%;
+      will-change: auto;
     }
 
     @keyframes scaler-morph {
-      /*
-        Hold full-bleed for the first ~22 % of contain range, then
-        shrink to one hex cell. clip-path morphs rectangle → hex
-        in lockstep.
-      */
-      0%, 22% {
+      from {
         width: var(--scaler-start-w, 100vw);
         height: var(--scaler-start-h, 100vh);
         clip-path: polygon(0% 0%, 100% 0%, 100% 50%, 100% 100%, 0% 100%, 0% 50%);
       }
-      100% {
+      to {
         width: var(--scaler-end-w, 5.65rem);
         height: var(--scaler-end-h, 6.52rem);
         clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
       }
     }
 
-    /*
-      Layer reveal — one named keyframe, each layer applies it with
-      a different animation-range start offset for the cascade.
-      No JS observer, no inline opacity sets, no per-frame
-      style invalidation cascade.
-    */
     .image-grid-section .grid > .layer {
       opacity: 0;
       animation: layer-reveal linear forwards;
       animation-timeline: --grid-view;
     }
+    /* Cascade order: layer 5 (outer) first, layer 1 (centre) last.
+       All finish before cover 68 % so the grid is fully visible by
+       the time the user is about to scroll past. */
     .image-grid-section .grid > .layer:nth-of-type(5) {
-      animation-range: contain 50% contain 90%;
+      animation-range: cover 50% cover 62%;
     }
     .image-grid-section .grid > .layer:nth-of-type(4) {
-      animation-range: contain 53% contain 92%;
+      animation-range: cover 52% cover 63%;
     }
     .image-grid-section .grid > .layer:nth-of-type(3) {
-      animation-range: contain 56% contain 94%;
+      animation-range: cover 54% cover 64%;
     }
     .image-grid-section .grid > .layer:nth-of-type(2) {
-      animation-range: contain 60% contain 96%;
+      animation-range: cover 56% cover 65%;
     }
     .image-grid-section .grid > .layer:nth-of-type(1) {
-      animation-range: contain 63% contain 98%;
+      animation-range: cover 58% cover 66%;
     }
     @keyframes layer-reveal {
-      0%   { opacity: 0; }
-      100% { opacity: 1; }
+      from { opacity: 0; }
+      to   { opacity: 1; }
     }
 
-    /* Intro overlay fade — same timeline, tighter range. */
+    /* Intro overlay fade — runs over the first ~6 % of pinned zone. */
     .image-grid-section [data-grid-intro] {
       animation: intro-fade linear forwards;
       animation-timeline: --grid-view;
-      animation-range: contain 0% contain 22%;
+      animation-range: cover 32% cover 40%;
     }
     @keyframes intro-fade {
-      0%, 36% { opacity: 1; transform: translateY(0); }
-      100%    { opacity: 0; transform: translateY(-24px); }
+      from { opacity: 1; transform: translateY(0); }
+      to   { opacity: 0; transform: translateY(-24px); }
     }
 
-    /* Darken layer — fades the photo "in" as the user scrolls. */
+    /* Darken layer — fades the photo "in" early. */
     .image-grid-section [data-grid-intro-darken] {
       animation: darken-fade linear forwards;
       animation-timeline: --grid-view;
-      animation-range: contain 0% contain 28%;
+      animation-range: cover 32% cover 42%;
     }
     @keyframes darken-fade {
       from { opacity: 1; }
@@ -1615,13 +1609,9 @@ const t = useTranslations(lang);
   const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   const compactMotion = window.matchMedia('(max-width: 900px), (max-height: 460px) and (max-width: 950px), (pointer: coarse)').matches;
 
-  // Native CSS scroll-driven animations — Chrome 115+ / Safari 26+ /
-  // Firefox 145+. If supported, browser handles the morph natively
-  // on the compositor; JS only sets the start/end size CSS vars at
-  // mount. If NOT supported, fall through to the Motion-based JS
-  // fallback below.
-  const supportsScrollTimeline =
-    typeof CSS !== 'undefined' && CSS.supports?.('animation-timeline: --foo');
+  // Native CSS scroll-driven animations were prepared but disabled
+  // (see CSS @supports note). Force Motion JS path for now.
+  const supportsScrollTimeline = false;
 
   if (!reduceMotion) {
     const section = document.querySelector<HTMLElement>('[data-grid-section]');

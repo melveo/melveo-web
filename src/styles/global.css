@@ -175,12 +175,12 @@ body {
   align-items: center;
   justify-content: center;
   box-sizing: border-box;
-  min-width: 12rem;
-  min-height: 4.25rem;
+  min-width: 0;
+  min-height: 3.5rem;
   overflow: hidden;
   border: 1.5px solid transparent;
   border-radius: 40px;
-  padding: 1rem 2.5rem;
+  padding: 0.78rem 1.65rem;
   color: var(--color-text-primary);
   background: linear-gradient(
     135deg,
@@ -196,7 +196,7 @@ body {
   font-size: 1rem;
   font-weight: 600;
   line-height: 1.1;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.045em;
   text-decoration: none;
   white-space: nowrap;
   cursor: pointer;
@@ -310,8 +310,8 @@ body {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 0.625rem;
-  min-height: 2rem;
+  gap: 0.55rem;
+  min-height: 1.7rem;
   text-align: center;
 }
 
@@ -360,10 +360,10 @@ body {
   */
   .hero-pill {
     min-width: 0;
-    min-height: 3.75rem;
-    padding: 0.68rem 0.95rem;
-    font-size: 0.85rem;
-    letter-spacing: 0.02em;
+    min-height: 3.15rem;
+    padding: 0.54rem 1rem;
+    font-size: 0.82rem;
+    letter-spacing: 0.015em;
   }
   .hero-pill-icon {
     width: 1.05rem;
@@ -378,7 +378,7 @@ body {
   */
   .hero-pill-eyebrow {
     display: block;
-    font-size: 0.52rem;
+    font-size: 0.49rem;
   }
   .hero-pill-text {
     flex-direction: column;
@@ -386,12 +386,12 @@ body {
     line-height: 1;
   }
   .hero-pill-title {
-    font-size: 0.85rem;
-    margin-top: 0.08rem;
+    font-size: 0.82rem;
+    margin-top: 0.06rem;
   }
   .hero-pill-content {
-    gap: 0.45rem;
-    min-height: 1.75rem;
+    gap: 0.42rem;
+    min-height: 1.55rem;
   }
 }
 
