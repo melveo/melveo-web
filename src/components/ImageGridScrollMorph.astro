@@ -1441,8 +1441,17 @@ const t = useTranslations(lang);
     backface-visibility: hidden;
   }
 
+  /*
+    Containment note 2026-05-17: must NOT include `paint`. The img
+    inside .scaler starts at 100 vw × 100 dvh (way bigger than the
+    cell) and gradually shrinks to fit. `contain: paint` clips
+    overflow to the padding box, which would hide the full-bleed
+    starting frame entirely (user-visible bug: "hlavní fotka tam
+    neni vidět vůbec" on desktop). `contain: layout` alone is safe
+    — it isolates layout work without clipping rendering.
+  */
   .image-grid-section .scaler {
-    contain: layout paint;
+    contain: layout;
   }
 
   /*
@@ -1451,96 +1460,11 @@ const t = useTranslations(lang);
     `overflow: clip` parent broke view-timeline tracking in
     Chrome (timeline.currentTime returned null even when the
     section was clearly in view). Falling back to Motion JS path
-    until this can be revisited.
+    until this can be revisited. Block deleted because @supports
+    only checks property syntax, not whether the timeline name
+    exists — the dead-code block was actually applying and putting
+    the scaler in its end state at page load.
   */
-  @supports (animation-timeline: --grid-view-disabled) {
-    /*
-      Animation-range uses `cover` percentages instead of `contain`
-      because our section (215vh) is TALLER than the viewport — the
-      `contain` keyword requires the element to fully fit inside the
-      scroller, which never happens here, so contain-based ranges
-      report 0 % progress permanently.
-
-      `cover` range maps to the element's full passage through the
-      viewport (entry → exit). For a 215vh section in a 100vh
-      viewport, total cover range = 215 + 100 = 315vh. The sticky-
-      pinned window inside the section corresponds to cover ~32 %
-      (section top at viewport top) to cover ~68 % (section bottom
-      at viewport bottom) — that's where the morph actually plays.
-    */
-    .image-grid-section .scaler img {
-      animation: scaler-morph linear forwards;
-      animation-timeline: --grid-view;
-      /* Hold full-bleed from cover 32 % (sticky engages) and
-         finish the morph by cover 60 %, leaving ~8 % of the
-         pinned window for the surrounding cells to settle. */
-      animation-range: cover 32% cover 60%;
-      will-change: auto;
-    }
-
-    @keyframes scaler-morph {
-      from {
-        width: var(--scaler-start-w, 100vw);
-        height: var(--scaler-start-h, 100vh);
-        clip-path: polygon(0% 0%, 100% 0%, 100% 50%, 100% 100%, 0% 100%, 0% 50%);
-      }
-      to {
-        width: var(--scaler-end-w, 5.65rem);
-        height: var(--scaler-end-h, 6.52rem);
-        clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
-      }
-    }
-
-    .image-grid-section .grid > .layer {
-      opacity: 0;
-      animation: layer-reveal linear forwards;
-      animation-timeline: --grid-view;
-    }
-    /* Cascade order: layer 5 (outer) first, layer 1 (centre) last.
-       All finish before cover 68 % so the grid is fully visible by
-       the time the user is about to scroll past. */
-    .image-grid-section .grid > .layer:nth-of-type(5) {
-      animation-range: cover 50% cover 62%;
-    }
-    .image-grid-section .grid > .layer:nth-of-type(4) {
-      animation-range: cover 52% cover 63%;
-    }
-    .image-grid-section .grid > .layer:nth-of-type(3) {
-      animation-range: cover 54% cover 64%;
-    }
-    .image-grid-section .grid > .layer:nth-of-type(2) {
-      animation-range: cover 56% cover 65%;
-    }
-    .image-grid-section .grid > .layer:nth-of-type(1) {
-      animation-range: cover 58% cover 66%;
-    }
-    @keyframes layer-reveal {
-      from { opacity: 0; }
-      to   { opacity: 1; }
-    }
-
-    /* Intro overlay fade — runs over the first ~6 % of pinned zone. */
-    .image-grid-section [data-grid-intro] {
-      animation: intro-fade linear forwards;
-      animation-timeline: --grid-view;
-      animation-range: cover 32% cover 40%;
-    }
-    @keyframes intro-fade {
-      from { opacity: 1; transform: translateY(0); }
-      to   { opacity: 0; transform: translateY(-24px); }
-    }
-
-    /* Darken layer — fades the photo "in" early. */
-    .image-grid-section [data-grid-intro-darken] {
-      animation: darken-fade linear forwards;
-      animation-timeline: --grid-view;
-      animation-range: cover 32% cover 42%;
-    }
-    @keyframes darken-fade {
-      from { opacity: 1; }
-      to   { opacity: 0; }
-    }
-  }
 
   /* Reduced-motion: drop the sticky/scroll dance. Show every cell in
      its final position, statically. */
