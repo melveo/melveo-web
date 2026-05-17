@@ -530,11 +530,47 @@ const t = useTranslations(lang);
     background: var(--color-bg-canvas);
     border-top: 1px solid var(--color-stroke-base);
     overflow: clip;
+    /*
+      Chrome scroll anchoring can try to preserve the visual position
+      of descendants while the centre image morphs from viewport-sized
+      to hex-sized and while Motion scroll observers are detached. That
+      can pull the page back toward this section after the user has
+      already scrolled on, which feels like global page jank. This
+      section intentionally controls its own scroll illusion, so opt it
+      out of anchoring.
+    */
+    overflow-anchor: none;
+    /*
+      Perf 2026-05-17 (user-reported: whole site janks after
+      passing through this section, even with Motion scroll
+      observers properly torn down via IntersectionObserver).
+      Root cause was Chrome continuing to composite the 30
+      hexagons + sticky container per scroll-frame across the
+      entire rest of the page, because the section stayed in
+      the layout/render tree.
+
+      `content-visibility: auto` tells Chrome to skip rendering
+      (paint, layout for descendants, hit-test) entirely when
+      the section is off-screen by more than ~50 % viewport.
+      Combined with `contain-intrinsic-size` (so layout still
+      reserves the section's space without measuring children)
+      it removes the per-scroll composite cost end-to-end.
+
+      215vh matches the min-height above so the placeholder
+      size is exact; the mobile media query below adjusts to
+      175vh for ≤1024 px.
+    */
+    content-visibility: auto;
+    contain-intrinsic-size: 100vw 215vh;
   }
 
   @media (max-width: 1024px) {
     .image-grid-section {
       min-height: 175vh;
+      /* Match content-visibility placeholder to the shorter
+         tablet/mobile section height — otherwise Chrome reserves
+         the desktop 215vh slot and the page below shifts. */
+      contain-intrinsic-size: 100vw 175vh;
     }
   }
 
@@ -735,6 +771,7 @@ const t = useTranslations(lang);
     position: sticky;
     top: 0;
     overflow: hidden;
+    overflow-anchor: none;
     display: flex;
     place-items: center;
     align-content: center;
@@ -779,6 +816,7 @@ const t = useTranslations(lang);
     translate: -50% -50%;
     overflow: visible;
     contain: layout style;
+    overflow-anchor: none;
   }
 
   /*
@@ -1503,6 +1541,7 @@ const t = useTranslations(lang);
       it on unmount.
     */
     backface-visibility: hidden;
+    overflow-anchor: none;
   }
 
   /*
@@ -1683,7 +1722,6 @@ const t = useTranslations(lang);
         let mounted = false;
         const willChangeEls: HTMLElement[] = [
           img,
-          ...Array.from(section.querySelectorAll<HTMLElement>('.grid-photo, .tech-card')),
           ...Array.from(layers),
         ];
 
@@ -1911,12 +1949,15 @@ const t = useTranslations(lang);
         };
 
         /*
-          IntersectionObserver — 100 % rootMargin means we mount
-          when the section is within one viewport of the user,
-          unmount once it's a full viewport away. That keeps the
-          morph perfectly ready by the time it scrolls into view
-          while leaving the rest of the site free of its scroll
-          observers and GPU layers.
+          IntersectionObserver — keep the Motion scroll observers
+          alive only while the morph is actually inside or close to the
+          viewport. Earlier this used 100 % rootMargin, which meant
+          the heavy width/height/clip-path timeline stayed mounted
+          deep into the next section. Chrome then kept paying for
+          the honeycomb while the user was already reading the rest
+          of the page. Keep only a small bottom pre-warm margin for
+          entry; top margin stays 0 so teardown happens as soon as
+          the section has fully left above the viewport.
         */
         const io = new IntersectionObserver(
           (entries) => {
@@ -1925,7 +1966,7 @@ const t = useTranslations(lang);
               else unmount();
             }
           },
-          { rootMargin: '100% 0px 100% 0px', threshold: 0 },
+          { rootMargin: '0px 0px 15% 0px', threshold: 0 },
         );
         io.observe(section);
       });
