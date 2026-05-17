@@ -74,31 +74,12 @@ const hueStep = (hueEnd - hueStart) / Math.max(1, words.length - 1);
     color-scheme: dark;
   }
 
-  .word-scroll-stage::before,
-  .word-scroll-stage::after {
-    content: '';
-    position: absolute;
-    pointer-events: none;
-    z-index: 0;
-  }
-
-  .word-scroll-stage::before {
-    inset: 12% 10% auto 10%;
-    height: 42%;
-    background:
-      radial-gradient(circle at 42% 52%, rgba(0, 240, 255, 0.18), transparent 34%),
-      radial-gradient(circle at 58% 48%, rgba(176, 112, 46, 0.09), transparent 38%);
-    filter: blur(48px);
-    opacity: 0.72;
-  }
-
-  .word-scroll-stage::after {
-    inset: auto 18% 12% 18%;
-    height: 22%;
-    background: radial-gradient(circle, rgba(0, 240, 255, 0.1), transparent 62%);
-    filter: blur(42px);
-    opacity: 0.55;
-  }
+  /*
+    Background blur halos (::before cyan+amber, ::after cyan) removed
+    2026-05-17 per user direction: section must be pure black, only
+    the prefix + cycling word list remain. No ambient glow blobs
+    behind the text.
+  */
 
   .word-scroll-stage__pin {
     position: sticky;

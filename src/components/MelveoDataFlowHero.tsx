@@ -1228,19 +1228,12 @@ export default function MelveoDataFlowHero({ lang = "en" }: Props) {
           padding: clamp(3rem, 7vw, 5.5rem) clamp(1rem, 4vw, 3rem);
           color: #fff;
         }
-        .data-flow-stage::before {
-          content: "";
-          position: absolute;
-          inset: 10% 30% 30% 30%;
-          background: radial-gradient(
-            ellipse at center,
-            rgba(0, 240, 255, 0.12),
-            transparent 70%
-          );
-          filter: blur(50px);
-          z-index: 0;
-          pointer-events: none;
-        }
+        /*
+          Background radial cyan halo removed 2026-05-17 per user
+          direction: section must be pure black, only the data-flow
+          visualisation itself remains. Was a blurred cyan ellipse
+          behind the centre of the section.
+        */
         .data-flow-inner {
           position: relative;
           z-index: 1;

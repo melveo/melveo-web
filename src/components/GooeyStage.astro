@@ -20,8 +20,11 @@ const t = useTranslations(lang);
 ---
 
 <section class="relative isolate w-full overflow-hidden border-t border-[var(--color-stroke-base)] bg-[var(--color-bg-canvas)]">
-  <div class="halo-cyan" style="opacity: 0.35; inset: -30% 0 auto 50%;"></div>
-
+  {/*
+    Background halo removed 2026-05-17 per user direction: section
+    background must be pure black, gooey balls remain as the
+    in-content visualisation.
+  */}
   <div class="relative z-10 flex min-h-[60vh] flex-col items-center justify-center px-6 py-24 text-center sm:py-32">
     <svg class="gooey-svg" viewBox="-200 -100 400 200" preserveAspectRatio="xMidYMid meet" aria-hidden="true">
       <defs>
