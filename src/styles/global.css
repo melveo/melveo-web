@@ -174,7 +174,9 @@ body {
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  box-sizing: border-box;
   min-width: 12rem;
+  min-height: 4.25rem;
   overflow: hidden;
   border: 1.5px solid transparent;
   border-radius: 40px;
@@ -191,7 +193,9 @@ body {
     0 8px 32px rgba(0, 0, 0, 0.2),
     inset 0 1px 0 rgba(255, 255, 255, 0.2),
     inset 0 -1px 0 rgba(255, 255, 255, 0.05);
+  font-size: 1rem;
   font-weight: 600;
+  line-height: 1.1;
   letter-spacing: 0.08em;
   text-decoration: none;
   white-space: nowrap;
@@ -307,6 +311,8 @@ body {
   align-items: center;
   justify-content: center;
   gap: 0.625rem;
+  min-height: 2rem;
+  text-align: center;
 }
 
 /* Apple glyph + stacked label inside the App Store filled pill */
@@ -324,12 +330,14 @@ body {
 .hero-pill-eyebrow {
   font-size: 0.625rem;
   font-weight: 500;
+  line-height: 1;
   letter-spacing: 0.05em;
   opacity: 0.75;
 }
 .hero-pill-title {
   font-size: 1rem;
   font-weight: 600;
+  line-height: 1;
   letter-spacing: -0.01em;
   margin-top: 0.1rem;
 }
@@ -352,35 +360,38 @@ body {
   */
   .hero-pill {
     min-width: 0;
-    padding: 0.65rem 1rem;
+    min-height: 3.75rem;
+    padding: 0.68rem 0.95rem;
     font-size: 0.85rem;
     letter-spacing: 0.02em;
   }
   .hero-pill-icon {
-    width: 1rem;
-    height: 1rem;
+    width: 1.05rem;
+    height: 1.05rem;
   }
   /*
-    Phone unification 2026-05-17: hide the 2-line "Download on the /
-    App Store" eyebrow and render the title as a single inline label
-    next to the Apple icon. Pairs visually with the single-line
-    "Kontakt →" / "Get in touch →" pill — same vertical height,
-    same font weight, same letterforms.
+    Phone unification 2026-05-17: keep the App Store button in its
+    native two-line shape ("Download on the" / "App Store") while the
+    sibling CTA gets the same explicit min-height. The buttons can
+    change width or wrap as the viewport requires, but their vertical
+    rhythm stays identical.
   */
   .hero-pill-eyebrow {
-    display: none;
+    display: block;
+    font-size: 0.52rem;
   }
   .hero-pill-text {
-    flex-direction: row;
-    align-items: center;
+    flex-direction: column;
+    align-items: flex-start;
     line-height: 1;
   }
   .hero-pill-title {
     font-size: 0.85rem;
-    margin-top: 0;
+    margin-top: 0.08rem;
   }
   .hero-pill-content {
     gap: 0.45rem;
+    min-height: 1.75rem;
   }
 }
 

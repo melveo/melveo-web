@@ -524,6 +524,17 @@ const t = useTranslations(lang);
     background: var(--color-bg-canvas);
     border-top: 1px solid var(--color-stroke-base);
     overflow: clip;
+    /*
+      View-timeline source — every scroll-driven animation in this
+      section references this name. Native CSS scroll-driven
+      animations run on the compositor on Chrome 115+ / Safari 26+,
+      handle reverse scroll natively, and avoid the WAAPI churn
+      that made the Motion fallback feel laggy on subsequent
+      scroll passes (user feedback 2026-05-17: "popvé OK, znovu se
+      to seká").
+    */
+    view-timeline-name: --grid-view;
+    view-timeline-axis: block;
   }
 
   @media (max-width: 1024px) {
@@ -1439,6 +1450,98 @@ const t = useTranslations(lang);
     contain: layout paint;
   }
 
+  /*
+    Native CSS scroll-driven animations — primary perf path.
+    Runs entirely on the compositor on Chrome 115+ / Safari 26+ /
+    Firefox 145+. Browser handles reverse-scroll natively, so the
+    "first pass smooth, subsequent passes janky" issue from the
+    Motion fallback disappears.
+
+    Sized values (--scaler-start-w, --scaler-start-h) are set
+    inline by JS at mount with measured viewport / source caps.
+    The @supports gate means browsers without scroll-driven
+    animations fall back to the Motion JS path below.
+  */
+  @supports (animation-timeline: --foo) {
+    .image-grid-section .scaler img {
+      animation: scaler-morph linear forwards;
+      animation-timeline: --grid-view;
+      animation-range: contain 0% contain 82%;
+      will-change: auto; /* native path handles compositor layer */
+    }
+
+    @keyframes scaler-morph {
+      /*
+        Hold full-bleed for the first ~22 % of contain range, then
+        shrink to one hex cell. clip-path morphs rectangle → hex
+        in lockstep.
+      */
+      0%, 22% {
+        width: var(--scaler-start-w, 100vw);
+        height: var(--scaler-start-h, 100vh);
+        clip-path: polygon(0% 0%, 100% 0%, 100% 50%, 100% 100%, 0% 100%, 0% 50%);
+      }
+      100% {
+        width: var(--scaler-end-w, 5.65rem);
+        height: var(--scaler-end-h, 6.52rem);
+        clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+      }
+    }
+
+    /*
+      Layer reveal — one named keyframe, each layer applies it with
+      a different animation-range start offset for the cascade.
+      No JS observer, no inline opacity sets, no per-frame
+      style invalidation cascade.
+    */
+    .image-grid-section .grid > .layer {
+      opacity: 0;
+      animation: layer-reveal linear forwards;
+      animation-timeline: --grid-view;
+    }
+    .image-grid-section .grid > .layer:nth-of-type(5) {
+      animation-range: contain 50% contain 90%;
+    }
+    .image-grid-section .grid > .layer:nth-of-type(4) {
+      animation-range: contain 53% contain 92%;
+    }
+    .image-grid-section .grid > .layer:nth-of-type(3) {
+      animation-range: contain 56% contain 94%;
+    }
+    .image-grid-section .grid > .layer:nth-of-type(2) {
+      animation-range: contain 60% contain 96%;
+    }
+    .image-grid-section .grid > .layer:nth-of-type(1) {
+      animation-range: contain 63% contain 98%;
+    }
+    @keyframes layer-reveal {
+      0%   { opacity: 0; }
+      100% { opacity: 1; }
+    }
+
+    /* Intro overlay fade — same timeline, tighter range. */
+    .image-grid-section [data-grid-intro] {
+      animation: intro-fade linear forwards;
+      animation-timeline: --grid-view;
+      animation-range: contain 0% contain 22%;
+    }
+    @keyframes intro-fade {
+      0%, 36% { opacity: 1; transform: translateY(0); }
+      100%    { opacity: 0; transform: translateY(-24px); }
+    }
+
+    /* Darken layer — fades the photo "in" as the user scrolls. */
+    .image-grid-section [data-grid-intro-darken] {
+      animation: darken-fade linear forwards;
+      animation-timeline: --grid-view;
+      animation-range: contain 0% contain 28%;
+    }
+    @keyframes darken-fade {
+      from { opacity: 1; }
+      to   { opacity: 0; }
+    }
+  }
+
   /* Reduced-motion: drop the sticky/scroll dance. Show every cell in
      its final position, statically. */
   @media (prefers-reduced-motion: reduce) {
@@ -1512,13 +1615,43 @@ const t = useTranslations(lang);
   const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   const compactMotion = window.matchMedia('(max-width: 900px), (max-height: 460px) and (max-width: 950px), (pointer: coarse)').matches;
 
+  // Native CSS scroll-driven animations — Chrome 115+ / Safari 26+ /
+  // Firefox 145+. If supported, browser handles the morph natively
+  // on the compositor; JS only sets the start/end size CSS vars at
+  // mount. If NOT supported, fall through to the Motion-based JS
+  // fallback below.
+  const supportsScrollTimeline =
+    typeof CSS !== 'undefined' && CSS.supports?.('animation-timeline: --foo');
+
   if (!reduceMotion) {
     const section = document.querySelector<HTMLElement>('[data-grid-section]');
     const image = section?.querySelector<HTMLImageElement>('.scaler img');
     const layers = section?.querySelectorAll<HTMLElement>('.grid > .layer');
     const cells = section?.querySelectorAll<HTMLElement>('.grid > .layer > div');
 
-    if (section && image && layers && layers.length > 0 && cells && cells.length > 0) {
+    // Native path — set CSS vars on the section so the keyframes can
+    // animate to the right pixel values. No scroll observers, no
+    // animation library, no per-frame JS.
+    if (supportsScrollTimeline && section && image) {
+      const setNativeVars = () => {
+        const scalerEl = section.querySelector<HTMLElement>('.scaler');
+        const contentEl = section.querySelector<HTMLElement>('.content');
+        const viewportWidth = contentEl?.offsetWidth || window.innerWidth;
+        const viewportHeight = contentEl?.offsetHeight || window.innerHeight;
+        const naturalWidth = scalerEl?.offsetWidth ?? 92;
+        const naturalHeight = scalerEl?.offsetHeight ?? naturalWidth / 0.8660254038;
+        const displayWidth = Math.min(viewportWidth, 1672);
+        const displayHeight = Math.min(viewportHeight, 941);
+        section.style.setProperty('--scaler-start-w', `${displayWidth}px`);
+        section.style.setProperty('--scaler-start-h', `${displayHeight}px`);
+        section.style.setProperty('--scaler-end-w', `${naturalWidth}px`);
+        section.style.setProperty('--scaler-end-h', `${naturalHeight}px`);
+      };
+      // Wait one frame for layout to settle, then publish vars.
+      requestAnimationFrame(setNativeVars);
+      // Re-publish on resize so the morph adapts to viewport changes.
+      window.addEventListener('resize', setNativeVars, { passive: true });
+    } else if (section && image && layers && layers.length > 0 && cells && cells.length > 0) {
       // Wait one frame so layout has settled and we can measure the
       // .scaler container itself — its offsetWidth/Height equal the
       // grid cell size after layout commits.
