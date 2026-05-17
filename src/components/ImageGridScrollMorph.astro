@@ -1064,11 +1064,24 @@ const t = useTranslations(lang);
     --card-icon: clamp(3.1rem, min(4.8vw, 7.2vh), 4.9rem);
     --card-label: clamp(0.82rem, min(1.23vw, 1.8vh), 1.28rem);
     --card-label-width: 100%;
-    filter:
-      drop-shadow(0 14px 34px rgba(0, 0, 0, 0.38))
-      drop-shadow(0 0 22px rgba(0, 240, 255, 0.11));
+    /*
+      Perf 2026-05-17 (Chrome jank): collapsed two drop-shadows
+      into a single combined shadow. Each drop-shadow forces a
+      filter-graph rasterization pass; with 30 cells and parent
+      .layer opacity animating per scroll frame, Chrome was
+      re-rasterizing 60 filter outputs every frame. One shadow
+      with a moderate radius gives the same visual depth at half
+      the cost. Was:
+        drop-shadow(0 14px 34px rgba(0,0,0,0.38))
+        drop-shadow(0 0 22px rgba(0,240,255,0.11));
+    */
+    filter: drop-shadow(0 12px 28px rgba(0, 0, 0, 0.44));
     contain: layout paint;
     backface-visibility: hidden;
+    /* Each cell its own composite layer — opacity changes on the
+       parent .layer then just blend pre-rastered cell outputs
+       instead of re-painting each cell's filter chain. */
+    transform: translateZ(0);
   }
 
   /*
@@ -1161,13 +1174,18 @@ const t = useTranslations(lang);
     width: 85%;
     aspect-ratio: 1;
     transform: translateX(-50%);
+    /*
+      Perf 2026-05-17 (Chrome jank): dropped `filter: blur(14px)`.
+      The radial-gradient stops already taper softly (0.22→0.08→
+      transparent), so the blur was adding ~zero visual gain at
+      high per-cell paint cost (~24 cells × 14 px blur). Removed.
+    */
     background: radial-gradient(
       circle,
-      rgba(0, 240, 255, 0.22) 0%,
-      rgba(0, 240, 255, 0.08) 35%,
-      transparent 65%
+      rgba(0, 240, 255, 0.18) 0%,
+      rgba(0, 240, 255, 0.07) 38%,
+      transparent 70%
     );
-    filter: blur(14px);
     pointer-events: none;
     z-index: 0;
   }
@@ -1426,7 +1444,16 @@ const t = useTranslations(lang);
     position: absolute;
     top: 50%;
     left: 50%;
-    translate: -50% -50%;
+    /*
+      Perf 2026-05-17 (Chrome jank): combine the centering translate
+      with translateZ(0) inside a single `transform`, instead of a
+      separate `translate` longhand. The Z component forces Chrome
+      to give this element its own composite layer — clip-path
+      morph + width/height changes then happen on the layer's own
+      raster instead of repainting the parent. Safari already did
+      this implicitly via its composite heuristics, Chrome did not.
+    */
+    transform: translate(-50%, -50%) translateZ(0);
     object-fit: cover;
     object-position: center;
     width: 100vw;
@@ -1437,7 +1464,16 @@ const t = useTranslations(lang);
     border-radius: 28px;
     max-width: none;
     max-height: none;
-    will-change: width, height, clip-path;
+    /*
+      Perf 2026-05-17 (Chrome jank): width/height are NOT valid
+      will-change candidates — Chrome ignores them (they always
+      trigger layout, no anticipation possible) and the only
+      effect is a warning. clip-path IS valid but only useful for
+      transitions about to start, not for ongoing per-frame morphs.
+      Hinting `transform` (which we use for layer promotion above)
+      is the only meaningful signal. Was: width, height, clip-path.
+    */
+    will-change: transform;
     backface-visibility: hidden;
   }
 
