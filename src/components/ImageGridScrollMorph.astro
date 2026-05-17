@@ -800,7 +800,13 @@ const t = useTranslations(lang);
     inset: 0;
     transform-origin: 50% 50%;
     opacity: clamp(0, calc((var(--reveal-progress, 0) - var(--reveal-offset, 0)) * 6), 1);
-    will-change: opacity;
+    /*
+      Perf 2026-05-17: will-change: opacity moved to JS — applied
+      only while the section is within one viewport of the user.
+      Static CSS hint kept all 5 layers on the GPU compositor for
+      the whole page and added a measurable per-scroll cost
+      everywhere else on the site.
+    */
   }
   .image-grid-section .grid > .layer:nth-of-type(5) { --reveal-offset: 0; }
   .image-grid-section .grid > .layer:nth-of-type(4) { --reveal-offset: 0.04; }
@@ -818,7 +824,13 @@ const t = useTranslations(lang);
     min-height: 0;
     min-width: 0;
     translate: -50% -50%;
-    will-change: transform, opacity;
+    /*
+      Perf 2026-05-17: dropped `will-change: transform, opacity`.
+      Each cell would otherwise hold a permanent GPU layer for
+      the page lifetime. The translate is static after layout —
+      no need to hint, and the IntersectionObserver in script
+      below promotes only what's animating, only when near view.
+    */
     backface-visibility: hidden;
   }
 
@@ -1078,10 +1090,20 @@ const t = useTranslations(lang);
     filter: drop-shadow(0 12px 28px rgba(0, 0, 0, 0.44));
     contain: layout paint;
     backface-visibility: hidden;
-    /* Each cell its own composite layer — opacity changes on the
-       parent .layer then just blend pre-rastered cell outputs
-       instead of re-painting each cell's filter chain. */
-    transform: translateZ(0);
+    /*
+      Perf 2026-05-17 (post-morph site-wide jank): dropped the
+      static `transform: translateZ(0)`. Each of the 30 cells
+      would otherwise hold a permanent GPU composite layer for
+      the page lifetime — even when the morph section was
+      nowhere near the viewport — and the cumulative composite
+      cost is what made the rest of the site stutter after
+      passing through the section. The IntersectionObserver in
+      the script block now sets `will-change: opacity` on these
+      elements only while the section is within one viewport,
+      and clears it once we're past — the cells get their layer
+      promotion exactly when the parent .layer opacity reveal
+      needs it, and not a moment longer.
+    */
   }
 
   /*
@@ -1144,8 +1166,14 @@ const t = useTranslations(lang);
        context (user feedback 2026-05-01: "ať jsou vidět hlavy"). */
     object-position: 50% 30%;
     display: block;
-    transform: translateZ(0) scale(1);
-    will-change: transform;
+    /*
+      Perf 2026-05-17: dropped translateZ(0) + will-change. The
+      grid-photo <img> elements (one per photo cell) are static
+      after layout — no animation, no transform changes. Forcing
+      each to its own GPU layer kept ~12 composite layers alive
+      for the whole page lifetime, contributing to the post-morph
+      scroll jank.
+    */
     contain: paint;
   }
 
@@ -1465,15 +1493,15 @@ const t = useTranslations(lang);
     max-width: none;
     max-height: none;
     /*
-      Perf 2026-05-17 (Chrome jank): width/height are NOT valid
-      will-change candidates — Chrome ignores them (they always
-      trigger layout, no anticipation possible) and the only
-      effect is a warning. clip-path IS valid but only useful for
-      transitions about to start, not for ongoing per-frame morphs.
-      Hinting `transform` (which we use for layer promotion above)
-      is the only meaningful signal. Was: width, height, clip-path.
+      Perf 2026-05-17: will-change is now applied dynamically from
+      JS via an IntersectionObserver — only while the section is
+      within one viewport of the user. Keeping it in CSS would
+      hold the GPU composite layer for the entire page lifetime
+      and cause the whole site to scroll-jank after passing
+      through the morph (user-reported regression). The JS path
+      sets `transform` as the will-change hint on mount, clears
+      it on unmount.
     */
-    will-change: transform;
     backface-visibility: hidden;
   }
 
@@ -1616,6 +1644,34 @@ const t = useTranslations(lang);
         if (!scalerEl) return;
 
         /*
+          Lifecycle 2026-05-17 (user-reported: site janks after
+          scrolling through the morph section). Motion's scroll()
+          attaches a ScrollTimeline that keeps re-evaluating
+          animation progress on every scroll event for the page
+          lifetime — even when the section is 5+ viewports away.
+          With 5 scroll() observers (scaler width/height/clip,
+          layer reveal, intro opacity, intro y, darken opacity)
+          plus permanently-promoted composite layers via
+          will-change, every scroll across the rest of the site
+          paid for this section.
+
+          Fix: mount the scroll observers + GPU layer hints only
+          while the section is anywhere near the viewport. Drop
+          them (capturing cleanup functions returned by scroll())
+          + strip will-change once the section is far away. The
+          IntersectionObserver runs with a generous 100 % rootMargin
+          so the wiring is back in place before the user can
+          scroll into the morph.
+        */
+        const cleanups: Array<() => void> = [];
+        let mounted = false;
+        const willChangeEls: HTMLElement[] = [
+          image,
+          ...Array.from(section.querySelectorAll<HTMLElement>('.grid-photo, .tech-card')),
+          ...Array.from(layers),
+        ];
+
+        /*
           Scaler 2026-05-17 v3 — animate width/height (aspect ratio
           changes from viewport landscape → hex portrait).
 
@@ -1650,9 +1706,20 @@ const t = useTranslations(lang);
         const scalerEndRatio = 0.82;
         const revealEndRatio = 0.95;
 
+        const mount = () => {
+          if (mounted) return;
+          mounted = true;
+          // Re-enable composite-layer hints right before the
+          // scroll-driven animations attach — kept off while the
+          // section is far from view so GPU layers don't hang
+          // around for the rest of the page.
+          for (const el of willChangeEls) {
+            el.style.willChange = el === image ? 'transform' : 'opacity';
+          }
+
         // ─── Scaler: hold full-bleed, then shrink to hex cell ───
         // width/height pixel keyframes + clip-path polygon morph.
-        scroll(
+        const offScaler = scroll(
           animate(
             image,
             {
@@ -1674,6 +1741,7 @@ const t = useTranslations(lang);
             offset: ['start start', `${scalerEndRatio * 100}% end`] as any,
           },
         );
+        if (typeof offScaler === 'function') cleanups.push(offScaler);
 
         // ─── Each layer: calm reveal cascade ───────────────────────────
         // Layer opacity is fully CSS-driven now (clamp(0, calc((reveal -
@@ -1721,7 +1789,7 @@ const t = useTranslations(lang);
           cascade ordering (inner finishes first, outer last) is
           preserved without JS work per frame.
         */
-        scroll(
+        const offReveal = scroll(
           animate(
             section,
             { '--reveal-progress': [0, 0, 1] } as any,
@@ -1735,6 +1803,7 @@ const t = useTranslations(lang);
             offset: ['start start', `${revealEndRatio * 100}% end`] as any,
           },
         );
+        if (typeof offReveal === 'function') cleanups.push(offReveal);
 
         // Individual per-cell scroll animations intentionally removed:
         // the parent layer reveal is the stable cross-browser path.
@@ -1755,7 +1824,7 @@ const t = useTranslations(lang);
         //     plus a tighter scroll() offset works correctly.
         const intro = section.querySelector<HTMLElement>('[data-grid-intro]');
         if (intro) {
-          scroll(
+          const offIntroOpacity = scroll(
             animate(
               intro,
               { opacity: [1, 1, 0] },
@@ -1769,7 +1838,8 @@ const t = useTranslations(lang);
               offset: ['start start', '22% start'] as any,
             },
           );
-          scroll(
+          if (typeof offIntroOpacity === 'function') cleanups.push(offIntroOpacity);
+          const offIntroY = scroll(
             animate(
               intro,
               { y: ['0px', '0px', '-24px'] },
@@ -1783,6 +1853,7 @@ const t = useTranslations(lang);
               offset: ['start start', '22% start'] as any,
             },
           );
+          if (typeof offIntroY === 'function') cleanups.push(offIntroY);
         }
 
         // ─── Black scroll-reveal: photo "develops in" ──────────────────
@@ -1794,7 +1865,7 @@ const t = useTranslations(lang);
         //     — gives the morph a "reveal then shrink" rhythm.
         const darken = section.querySelector<HTMLElement>('[data-grid-intro-darken]');
         if (darken) {
-          scroll(
+          const offDarken = scroll(
             animate(
               darken,
               { opacity: [1, 0] },
@@ -1805,7 +1876,43 @@ const t = useTranslations(lang);
               offset: ['start start', '28% start'] as any,
             },
           );
+          if (typeof offDarken === 'function') cleanups.push(offDarken);
         }
+        };
+
+        const unmount = () => {
+          if (!mounted) return;
+          mounted = false;
+          // Detach every Motion scroll observer and release the
+          // composite-layer hints so the rest of the page scrolls
+          // without paying for this section's setup.
+          for (const off of cleanups) {
+            try { off(); } catch {}
+          }
+          cleanups.length = 0;
+          for (const el of willChangeEls) {
+            el.style.willChange = '';
+          }
+        };
+
+        /*
+          IntersectionObserver — 100 % rootMargin means we mount
+          when the section is within one viewport of the user,
+          unmount once it's a full viewport away. That keeps the
+          morph perfectly ready by the time it scrolls into view
+          while leaving the rest of the site free of its scroll
+          observers and GPU layers.
+        */
+        const io = new IntersectionObserver(
+          (entries) => {
+            for (const entry of entries) {
+              if (entry.isIntersecting) mount();
+              else unmount();
+            }
+          },
+          { rootMargin: '100% 0px 100% 0px', threshold: 0 },
+        );
+        io.observe(section);
       });
     }
   }
