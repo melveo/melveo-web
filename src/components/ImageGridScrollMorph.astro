@@ -1819,55 +1819,46 @@ const t = useTranslations(lang);
         const displayWidth = Math.min(viewportWidth, sourceMaxW);
         const displayHeight = Math.min(viewportHeight, sourceMaxH);
 
-        img.style.width = `${displayWidth}px`;
-        img.style.height = `${displayHeight}px`;
-        img.style.clipPath = 'polygon(0% 0%, 100% 0%, 100% 50%, 100% 100%, 0% 100%, 0% 50%)';
-        img.style.setProperty('-webkit-clip-path', 'polygon(0% 0%, 100% 0%, 100% 50%, 100% 100%, 0% 100%, 0% 50%)');
-
         /*
-          Scale-based morph (replaces the previous width/height
-          per-frame animation).
+          Scale-based morph v3 — element sized at the hex cell
+          itself, scale UP to cover the viewport at start, scale
+          DOWN to 1 at end.
 
-          Why: animating width/height triggers a layout pass on
-          every scroll-frame. Desktop Chrome could just about keep
-          up; phone CPUs could not, producing the user-reported
-          jank "to zmenšování fotky na hexagon a zpět" on mobile.
+          Why v3: in v2 the element was viewport-sized and we
+          scaled it down to cell size with `max(natW/dispW,
+          natH/dispH)`. With a uniform scale factor that ends up
+          taller than the destination cell on the looser axis,
+          and the hex clip-path (computed at 100 % of the
+          ORIGINAL viewport-sized element) was much bigger than
+          the cell — so the end-state photo extended well past
+          the cell outline. User: "musi to byt stale hexagon" —
+          the photo must stay a clean hex, sized to the cell.
 
-          With the image element kept at its full-bleed dimensions
-          throughout, `transform: scale()` drives the visual shrink
-          purely on the GPU compositor — zero layout work per
-          frame. Object-fit:cover is computed once at the element's
-          original (full-bleed) dimensions, so the player faces
-          stay in frame regardless of the scale factor.
-
-          Non-uniform scale (scaleX !== scaleY) is required because
-          the destination hex cell is portrait while the start
-          frame is landscape viewport. The visual outcome is
-          identical to the previous width/height morph because
-          transform-origin sits at the image centre = grid centre =
-          hex cell centre.
+          v3 fix: the image element's width/height is the hex
+          cell itself (naturalWidth × naturalHeight). The clip-
+          path therefore describes a hex inside the cell — exact
+          fit at end. At start we apply a uniform `coverScale`
+          large enough to cover the viewport; the scaled hex
+          extends past viewport edges on the looser axis (looks
+          like full-bleed) while preserving the image's aspect
+          throughout. Object-fit:cover crops the landscape source
+          (1672 × 941) to the cell's portrait ratio once; that
+          crop is consistent through every scale factor.
         */
-        /*
-          Uniform scale (no aspect distortion). The image keeps
-          its natural landscape proportions throughout the morph;
-          we pick a single scale factor that covers the hex cell
-          on its tighter dimension. Object-fit:cover handles the
-          initial crop at full-bleed dimensions, the hex clip-path
-          handles the final shape — between them, the player
-          faces stay centred and uncrushed.
+        img.style.width = `${naturalWidth}px`;
+        img.style.height = `${naturalHeight}px`;
 
-          Was: non-uniform scaleX = naturalWidth/displayWidth,
-          scaleY = naturalHeight/displayHeight. Stretched the
-          photo horizontally on phone because the hex cell aspect
-          (~0.866:1) differs from the landscape source aspect
-          (~1.78:1). User noticed: "ta hlavní fotka jak se mění
-          na hexagon, tak je teď roztažená taková divná" — the
-          aspect was changing live during the scale animation.
-        */
-        const scaleEnd = Math.max(
-          naturalWidth / displayWidth,
-          naturalHeight / displayHeight,
+        const coverScale = Math.max(
+          displayWidth / naturalWidth,
+          displayHeight / naturalHeight,
         );
+
+        // Pre-position the image at coverScale so the very first
+        // render frame (before Motion's scroll observer fires)
+        // shows the full-bleed hex, not a hex cell-sized photo
+        // briefly snapping up. Motion overrides this on its
+        // first tick and then drives scale from coverScale → 1.
+        img.style.transform = `scale(${coverScale})`;
 
         const power1InOut = [0.42, 0, 0.58, 1] as const;
         const power2InOut = [0.65, 0, 0.35, 1] as const;
@@ -1903,15 +1894,16 @@ const t = useTranslations(lang);
           'polygon(0% 0%, 100% 0%, 100% 50%, 100% 100%, 0% 100%, 0% 50%)';
 
         if (compactMotion) {
-          // Lock the image to hex shape immediately — no clip-path
-          // animation will run on this device.
+          // Hex clip-path locked in from the start. Animation =
+          // just uniform scale from coverScale (≈viewport-filling
+          // hex) to 1 (hex cell exact).
           img.style.clipPath = hexClipPolygon;
           img.style.setProperty('-webkit-clip-path', hexClipPolygon);
           img.style.borderRadius = '0';
           wireScroll(
             animate(
               img,
-              { scale: [1, 1, scaleEnd] },
+              { scale: [coverScale, coverScale, 1] },
               {
                 times: [0, 0.18, 1],
                 ease: power2InOut as any,
@@ -1923,11 +1915,15 @@ const t = useTranslations(lang);
             },
           );
         } else {
+          // Desktop: rectangle (full-bleed look) → hex morph
+          // layered on top of the same coverScale → 1 scale.
+          img.style.clipPath = rectClipPolygon;
+          img.style.setProperty('-webkit-clip-path', rectClipPolygon);
           wireScroll(
             animate(
               img,
               {
-                scale: [1, 1, scaleEnd],
+                scale: [coverScale, coverScale, 1],
                 clipPath: [rectClipPolygon, rectClipPolygon, hexClipPolygon],
               },
               {
