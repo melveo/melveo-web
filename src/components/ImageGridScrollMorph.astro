@@ -1511,15 +1511,18 @@ const t = useTranslations(lang);
     top: 50%;
     left: 50%;
     /*
-      Perf 2026-05-17 (Chrome jank): combine the centering translate
-      with translateZ(0) inside a single `transform`, instead of a
-      separate `translate` longhand. The Z component forces Chrome
-      to give this element its own composite layer — clip-path
-      morph + width/height changes then happen on the layer's own
-      raster instead of repainting the parent. Safari already did
-      this implicitly via its composite heuristics, Chrome did not.
+      Perf 2026-05-17 (phone morph jank): split centering off
+      `transform` into the `translate` CSS longhand so Motion can
+      animate `transform: scale()` without overwriting the
+      centering. translateZ(0) stays in `transform` to force the
+      Chrome composite layer; the scale animation then composes
+      on top via JS. transform-origin defaults to 50 % 50 % which
+      is what we want — scaling shrinks the image toward its own
+      centre, which sits at the centre of the grid (= centre of
+      the destination hex cell).
     */
-    transform: translate(-50%, -50%) translateZ(0);
+    translate: -50% -50%;
+    transform: translateZ(0);
     object-fit: cover;
     object-position: center;
     width: 100vw;
@@ -1821,6 +1824,32 @@ const t = useTranslations(lang);
         img.style.clipPath = 'polygon(0% 0%, 100% 0%, 100% 50%, 100% 100%, 0% 100%, 0% 50%)';
         img.style.setProperty('-webkit-clip-path', 'polygon(0% 0%, 100% 0%, 100% 50%, 100% 100%, 0% 100%, 0% 50%)');
 
+        /*
+          Scale-based morph (replaces the previous width/height
+          per-frame animation).
+
+          Why: animating width/height triggers a layout pass on
+          every scroll-frame. Desktop Chrome could just about keep
+          up; phone CPUs could not, producing the user-reported
+          jank "to zmenšování fotky na hexagon a zpět" on mobile.
+
+          With the image element kept at its full-bleed dimensions
+          throughout, `transform: scale()` drives the visual shrink
+          purely on the GPU compositor — zero layout work per
+          frame. Object-fit:cover is computed once at the element's
+          original (full-bleed) dimensions, so the player faces
+          stay in frame regardless of the scale factor.
+
+          Non-uniform scale (scaleX !== scaleY) is required because
+          the destination hex cell is portrait while the start
+          frame is landscape viewport. The visual outcome is
+          identical to the previous width/height morph because
+          transform-origin sits at the image centre = grid centre =
+          hex cell centre.
+        */
+        const scaleEndX = naturalWidth / displayWidth;
+        const scaleEndY = naturalHeight / displayHeight;
+
         const power1InOut = [0.42, 0, 0.58, 1] as const;
         const power2InOut = [0.65, 0, 0.35, 1] as const;
         const sineOut = [0.61, 1, 0.88, 1] as const;
@@ -1839,13 +1868,13 @@ const t = useTranslations(lang);
           }
 
         // ─── Scaler: hold full-bleed, then shrink to hex cell ───
-        // width/height pixel keyframes + clip-path polygon morph.
+        // GPU-only transform: scale (no layout) + clip-path morph.
         wireScroll(
           animate(
             img,
             {
-              width: [`${displayWidth}px`, `${displayWidth}px`, `${naturalWidth}px`],
-              height: [`${displayHeight}px`, `${displayHeight}px`, `${naturalHeight}px`],
+              scaleX: [1, 1, scaleEndX],
+              scaleY: [1, 1, scaleEndY],
               clipPath: [
                 'polygon(0% 0%, 100% 0%, 100% 50%, 100% 100%, 0% 100%, 0% 50%)',
                 'polygon(0% 0%, 100% 0%, 100% 50%, 100% 100%, 0% 100%, 0% 50%)',
