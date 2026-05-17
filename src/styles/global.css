@@ -352,22 +352,35 @@ body {
   */
   .hero-pill {
     min-width: 0;
-    padding: 0.6rem 0.95rem;
-    font-size: 0.78rem;
+    padding: 0.65rem 1rem;
+    font-size: 0.85rem;
     letter-spacing: 0.02em;
   }
   .hero-pill-icon {
-    width: 0.95rem;
-    height: 0.95rem;
+    width: 1rem;
+    height: 1rem;
   }
+  /*
+    Phone unification 2026-05-17: hide the 2-line "Download on the /
+    App Store" eyebrow and render the title as a single inline label
+    next to the Apple icon. Pairs visually with the single-line
+    "Kontakt →" / "Get in touch →" pill — same vertical height,
+    same font weight, same letterforms.
+  */
   .hero-pill-eyebrow {
-    font-size: 0.5rem;
+    display: none;
+  }
+  .hero-pill-text {
+    flex-direction: row;
+    align-items: center;
+    line-height: 1;
   }
   .hero-pill-title {
-    font-size: 0.78rem;
+    font-size: 0.85rem;
+    margin-top: 0;
   }
   .hero-pill-content {
-    gap: 0.4rem;
+    gap: 0.45rem;
   }
 }
 
