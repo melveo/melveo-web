@@ -1644,6 +1644,22 @@ const t = useTranslations(lang);
         if (!scalerEl) return;
 
         /*
+          Re-narrow `image` to a non-null reference inside the rAF
+          callback. The outer-scope variable is HTMLImageElement |
+          null | undefined; we already proved it non-null in the
+          enclosing `else if`, but the type system can't carry that
+          narrowing into the rAF closure. Renamed to `img` (was
+          `image` previously) to avoid a const-shadowing temporal
+          dead zone — re-using the name `image` here threw
+          "Cannot access 'image' before initialization" when the
+          willChangeEls array (built earlier in this callback)
+          referenced the outer `image`, which silently killed the
+          entire mount() + IntersectionObserver setup. (Bug found
+          2026-05-17 after the lifecycle refactor.)
+        */
+        const img = section.querySelector<HTMLImageElement>('.scaler img')!;
+
+        /*
           Lifecycle 2026-05-17 (user-reported: site janks after
           scrolling through the morph section). Motion's scroll()
           attaches a ScrollTimeline that keeps re-evaluating
@@ -1666,7 +1682,7 @@ const t = useTranslations(lang);
         const cleanups: Array<() => void> = [];
         let mounted = false;
         const willChangeEls: HTMLElement[] = [
-          image,
+          img,
           ...Array.from(section.querySelectorAll<HTMLElement>('.grid-photo, .tech-card')),
           ...Array.from(layers),
         ];
@@ -1694,11 +1710,10 @@ const t = useTranslations(lang);
         const displayWidth = Math.min(viewportWidth, sourceMaxW);
         const displayHeight = Math.min(viewportHeight, sourceMaxH);
 
-        const image = section.querySelector<HTMLImageElement>('.scaler img')!;
-        image.style.width = `${displayWidth}px`;
-        image.style.height = `${displayHeight}px`;
-        image.style.clipPath = 'polygon(0% 0%, 100% 0%, 100% 50%, 100% 100%, 0% 100%, 0% 50%)';
-        image.style.setProperty('-webkit-clip-path', 'polygon(0% 0%, 100% 0%, 100% 50%, 100% 100%, 0% 100%, 0% 50%)');
+        img.style.width = `${displayWidth}px`;
+        img.style.height = `${displayHeight}px`;
+        img.style.clipPath = 'polygon(0% 0%, 100% 0%, 100% 50%, 100% 100%, 0% 100%, 0% 50%)';
+        img.style.setProperty('-webkit-clip-path', 'polygon(0% 0%, 100% 0%, 100% 50%, 100% 100%, 0% 100%, 0% 50%)');
 
         const power1InOut = [0.42, 0, 0.58, 1] as const;
         const power2InOut = [0.65, 0, 0.35, 1] as const;
@@ -1714,14 +1729,14 @@ const t = useTranslations(lang);
           // section is far from view so GPU layers don't hang
           // around for the rest of the page.
           for (const el of willChangeEls) {
-            el.style.willChange = el === image ? 'transform' : 'opacity';
+            el.style.willChange = el === img ? 'transform' : 'opacity';
           }
 
         // ─── Scaler: hold full-bleed, then shrink to hex cell ───
         // width/height pixel keyframes + clip-path polygon morph.
         const offScaler = scroll(
           animate(
-            image,
+            img,
             {
               width: [`${displayWidth}px`, `${displayWidth}px`, `${naturalWidth}px`],
               height: [`${displayHeight}px`, `${displayHeight}px`, `${naturalHeight}px`],
