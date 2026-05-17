@@ -341,7 +341,7 @@ const steps = content.steps;
     position: relative;
     isolation: isolate;
     overflow: clip;
-    border-top: 1px solid var(--color-stroke-base);
+    /* border-top removed 2026-05-17: no horizontal dividers between sections */
     background:
       radial-gradient(circle at 50% 0%, color-mix(in srgb, var(--color-bg-tint) 64%, transparent), transparent 42rem),
       linear-gradient(180deg, var(--color-bg-canvas), color-mix(in srgb, var(--color-bg-surface) 44%, var(--color-bg-canvas)) 48%, var(--color-bg-canvas));

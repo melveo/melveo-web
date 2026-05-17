@@ -1223,7 +1223,7 @@ export default function MelveoDataFlowHero({ lang = "en" }: Props) {
           width: 100%;
           isolation: isolate;
           overflow: hidden;
-          border-top: 1px solid var(--color-stroke-base);
+          /* border-top removed 2026-05-17: no horizontal dividers between sections */
           background: var(--color-bg-canvas);
           padding: clamp(3rem, 7vw, 5.5rem) clamp(1rem, 4vw, 3rem);
           color: #fff;

@@ -67,8 +67,7 @@ const hueStep = (hueEnd - hueStart) / Math.max(1, words.length - 1);
     width: 100%;
     height: calc(100vh + var(--word-scroll-distance));
     overflow: visible;
-    border-top: 1px solid var(--color-stroke-base);
-    border-bottom: 1px solid var(--color-stroke-base);
+    /* border-top + border-bottom removed 2026-05-17: no horizontal dividers between sections */
     background: var(--color-bg-canvas);
     color: var(--color-text-primary);
     color-scheme: dark;

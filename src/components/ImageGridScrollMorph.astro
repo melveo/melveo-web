@@ -528,7 +528,7 @@ const t = useTranslations(lang);
     width: 100%;
     min-height: 215vh;
     background: var(--color-bg-canvas);
-    border-top: 1px solid var(--color-stroke-base);
+    /* border-top removed 2026-05-17: no horizontal dividers between sections */
     overflow: clip;
     /*
       Chrome scroll anchoring can try to preserve the visual position
@@ -1868,29 +1868,64 @@ const t = useTranslations(lang);
           }
 
         // ─── Scaler: hold full-bleed, then shrink to hex cell ───
-        // GPU-only transform: scale (no layout) + clip-path morph.
-        wireScroll(
-          animate(
-            img,
+        // Desktop: scale + clip-path polygon morph (rectangle → hex).
+        // Phone (compactMotion): scale-only — image is hex-clipped
+        //   from the start so we skip the polygon interpolation,
+        //   which is the single most expensive bit per scroll-frame
+        //   on mobile GPUs (clip-path polygon interpolates all 6
+        //   vertices each tick + invalidates the raster). The visual
+        //   trade-off: the start frame shows a big hex covering most
+        //   of the viewport instead of a rectangle, which actually
+        //   aligns with the brand identity. Animation = just scale,
+        //   purely GPU composite.
+        const hexClipPolygon =
+          'polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)';
+        const rectClipPolygon =
+          'polygon(0% 0%, 100% 0%, 100% 50%, 100% 100%, 0% 100%, 0% 50%)';
+
+        if (compactMotion) {
+          // Lock the image to hex shape immediately — no clip-path
+          // animation will run on this device.
+          img.style.clipPath = hexClipPolygon;
+          img.style.setProperty('-webkit-clip-path', hexClipPolygon);
+          img.style.borderRadius = '0';
+          wireScroll(
+            animate(
+              img,
+              {
+                scaleX: [1, 1, scaleEndX],
+                scaleY: [1, 1, scaleEndY],
+              },
+              {
+                times: [0, 0.18, 1],
+                ease: power2InOut as any,
+              },
+            ),
             {
-              scaleX: [1, 1, scaleEndX],
-              scaleY: [1, 1, scaleEndY],
-              clipPath: [
-                'polygon(0% 0%, 100% 0%, 100% 50%, 100% 100%, 0% 100%, 0% 50%)',
-                'polygon(0% 0%, 100% 0%, 100% 50%, 100% 100%, 0% 100%, 0% 50%)',
-                'polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)',
-              ],
+              target: section,
+              offset: ['start start', `${scalerEndRatio * 100}% end`] as any,
             },
+          );
+        } else {
+          wireScroll(
+            animate(
+              img,
+              {
+                scaleX: [1, 1, scaleEndX],
+                scaleY: [1, 1, scaleEndY],
+                clipPath: [rectClipPolygon, rectClipPolygon, hexClipPolygon],
+              },
+              {
+                times: [0, 0.18, 1],
+                ease: power2InOut as any,
+              },
+            ),
             {
-              times: [0, 0.18, 1],
-              ease: power2InOut as any,
+              target: section,
+              offset: ['start start', `${scalerEndRatio * 100}% end`] as any,
             },
-          ),
-          {
-            target: section,
-            offset: ['start start', `${scalerEndRatio * 100}% end`] as any,
-          },
-        );
+          );
+        }
 
         // ─── Each layer: calm reveal cascade ───────────────────────────
         // Layer opacity is fully CSS-driven now (clamp(0, calc((reveal -
