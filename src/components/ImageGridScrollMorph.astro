@@ -1820,45 +1820,61 @@ const t = useTranslations(lang);
         const displayHeight = Math.min(viewportHeight, sourceMaxH);
 
         /*
-          Scale-based morph v3 — element sized at the hex cell
-          itself, scale UP to cover the viewport at start, scale
-          DOWN to 1 at end.
+          Scale-based morph v4 — element rendered at LARGE size
+          with cell aspect ratio, scale DOWN to 1 at end.
 
-          Why v3: in v2 the element was viewport-sized and we
-          scaled it down to cell size with `max(natW/dispW,
-          natH/dispH)`. With a uniform scale factor that ends up
-          taller than the destination cell on the looser axis,
-          and the hex clip-path (computed at 100 % of the
-          ORIGINAL viewport-sized element) was much bigger than
-          the cell — so the end-state photo extended well past
-          the cell outline. User: "musi to byt stale hexagon" —
-          the photo must stay a clean hex, sized to the cell.
+          Why v4 (vs v3): v3 sized the element at the tiny hex
+          cell itself and scaled UP to cover the viewport. That
+          looked geometrically right but the browser decoded the
+          IMG at the small element box, then nearest-sampled up
+          when composited — pixelated mess on every device.
+          User: "v plne kvalite a ne rozpixelovane".
 
-          v3 fix: the image element's width/height is the hex
-          cell itself (naturalWidth × naturalHeight). The clip-
-          path therefore describes a hex inside the cell — exact
-          fit at end. At start we apply a uniform `coverScale`
-          large enough to cover the viewport; the scaled hex
-          extends past viewport edges on the looser axis (looks
-          like full-bleed) while preserving the image's aspect
-          throughout. Object-fit:cover crops the landscape source
-          (1672 × 941) to the cell's portrait ratio once; that
-          crop is consistent through every scale factor.
+          v4 sizes the element so it covers the viewport at
+          scale = 1 while still preserving the hex cell aspect:
+          elementWidth = max(displayW, displayH * cellAspect),
+          elementHeight = elementWidth / cellAspect.
+          The browser decodes the IMG at this large element box
+          (sharp at full bleed) and we only scale DOWN to the
+          cell size at end — downscaling never adds pixelation.
+
+          Because elementAspect ≡ cellAspect, a uniform scale
+          fits the cell exactly: scaleEnd = naturalW / elementW.
+          No overflow past the cell outline at end, no axis
+          distortion, and the clip-path hex (at 100 % of a
+          cell-aspect element) renders as a clean regular hex
+          throughout the morph.
+
+          User also said "ve velkem ta fotka nema byt hexagon, má
+          se na hexagon menit" — start state must read as a
+          full-bleed rectangle and morph INTO the hex. Initial
+          clip-path is the rectangle polygon; the scroll-driven
+          animation morphs it to the hex polygon (on both phone
+          and desktop now — the previous phone-skip was tied to
+          the v3 geometry and isn't needed with the cleaner v4
+          coordinate system).
         */
-        img.style.width = `${naturalWidth}px`;
-        img.style.height = `${naturalHeight}px`;
+        const cellAspect = naturalWidth / naturalHeight; // ~ 0.866
+        const elementWidth = Math.max(displayWidth, displayHeight * cellAspect);
+        const elementHeight = elementWidth / cellAspect;
 
-        const coverScale = Math.max(
-          displayWidth / naturalWidth,
-          displayHeight / naturalHeight,
+        img.style.width = `${elementWidth}px`;
+        img.style.height = `${elementHeight}px`;
+
+        // Uniform scale END value — fits the cell exactly on both
+        // axes because the element is already at cell aspect.
+        const scaleEnd = naturalWidth / elementWidth;
+
+        // Initial render: scale = 1 (element at full size →
+        // full-bleed view) + rectangle clip-path. Both phone and
+        // desktop start with the same rectangle photo.
+        img.style.transform = 'scale(1)';
+        img.style.clipPath =
+          'polygon(0% 0%, 100% 0%, 100% 50%, 100% 100%, 0% 100%, 0% 50%)';
+        img.style.setProperty(
+          '-webkit-clip-path',
+          'polygon(0% 0%, 100% 0%, 100% 50%, 100% 100%, 0% 100%, 0% 50%)',
         );
-
-        // Pre-position the image at coverScale so the very first
-        // render frame (before Motion's scroll observer fires)
-        // shows the full-bleed hex, not a hex cell-sized photo
-        // briefly snapping up. Motion overrides this on its
-        // first tick and then drives scale from coverScale → 1.
-        img.style.transform = `scale(${coverScale})`;
 
         const power1InOut = [0.42, 0, 0.58, 1] as const;
         const power2InOut = [0.65, 0, 0.35, 1] as const;
@@ -1877,66 +1893,33 @@ const t = useTranslations(lang);
             el.style.willChange = el === img ? 'transform' : 'opacity';
           }
 
-        // ─── Scaler: hold full-bleed, then shrink to hex cell ───
-        // Desktop: scale + clip-path polygon morph (rectangle → hex).
-        // Phone (compactMotion): scale-only — image is hex-clipped
-        //   from the start so we skip the polygon interpolation,
-        //   which is the single most expensive bit per scroll-frame
-        //   on mobile GPUs (clip-path polygon interpolates all 6
-        //   vertices each tick + invalidates the raster). The visual
-        //   trade-off: the start frame shows a big hex covering most
-        //   of the viewport instead of a rectangle, which actually
-        //   aligns with the brand identity. Animation = just scale,
-        //   purely GPU composite.
+        // ─── Scaler: full-bleed rectangle → hex cell ───
+        // Both phone and desktop animate scale + clip-path with
+        // the same keyframes. The element is at cell aspect so
+        // the hex polygon at 100 % element coords renders as a
+        // regular hex throughout the scroll-driven scale-down.
         const hexClipPolygon =
           'polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)';
         const rectClipPolygon =
           'polygon(0% 0%, 100% 0%, 100% 50%, 100% 100%, 0% 100%, 0% 50%)';
 
-        if (compactMotion) {
-          // Hex clip-path locked in from the start. Animation =
-          // just uniform scale from coverScale (≈viewport-filling
-          // hex) to 1 (hex cell exact).
-          img.style.clipPath = hexClipPolygon;
-          img.style.setProperty('-webkit-clip-path', hexClipPolygon);
-          img.style.borderRadius = '0';
-          wireScroll(
-            animate(
-              img,
-              { scale: [coverScale, coverScale, 1] },
-              {
-                times: [0, 0.18, 1],
-                ease: power2InOut as any,
-              },
-            ),
+        wireScroll(
+          animate(
+            img,
             {
-              target: section,
-              offset: ['start start', `${scalerEndRatio * 100}% end`] as any,
+              scale: [1, 1, scaleEnd],
+              clipPath: [rectClipPolygon, rectClipPolygon, hexClipPolygon],
             },
-          );
-        } else {
-          // Desktop: rectangle (full-bleed look) → hex morph
-          // layered on top of the same coverScale → 1 scale.
-          img.style.clipPath = rectClipPolygon;
-          img.style.setProperty('-webkit-clip-path', rectClipPolygon);
-          wireScroll(
-            animate(
-              img,
-              {
-                scale: [coverScale, coverScale, 1],
-                clipPath: [rectClipPolygon, rectClipPolygon, hexClipPolygon],
-              },
-              {
-                times: [0, 0.18, 1],
-                ease: power2InOut as any,
-              },
-            ),
             {
-              target: section,
-              offset: ['start start', `${scalerEndRatio * 100}% end`] as any,
+              times: [0, 0.18, 1],
+              ease: power2InOut as any,
             },
-          );
-        }
+          ),
+          {
+            target: section,
+            offset: ['start start', `${scalerEndRatio * 100}% end`] as any,
+          },
+        );
 
         // ─── Each layer: calm reveal cascade ───────────────────────────
         // Layer opacity is fully CSS-driven now (clamp(0, calc((reveal -
