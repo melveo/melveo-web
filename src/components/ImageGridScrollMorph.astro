@@ -1603,6 +1603,46 @@ const t = useTranslations(lang);
   import { animate, scroll } from 'motion';
   import { mountGlassSmoke } from '../scripts/glass-smoke';
 
+  /*
+    Diagnostic switches — 2026-05-17. The morph section was
+    accused of janking the whole site after passing through it,
+    and the standard fixes (IntersectionObserver mount/unmount,
+    content-visibility:auto, capturing Motion scroll cleanup
+    functions, stripping static will-change) didn't fully solve
+    it. Adding URL-based kill-switches so the source of jank can
+    be isolated by elimination:
+
+      ?morph=off          → skip every JS subsystem of this
+                            section. Renders as a static black
+                            box (CSS-only). If the site is still
+                            janky, the morph is not the source.
+      ?morph=no-scroll    → no Motion scroll() animations. Image
+                            stays at its CSS-default full-bleed
+                            and cells at their initial opacity.
+      ?morph=no-smoke     → don't mount the glass-smoke canvas.
+      ?morph=no-anim-cancel → keep the current behaviour where
+                            unmount only detaches scroll() observers
+                            without cancelling the underlying WAAPI
+                            animations. Default: animations get
+                            cancelled too.
+
+    Combine with commas, e.g. `?morph=no-smoke,no-scroll`.
+  */
+  const morphFlags = new Set(
+    new URLSearchParams(window.location.search)
+      .get('morph')
+      ?.split(',')
+      .map((s) => s.trim()) ?? [],
+  );
+  const MORPH_OFF = morphFlags.has('off');
+  const MORPH_NO_SCROLL = MORPH_OFF || morphFlags.has('no-scroll');
+  const MORPH_NO_SMOKE = MORPH_OFF || morphFlags.has('no-smoke');
+  const MORPH_CANCEL_ANIMS = !morphFlags.has('no-anim-cancel');
+  if (morphFlags.size > 0) {
+    // eslint-disable-next-line no-console
+    console.info('[morph] diagnostic flags:', [...morphFlags]);
+  }
+
   // Smoke field behind the grid — defer to idle so the scroll/Motion
   // setup below runs first. mountGlassSmoke scans for [data-glass-smoke]
   // sections so the same call also re-attaches new sections if the page
@@ -1618,6 +1658,10 @@ const t = useTranslations(lang);
   // Mount unconditionally so the grid has its cyan smoke on first
   // approach, matching pricing on every viewport.
   function startSmoke() {
+    if (MORPH_NO_SMOKE) {
+      console.info('[morph] skipping glass-smoke (?morph=no-smoke)');
+      return;
+    }
     mountGlassSmoke();
   }
   if ('requestIdleCallback' in window) {
@@ -1646,7 +1690,7 @@ const t = useTranslations(lang);
   // (see CSS @supports note). Force Motion JS path for now.
   const supportsScrollTimeline = false;
 
-  if (!reduceMotion) {
+  if (!reduceMotion && !MORPH_NO_SCROLL) {
     const section = document.querySelector<HTMLElement>('[data-grid-section]');
     const image = section?.querySelector<HTMLImageElement>('.scaler img');
     const layers = section?.querySelectorAll<HTMLElement>('.grid > .layer');
@@ -1719,11 +1763,35 @@ const t = useTranslations(lang);
           scroll into the morph.
         */
         const cleanups: Array<() => void> = [];
+        const animations: any[] = [];
         let mounted = false;
         const willChangeEls: HTMLElement[] = [
           img,
           ...Array.from(layers),
         ];
+
+        /*
+          Helper: wire a Motion animation to a scroll() observer
+          and capture both teardown paths.
+
+          - scroll(...) returns a function that detaches the
+            internal scroll listener.
+          - animate(...) returns an AnimationControls whose
+            underlying WAAPI animation otherwise lingers in
+            document.getAnimations() (Chrome keeps it in the
+            ticker bookkeeping even after the timeline is gone)
+            unless explicitly .cancel()-ed.
+
+          Capturing both so unmount can fully retire them.
+        */
+        const wireScroll = (
+          animObj: any,
+          scrollOpts: { target: HTMLElement; offset: any },
+        ) => {
+          const off = scroll(animObj, scrollOpts as any);
+          if (typeof off === 'function') cleanups.push(off);
+          if (animObj && typeof animObj === 'object') animations.push(animObj);
+        };
 
         /*
           Scaler 2026-05-17 v3 — animate width/height (aspect ratio
@@ -1772,7 +1840,7 @@ const t = useTranslations(lang);
 
         // ─── Scaler: hold full-bleed, then shrink to hex cell ───
         // width/height pixel keyframes + clip-path polygon morph.
-        const offScaler = scroll(
+        wireScroll(
           animate(
             img,
             {
@@ -1794,7 +1862,6 @@ const t = useTranslations(lang);
             offset: ['start start', `${scalerEndRatio * 100}% end`] as any,
           },
         );
-        if (typeof offScaler === 'function') cleanups.push(offScaler);
 
         // ─── Each layer: calm reveal cascade ───────────────────────────
         // Layer opacity is fully CSS-driven now (clamp(0, calc((reveal -
@@ -1842,7 +1909,7 @@ const t = useTranslations(lang);
           cascade ordering (inner finishes first, outer last) is
           preserved without JS work per frame.
         */
-        const offReveal = scroll(
+        wireScroll(
           animate(
             section,
             { '--reveal-progress': [0, 0, 1] } as any,
@@ -1856,7 +1923,6 @@ const t = useTranslations(lang);
             offset: ['start start', `${revealEndRatio * 100}% end`] as any,
           },
         );
-        if (typeof offReveal === 'function') cleanups.push(offReveal);
 
         // Individual per-cell scroll animations intentionally removed:
         // the parent layer reveal is the stable cross-browser path.
@@ -1877,7 +1943,7 @@ const t = useTranslations(lang);
         //     plus a tighter scroll() offset works correctly.
         const intro = section.querySelector<HTMLElement>('[data-grid-intro]');
         if (intro) {
-          const offIntroOpacity = scroll(
+          wireScroll(
             animate(
               intro,
               { opacity: [1, 1, 0] },
@@ -1891,8 +1957,7 @@ const t = useTranslations(lang);
               offset: ['start start', '22% start'] as any,
             },
           );
-          if (typeof offIntroOpacity === 'function') cleanups.push(offIntroOpacity);
-          const offIntroY = scroll(
+          wireScroll(
             animate(
               intro,
               { y: ['0px', '0px', '-24px'] },
@@ -1906,7 +1971,6 @@ const t = useTranslations(lang);
               offset: ['start start', '22% start'] as any,
             },
           );
-          if (typeof offIntroY === 'function') cleanups.push(offIntroY);
         }
 
         // ─── Black scroll-reveal: photo "develops in" ──────────────────
@@ -1918,7 +1982,7 @@ const t = useTranslations(lang);
         //     — gives the morph a "reveal then shrink" rhythm.
         const darken = section.querySelector<HTMLElement>('[data-grid-intro-darken]');
         if (darken) {
-          const offDarken = scroll(
+          wireScroll(
             animate(
               darken,
               { opacity: [1, 0] },
@@ -1929,20 +1993,35 @@ const t = useTranslations(lang);
               offset: ['start start', '28% start'] as any,
             },
           );
-          if (typeof offDarken === 'function') cleanups.push(offDarken);
         }
         };
 
         const unmount = () => {
           if (!mounted) return;
           mounted = false;
-          // Detach every Motion scroll observer and release the
-          // composite-layer hints so the rest of the page scrolls
-          // without paying for this section's setup.
+          // 1) Detach every Motion scroll() observer (removes the
+          //    internal scroll listener for this container).
           for (const off of cleanups) {
             try { off(); } catch {}
           }
           cleanups.length = 0;
+          // 2) Cancel the underlying WAAPI animations. Without
+          //    this Chrome leaves them in document.getAnimations()
+          //    + keeps ticking them, which costs main-thread work
+          //    on every page scroll for the rest of the session.
+          //    The ?morph=no-anim-cancel flag disables this so we
+          //    can confirm whether lingering animations are the
+          //    actual jank source.
+          if (MORPH_CANCEL_ANIMS) {
+            for (const a of animations) {
+              try { (a as any).cancel?.(); } catch {}
+              try { (a as any).stop?.(); } catch {}
+            }
+          }
+          animations.length = 0;
+          // 3) Release composite-layer hints so GPU memory is
+          //    freed and the rest of the page composites without
+          //    paying for these elements.
           for (const el of willChangeEls) {
             el.style.willChange = '';
           }
