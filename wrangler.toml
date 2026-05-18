@@ -3,9 +3,11 @@
 # Workers + Static Assets config for the melveo.app marketing site.
 #
 # Deployed to a Cloudflare Worker named `melveo-web` with the static
-# build output (dist/) bound as ASSETS, plus a tiny TypeScript
-# Worker entry that adds /api/lead for the App Store notify + Pilot
-# inquiry forms (T14 + T15, 2026-05-03).
+# build output (dist/) bound as ASSETS, plus a minimal TypeScript
+# Worker entry that currently just passes every request through to
+# the static-assets binding. The Worker remains in place (vs.
+# switching to a Pages-style static-only deploy) so future API
+# routes can land here without re-wiring wrangler.
 #
 # Auto-deploy is wired through Workers Builds — every push to main
 # on the matk0shub/melveo-web GitHub repo runs `bun install &&
@@ -30,31 +32,17 @@ binding = "ASSETS"
 not_found_handling = "404-page"
 html_handling = "auto-trailing-slash"
 
-# Vars available to the Worker (non-secret). Override via dashboard
-# Settings → Variables and Secrets if needed.
-[vars]
-LEAD_NOTIFY_TO = "hello@melveo.app"
-LEAD_NOTIFY_FROM = "Melveo Web <notifications@melveo.app>"
-
 # ─────────────────────────────────────────────────────────────────
-# SECRETS that need to be set out-of-band (NOT in this file):
+# History note: this file previously declared LEAD_NOTIFY_TO /
+# LEAD_NOTIFY_FROM vars + a RESEND_API_KEY secret + an optional
+# LEAD_RATE_LIMIT KV binding for the POST /api/lead endpoint. Those
+# were retired 2026-05-18 along with the on-page lead forms (audit
+# cleanup — the in-page UI was 582 lines of unrendered code). The
+# Worker is now a pure static-assets pass-through.
 #
-#   wrangler secret put RESEND_API_KEY
-#     OR
-#   Dashboard → melveo-web → Settings → Variables and Secrets →
-#   Add secret → Name: RESEND_API_KEY, Value: <re_xxxx from Resend>
-#
-#   The /api/lead endpoint falls back to console.log() if this
-#   secret is missing — the site won't break, but lead emails
-#   won't deliver. Watch `wrangler tail` during the gap.
-#
-# OPTIONAL KV binding for per-IP rate limiting (3 submissions per
-# IP per 10 minutes). Without it the endpoint runs unlimited:
-#
-#   wrangler kv namespace create LEAD_RATE_LIMIT
-#   then add the printed binding block under [[kv_namespaces]]:
-#
-#   [[kv_namespaces]]
-#   binding = "LEAD_RATE_LIMIT"
-#   id = "<id from create command>"
+# To bring an API endpoint back:
+#   1. Add the route in src/worker.ts (before env.ASSETS.fetch).
+#   2. If it needs Resend / KV / etc., declare [vars] +
+#      [[kv_namespaces]] here and `wrangler secret put NAME` for
+#      anything sensitive (API keys never go in this file).
 # ─────────────────────────────────────────────────────────────────

@@ -24,6 +24,16 @@ import CookieBanner from '../components/CookieBanner.astro';
 import AnalyticsHead from '../components/AnalyticsHead.astro';
 import AnalyticsBody from '../components/AnalyticsBody.astro';
 
+// Self-hosted brand fonts (audit 2026-05-18 — replaced Google Fonts
+// CDN link). Imported here (not via CSS @import) so Vite resolves
+// the package's ./files/*.woff2 URLs through its asset pipeline and
+// emits them at /assets/inter-... etc., versus a CSS @import which
+// would leave the woff2 paths as broken relative URLs at the bundle
+// output location. Variable fonts: one woff2 per subset covers all
+// weights — smaller transfer than Google's per-weight files.
+import '@fontsource-variable/inter';
+import '@fontsource-variable/comfortaa';
+
 interface Props {
   title: string;
   description?: string;
@@ -129,29 +139,14 @@ const altUrls = {
         excellent at small sizes, broad Czech diacritic support.
         Weights 400/500/600/700.
     */}
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     {/*
-      Async font loading (audit 2026-05-18): media="print" + onload
-      swap removes the render-blocking <link rel="stylesheet"> from
-      the critical path. Estimated 150–300 ms LCP win. The <noscript>
-      fallback keeps fonts loading for the rare JS-disabled crawler
-      or visitor. font-display:swap (in the URL) means the page paints
-      with system fallbacks first and re-paints with the brand fonts
-      when the woff2 arrives — no FOIT.
+      Fonts (Inter Variable + Comfortaa Variable) are self-hosted via
+      @fontsource-variable — imported from src/styles/global.css so
+      they ship in the same Vite-bundled stylesheet as the rest of
+      our CSS. No <link rel="preconnect"> or <link rel="stylesheet">
+      to fonts.googleapis.com needed; that hop was costing ~50–80 ms
+      cold-cache RTT plus a CSP allowlist entry. Audit 2026-05-18.
     */}
-    <link
-      rel="stylesheet"
-      media="print"
-      onload="this.media='all'"
-      href="https://fonts.googleapis.com/css2?family=Comfortaa:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap"
-    />
-    <noscript>
-      <link
-        rel="stylesheet"
-        href="https://fonts.googleapis.com/css2?family=Comfortaa:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap"
-      />
-    </noscript>
 
     <!-- Hreflang alternates -->
     <link rel="alternate" hreflang="cs" href={altUrls.cs} />

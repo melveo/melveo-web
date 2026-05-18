@@ -4,6 +4,15 @@ import react from '@astrojs/react';
 import sitemap from '@astrojs/sitemap';
 import tailwindcss from '@tailwindcss/vite';
 
+/*
+  Output: `static` (implicit). Astro pre-renders every route to HTML
+  + CSS + JS bundles in dist/, which Cloudflare Workers Static
+  Assets serves directly via the binding declared in wrangler.toml.
+  No Astro SSR adapter is configured — the minimal Worker entry
+  (src/worker.ts) is currently a pass-through; future API routes
+  would land there alongside the static-asset binding, NOT through
+  Astro's SSR pipeline. (Audit 2026-05-18.)
+*/
 // https://astro.build/config
 export default defineConfig({
   site: 'https://melveo.app',
