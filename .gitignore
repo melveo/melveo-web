@@ -46,3 +46,4 @@ melveo-*.png
 # IDE
 .vscode/*
 !.vscode/extensions.json
+audit-*.png
