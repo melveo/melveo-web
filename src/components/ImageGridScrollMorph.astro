@@ -1961,11 +1961,21 @@ const t = useTranslations(lang);
           // 0.55 sits just past the scale's hold phase (0.18) so
           // the snap lands while the photo is mid-shrink, reading
           // as a continuous morph.
+          //
+          // 2026-05-18 bug: Motion v12 dispatches scroll(callback,
+          // …) two ways depending on callback.length. With length 2
+          // it calls callback(progress, info) on each tick; with
+          // any other length it tries to treat the function as an
+          // animation object and silently drops the call. Previous
+          // signature was (info) => … (length 1) — which is why
+          // the phone clip-path swap was never firing in prod and
+          // the photo stayed as a rectangle even at the cell. Use
+          // exactly two parameters so the callback path is taken.
           let isHex = false;
           const swapThreshold = 0.55;
           const offSwap = scroll(
-            ((info: any) => {
-              const progress = info?.y?.progress ?? 0;
+            ((progress: number, _info: unknown) => {
+              void _info;
               const shouldHex = progress >= swapThreshold;
               if (shouldHex !== isHex) {
                 isHex = shouldHex;

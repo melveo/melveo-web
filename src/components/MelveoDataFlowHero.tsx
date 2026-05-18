@@ -1493,9 +1493,17 @@ function MobileFlow({ reduced, lang }: { reduced: boolean; lang: Lang }) {
           textAnchor="middle"
           fill="url(#m-shimmer)"
           style={{
+            // Match the brand wordmark — Comfortaa Variable. The
+            // desktop core <text> already sets this; the mobile
+            // path was missing it and inherited the system sans
+            // (user noticed: "ten font, který je vlevo nahoře v
+            // hero" — i.e. should match the .melveo-wordmark in
+            // the hero header). Audit 2026-05-18.
+            fontFamily: "var(--font-wordmark)",
             fontSize: "52px",
-            fontWeight: 900,
+            fontWeight: 700,
             letterSpacing: "-0.02em",
+            textTransform: "lowercase",
             filter: "drop-shadow(0 0 22px rgba(0,240,255,0.55))",
           }}
         >
