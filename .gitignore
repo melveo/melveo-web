@@ -32,9 +32,12 @@ bun-debug.log*
 # local browser / visual QA artifacts
 .playwright-cli/
 .playwright-mcp/
-output/playwright/
-output/unused-public-duplicates/
+output/
 melveo-*.png
+
+# Scheduled-task lock files from the agent harness — runtime state,
+# never source-of-truth. Was leaking into commits as a 0-byte file.
+.claude/scheduled_tasks.lock
 
 # Finder "Copy" duplicates (file " 2.md" / " 2.png" etc.) — recurring
 # noise from macOS Finder when documents get accidentally duplicated.
