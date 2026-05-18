@@ -1575,15 +1575,25 @@ const t = useTranslations(lang);
       -webkit-clip-path 0.35s cubic-bezier(0.65, 0, 0.35, 1),
       border-radius 0.35s ease;
   }
+  /*
+    `!important` is required here because the production CSS bundle
+    ends up with another rule for `.scaler img` clip-path at the
+    same specificity that wins the cascade order. Both .phone-morph-
+    rect and .phone-morph-hex need to GUARANTEE they apply, not
+    just have higher specificity than the base rule — empirically
+    verified 2026-05-18 that without !important the hex polygon
+    never paints. The rules are scoped tightly to the morph image
+    so the !important doesn't leak.
+  */
   .image-grid-section .scaler img.phone-morph-rect {
-    clip-path: polygon(0% 0%, 100% 0%, 100% 50%, 100% 100%, 0% 100%, 0% 50%);
-    -webkit-clip-path: polygon(0% 0%, 100% 0%, 100% 50%, 100% 100%, 0% 100%, 0% 50%);
-    border-radius: 28px;
+    clip-path: polygon(0% 0%, 100% 0%, 100% 50%, 100% 100%, 0% 100%, 0% 50%) !important;
+    -webkit-clip-path: polygon(0% 0%, 100% 0%, 100% 50%, 100% 100%, 0% 100%, 0% 50%) !important;
+    border-radius: 28px !important;
   }
   .image-grid-section .scaler img.phone-morph-hex {
-    clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
-    -webkit-clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
-    border-radius: 0;
+    clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%) !important;
+    -webkit-clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%) !important;
+    border-radius: 0 !important;
   }
 
   /*
