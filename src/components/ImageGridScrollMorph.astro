@@ -1545,6 +1545,20 @@ const t = useTranslations(lang);
     */
     backface-visibility: hidden;
     overflow-anchor: none;
+    /*
+      Transition for the phone morph clip-path swap. Lives on the
+      BASE rule (not on the .phone-morph-* class rules) because
+      transitions need to be "already applied" to the element
+      BEFORE the property value changes — otherwise the browser
+      sees `transition` and the new value arrive at the same
+      moment and refuses to animate (no start value recorded).
+      Empirically verified 2026-05-18 that this placement is the
+      one that actually triggers the morph. Desktop uses Motion's
+      WAAPI animation which overrides this transition anyway.
+    */
+    transition: clip-path 0.35s cubic-bezier(0.65, 0, 0.35, 1),
+      -webkit-clip-path 0.35s cubic-bezier(0.65, 0, 0.35, 1),
+      border-radius 0.35s ease;
   }
 
   /*
@@ -1568,13 +1582,16 @@ const t = useTranslations(lang);
     swaps these two classes ONCE at the crossover scroll point,
     so the polygon interpolation only runs through the brief CSS
     transition window (~24 frames) instead of the whole morph.
+
+    Transition lives on the BASE `.scaler img` rule above (search
+    `transition:`) — not on the class selectors. Putting transition
+    on the class rule meant the transition was first applied AT
+    THE SAME TIME as the target value change, which browsers
+    refuse to animate (no recorded start value at the moment the
+    transition becomes applicable). Symptom: class toggled but
+    clip-path snapped without animation AND the new value didn't
+    even paint — stayed at base. Empirically verified 2026-05-18.
   */
-  .image-grid-section .scaler img.phone-morph-rect,
-  .image-grid-section .scaler img.phone-morph-hex {
-    transition: clip-path 0.35s cubic-bezier(0.65, 0, 0.35, 1),
-      -webkit-clip-path 0.35s cubic-bezier(0.65, 0, 0.35, 1),
-      border-radius 0.35s ease;
-  }
   /*
     `!important` is required here because the production CSS bundle
     ends up with another rule for `.scaler img` clip-path at the
