@@ -1891,16 +1891,22 @@ const t = useTranslations(lang);
         // axes because the element is already at cell aspect.
         const scaleEnd = naturalWidth / elementWidth;
 
-        // Initial render: scale = 1 (element at full size →
-        // full-bleed view) + rectangle clip-path. Both phone and
-        // desktop start with the same rectangle photo.
+        // Initial transform: scale=1 so the first render frame
+        // shows the full-bleed view (Motion's scroll observer hasn't
+        // ticked yet at this point). Motion then drives scale from
+        // 1 → scaleEnd.
         img.style.transform = 'scale(1)';
-        img.style.clipPath =
-          'polygon(0% 0%, 100% 0%, 100% 50%, 100% 100%, 0% 100%, 0% 50%)';
-        img.style.setProperty(
-          '-webkit-clip-path',
-          'polygon(0% 0%, 100% 0%, 100% 50%, 100% 100%, 0% 100%, 0% 50%)',
-        );
+        // NOTE: do NOT set img.style.clipPath here. Inline styles
+        // override class-based CSS, which silently broke the
+        // mobile clip-path swap — the phone-morph-hex class never
+        // visually applied because the inline `rect` won the
+        // cascade. (Bug found 2026-05-18.) The CSS default on
+        // .scaler img already declares the rectangle clip-path;
+        // mobile then class-toggles to hex (CSS transition handles
+        // the morph) and desktop's Motion WAAPI animation
+        // interpolates clip-path through its own keyframe track
+        // (WAAPI overrides inline styles, so neither path needs
+        // the inline reset).
 
         const power1InOut = [0.42, 0, 0.58, 1] as const;
         const power2InOut = [0.65, 0, 0.35, 1] as const;
@@ -1945,7 +1951,7 @@ const t = useTranslations(lang);
               img,
               { scale: [1, 1, scaleEnd] },
               {
-                times: [0, 0.18, 1],
+                times: [0, 0.5, 1],
                 ease: power2InOut as any,
               },
             ),
@@ -1999,7 +2005,7 @@ const t = useTranslations(lang);
                 clipPath: [rectClipPolygon, rectClipPolygon, hexClipPolygon],
               },
               {
-                times: [0, 0.18, 1],
+                times: [0, 0.5, 1],
                 ease: power2InOut as any,
               },
             ),
