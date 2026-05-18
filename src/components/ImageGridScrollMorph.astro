@@ -1561,6 +1561,32 @@ const t = useTranslations(lang);
   }
 
   /*
+    Phone-only clip-path strategy (2026-05-18). On mobile the
+    scroll-driven polygon interpolation was the residual jank
+    source after the v4 geometry fix — the GPU re-rasterizes the
+    polygon every scroll tick across hundreds of frames. The JS
+    swaps these two classes ONCE at the crossover scroll point,
+    so the polygon interpolation only runs through the brief CSS
+    transition window (~24 frames) instead of the whole morph.
+  */
+  .image-grid-section .scaler img.phone-morph-rect,
+  .image-grid-section .scaler img.phone-morph-hex {
+    transition: clip-path 0.35s cubic-bezier(0.65, 0, 0.35, 1),
+      -webkit-clip-path 0.35s cubic-bezier(0.65, 0, 0.35, 1),
+      border-radius 0.35s ease;
+  }
+  .image-grid-section .scaler img.phone-morph-rect {
+    clip-path: polygon(0% 0%, 100% 0%, 100% 50%, 100% 100%, 0% 100%, 0% 50%);
+    -webkit-clip-path: polygon(0% 0%, 100% 0%, 100% 50%, 100% 100%, 0% 100%, 0% 50%);
+    border-radius: 28px;
+  }
+  .image-grid-section .scaler img.phone-morph-hex {
+    clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+    -webkit-clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+    border-radius: 0;
+  }
+
+  /*
     Native CSS scroll-driven animations — TEMPORARILY DISABLED
     2026-05-17. The combination of position:sticky inside an
     `overflow: clip` parent broke view-timeline tracking in
@@ -1894,32 +1920,85 @@ const t = useTranslations(lang);
           }
 
         // ─── Scaler: full-bleed rectangle → hex cell ───
-        // Both phone and desktop animate scale + clip-path with
-        // the same keyframes. The element is at cell aspect so
-        // the hex polygon at 100 % element coords renders as a
-        // regular hex throughout the scroll-driven scale-down.
         const hexClipPolygon =
           'polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)';
         const rectClipPolygon =
           'polygon(0% 0%, 100% 0%, 100% 50%, 100% 100%, 0% 100%, 0% 50%)';
 
-        wireScroll(
-          animate(
-            img,
+        if (compactMotion) {
+          /*
+            Phone path 2026-05-18 — scale animates scroll-driven,
+            clip-path swaps once via a class toggle (with a short
+            CSS transition softening the snap). Reason: polygon
+            interpolation per scroll-frame is the most expensive
+            bit on mobile GPUs (6 vertices each interpolated and
+            the raster invalidated every tick). A one-shot CSS
+            transition runs ~24 frames at the crossover; scroll-
+            driven morph runs through hundreds of frames as the
+            user scrolls. Both interpolate the same polygon — the
+            transition does it MUCH less.
+          */
+          img.classList.add('phone-morph-rect');
+
+          wireScroll(
+            animate(
+              img,
+              { scale: [1, 1, scaleEnd] },
+              {
+                times: [0, 0.18, 1],
+                ease: power2InOut as any,
+              },
+            ),
             {
-              scale: [1, 1, scaleEnd],
-              clipPath: [rectClipPolygon, rectClipPolygon, hexClipPolygon],
+              target: section,
+              offset: ['start start', `${scalerEndRatio * 100}% end`] as any,
             },
+          );
+
+          // Threshold-based clip-path swap. The callback fires on
+          // every scroll tick but the class mutation only happens
+          // on the crossover — `isHex` debounces it. Threshold of
+          // 0.55 sits just past the scale's hold phase (0.18) so
+          // the snap lands while the photo is mid-shrink, reading
+          // as a continuous morph.
+          let isHex = false;
+          const swapThreshold = 0.55;
+          const offSwap = scroll(
+            ((info: any) => {
+              const progress = info?.y?.progress ?? 0;
+              const shouldHex = progress >= swapThreshold;
+              if (shouldHex !== isHex) {
+                isHex = shouldHex;
+                img.classList.toggle('phone-morph-hex', isHex);
+                img.classList.toggle('phone-morph-rect', !isHex);
+              }
+            }) as any,
             {
-              times: [0, 0.18, 1],
-              ease: power2InOut as any,
+              target: section,
+              offset: ['start start', `${scalerEndRatio * 100}% end`] as any,
             },
-          ),
-          {
-            target: section,
-            offset: ['start start', `${scalerEndRatio * 100}% end`] as any,
-          },
-        );
+          );
+          if (typeof offSwap === 'function') cleanups.push(offSwap);
+        } else {
+          // Desktop: full scroll-driven scale + clip-path morph.
+          wireScroll(
+            animate(
+              img,
+              {
+                scale: [1, 1, scaleEnd],
+                clipPath: [rectClipPolygon, rectClipPolygon, hexClipPolygon],
+              },
+              {
+                times: [0, 0.18, 1],
+                ease: power2InOut as any,
+              },
+            ),
+            {
+              target: section,
+              offset: ['start start', `${scalerEndRatio * 100}% end`] as any,
+            },
+          );
+        }
 
         // ─── Each layer: calm reveal cascade ───────────────────────────
         // Layer opacity is fully CSS-driven now (clamp(0, calc((reveal -
