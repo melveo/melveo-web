@@ -31,6 +31,15 @@ export default defineConfig({
   // toolbar is dev-only and never ships to prod, but we'd rather have
   // a clean dev preview too).
   devToolbar: { enabled: false },
+  // Astro prefetch — warm up next-page assets on link hover so
+  // navigation to Privacy / Terms / locale-switch lands instantly.
+  // `hover` strategy: prefetch starts on mouseenter (zero cost
+  // unless the user actually targets the link). Opt out per-link
+  // with `data-astro-prefetch="false"`. (Audit 2026-05-18.)
+  prefetch: {
+    prefetchAll: false,
+    defaultStrategy: 'hover',
+  },
   vite: {
     plugins: [/** @type {any} */ (tailwindcss())],
     server: {

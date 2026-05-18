@@ -67,6 +67,7 @@ const BASE_RAD = (Math.PI * 2) / 6;
 export function mountHeroLines({ canvas }: HeroLinesOpts): HeroLinesHandle | null {
   const ctx = canvas.getContext('2d');
   if (!ctx) return null;
+  const context = ctx;
 
   // Cap DPR — retina phones at 3× × full viewport is too many pixels.
   const dpr = Math.min(window.devicePixelRatio || 1, 1.75);
@@ -86,14 +87,14 @@ export function mountHeroLines({ canvas }: HeroLinesOpts): HeroLinesHandle | nul
     canvas.height = Math.round(h * dpr);
     canvas.style.width = `${w}px`;
     canvas.style.height = `${h}px`;
-    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    context.setTransform(dpr, 0, 0, dpr, 0, 0);
     cx = w / 2;
     cy = h / 2;
     dieX = w / 2 / opts.len;
     dieY = h / 2 / opts.len;
     // Re-paint base so the trail picks up from a clean black.
-    ctx.fillStyle = 'black';
-    ctx.fillRect(0, 0, w, h);
+    context.fillStyle = 'black';
+    context.fillRect(0, 0, w, h);
   };
 
   resize();
@@ -162,16 +163,16 @@ export function mountHeroLines({ canvas }: HeroLinesOpts): HeroLinesHandle | nul
       const wave = Math.sin((prop * Math.PI) / 2);
       const x = this.addedX * wave;
       const y = this.addedY * wave;
-      ctx.shadowBlur = prop * opts.shadowToTimePropMult;
+      context.shadowBlur = prop * opts.shadowToTimePropMult;
       const lightness =
         opts.baseLight +
         opts.addedLight * Math.sin(this.cumulativeTime * this.lightInputMultiplier);
       const color = this.color.replace('light', String(lightness));
-      ctx.fillStyle = color;
-      ctx.shadowColor = color;
-      ctx.fillRect(cx + (this.x + x) * opts.len, cy + (this.y + y) * opts.len, 2, 2);
+      context.fillStyle = color;
+      context.shadowColor = color;
+      context.fillRect(cx + (this.x + x) * opts.len, cy + (this.y + y) * opts.len, 2, 2);
       if (Math.random() < opts.sparkChance) {
-        ctx.fillRect(
+        context.fillRect(
           cx +
             (this.x + x) * opts.len +
             Math.random() * opts.sparkDist * (Math.random() < 0.5 ? 1 : -1) -
@@ -193,11 +194,11 @@ export function mountHeroLines({ canvas }: HeroLinesOpts): HeroLinesHandle | nul
 
   const frame = () => {
     tick += 1;
-    ctx.globalCompositeOperation = 'source-over';
-    ctx.shadowBlur = 0;
-    ctx.fillStyle = `rgba(0,0,0,${opts.repaintAlpha})`;
-    ctx.fillRect(0, 0, w, h);
-    ctx.globalCompositeOperation = 'lighter';
+    context.globalCompositeOperation = 'source-over';
+    context.shadowBlur = 0;
+    context.fillStyle = `rgba(0,0,0,${opts.repaintAlpha})`;
+    context.fillRect(0, 0, w, h);
+    context.globalCompositeOperation = 'lighter';
     if (lines.length < opts.count && Math.random() < opts.spawnChance) {
       lines.push(new Line());
     }

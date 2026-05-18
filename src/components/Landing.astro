@@ -56,15 +56,24 @@ const t = useTranslations(lang);
       <a
         href={`/${lang}/`}
         class="melveo-wordmark text-xl tracking-tight text-[var(--color-text-primary)]"
+        aria-label="Melveo"
       >
         melveo
       </a>
-      <a
-        href="mailto:hello@melveo.app"
-        class="hidden text-sm text-[var(--color-text-secondary)] transition-colors hover:text-[var(--color-text-primary)] sm:inline"
-      >
-        {t('nav.contact')}
-      </a>
+      {/*
+        <nav> landmark for AT users (audit 2026-05-18). The single
+        contact link is the only primary navigation; wrapping it in
+        a labelled nav lets screen-reader users jump to it via the
+        landmarks rotor.
+      */}
+      <nav aria-label={lang === 'cs' ? 'Hlavní' : 'Primary'}>
+        <a
+          href="mailto:hello@melveo.app"
+          class="hidden text-sm text-[var(--color-text-secondary)] transition-colors hover:text-[var(--color-text-primary)] sm:inline"
+        >
+          {t('nav.contact')}
+        </a>
+      </nav>
     </header>
 
     {/*
@@ -491,6 +500,17 @@ const t = useTranslations(lang);
     line-height: 1.14;
     text-align: center;
     transform: translateZ(0);
+    /*
+      Safety overflow for very narrow viewports (audit 2026-05-18).
+      The longest English rotation phrase is ~14 chars ("better
+      training") and Czech goes up to "kontext pro celý tým" (~20
+      chars). On <320 px Android browsers the longest phrase could
+      bleed past the hero centre column; max-width + ellipsis is a
+      visible-but-not-broken fallback.
+    */
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 
   [data-rotate-word]::after {

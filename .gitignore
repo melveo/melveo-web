@@ -36,6 +36,10 @@ output/playwright/
 output/unused-public-duplicates/
 melveo-*.png
 
+# Finder "Copy" duplicates (file " 2.md" / " 2.png" etc.) — recurring
+# noise from macOS Finder when documents get accidentally duplicated.
+* 2.*
+
 # IDE
 .vscode/*
 !.vscode/extensions.json

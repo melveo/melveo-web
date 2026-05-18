@@ -188,7 +188,21 @@ function isValidEmail(value: string): boolean {
 }
 
 async function isRateLimited(kv: KVNamespace | undefined, ip: string) {
-  if (!kv) return false; // no KV bound = no rate limit (logged for ops)
+  if (!kv) {
+    // Loud warning so `wrangler tail` surfaces the misconfiguration —
+    // the endpoint is wide-open to per-IP abuse without KV. We do NOT
+    // fail-closed here (that would self-DoS legit submissions on
+    // every request the moment KV unbinds); instead the warning is
+    // the alarm that ops needs to fix the binding.
+    //
+    // 2026-05-18 audit recommendation: also wire Cloudflare Turnstile
+    // (free, native to Workers) as a second line of defence that
+    // works even without KV. See docs/audit-2026-05-18.md C3.
+    console.error(
+      '[melveo-web] CRITICAL: LEAD_RATE_LIMIT KV unbound — /api/lead is unlimited per IP. Fix in wrangler.toml + dashboard binding.',
+    );
+    return false;
+  }
   const key = `rl:lead:${ip}`;
   const current = parseInt((await kv.get(key)) ?? '0', 10);
   return current >= RATE_LIMIT_MAX;
