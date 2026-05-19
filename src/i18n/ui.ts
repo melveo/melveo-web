@@ -119,6 +119,10 @@ export const ui = {
     'orb.secondary': 'Pro každého hráče.',
     'orb.hint': 'Klikni a nakláněním ovládej',
     'orb.hintActive': 'Nakláněj telefon nebo táhni prstem',
+    'orb.hintDesktop': 'Klikni a táhni',
+    'orb.hintDesktopActive': 'Táhni myší',
+    'orb.hintMobile': 'Klepni a nakláněj',
+    'orb.hintMobileActive': 'Nakláněj telefon nebo táhni',
     'orb.gyroPermission': 'Povolit ovládání nakláněním?',
 
     // Stage 6.25 — Technical-feature mini bridge before pricing.
@@ -378,6 +382,10 @@ export const ui = {
     'orb.secondary': 'For every player.',
     'orb.hint': 'Tap and tilt to control',
     'orb.hintActive': 'Tilt your phone or drag',
+    'orb.hintDesktop': 'Click and drag',
+    'orb.hintDesktopActive': 'Drag with mouse',
+    'orb.hintMobile': 'Tap and tilt',
+    'orb.hintMobileActive': 'Tilt phone or drag',
     'orb.gyroPermission': 'Allow tilt control?',
 
     'promise.headlinePrefix': 'Real-time data.',

@@ -151,9 +151,13 @@ export function mountOrbCursor() {
     const hb = wrapper!.querySelector<HTMLButtonElement>('[data-orb-hint]');
     const hl = wrapper!.querySelector<HTMLElement>('[data-orb-hint-label]');
     if (!hb || !hl) return;
-    const active = hb.dataset.hintActive;
-    const def = hb.dataset.hintDefault;
-    hl.textContent = manualMode ? active ?? '' : def ?? '';
+    const mobileMode = isTouchContext();
+    const active = mobileMode ? hb.dataset.hintMobileActive : hb.dataset.hintDesktopActive;
+    const def = mobileMode ? hb.dataset.hintMobile : hb.dataset.hintDesktop;
+    const nextLabel = manualMode ? active ?? '' : def ?? '';
+    hl.textContent = nextLabel;
+    hb.setAttribute('aria-label', nextLabel);
+    wrapper!.classList.toggle('is-orb-touch', mobileMode);
   }
 
   function onManualPointerMove(event: PointerEvent) {
@@ -280,6 +284,15 @@ export function mountOrbCursor() {
 
   // ─── Hint button — surfaces the click+tilt affordance ──────────
   const hintButton = wrapper.querySelector<HTMLButtonElement>('[data-orb-hint]');
+  const touchMedia = window.matchMedia('(pointer: coarse), (hover: none)');
+
+  function isTouchContext() {
+    return touchMedia.matches;
+  }
+
+  syncHintLabel();
+  touchMedia.addEventListener?.('change', syncHintLabel);
+
   hintButton?.addEventListener('click', (event) => {
     event.stopPropagation();
     if (manualMode) {
