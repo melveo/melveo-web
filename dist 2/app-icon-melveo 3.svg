@@ -1,0 +1,44 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" role="img" aria-label="Melveo app icon">
+  <defs>
+    <linearGradient id="background" x1="118" y1="70" x2="890" y2="944" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#F5F6F4"/>
+      <stop offset="0.52" stop-color="#E9EDEB"/>
+      <stop offset="1" stop-color="#D8DEDE"/>
+    </linearGradient>
+    <radialGradient id="surface" cx="330" cy="178" r="760" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#FFFFFF" stop-opacity="0.018"/>
+      <stop offset="0.55" stop-color="#FFFFFF" stop-opacity="0.004"/>
+      <stop offset="1" stop-color="#FFFFFF" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="glyphStroke" x1="246" y1="490" x2="786" y2="650" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#222930"/>
+      <stop offset="0.6" stop-color="#20262D"/>
+      <stop offset="0.76" stop-color="#1D4D56"/>
+      <stop offset="1" stop-color="#00F0FF"/>
+    </linearGradient>
+    <filter id="glyphDepth" x="170" y="300" width="720" height="430" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+      <feDropShadow dx="0" dy="12" stdDeviation="11" flood-color="#9AA6A9" flood-opacity="0.28" result="shadow"/>
+      <feMerge>
+        <feMergeNode in="shadow"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    <!-- iOS-style rounded corners (22.37% of side = ~229 of 1024). -->
+    <clipPath id="iconSquircle">
+      <rect width="1024" height="1024" rx="229" ry="229"/>
+    </clipPath>
+  </defs>
+
+  <g clip-path="url(#iconSquircle)">
+    <rect width="1024" height="1024" fill="url(#background)"/>
+    <rect width="1024" height="1024" fill="url(#surface)"/>
+  </g>
+  <path
+    d="M256 660V500C256 424 314 374 392 374C470 374 520 428 520 500V660M520 500C520 424 578 374 656 374C734 374 788 428 788 500V660"
+    fill="none"
+    stroke="url(#glyphStroke)"
+    stroke-width="82"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+    filter="url(#glyphDepth)"/>
+</svg>
