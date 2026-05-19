@@ -190,11 +190,11 @@ const hueStep = (hueEnd - hueStart) / Math.max(1, words.length - 1);
     --word-accent: oklch(0.82 0.16 var(--word-hue));
     --word-accent-muted: color-mix(
       in oklch,
-      var(--word-accent) 62%,
+      var(--word-accent) 45%,
       var(--color-text-primary)
     );
     color: var(--word-accent-muted);
-    opacity: clamp(0.16, calc(0.2 + (var(--word-focus) * 0.8)), 1);
+    opacity: clamp(0.62, calc(0.62 + (var(--word-focus) * 0.38)), 1);
     filter: brightness(clamp(0.9, calc(0.94 + (var(--word-focus) * 0.2)), 1.14));
     box-shadow: none;
     transition: none;

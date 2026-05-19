@@ -24,16 +24,6 @@ import CookieBanner from '../components/CookieBanner.astro';
 import AnalyticsHead from '../components/AnalyticsHead.astro';
 import AnalyticsBody from '../components/AnalyticsBody.astro';
 
-// Self-hosted brand fonts (audit 2026-05-18 — replaced Google Fonts
-// CDN link). Imported here (not via CSS @import) so Vite resolves
-// the package's ./files/*.woff2 URLs through its asset pipeline and
-// emits them at /assets/inter-... etc., versus a CSS @import which
-// would leave the woff2 paths as broken relative URLs at the bundle
-// output location. Variable fonts: one woff2 per subset covers all
-// weights — smaller transfer than Google's per-weight files.
-import '@fontsource-variable/inter';
-import '@fontsource-variable/comfortaa';
-
 interface Props {
   title: string;
   description?: string;
@@ -141,9 +131,9 @@ const altUrls = {
     */}
     {/*
       Fonts (Inter Variable + Comfortaa Variable) are self-hosted via
-      @fontsource-variable — imported from src/styles/global.css so
-      they ship in the same Vite-bundled stylesheet as the rest of
-      our CSS. No <link rel="preconnect"> or <link rel="stylesheet">
+      /public/fonts and declared in src/styles/global.css so we ship
+      only the CS/EN latin + latin-ext subsets the landing page needs.
+      No <link rel="preconnect"> or <link rel="stylesheet">
       to fonts.googleapis.com needed; that hop was costing ~50–80 ms
       cold-cache RTT plus a CSP allowlist entry. Audit 2026-05-18.
     */}

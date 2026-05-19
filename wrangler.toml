@@ -15,9 +15,15 @@
 # → Settings → Builds for the connection.
 
 name = "melveo-web"
+account_id = "b8a715f4cd10ef66f00fa6c48a5b6b78"
 main = "src/worker.ts"
 compatibility_date = "2026-05-01"
 compatibility_flags = ["global_fetch_strictly_public"]
+
+routes = [
+  { pattern = "melveo.app/*", zone_name = "melveo.app" },
+  { pattern = "www.melveo.app/*", zone_name = "melveo.app" },
+]
 
 # Static asset serving — the Astro build output goes here. Workers
 # Static Assets respects /public/_headers and /public/_redirects

@@ -4,13 +4,13 @@ import { useTranslations, type Lang } from "../i18n/ui";
 type HexColor = "cyan" | "white";
 
 const ACCENT = "#00F0FF";
-const HEX_WHITE = "#F5FEFF";
 
 const VBW = 1320;
 const VBH = 780;
 const CENTER = { x: 660, y: 390 };
 const TEXT_RX = 108;
 const TEXT_RY = 28;
+const SIGNAL_TEXT_PATH_OFFSET = 10;
 const SQRT3_HALF = Math.sqrt(3) / 2;
 
 type InputDef = {
@@ -33,12 +33,12 @@ const INPUT_LABELS: Record<Lang, Record<string, string>> = {
     sleep: "Spánek",
     mood: "Nálada",
     stress: "Stres",
-    readiness: "Readiness",
+    readiness: "Stav",
     pain: "Bolest",
     fatigue: "Únava",
     hrv: "HRV",
     load: "Zátěž",
-    match: "Kontext zápasu",
+    match: "Kontext",
   },
   en: {
     sleep: "Sleep",
@@ -48,8 +48,8 @@ const INPUT_LABELS: Record<Lang, Record<string, string>> = {
     pain: "Pain",
     fatigue: "Fatigue",
     hrv: "HRV",
-    load: "Training load",
-    match: "Match context",
+    load: "Load",
+    match: "Context",
   },
 };
 
@@ -102,15 +102,15 @@ const MOBILE_HEX_OUT_CENTER = { x: 200, y: 590 };
 // in no predictable order) so the layout reads as scattered rather
 // than a symmetric arc.
 const MOBILE_INPUTS: InputDef[] = [
-  { id: "mood",      label: "Mood",          x: 70,  y: 369, r: 28, color: "white", bowDir: -1, bowAmt: 4  },
-  { id: "hrv",       label: "HRV",           x: 73,  y: 317, r: 22, color: "white", bowDir: -1, bowAmt: 4  },
-  { id: "match",     label: "Match context", x: 70,  y: 219, r: 36, color: "cyan",  bowDir: -1, bowAmt: 3  },
-  { id: "sleep",     label: "Sleep",         x: 148, y: 251, r: 24, color: "cyan",  bowDir: -1, bowAmt: 3  },
+  { id: "mood",      label: "Mood",          x: 116, y: 386, r: 25, color: "white", bowDir:  1, bowAmt: 18 },
+  { id: "hrv",       label: "HRV",           x: 45,  y: 322, r: 22, color: "white", bowDir: -1, bowAmt: 160 },
+  { id: "match",     label: "Match context", x: 104, y: 205, r: 34, color: "cyan",  bowDir: -1, bowAmt: 18 },
+  { id: "sleep",     label: "Sleep",         x: 148, y: 252, r: 23, color: "cyan",  bowDir: -1, bowAmt: 3  },
   { id: "fatigue",   label: "Fatigue",       x: 200, y: 104, r: 30, color: "cyan",  bowDir:  0, bowAmt: 0  },
   { id: "pain",      label: "Pain",          x: 257, y: 232, r: 26, color: "cyan",  bowDir:  1, bowAmt: 3  },
   { id: "readiness", label: "Readiness",     x: 340, y: 202, r: 32, color: "white", bowDir:  1, bowAmt: 3  },
-  { id: "stress",    label: "Stress",        x: 355, y: 288, r: 24, color: "cyan",  bowDir:  1, bowAmt: 4  },
-  { id: "load",      label: "Training load", x: 339, y: 364, r: 30, color: "white", bowDir:  1, bowAmt: 4  },
+  { id: "stress",    label: "Stress",        x: 355, y: 288, r: 24, color: "cyan",  bowDir: -1, bowAmt: 38 },
+  { id: "load",      label: "Training load", x: 336, y: 365, r: 28, color: "white", bowDir:  1, bowAmt: 4  },
 ];
 
 const MOBILE_ACCENT_DOTS: Array<{ x: number; y: number; r: number }> = [
@@ -120,10 +120,6 @@ const MOBILE_ACCENT_DOTS: Array<{ x: number; y: number; r: number }> = [
   { x: 200, y: 380, r: 6 },
   { x: 200, y: 560, r: 6 },
 ];
-
-function colorFor(c: HexColor) {
-  return c === "cyan" ? ACCENT : HEX_WHITE;
-}
 
 function hexPolygon(cx: number, cy: number, r: number) {
   const s = SQRT3_HALF * r;
@@ -154,17 +150,25 @@ function hexPolygonFlat(cx: number, cy: number, r: number) {
 }
 
 function inputPathD(inp: InputDef) {
-  const sx = inp.x + inp.r;
-  const sy = inp.y;
+  const vx = CENTER.x - inp.x;
+  const vy = CENTER.y - inp.y;
+  const len = Math.hypot(vx, vy) || 1;
+  const ux = vx / len;
+  const uy = vy / len;
+  const sx = inp.x + ux * SIGNAL_TEXT_PATH_OFFSET;
+  const sy = inp.y + uy * SIGNAL_TEXT_PATH_OFFSET;
   const angle = Math.atan2(sy - CENTER.y, sx - CENTER.x);
   const ex = CENTER.x + TEXT_RX * Math.cos(angle);
   const ey = CENTER.y + TEXT_RY * Math.sin(angle);
   const dx = ex - sx;
+  const dy = ey - sy;
+  const px = -dy / (Math.hypot(dx, dy) || 1);
+  const py = dx / (Math.hypot(dx, dy) || 1);
 
-  const cp1x = sx + dx * 0.45;
-  const cp1y = sy + inp.bowDir * inp.bowAmt;
-  const cp2x = sx + dx * 0.78;
-  const cp2y = ey - inp.bowDir * inp.bowAmt * 0.5;
+  const cp1x = sx + dx * 0.38 + px * inp.bowDir * inp.bowAmt;
+  const cp1y = sy + dy * 0.38 + py * inp.bowDir * inp.bowAmt;
+  const cp2x = sx + dx * 0.72 + px * inp.bowDir * inp.bowAmt * 0.45;
+  const cp2y = sy + dy * 0.72 + py * inp.bowDir * inp.bowAmt * 0.45;
 
   return `M ${sx.toFixed(1)} ${sy.toFixed(1)} C ${cp1x.toFixed(1)} ${cp1y.toFixed(1)}, ${cp2x.toFixed(1)} ${cp2y.toFixed(1)}, ${ex.toFixed(1)} ${ey.toFixed(1)}`;
 }
@@ -182,8 +186,13 @@ function outputPathD() {
 // edge. Each input is placed at a unique angular slot from melveo, so
 // straight lines guarantee zero hex/path collisions.
 function inputPathDMobile(inp: InputDef) {
-  const sx = inp.x;
-  const sy = inp.y + SQRT3_HALF * inp.r;
+  const vx = MOBILE_CENTER.x - inp.x;
+  const vy = MOBILE_CENTER.y - inp.y;
+  const len = Math.hypot(vx, vy) || 1;
+  const ux = vx / len;
+  const uy = vy / len;
+  const sx = inp.x + ux * SIGNAL_TEXT_PATH_OFFSET;
+  const sy = inp.y + uy * SIGNAL_TEXT_PATH_OFFSET;
   const angle = Math.atan2(sy - MOBILE_CENTER.y, sx - MOBILE_CENTER.x);
   const ex = MOBILE_CENTER.x + MOBILE_TEXT_RX * Math.cos(angle);
   const ey = MOBILE_CENTER.y + MOBILE_TEXT_RY * Math.sin(angle);
@@ -198,7 +207,6 @@ function outputPathDMobile() {
   const sx = MOBILE_CENTER.x;
   const sy = MOBILE_CENTER.y + MOBILE_TEXT_RY;
   const ex = MOBILE_HEX_OUT_CENTER.x;
-  // Flat-top hex top edge sits at cy - sqrt(3)/2 * R, not at cy - R.
   const ey = MOBILE_HEX_OUT_CENTER.y - SQRT3_HALF * MOBILE_HEX_OUT_R;
   const dy = ey - sy;
   return `M ${sx} ${sy} C ${sx + 8} ${sy + dy * 0.4}, ${ex - 8} ${sy + dy * 0.7}, ${ex} ${ey}`;
@@ -241,13 +249,13 @@ type GsapInstance = typeof import("gsap")["gsap"];
 
 // Charge / release tuning — shared by desktop and mobile
 const CHARGE_THRESHOLD = 6;
-const SCALE_PER_CHARGE = 0.05;
-const BLOOM_OP_PER_CHARGE = 0.1;
-const BLOOM_SCALE_PER_CHARGE = 0.08;
+const SCALE_PER_CHARGE = 0.038;
+const BLOOM_OP_PER_CHARGE = 0.075;
+const BLOOM_SCALE_PER_CHARGE = 0.065;
 const BASE_BLOOM_OPACITY = 0.32;
 const RELEASE_DURATION = 1.6;
 const BASE_FILTER = "drop-shadow(0 0 22px rgba(0, 240, 255, 0.55))";
-const FLASH_FILTER = "drop-shadow(0 0 52px rgba(225, 250, 255, 0.95))";
+const FLASH_FILTER = "drop-shadow(0 0 36px rgba(190, 250, 255, 0.78))";
 
 function setupMobileAnimation(
   gsap: GsapInstance,
@@ -270,6 +278,7 @@ function setupMobileAnimation(
   const outputHexFlash = svg.querySelector<SVGPolygonElement>(
     "[data-output-flash]",
   );
+  const outputHexGroup = svg.querySelector<SVGGElement>("[data-output-group]");
   const outputHexHalo = svg.querySelector<SVGPolygonElement>(
     "[data-output-halo]",
   );
@@ -306,12 +315,12 @@ function setupMobileAnimation(
       .timeline()
       .to(coreText, {
         filter: FLASH_FILTER,
-        duration: 0.1,
+        duration: 0.22,
         ease: "power2.out",
       })
       .to(coreText, {
         filter: BASE_FILTER,
-        duration: 0.55,
+        duration: 0.78,
         ease: "power2.inOut",
       });
   };
@@ -330,7 +339,7 @@ function setupMobileAnimation(
         scale: targetScale,
         duration,
         transformOrigin: "50% 50%",
-        ease: target >= energy ? "back.out(1.4)" : "power2.inOut",
+        ease: target > 0 ? "power3.out" : "power2.inOut",
       });
     }
     if (coreBloom) {
@@ -349,7 +358,7 @@ function setupMobileAnimation(
     runShimmer();
     flashMelveo();
     energy += 1;
-    animateToEnergy(energy, 0.4);
+    animateToEnergy(energy, 0.68);
     if (energy >= CHARGE_THRESHOLD && !pendingRelease) {
       pendingRelease = true;
       gsap.delayedCall(0.3, () => {
@@ -415,14 +424,37 @@ function setupMobileAnimation(
         outputHexFlash,
         { opacity: 0 },
         {
-          opacity: 0.95,
-          duration: 0.08,
+          opacity: 1,
+          duration: 0.18,
           ease: "power2.out",
           onComplete: () => {
             gsap.to(outputHexFlash, {
               opacity: 0,
-              duration: 0.6,
-              ease: "power2.inOut",
+              duration: 0.72,
+              ease: "power3.out",
+            });
+          },
+        },
+        arrivalAt,
+      );
+    }
+    if (outputHexGroup) {
+      tl.fromTo(
+        outputHexGroup,
+        {
+          scale: 1,
+          svgOrigin: `${MOBILE_HEX_OUT_CENTER.x} ${MOBILE_HEX_OUT_CENTER.y}`,
+        },
+        {
+          scale: 1.065,
+          duration: 0.26,
+          ease: "power3.out",
+          onComplete: () => {
+            gsap.to(outputHexGroup, {
+              scale: 1,
+              duration: 0.9,
+              ease: "elastic.out(1, 0.72)",
+              svgOrigin: `${MOBILE_HEX_OUT_CENTER.x} ${MOBILE_HEX_OUT_CENTER.y}`,
             });
           },
         },
@@ -433,22 +465,22 @@ function setupMobileAnimation(
       tl.fromTo(
         outputHexHalo,
         {
-          opacity: 0.85,
+          opacity: 0.9,
           scale: 1,
-          transformOrigin: `${MOBILE_HEX_OUT_CENTER.x}px ${MOBILE_HEX_OUT_CENTER.y}px`,
+          svgOrigin: `${MOBILE_HEX_OUT_CENTER.x} ${MOBILE_HEX_OUT_CENTER.y}`,
         },
         {
           opacity: 1,
-          scale: 1.22,
-          duration: 0.15,
-          ease: "power2.out",
+          scale: 1.045,
+          duration: 0.24,
+          ease: "power3.out",
           onComplete: () => {
             gsap.to(outputHexHalo, {
-              opacity: 0.85,
+              opacity: 0.9,
               scale: 1,
-              duration: 0.8,
-              ease: "power2.inOut",
-              transformOrigin: `${MOBILE_HEX_OUT_CENTER.x}px ${MOBILE_HEX_OUT_CENTER.y}px`,
+              duration: 0.95,
+              ease: "elastic.out(1, 0.75)",
+              svgOrigin: `${MOBILE_HEX_OUT_CENTER.x} ${MOBILE_HEX_OUT_CENTER.y}`,
             });
           },
         },
@@ -467,7 +499,7 @@ function setupMobileAnimation(
       const pulse = svg.querySelector<SVGCircleElement>(
         `[data-input-pulse="${inp.id}"]`,
       );
-      const flash = svg.querySelector<SVGPolygonElement>(
+      const flash = svg.querySelector<SVGTextElement>(
         `[data-input-flash="${inp.id}"]`,
       );
       if (!path || !pulse) {
@@ -489,8 +521,8 @@ function setupMobileAnimation(
         },
         {
           autoAlpha: 1,
-          duration: 1.3,
-          ease: "power1.inOut",
+          duration: 1.58,
+          ease: "sine.inOut",
           motionPath: {
             path,
             align: path,
@@ -504,11 +536,11 @@ function setupMobileAnimation(
       tl.fromTo(
         path,
         { opacity: 0.18, strokeWidth: 1 },
-        { opacity: 0.95, strokeWidth: 1.8, duration: 0.3 },
+        { opacity: 0.82, strokeWidth: 1.6, duration: 0.46, ease: "sine.out" },
         0,
       );
-      tl.to(path, { opacity: 0.18, strokeWidth: 1, duration: 0.7 }, 0.7);
-      tl.to(pulse, { autoAlpha: 0, duration: 0.18 }, 1.25);
+      tl.to(path, { opacity: 0.18, strokeWidth: 1, duration: 0.9, ease: "sine.inOut" }, 0.68);
+      tl.to(pulse, { autoAlpha: 0, duration: 0.24 }, 1.46);
       if (flash) {
         tl.fromTo(
           flash,
@@ -533,7 +565,7 @@ function setupMobileAnimation(
           chargeMelveo();
         },
         undefined,
-        1.28,
+        1.54,
       );
       tl.call(() => {
         schedulePulse(inp, 2.2 + Math.random() * 3.5);
@@ -548,7 +580,6 @@ function setupMobileAnimation(
 
 export default function MelveoDataFlowHero({ lang = "en" }: Props) {
   const t = useTranslations(lang);
-  const coachLabel = lang === "cs" ? "Trenér" : "Coach";
   const flowAria =
     lang === "cs"
       ? "Hráčské signály tečou do melveo. Melveo vytváří výstup pro trenéra."
@@ -556,13 +587,12 @@ export default function MelveoDataFlowHero({ lang = "en" }: Props) {
   const rootRef = useRef<HTMLElement | null>(null);
   const inputPathRefs = useRef<Record<string, SVGPathElement | null>>({});
   const inputPulseRefs = useRef<Record<string, SVGCircleElement | null>>({});
-  const inputHexRefs = useRef<Record<string, SVGPolygonElement | null>>({});
   const outputPathRef = useRef<SVGPathElement | null>(null);
   const outputPulseRef = useRef<SVGCircleElement | null>(null);
-  const outputHexGroupRef = useRef<SVGGElement | null>(null);
   const outputHexFlashRef = useRef<SVGPolygonElement | null>(null);
   const outputHexHaloRef = useRef<SVGPolygonElement | null>(null);
-  const inputFlashRefs = useRef<Record<string, SVGPolygonElement | null>>({});
+  const outputHexGroupRef = useRef<SVGGElement | null>(null);
+  const inputFlashRefs = useRef<Record<string, SVGTextElement | null>>({});
   const coreTextRef = useRef<SVGTextElement | null>(null);
   const coreBloomRef = useRef<SVGEllipseElement | null>(null);
   const coreShimmerRef = useRef<SVGLinearGradientElement | null>(null);
@@ -675,12 +705,12 @@ export default function MelveoDataFlowHero({ lang = "en" }: Props) {
             .timeline()
             .to(text, {
               filter: FLASH_FILTER,
-              duration: 0.1,
+              duration: 0.22,
               ease: "power2.out",
             })
             .to(text, {
               filter: BASE_FILTER,
-              duration: 0.55,
+              duration: 0.78,
               ease: "power2.inOut",
             });
         };
@@ -701,7 +731,7 @@ export default function MelveoDataFlowHero({ lang = "en" }: Props) {
             scale: targetScale,
             duration,
             transformOrigin: "50% 50%",
-            ease: target >= energy ? "back.out(1.4)" : "power2.inOut",
+            ease: target > 0 ? "power3.out" : "power2.inOut",
           });
           if (bloom) {
             gsap.killTweensOf(bloom, "scale,opacity");
@@ -719,7 +749,7 @@ export default function MelveoDataFlowHero({ lang = "en" }: Props) {
           runShimmer();
           flashMelveo();
           energy += 1;
-          animateToEnergy(energy, 0.4);
+          animateToEnergy(energy, 0.68);
           if (energy >= CHARGE_THRESHOLD && !pendingRelease) {
             pendingRelease = true;
             gsap.delayedCall(0.3, () => {
@@ -783,14 +813,38 @@ export default function MelveoDataFlowHero({ lang = "en" }: Props) {
               coachFlash,
               { opacity: 0 },
               {
-                opacity: 0.95,
-                duration: 0.08,
+                opacity: 1,
+                duration: 0.18,
                 ease: "power2.out",
                 onComplete: () => {
                   gsap.to(coachFlash, {
                     opacity: 0,
-                    duration: 0.6,
-                    ease: "power2.inOut",
+                    duration: 0.72,
+                    ease: "power3.out",
+                  });
+                },
+              },
+              arrivalAt,
+            );
+          }
+          const coachGroup = outputHexGroupRef.current;
+          if (coachGroup) {
+            tl.fromTo(
+              coachGroup,
+              {
+                scale: 1,
+                svgOrigin: `${HEX_OUT_CENTER.x} ${HEX_OUT_CENTER.y}`,
+              },
+              {
+                scale: 1.058,
+                duration: 0.26,
+                ease: "power3.out",
+                onComplete: () => {
+                  gsap.to(coachGroup, {
+                    scale: 1,
+                    duration: 0.9,
+                    ease: "elastic.out(1, 0.72)",
+                    svgOrigin: `${HEX_OUT_CENTER.x} ${HEX_OUT_CENTER.y}`,
                   });
                 },
               },
@@ -802,22 +856,22 @@ export default function MelveoDataFlowHero({ lang = "en" }: Props) {
             tl.fromTo(
               coachHalo,
               {
-                opacity: 0.85,
+                opacity: 0.9,
                 scale: 1,
-                transformOrigin: `${HEX_OUT_CENTER.x}px ${HEX_OUT_CENTER.y}px`,
+                svgOrigin: `${HEX_OUT_CENTER.x} ${HEX_OUT_CENTER.y}`,
               },
               {
                 opacity: 1,
-                scale: 1.22,
-                duration: 0.15,
-                ease: "power2.out",
+                scale: 1.045,
+                duration: 0.24,
+                ease: "power3.out",
                 onComplete: () => {
                   gsap.to(coachHalo, {
-                    opacity: 0.85,
+                    opacity: 0.9,
                     scale: 1,
-                    duration: 0.8,
-                    ease: "power2.inOut",
-                    transformOrigin: `${HEX_OUT_CENTER.x}px ${HEX_OUT_CENTER.y}px`,
+                    duration: 0.95,
+                    ease: "elastic.out(1, 0.75)",
+                    svgOrigin: `${HEX_OUT_CENTER.x} ${HEX_OUT_CENTER.y}`,
                   });
                 },
               },
@@ -852,8 +906,8 @@ export default function MelveoDataFlowHero({ lang = "en" }: Props) {
               },
               {
                 autoAlpha: 1,
-                duration: 1.3,
-                ease: "power1.inOut",
+                duration: 1.58,
+                ease: "sine.inOut",
                 motionPath: {
                   path,
                   align: path,
@@ -867,15 +921,25 @@ export default function MelveoDataFlowHero({ lang = "en" }: Props) {
             tl.fromTo(
               path,
               { opacity: 0.18, strokeWidth: 1 },
-              { opacity: 0.95, strokeWidth: 1.8, duration: 0.3 },
+              {
+                opacity: 0.82,
+                strokeWidth: 1.6,
+                duration: 0.46,
+                ease: "sine.out",
+              },
               0,
             );
             tl.to(
               path,
-              { opacity: 0.18, strokeWidth: 1, duration: 0.7 },
-              0.7,
+              {
+                opacity: 0.18,
+                strokeWidth: 1,
+                duration: 0.9,
+                ease: "sine.inOut",
+              },
+              0.68,
             );
-            tl.to(pulse, { autoAlpha: 0, duration: 0.18 }, 1.25);
+            tl.to(pulse, { autoAlpha: 0, duration: 0.24 }, 1.46);
             const flash = inputFlashRefs.current[inp.id];
             if (flash) {
               tl.fromTo(
@@ -901,7 +965,7 @@ export default function MelveoDataFlowHero({ lang = "en" }: Props) {
                 chargeMelveo();
               },
               undefined,
-              1.28,
+              1.54,
             );
             tl.call(() => {
               schedulePulse(inp, 2.2 + Math.random() * 3.5);
@@ -1011,6 +1075,21 @@ export default function MelveoDataFlowHero({ lang = "en" }: Props) {
                   <stop offset="60%" stopColor="rgba(0,240,255,0.08)" />
                   <stop offset="100%" stopColor="rgba(0,240,255,0)" />
                 </radialGradient>
+                <radialGradient id="signal-orb-cyan" cx="42%" cy="34%" r="62%">
+                  <stop offset="0%" stopColor="rgba(120,255,255,0.42)" />
+                  <stop offset="38%" stopColor="rgba(0,240,255,0.18)" />
+                  <stop offset="100%" stopColor="rgba(2,10,13,0.94)" />
+                </radialGradient>
+                <radialGradient id="signal-orb-white" cx="42%" cy="34%" r="62%">
+                  <stop offset="0%" stopColor="rgba(255,255,255,0.58)" />
+                  <stop offset="42%" stopColor="rgba(205,247,251,0.16)" />
+                  <stop offset="100%" stopColor="rgba(2,10,13,0.94)" />
+                </radialGradient>
+                <radialGradient id="coach-orb" cx="42%" cy="36%" r="62%">
+                  <stop offset="0%" stopColor="rgba(190,255,255,0.42)" />
+                  <stop offset="36%" stopColor="rgba(0,240,255,0.28)" />
+                  <stop offset="100%" stopColor="rgba(0,22,26,0.96)" />
+                </radialGradient>
                 <mask id="honey-mask">
                   <rect width={VBW} height={VBH} fill="url(#left-fade)" />
                 </mask>
@@ -1048,9 +1127,9 @@ export default function MelveoDataFlowHero({ lang = "en" }: Props) {
                   }}
                   d={inputPathD(inp)}
                   stroke="url(#melveo-line)"
-                  strokeWidth="1"
+                  strokeWidth="1.2"
                   fill="none"
-                  opacity="0.18"
+                  opacity="0.28"
                 />
               ))}
 
@@ -1097,16 +1176,29 @@ export default function MelveoDataFlowHero({ lang = "en" }: Props) {
                 />
                 <text
                   x={HEX_OUT_CENTER.x}
-                  y={HEX_OUT_CENTER.y + 14}
+                  y={HEX_OUT_CENTER.y - 3}
                   textAnchor="middle"
                   fill="#001014"
                   style={{
-                    fontSize: "44px",
+                    fontSize: "38px",
+                    fontWeight: 850,
+                    letterSpacing: "-0.02em",
+                  }}
+                >
+                  {lang === "cs" ? "Trenér" : "Coach"}
+                </text>
+                <text
+                  x={HEX_OUT_CENTER.x}
+                  y={HEX_OUT_CENTER.y + 33}
+                  textAnchor="middle"
+                  fill="rgba(0,16,20,0.64)"
+                  style={{
+                    fontSize: "15px",
                     fontWeight: 800,
                     letterSpacing: "-0.01em",
                   }}
                 >
-                  {coachLabel}
+                  {lang === "cs" ? "ví, co řešit." : "knows what to do."}
                 </text>
               </g>
 
@@ -1139,48 +1231,39 @@ export default function MelveoDataFlowHero({ lang = "en" }: Props) {
               </text>
 
               {INPUTS.map((inp) => {
-                const color = colorFor(inp.color);
                 const label = getInputLabel(lang, inp.id, inp.label);
-                const fontSize = inp.r < 35 ? 11 : inp.r < 50 ? 12.5 : 14;
+                const fontSize = inp.r < 35 ? 17 : inp.r < 50 ? 18 : 20;
                 return (
                   <g key={inp.id} transform={`translate(${inp.x}, ${inp.y})`}>
-                    <polygon
-                      points={hexPolygonFlat(0, 0, inp.r + 8)}
-                      fill={color}
-                      opacity="0.14"
-                    />
-                    <polygon
-                      ref={(el) => {
-                        inputHexRefs.current[inp.id] = el;
+                    <text
+                      data-input-label={inp.id}
+                      x={0}
+                      y={0}
+                      textAnchor="middle"
+                      fill={inp.color === "cyan" ? "rgba(245,254,255,0.82)" : "rgba(245,254,255,0.94)"}
+                      style={{
+                        fontSize: `${fontSize}px`,
+                        fontWeight: 650,
+                        letterSpacing: "0",
+                        filter: "drop-shadow(0 0 12px rgba(0,0,0,0.8))",
                       }}
-                      points={hexPolygonFlat(0, 0, inp.r)}
-                      fill={color}
-                      stroke={
-                        inp.color === "cyan"
-                          ? "rgba(205, 247, 251, 0.65)"
-                          : "rgba(255, 255, 255, 0.85)"
-                      }
-                      strokeWidth="1"
-                      strokeLinejoin="round"
-                      style={{ filter: `drop-shadow(0 0 10px ${color}55)` }}
-                    />
-                    <polygon
+                    >
+                      {label}
+                    </text>
+                    <text
                       ref={(el) => {
                         inputFlashRefs.current[inp.id] = el;
                       }}
-                      points={hexPolygonFlat(0, 0, inp.r - 1.5)}
-                      fill="#FFFFFF"
-                      opacity="0"
-                    />
-                    <text
                       x={0}
-                      y={fontSize / 3}
+                      y={0}
                       textAnchor="middle"
-                      fill="#001014"
+                      fill={ACCENT}
+                      opacity="0"
                       style={{
                         fontSize: `${fontSize}px`,
-                        fontWeight: 700,
-                        letterSpacing: "-0.005em",
+                        fontWeight: 750,
+                        letterSpacing: "0",
+                        filter: "drop-shadow(0 0 16px rgba(0,240,255,0.7))",
                       }}
                     >
                       {label}
@@ -1314,7 +1397,6 @@ export default function MelveoDataFlowHero({ lang = "en" }: Props) {
 }
 
 function MobileFlow({ reduced, lang }: { reduced: boolean; lang: Lang }) {
-  const coachLabel = lang === "cs" ? "Trenér" : "Coach";
   const flowAria =
     lang === "cs"
       ? "Hráčské signály tečou do melveo. Melveo vytváří výstup pro trenéra."
@@ -1382,6 +1464,21 @@ function MobileFlow({ reduced, lang }: { reduced: boolean; lang: Lang }) {
             <stop offset="60%" stopColor="rgba(0,240,255,0.08)" />
             <stop offset="100%" stopColor="rgba(0,240,255,0)" />
           </radialGradient>
+          <radialGradient id="m-signal-orb-cyan" cx="42%" cy="34%" r="62%">
+            <stop offset="0%" stopColor="rgba(120,255,255,0.42)" />
+            <stop offset="38%" stopColor="rgba(0,240,255,0.18)" />
+            <stop offset="100%" stopColor="rgba(2,10,13,0.94)" />
+          </radialGradient>
+          <radialGradient id="m-signal-orb-white" cx="42%" cy="34%" r="62%">
+            <stop offset="0%" stopColor="rgba(255,255,255,0.58)" />
+            <stop offset="42%" stopColor="rgba(205,247,251,0.16)" />
+            <stop offset="100%" stopColor="rgba(2,10,13,0.94)" />
+          </radialGradient>
+          <radialGradient id="m-coach-orb" cx="42%" cy="36%" r="62%">
+            <stop offset="0%" stopColor="rgba(190,255,255,0.42)" />
+            <stop offset="36%" stopColor="rgba(0,240,255,0.28)" />
+            <stop offset="100%" stopColor="rgba(0,22,26,0.96)" />
+          </radialGradient>
         </defs>
 
         <g mask="url(#m-honey-mask)" opacity="0.2">
@@ -1414,9 +1511,9 @@ function MobileFlow({ reduced, lang }: { reduced: boolean; lang: Lang }) {
             data-input-path={inp.id}
             d={inputPathDMobile(inp)}
             stroke="url(#m-line)"
-            strokeWidth="1"
+            strokeWidth="1.25"
             fill="none"
-            opacity="0.18"
+            opacity="0.38"
           />
         ))}
 
@@ -1429,7 +1526,7 @@ function MobileFlow({ reduced, lang }: { reduced: boolean; lang: Lang }) {
           opacity="0.85"
         />
 
-        <g>
+        <g data-output-group>
           <polygon
             data-output-halo
             points={hexPolygonFlat(
@@ -1463,16 +1560,29 @@ function MobileFlow({ reduced, lang }: { reduced: boolean; lang: Lang }) {
           />
           <text
             x={MOBILE_HEX_OUT_CENTER.x}
-            y={MOBILE_HEX_OUT_CENTER.y + 11}
+            y={MOBILE_HEX_OUT_CENTER.y + 2}
             textAnchor="middle"
             fill="#001014"
             style={{
-              fontSize: "32px",
+              fontSize: "30px",
+              fontWeight: 850,
+              letterSpacing: "-0.02em",
+            }}
+          >
+            {lang === "cs" ? "Trenér" : "Coach"}
+          </text>
+          <text
+            x={MOBILE_HEX_OUT_CENTER.x}
+            y={MOBILE_HEX_OUT_CENTER.y + 29}
+            textAnchor="middle"
+            fill="rgba(0,16,20,0.64)"
+            style={{
+              fontSize: "11px",
               fontWeight: 800,
               letterSpacing: "-0.01em",
             }}
           >
-            {coachLabel}
+            {lang === "cs" ? "ví, co řešit." : "knows what to do."}
           </text>
         </g>
 
@@ -1511,51 +1621,29 @@ function MobileFlow({ reduced, lang }: { reduced: boolean; lang: Lang }) {
         </text>
 
         {MOBILE_INPUTS.map((inp) => {
-          const color = colorFor(inp.color);
           const label = getInputLabel(lang, inp.id, inp.label);
-          const fontSize = inp.r < 30 ? 10 : inp.r < 40 ? 11 : 12.5;
+          const fontSize = inp.r < 30 ? 13 : inp.r < 40 ? 14 : 15;
           return (
             <g
-              key={`m-hex-${inp.id}`}
+              key={`m-text-${inp.id}`}
               transform={`translate(${inp.x}, ${inp.y})`}
             >
-              <polygon
-                points={hexPolygonFlat(0, 0, inp.r + 6)}
-                fill={color}
-                opacity="0.14"
-              />
-              <polygon
-                points={hexPolygonFlat(0, 0, inp.r)}
-                fill={color}
-                stroke={
-                  inp.color === "cyan"
-                    ? "rgba(205, 247, 251, 0.65)"
-                    : "rgba(255, 255, 255, 0.85)"
-                }
-                strokeWidth="1"
-                strokeLinejoin="round"
-                style={{ filter: `drop-shadow(0 0 8px ${color}55)` }}
-              />
-              <polygon
-                data-input-flash={inp.id}
-                points={hexPolygonFlat(0, 0, inp.r - 1.5)}
-                fill="#FFFFFF"
-                opacity="0"
-              />
               {(() => {
                 const words = label.split(" ");
                 const isTwoLine = words.length === 2 && label.length > 7;
                 if (isTwoLine) {
                   return (
                     <text
+                      data-input-label={inp.id}
                       x={0}
                       y={0}
                       textAnchor="middle"
-                      fill="#001014"
+                      fill="rgba(245,254,255,0.94)"
                       style={{
                         fontSize: `${fontSize}px`,
-                        fontWeight: 700,
-                        letterSpacing: "-0.005em",
+                        fontWeight: 650,
+                        letterSpacing: "0",
+                        filter: "drop-shadow(0 0 9px rgba(0,0,0,0.78))",
                       }}
                     >
                       <tspan x="0" dy="-0.25em">
@@ -1569,20 +1657,38 @@ function MobileFlow({ reduced, lang }: { reduced: boolean; lang: Lang }) {
                 }
                 return (
                   <text
+                    data-input-label={inp.id}
                     x={0}
                     y={fontSize / 3}
                     textAnchor="middle"
-                    fill="#001014"
+                    fill="rgba(245,254,255,0.94)"
                     style={{
                       fontSize: `${fontSize}px`,
-                      fontWeight: 700,
-                      letterSpacing: "-0.005em",
+                      fontWeight: 650,
+                      letterSpacing: "0",
+                      filter: "drop-shadow(0 0 9px rgba(0,0,0,0.78))",
                     }}
                   >
                     {label}
                   </text>
                 );
               })()}
+              <text
+                data-input-flash={inp.id}
+                x={0}
+                y={fontSize / 3}
+                textAnchor="middle"
+                fill={ACCENT}
+                opacity="0"
+                style={{
+                  fontSize: `${fontSize}px`,
+                  fontWeight: 760,
+                  letterSpacing: "0",
+                  filter: "drop-shadow(0 0 14px rgba(0,240,255,0.75))",
+                }}
+              >
+                {label}
+              </text>
             </g>
           );
         })}
