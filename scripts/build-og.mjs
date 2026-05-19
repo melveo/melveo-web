@@ -24,7 +24,7 @@ const ROOT = resolve(__dirname, '..');
 const W = 1200;
 const H = 630;
 
-const SVG = `
+const buildSvg = () => `
 <svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}">
   <defs>
     <radialGradient id="bgCenter" cx="50%" cy="50%" r="55%">
@@ -70,23 +70,25 @@ const SVG = `
     </g>
   </g>
 
-  <!-- Wordmark — Comfortaa Variable, cyan with glow. -->
+  <!-- Wordmark — Comfortaa @ weight 600, matching the live
+       .melveo-wordmark header element on production. Glow layer
+       on top of solid layer (double-rendered SVG <text>). -->
   <g>
-    <text x="${W / 2}" y="${H / 2 - 8}"
+    <text x="${W / 2}" y="${H / 2 + 30}"
           text-anchor="middle"
           font-family="Comfortaa"
-          font-weight="700"
-          font-size="220"
-          letter-spacing="-8"
+          font-weight="600"
+          font-size="200"
+          letter-spacing="-6"
           fill="#00f0ff"
           opacity="0.55"
           filter="url(#glow)">melveo</text>
-    <text x="${W / 2}" y="${H / 2 - 8}"
+    <text x="${W / 2}" y="${H / 2 + 30}"
           text-anchor="middle"
           font-family="Comfortaa"
-          font-weight="700"
-          font-size="220"
-          letter-spacing="-8"
+          font-weight="600"
+          font-size="200"
+          letter-spacing="-6"
           fill="#00f0ff">melveo</text>
   </g>
 
@@ -156,22 +158,23 @@ async function fetchStaticTtfViaGoogleFonts(family, weight) {
   return Buffer.from(ttf);
 }
 
-console.log('• Fetching Comfortaa Bold + Inter Medium (Google Fonts CSS API) …');
-const [comfortaa, inter] = await Promise.all([
-  fetchStaticTtfViaGoogleFonts('Comfortaa', 700),
+console.log('• Fetching Comfortaa 600 + Inter 500 (Google Fonts CSS API) …');
+// Weight 600 (SemiBold) matches the live .melveo-wordmark in the
+// header — verified via getComputedStyle on production. Static
+// instance avoids resvg's variable-font axis weirdness.
+const [comfortaaTtf, interTtf] = await Promise.all([
+  fetchStaticTtfViaGoogleFonts('Comfortaa', 600),
   fetchStaticTtfViaGoogleFonts('Inter', 500),
 ]);
 
 console.log('• Rasterizing SVG @ 1200×630 …');
+const SVG = buildSvg();
 const resvg = new Resvg(SVG, {
   fitTo: { mode: 'width', value: W },
   background: '#050608',
   font: {
-    fontBuffers: [comfortaa, inter],
+    fontBuffers: [comfortaaTtf, interTtf],
     loadSystemFonts: false,
-    // Match the actual TTF family name (wawoff2 decompresses
-    // @fontsource-variable/inter to a TTF whose family-name table
-    // entry is "Inter", not "Inter Variable"). Same for Comfortaa.
     defaultFontFamily: 'Inter',
   },
 });
