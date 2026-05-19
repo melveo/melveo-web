@@ -39,9 +39,17 @@ melveo-*.png
 # never source-of-truth. Was leaking into commits as a 0-byte file.
 .claude/scheduled_tasks.lock
 
-# Finder "Copy" duplicates (file " 2.md" / " 2.png" etc.) — recurring
-# noise from macOS Finder when documents get accidentally duplicated.
+# Finder "Copy" duplicates — file " 2.md" / " 2.png" AND whole
+# directory " 2/" copies. Recurring noise from macOS Finder when
+# items get accidentally duplicated.
 * 2.*
+* 2/
+*\ 2
+*\ 3.*
+*\ 3/
+
+# Ad-hoc audit / agent screenshots dumped into repo root.
+post-change-*.png
 
 # IDE
 .vscode/*

@@ -1,7 +1,0 @@
-# melveo.app — V4-G
-User-agent: *
-Allow: /
-Disallow: /checkout/
-Disallow: /.well-known/
-
-Sitemap: https://melveo.app/sitemap-index.xml
