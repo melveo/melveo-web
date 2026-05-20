@@ -525,6 +525,7 @@ const t = useTranslations(lang);
     position: relative;
     width: 100%;
     min-height: 285vh;
+    min-height: calc(var(--grid-stable-vh, 100svh) * 2.85);
     background: var(--color-bg-canvas);
     /* border-top removed 2026-05-17: no horizontal dividers between sections */
     overflow: clip;
@@ -565,6 +566,7 @@ const t = useTranslations(lang);
   @media (max-width: 1024px) {
     .image-grid-section {
       min-height: 235vh;
+      min-height: calc(var(--grid-stable-vh, 100svh) * 2.35);
       /* Match content-visibility placeholder to the shorter
          tablet/mobile section height — otherwise Chrome reserves
          the desktop 215vh slot and the page below shifts. */
@@ -583,7 +585,9 @@ const t = useTranslations(lang);
     left: 0;
     width: 100vw;
     height: 100vh;
+    height: var(--grid-stable-vh, 100svh);
     margin-bottom: -100vh;
+    margin-bottom: calc(-1 * var(--grid-stable-vh, 100svh));
     pointer-events: none;
     z-index: 0;
     filter: saturate(120%) brightness(1.05);
@@ -591,16 +595,45 @@ const t = useTranslations(lang);
       180deg,
       transparent 0%,
       black 12%,
-      black 88%,
-      transparent 100%
+      black 100%
     );
     -webkit-mask-image: linear-gradient(
       180deg,
       transparent 0%,
       black 12%,
-      black 88%,
-      transparent 100%
+      black 100%
     );
+  }
+
+  @media (max-width: 900px), (pointer: coarse) {
+    /*
+      Mobile fix 2026-05-20: the sticky smoke layer produced a
+      parallax-like handoff at the end of the morph section. While the
+      honeycomb stayed pinned, the next section visually slid across a
+      background that was still locked to the viewport, which looked
+      like a black/cyan band cutting through the bottom hexes. On touch
+      devices the smoke is already rendered as one static frame, so let
+      that frame belong to the whole section instead of the viewport.
+    */
+    .image-grid-section .glass-smoke {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      margin-bottom: 0;
+      mask-image: linear-gradient(
+        180deg,
+        transparent 0%,
+        black 8%,
+        black 100%
+      );
+      -webkit-mask-image: linear-gradient(
+        180deg,
+        transparent 0%,
+        black 8%,
+        black 100%
+      );
+    }
   }
 
   /* .content needs to sit above the smoke. Sticky positioning on
@@ -750,21 +783,14 @@ const t = useTranslations(lang);
 
   .image-grid-section .content {
     /*
-      Use dvh (dynamic viewport height) instead of vh so the sticky
-      pin's height ALWAYS matches the currently visible viewport. On
-      iOS Safari + Chrome mobile, `100vh` resolves to the LARGEST
-      possible viewport (URL bar collapsed = 852 px on iPhone 14 Pro)
-      while the actually-visible area is only 700 px when the URL
-      bar is shown. Using `vh` therefore made .content 152 px taller
-      than visible, so the photo (sized to .content) extended past
-      the visible area, leaving an empty band at the top of the
-      pinned section (user feedback 2026-05-01: "ta sekce jakoby
-      posunutá dolů"). dvh adapts to the current visible viewport
-      and the photo always fills the visible area exactly. Falls
-      back to `vh` on browsers without dvh support (iOS < 15.4).
+      Mobile browser chrome changes the visible viewport while the
+      user scrolls. This section locks to a stable viewport variable
+      in JS so the honeycomb cell size, sticky area and smoke layer do
+      not resize mid-morph when the URL bar collapses.
     */
     min-height: 100vh;
-    min-height: 100dvh;
+    min-height: 100svh;
+    min-height: var(--grid-stable-vh, 100svh);
     width: 100vw;
     position: sticky;
     top: 0;
@@ -794,7 +820,8 @@ const t = useTranslations(lang);
     --hex-h: calc(var(--hex-w) / 0.8660254038);
     --available-w: calc(100vw - (2 * var(--gutter)));
     --available-h: calc(100vh - (2 * var(--gutter)));
-    --available-h: calc(100dvh - (2 * var(--gutter)));
+    --available-h: calc(100svh - (2 * var(--gutter)));
+    --available-h: calc(var(--grid-stable-vh, 100svh) - (2 * var(--gutter)));
     /* True honeycomb adjacency: resize the hexagons themselves, never
        fake the fill by pushing cells apart. Horizontal neighbours share
        vertical sides; the next row shifts by half a cell and 75% height. */
@@ -1525,7 +1552,8 @@ const t = useTranslations(lang);
     object-position: center;
     width: 100vw;
     height: 100vh;
-    height: 100dvh;
+    height: 100svh;
+    height: var(--grid-stable-vh, 100svh);
     clip-path: polygon(0% 0%, 100% 0%, 100% 50%, 100% 100%, 0% 100%, 0% 50%);
     -webkit-clip-path: polygon(0% 0%, 100% 0%, 100% 50%, 100% 100%, 0% 100%, 0% 50%);
     border-radius: 28px;
@@ -1733,6 +1761,48 @@ const t = useTranslations(lang);
   const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   const compactMotion = window.matchMedia('(max-width: 900px), (max-height: 460px) and (max-width: 950px), (pointer: coarse)').matches;
 
+  /*
+    Mobile browsers fire resize events while the URL bar collapses.
+    If the honeycomb uses dynamic viewport units during that scroll,
+    every hexagon gets re-sized mid-animation and the smoke canvas
+    appears to drift independently from the grid. Lock this section
+    to a stable visual viewport height and only refresh it on real
+    layout changes (rotation / major viewport change), not browser
+    chrome movement.
+  */
+  function lockGridViewport(section: HTMLElement) {
+    const read = () => ({
+      width: Math.round(window.visualViewport?.width ?? window.innerWidth),
+      height: Math.round(window.visualViewport?.height ?? window.innerHeight),
+    });
+    let stable = read();
+
+    const apply = () => {
+      section.style.setProperty('--grid-stable-vh', `${stable.height}px`);
+      section.style.setProperty('--grid-stable-vw', `${stable.width}px`);
+    };
+
+    const maybeRefresh = () => {
+      const next = read();
+      const widthChanged = Math.abs(next.width - stable.width) > 24;
+      const majorHeightChanged =
+        Math.abs(next.height - stable.height) > Math.max(180, stable.height * 0.25);
+
+      if (!widthChanged && !majorHeightChanged) return false;
+
+      stable = next;
+      apply();
+      return true;
+    };
+
+    apply();
+
+    return {
+      maybeRefresh,
+      getHeight: () => stable.height,
+    };
+  }
+
   if (!reduceMotion && !MORPH_NO_SCROLL) {
     const section = document.querySelector<HTMLElement>('[data-grid-section]');
     const image = section?.querySelector<HTMLImageElement>('.scaler img');
@@ -1740,6 +1810,7 @@ const t = useTranslations(lang);
     const cells = section?.querySelectorAll<HTMLElement>('.grid > .layer > div');
 
     if (section && image && layers && layers.length > 0 && cells && cells.length > 0) {
+      const viewportLock = lockGridViewport(section);
       // Wait one frame so layout has settled and we can measure the
       // .scaler container itself — its offsetWidth/Height equal the
       // grid cell size after layout commits.
@@ -1883,7 +1954,11 @@ const t = useTranslations(lang);
 
         const readProgress = () => {
           const rect = section.getBoundingClientRect();
-          const viewport = window.innerHeight || document.documentElement.clientHeight || 1;
+          const viewport =
+            viewportLock.getHeight() ||
+            window.innerHeight ||
+            document.documentElement.clientHeight ||
+            1;
           const scrollDistance = Math.max(1, section.offsetHeight - viewport);
           return clamp01(-rect.top / scrollDistance);
         };
@@ -2004,6 +2079,13 @@ const t = useTranslations(lang);
 
         const onScroll = () => requestUpdate();
         const onResize = () => {
+          /*
+            Ignore mobile URL-bar resize noise. The section's stable
+            viewport lock keeps the visible grid size fixed during
+            scroll; only real viewport changes should invalidate the
+            measured progress state.
+          */
+          if (!viewportLock.maybeRefresh()) return;
           lastProgress = -1;
           targetProgress = readProgress();
           renderedProgress = targetProgress;
