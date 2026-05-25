@@ -104,6 +104,16 @@ Post-fix local validation:
 - `npm run build`: passed.
 - Local preview smoke on 24 route/viewport combinations: passed with no broken images, no 4xx asset responses, no console errors and no horizontal overflow above the 2px tolerance.
 
+Post-deploy production validation after commit `5fad17f`:
+
+- Production routes `/`, `/cs/`, `/en/`, privacy, terms, sitemap and robots returned `200`.
+- `Content-Security-Policy` is enforced in production.
+- `Content-Security-Policy-Report-Only` is no longer emitted.
+- `sitemap-index.xml` and `sitemap-0.xml` return a single `Cache-Control: public, max-age=3600`.
+- 100 production responsiveness checks across `/cs/` and `/en/` passed with no broken images, no console errors and no horizontal overflow above the 2px tolerance.
+- Post-fix Lighthouse `/cs/` mobile: Performance 99, Accessibility 100, Best Practices 100, SEO 100.
+- Post-fix Lighthouse `/cs/` desktop: Performance 100, Accessibility 100, Best Practices 100, SEO 100.
+
 ## Availability And Routing
 
 Checked routes:
