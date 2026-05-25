@@ -56,7 +56,12 @@ const defaultDescription =
 
 const finalDescription = description ?? defaultDescription;
 
-const fullTitle = title === 'Melveo' ? title : `${title} — Melveo`;
+const fullTitle =
+  title === 'Melveo'
+    ? lang === 'cs'
+      ? 'Melveo — hráčské signály do rozhodnutí trenéra'
+      : 'Melveo — athlete signals into coach decisions'
+    : `${title} — Melveo`;
 const canonicalUrl = canonical
   ? new URL(canonical, Astro.site).toString()
   : new URL(Astro.url.pathname, Astro.site).toString();
@@ -67,7 +72,7 @@ const currentPathWithoutLocale = Astro.url.pathname.replace(/^\/(cs|en)/, '') ||
 const altUrls = {
   cs: new URL(`/cs${currentPathWithoutLocale}`, Astro.site).toString(),
   en: new URL(`/en${currentPathWithoutLocale}`, Astro.site).toString(),
-  default: new URL('/', Astro.site).toString(),
+  default: new URL(`/cs${currentPathWithoutLocale}`, Astro.site).toString(),
 };
 ---
 
@@ -219,13 +224,13 @@ const altUrls = {
           <div class="flex flex-col items-center gap-4 px-6 py-10 text-center text-sm text-[var(--color-text-secondary)] sm:flex-row sm:flex-wrap sm:justify-center sm:gap-x-8 sm:gap-y-4">
             <span>{t('footer.copyright')}</span>
             <a
-              href={`/${lang}/privacy`}
+              href={`/${lang}/privacy/`}
               class="inline-flex items-center min-h-[44px] py-2 transition-colors hover:text-[var(--color-text-primary)]"
             >
               {t('footer.privacy')}
             </a>
             <a
-              href={`/${lang}/terms`}
+              href={`/${lang}/terms/`}
               class="inline-flex items-center min-h-[44px] py-2 transition-colors hover:text-[var(--color-text-primary)]"
             >
               {t('footer.terms')}

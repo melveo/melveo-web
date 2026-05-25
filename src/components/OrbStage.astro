@@ -119,22 +119,16 @@ const t = useTranslations(lang);
     height: 100%;
 
     /*
-      Glass-hexagon body — pure brand-cyan radial gradient that
-      follows the cursor on desktop and ambient auto-orbit on touch
-      devices (same --x / --y as the clip-path).
+      Glass-hexagon body — solid brand-cyan fill that follows the
+      cursor on desktop and ambient auto-orbit on touch devices
+      (same --x / --y as the clip-path).
       Updated 2026-05: replaced the circular orb with a hexagon clip
       so the reveal shape matches the hexagonal brand identity used
       throughout the rest of the site (input + Coach hexes).
     */
     --x: 70%;
     --y: 50%;
-    background: radial-gradient(
-      circle at calc(var(--x) - 6%) calc(var(--y) - 6%),
-      var(--color-accent-primary-subtle) 0%,
-      var(--color-accent-primary) 18%,
-      color-mix(in srgb, var(--color-accent-primary) 75%, var(--color-bg-canvas)) 55%,
-      color-mix(in srgb, var(--color-accent-primary) 45%, var(--color-bg-canvas)) 100%
-    );
+    background: var(--color-accent-primary);
 
     /*
       Dark text inside the hexagon — same canvas variable as before
