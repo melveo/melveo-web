@@ -44,16 +44,11 @@ const t = useTranslations(lang);
 <section
   class="image-grid-section"
   data-grid-section
-  data-glass-smoke
-  data-glass-smoke-density="0.65"
-  data-glass-smoke-fps="20"
-  data-glass-smoke-static="compact"
 >
-  {/* Cyan smoke field behind the grid — same recipe + same component
-      as the pricing section (glass-smoke.ts). Kept calmer here and
-      frame-capped because the section already runs a scroll morph and
-      clipped glass honeycomb; the smoke should add depth without
-      competing with scroll performance. */}
+  {/* Static cyan atmosphere behind the grid. This used to be the
+      runtime glass-smoke canvas, but the honeycomb already owns the
+      scroll budget; a CSS field keeps the same mood without a large
+      canvas repaint during the morph. */}
   <canvas class="glass-smoke" data-glass-smoke-canvas aria-hidden="true"></canvas>
 
   <div class="content">
@@ -563,6 +558,22 @@ const t = useTranslations(lang);
     contain-intrinsic-size: 100vw 285vh;
   }
 
+  .image-grid-section::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    background:
+      radial-gradient(circle at 8% 22%, rgba(0, 240, 255, 0.16), transparent 16rem),
+      radial-gradient(circle at 24% 78%, rgba(0, 240, 255, 0.14), transparent 20rem),
+      radial-gradient(circle at 54% 18%, rgba(0, 240, 255, 0.12), transparent 18rem),
+      radial-gradient(circle at 72% 66%, rgba(0, 240, 255, 0.16), transparent 22rem),
+      radial-gradient(circle at 94% 34%, rgba(0, 240, 255, 0.13), transparent 17rem),
+      linear-gradient(180deg, rgba(0, 240, 255, 0.02), transparent 35%, rgba(0, 240, 255, 0.035));
+    opacity: 0.92;
+  }
+
   @media (max-width: 1024px) {
     .image-grid-section {
       min-height: 235vh;
@@ -574,65 +585,22 @@ const t = useTranslations(lang);
     }
   }
 
-  /* Smoke canvas — same recipe as the pricing section. Sticks to the
-     viewport so it covers the whole sticky-content area instead of
-     the 620vh section bounding box (which would force the canvas to
-     be enormous and stretch the puffs vertically). The smoke needs
-     to live above the section background but below .content. */
+  /* The canvas element remains in markup for backwards compatibility
+     with old snapshots, but this section now uses the static CSS
+     atmosphere above instead of runtime smoke. */
   .image-grid-section .glass-smoke {
-    position: sticky;
-    top: 0;
-    left: 0;
-    width: 100vw;
-    height: 100vh;
-    height: var(--grid-stable-vh, 100svh);
-    margin-bottom: -100vh;
-    margin-bottom: calc(-1 * var(--grid-stable-vh, 100svh));
+    display: none;
     pointer-events: none;
-    z-index: 0;
-    filter: saturate(120%) brightness(1.05);
-    mask-image: linear-gradient(
-      180deg,
-      transparent 0%,
-      black 12%,
-      black 100%
-    );
-    -webkit-mask-image: linear-gradient(
-      180deg,
-      transparent 0%,
-      black 12%,
-      black 100%
-    );
   }
 
   @media (max-width: 900px), (pointer: coarse) {
-    /*
-      Mobile fix 2026-05-20: the sticky smoke layer produced a
-      parallax-like handoff at the end of the morph section. While the
-      honeycomb stayed pinned, the next section visually slid across a
-      background that was still locked to the viewport, which looked
-      like a black/cyan band cutting through the bottom hexes. On touch
-      devices the smoke is already rendered as one static frame, so let
-      that frame belong to the whole section instead of the viewport.
-    */
-    .image-grid-section .glass-smoke {
-      position: absolute;
-      inset: 0;
-      width: 100%;
-      height: 100%;
-      margin-bottom: 0;
-      mask-image: linear-gradient(
-        180deg,
-        transparent 0%,
-        black 8%,
-        black 100%
-      );
-      -webkit-mask-image: linear-gradient(
-        180deg,
-        transparent 0%,
-        black 8%,
-        black 100%
-      );
+    .image-grid-section::before {
+      background:
+        radial-gradient(circle at 18% 18%, rgba(0, 240, 255, 0.13), transparent 11rem),
+        radial-gradient(circle at 78% 28%, rgba(0, 240, 255, 0.12), transparent 10rem),
+        radial-gradient(circle at 22% 76%, rgba(0, 240, 255, 0.14), transparent 12rem),
+        radial-gradient(circle at 86% 82%, rgba(0, 240, 255, 0.11), transparent 10rem),
+        linear-gradient(180deg, rgba(0, 240, 255, 0.02), transparent 42%, rgba(0, 240, 255, 0.035));
     }
   }
 
@@ -1690,8 +1658,6 @@ const t = useTranslations(lang);
 </style>
 
 <script>
-  import { mountGlassSmoke } from '../scripts/glass-smoke';
-
   /*
     Diagnostic switches — 2026-05-17. The morph section was
     accused of janking the whole site after passing through it,
@@ -1708,14 +1674,13 @@ const t = useTranslations(lang);
       ?morph=no-scroll    → no Motion scroll() animations. Image
                             stays at its CSS-default full-bleed
                             and cells at their initial opacity.
-      ?morph=no-smoke     → don't mount the glass-smoke canvas.
       ?morph=no-anim-cancel → keep the current behaviour where
                             unmount only detaches scroll() observers
                             without cancelling the underlying WAAPI
                             animations. Default: animations get
                             cancelled too.
 
-    Combine with commas, e.g. `?morph=no-smoke,no-scroll`.
+    Combine with commas, e.g. `?morph=no-scroll`.
   */
   const morphFlags = new Set(
     new URLSearchParams(window.location.search)
@@ -1725,37 +1690,9 @@ const t = useTranslations(lang);
   );
   const MORPH_OFF = morphFlags.has('off');
   const MORPH_NO_SCROLL = MORPH_OFF || morphFlags.has('no-scroll');
-  const MORPH_NO_SMOKE = MORPH_OFF || morphFlags.has('no-smoke');
   if (morphFlags.size > 0) {
     // eslint-disable-next-line no-console
     console.info('[morph] diagnostic flags:', [...morphFlags]);
-  }
-
-  // Smoke field behind the grid — defer to idle so the scroll/Motion
-  // setup below runs first. mountGlassSmoke scans for [data-glass-smoke]
-  // sections so the same call also re-attaches new sections if the page
-  // adds them later.
-  //
-  // 2026-05-16: removed phone/coarse-pointer skip. The original
-  // perf guard was for the SVG glass-lens displacement filter
-  // (now gone from .glass-card .glass-filter); the canvas itself
-  // uses composite="lighter" which is GPU-cheap. Skip caused a
-  // visible bug: image-grid had black background until user scrolled
-  // to pricing (whose own startSmoke had no skip and scanned ALL
-  // [data-glass-smoke] sections, retroactively mounting the grid).
-  // Mount unconditionally so the grid has its cyan smoke on first
-  // approach, matching pricing on every viewport.
-  function startSmoke() {
-    if (MORPH_NO_SMOKE) {
-      console.info('[morph] skipping glass-smoke (?morph=no-smoke)');
-      return;
-    }
-    mountGlassSmoke();
-  }
-  if ('requestIdleCallback' in window) {
-    (window as any).requestIdleCallback(startSmoke, { timeout: 1500 });
-  } else {
-    setTimeout(startSmoke, 250);
   }
 
   const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -1945,6 +1882,12 @@ const t = useTranslations(lang);
         let compactShrunk = false;
         let sectionActive = false;
         let lastProgress = -1;
+        let lastIntroOpacity = '';
+        let lastIntroTransform = '';
+        let lastIntroPointerEvents = '';
+        let lastDarkenOpacity = '';
+        let lastReveal = '';
+        let lastImgTransform = '';
         let targetProgress = 0;
         let renderedProgress = 0;
         let settleRaf = 0;
@@ -1971,13 +1914,29 @@ const t = useTranslations(lang);
           const introP = easeInOut(progress / introEnd);
           const introVisible = progress < introEnd;
           if (intro) {
-            intro.style.opacity = `${1 - introP}`;
-            intro.style.transform = `translate3d(0, ${-24 * introP}px, 0)`;
-            intro.style.pointerEvents = introVisible ? '' : 'none';
+            const nextOpacity = (1 - introP).toFixed(3);
+            const nextTransform = `translate3d(0, ${(-24 * introP).toFixed(2)}px, 0)`;
+            const nextPointerEvents = introVisible ? '' : 'none';
+            if (nextOpacity !== lastIntroOpacity) {
+              lastIntroOpacity = nextOpacity;
+              intro.style.opacity = nextOpacity;
+            }
+            if (nextTransform !== lastIntroTransform) {
+              lastIntroTransform = nextTransform;
+              intro.style.transform = nextTransform;
+            }
+            if (nextPointerEvents !== lastIntroPointerEvents) {
+              lastIntroPointerEvents = nextPointerEvents;
+              intro.style.pointerEvents = nextPointerEvents;
+            }
           }
 
           if (darken) {
-            darken.style.opacity = `${1 - easeInOut(progress / (compactMotion ? 0.36 : 0.34))}`;
+            const nextDarkenOpacity = (1 - easeInOut(progress / (compactMotion ? 0.36 : 0.34))).toFixed(3);
+            if (nextDarkenOpacity !== lastDarkenOpacity) {
+              lastDarkenOpacity = nextDarkenOpacity;
+              darken.style.opacity = nextDarkenOpacity;
+            }
           }
 
           if (compactMotion) {
@@ -1992,7 +1951,11 @@ const t = useTranslations(lang);
             const shouldShrink = progress >= 0.28;
             if (shouldShrink !== compactShrunk) {
               compactShrunk = shouldShrink;
-              img.style.transform = `translateZ(0) scale(${shouldShrink ? scaleEnd : 1})`;
+              const nextTransform = `translateZ(0) scale(${shouldShrink ? scaleEnd : 1})`;
+              if (nextTransform !== lastImgTransform) {
+                lastImgTransform = nextTransform;
+                img.style.transform = nextTransform;
+              }
             }
 
             const shouldHex = progress >= 0.42;
@@ -2006,7 +1969,11 @@ const t = useTranslations(lang);
             const morphEnd = 0.76;
             const morphP = easeInOut((progress - morphStart) / (morphEnd - morphStart));
             const scale = 1 + (scaleEnd - 1) * morphP;
-            img.style.transform = `translateZ(0) scale(${scale})`;
+            const nextTransform = `translateZ(0) scale(${scale.toFixed(5)})`;
+            if (nextTransform !== lastImgTransform) {
+              lastImgTransform = nextTransform;
+              img.style.transform = nextTransform;
+            }
 
             const shouldHex = morphP >= 0.58;
             if (shouldHex !== isHex) {
@@ -2019,7 +1986,11 @@ const t = useTranslations(lang);
           const revealStart = compactMotion ? 0.52 : 0.68;
           const revealEnd = compactMotion ? 0.92 : 0.94;
           const reveal = easeOut((progress - revealStart) / (revealEnd - revealStart));
-          section.style.setProperty('--reveal-progress', reveal.toFixed(4));
+          const nextReveal = reveal.toFixed(3);
+          if (nextReveal !== lastReveal) {
+            lastReveal = nextReveal;
+            section.style.setProperty('--reveal-progress', nextReveal);
+          }
         };
 
         /*
@@ -2077,7 +2048,15 @@ const t = useTranslations(lang);
           }
         };
 
-        const onScroll = () => requestUpdate();
+        const onScroll = () => {
+          if (
+            !sectionActive &&
+            (renderedProgress <= 0.001 || renderedProgress >= 0.999)
+          ) {
+            return;
+          }
+          requestUpdate();
+        };
         const onResize = () => {
           /*
             Ignore mobile URL-bar resize noise. The section's stable

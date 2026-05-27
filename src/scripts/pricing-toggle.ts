@@ -18,6 +18,18 @@ export function mountPricingToggle() {
   sections.forEach((section) => {
     const buttons = section.querySelectorAll<HTMLButtonElement>('[data-period-set]');
     if (buttons.length === 0) return;
+    const toggle = section.querySelector<HTMLElement>('.pricing-toggle');
+
+    function syncThumb(period: Period) {
+      if (!toggle) return;
+      const active = Array.from(buttons).find((btn) => btn.dataset.periodSet === period);
+      if (!active) return;
+      const toggleRect = toggle.getBoundingClientRect();
+      const activeRect = active.getBoundingClientRect();
+      toggle.style.setProperty('--toggle-x', `${activeRect.left - toggleRect.left}px`);
+      toggle.style.setProperty('--toggle-w', `${activeRect.width}px`);
+      toggle.classList.add('pricing-toggle--ready');
+    }
 
     function setPeriod(period: Period) {
       section.dataset.period = period;
@@ -26,6 +38,7 @@ export function mountPricingToggle() {
         btn.classList.toggle('pricing-toggle-btn--active', isActive);
         btn.setAttribute('aria-selected', isActive ? 'true' : 'false');
       });
+      requestAnimationFrame(() => syncThumb(period));
     }
 
     buttons.forEach((btn) => {
@@ -41,5 +54,9 @@ export function mountPricingToggle() {
     // markup so first paint already shows the recommended option).
     const initial = (section.dataset.period as Period | undefined) ?? 'yearly';
     setPeriod(initial);
+    window.addEventListener('resize', () => {
+      const current = (section.dataset.period as Period | undefined) ?? initial;
+      syncThumb(current);
+    }, { passive: true });
   });
 }

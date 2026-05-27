@@ -25,6 +25,7 @@
 const ORBIT_PERIOD_X_MS = 10500;
 const ORBIT_PERIOD_Y_MS = 12800;
 const IDLE_RELEASE_MS = 1600;
+const TOUCH_IDLE_RELEASE_MS = 30000;
 
 export function mountOrbCursor() {
   const wrapper = document.querySelector<HTMLElement>('[data-orb-wrapper]');
@@ -33,6 +34,8 @@ export function mountOrbCursor() {
 
   const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   if (reduceMotion) return;
+
+  let wrapperVisible = !('IntersectionObserver' in window);
 
   // ─── rAF-batched style writer ───────────────────────────────────
   // Pointer events on a fast input device fire at 200+ Hz; we
@@ -44,6 +47,8 @@ export function mountOrbCursor() {
 
   function flushWrite() {
     writeRaf = 0;
+    wrapper!.style.setProperty('--x', pendingX.toFixed(2) + '%');
+    wrapper!.style.setProperty('--y', pendingY.toFixed(2) + '%');
     secondary!.style.setProperty('--x', pendingX.toFixed(2) + '%');
     secondary!.style.setProperty('--y', pendingY.toFixed(2) + '%');
   }
@@ -65,12 +70,25 @@ export function mountOrbCursor() {
     scheduleWrite();
   }
 
+  function readRenderedHexCenter() {
+    const rect = wrapper!.getBoundingClientRect();
+    const styles = getComputedStyle(secondary!);
+    const rawX = Number.parseFloat(styles.getPropertyValue('--x'));
+    const rawY = Number.parseFloat(styles.getPropertyValue('--y'));
+    const xPct = Number.isFinite(rawX) ? rawX : pendingX;
+    const yPct = Number.isFinite(rawY) ? rawY : pendingY;
+    return {
+      cx: rect.left + (xPct / 100) * rect.width,
+      cy: rect.top + (yPct / 100) * rect.height,
+    };
+  }
+
   // ─── Auto-orbit (default state) ─────────────────────────────────
   let orbitRaf = 0;
   let orbitStart = 0;
 
   function orbitFrame(t: number) {
-    if (document.hidden) {
+    if (document.hidden || !wrapperVisible) {
       orbitRaf = 0;
       return;
     }
@@ -90,7 +108,7 @@ export function mountOrbCursor() {
   }
 
   function startOrbit() {
-    if (orbitRaf !== 0) return;
+    if (orbitRaf !== 0 || document.hidden || !wrapperVisible) return;
     // Resume the Lissajous at a phase that matches the current
     // pending position so the orb doesn't snap back to centre when
     // we hand control back from manual mode.
@@ -108,10 +126,15 @@ export function mountOrbCursor() {
   // ─── Manual mode (post-click cursor / finger follow) ────────────
   let manualMode = false;
   let idleTimer = 0;
+  let gyroNeutralGamma: number | null = null;
+  let gyroNeutralBeta: number | null = null;
 
   function bumpIdleTimer() {
     if (idleTimer !== 0) window.clearTimeout(idleTimer);
-    idleTimer = window.setTimeout(exitManual, IDLE_RELEASE_MS);
+    idleTimer = window.setTimeout(
+      exitManual,
+      isTouchContext() ? TOUCH_IDLE_RELEASE_MS : IDLE_RELEASE_MS,
+    );
   }
 
   function clearIdleTimer() {
@@ -122,6 +145,7 @@ export function mountOrbCursor() {
   }
 
   function enterManual(clientX: number, clientY: number) {
+    if (!wrapperVisible) return;
     if (manualMode) {
       // Already manual — just refresh position + idle timer.
       setFromClientPoint(clientX, clientY);
@@ -129,10 +153,14 @@ export function mountOrbCursor() {
       return;
     }
     manualMode = true;
+    if (isTouchContext()) {
+      gyroNeutralGamma = null;
+      gyroNeutralBeta = null;
+    }
     wrapper!.classList.add('is-orb-manual');
     stopOrbit();
     setFromClientPoint(clientX, clientY);
-    window.addEventListener('pointermove', onManualPointerMove, { passive: true });
+    window.addEventListener('pointermove', onManualPointerMove, { passive: false });
     bumpIdleTimer();
     syncHintLabel();
   }
@@ -143,56 +171,73 @@ export function mountOrbCursor() {
     wrapper!.classList.remove('is-orb-manual');
     window.removeEventListener('pointermove', onManualPointerMove);
     clearIdleTimer();
-    startOrbit();
+    if (wrapperVisible) startOrbit();
     syncHintLabel();
   }
 
   function syncHintLabel() {
-    const hb = wrapper!.querySelector<HTMLButtonElement>('[data-orb-hint]');
-    const hl = wrapper!.querySelector<HTMLElement>('[data-orb-hint-label]');
-    if (!hb || !hl) return;
-    const mobileMode = isTouchContext();
-    const active = mobileMode ? hb.dataset.hintMobileActive : hb.dataset.hintDesktopActive;
-    const def = mobileMode ? hb.dataset.hintMobile : hb.dataset.hintDesktop;
-    const nextLabel = manualMode ? active ?? '' : def ?? '';
-    hl.textContent = nextLabel;
-    hb.setAttribute('aria-label', nextLabel);
-    wrapper!.classList.toggle('is-orb-touch', mobileMode);
+    wrapper!.classList.toggle('is-orb-touch', isTouchContext());
   }
 
   function onManualPointerMove(event: PointerEvent) {
+    if (!wrapperVisible) return;
+    if (event.pointerType === 'touch') event.preventDefault();
     setFromClientPoint(event.clientX, event.clientY);
     bumpIdleTimer();
   }
 
   // ─── Activation: click inside section enters manual ─────────────
+  function isHintEventTarget(target: EventTarget | null) {
+    return target instanceof Node && !!hintButton?.contains(target);
+  }
+
+  function isInsideCurrentHex(clientX: number, clientY: number) {
+    const { cx, cy } = readRenderedHexCenter();
+    const radius = Math.min(window.innerWidth, window.innerHeight) * 0.28;
+    const dx = Math.abs(clientX - cx);
+    const dy = Math.abs(clientY - cy);
+    const halfHeight = radius * 0.866;
+    return dx <= radius && dy <= halfHeight && 0.866 * dx + 0.5 * dy <= 0.866 * radius;
+  }
+
   function onWrapperPointerDown(event: PointerEvent) {
+    if (isHintEventTarget(event.target)) return;
     // Don't preventDefault on touch — the user could be scrolling
     // through the section. We only take control on stationary
     // taps / clicks. mousedown / pen always activate; touch needs
     // the pointerup to land near pointerdown (small move tolerance).
     if (event.pointerType === 'mouse' || event.pointerType === 'pen') {
+      if (!isInsideCurrentHex(event.clientX, event.clientY)) return;
       event.preventDefault();
       enterManual(event.clientX, event.clientY);
       return;
     }
-    // Touch — wait for a non-scrolling tap.
-    handleTouchTap(event);
+    // Touch — if the gesture starts on the visible hex, take
+    // control immediately so the same drag moves the hex instead
+    // of scrolling the page.
+    if (!isInsideCurrentHex(event.clientX, event.clientY)) return;
+    event.preventDefault();
+    try {
+      wrapper!.setPointerCapture(event.pointerId);
+    } catch {
+      // Older browsers may not expose pointer capture here; manual
+      // window-level pointermove still keeps the interaction usable.
+    }
+    pendingTouchId = null;
+    enterManual(event.clientX, event.clientY);
+    enableGyroscope().catch(() => undefined);
   }
 
   // Touch-specific tap detection: tracks pointerup near pointerdown.
   let pendingTouchId: number | null = null;
   let touchStartX = 0;
   let touchStartY = 0;
-  const TAP_MOVE_TOLERANCE = 14;
-
-  function handleTouchTap(event: PointerEvent) {
-    pendingTouchId = event.pointerId;
-    touchStartX = event.clientX;
-    touchStartY = event.clientY;
-  }
+  const TAP_MOVE_TOLERANCE = 22;
 
   function onWrapperPointerMove(event: PointerEvent) {
+    if (!manualMode && (event.pointerType === 'mouse' || event.pointerType === 'pen')) {
+      wrapper!.classList.toggle('is-orb-hit', isInsideCurrentHex(event.clientX, event.clientY));
+    }
     // If we're tracking a touch for tap, cancel it once the user
     // moves past tolerance — they're scrolling, not tapping.
     if (
@@ -215,14 +260,71 @@ export function mountOrbCursor() {
   }
 
   function onWrapperPointerUp(event: PointerEvent) {
+    if (isHintEventTarget(event.target)) return;
     if (
       event.pointerType === 'touch' &&
       pendingTouchId === event.pointerId
     ) {
       // The touch never moved past tolerance — treat as tap.
+      if (!isInsideCurrentHex(event.clientX, event.clientY)) {
+        pendingTouchId = null;
+        return;
+      }
       enterManual(event.clientX, event.clientY);
+      enableGyroscope().catch(() => undefined);
       pendingTouchId = null;
     }
+  }
+
+  function onWrapperTouchStart(event: TouchEvent) {
+    if (isHintEventTarget(event.target)) return;
+    if (event.touches.length !== 1) return;
+    const touch = event.touches[0];
+    if (!isInsideCurrentHex(touch.clientX, touch.clientY)) return;
+    pendingTouchId = touch.identifier;
+    touchStartX = touch.clientX;
+    touchStartY = touch.clientY;
+  }
+
+  function onWrapperTouchMove(event: TouchEvent) {
+    if (event.touches.length !== 1) return;
+    const touch = event.touches[0];
+    if (!manualMode && pendingTouchId === touch.identifier) {
+      const dx = touch.clientX - touchStartX;
+      const dy = touch.clientY - touchStartY;
+      if (Math.hypot(dx, dy) > TAP_MOVE_TOLERANCE) {
+        pendingTouchId = null;
+      }
+      return;
+    }
+    if (manualMode) {
+      event.preventDefault();
+      setFromClientPoint(touch.clientX, touch.clientY);
+      bumpIdleTimer();
+    }
+  }
+
+  function onWrapperTouchEnd(event: TouchEvent) {
+    if (isHintEventTarget(event.target)) return;
+    if (pendingTouchId === null || event.changedTouches.length === 0) return;
+    const touch = Array.from(event.changedTouches).find(
+      (item) => item.identifier === pendingTouchId,
+    );
+    if (!touch) return;
+    pendingTouchId = null;
+    if (!isInsideCurrentHex(touch.clientX, touch.clientY)) return;
+    enterManual(touch.clientX, touch.clientY);
+    enableGyroscope().catch(() => undefined);
+  }
+
+  function onWrapperKeyDown(event: KeyboardEvent) {
+    if (event.key !== 'Enter' && event.key !== ' ') return;
+    event.preventDefault();
+    const rect = wrapper!.getBoundingClientRect();
+    enterManual(
+      rect.left + (pendingX / 100) * rect.width,
+      rect.top + (pendingY / 100) * rect.height,
+    );
   }
 
   // ─── Deactivation: click outside or leave section ───────────────
@@ -233,6 +335,7 @@ export function mountOrbCursor() {
   }
 
   function onWrapperPointerLeave() {
+    wrapper!.classList.remove('is-orb-hit');
     if (!manualMode) return;
     exitManual();
   }
@@ -248,13 +351,19 @@ export function mountOrbCursor() {
   let gyroPermissionRequested = false;
 
   function onDeviceOrientation(event: DeviceOrientationEvent) {
-    if (!gyroEnabled || !manualMode) return;
+    if (!gyroEnabled || !manualMode || !wrapperVisible) return;
     const gamma = event.gamma ?? 0; // -90 → +90
     const beta = event.beta ?? 0;   // -180 → +180
-    // Map ±30° of tilt to the full orb travel; clamp aggressively
-    // so a phone held normally lands near centre.
-    const xRaw = 50 + (gamma / 30) * 45;
-    const yRaw = 50 + ((beta - 45) / 30) * 45;
+    if (gyroNeutralGamma === null || gyroNeutralBeta === null) {
+      gyroNeutralGamma = gamma;
+      gyroNeutralBeta = beta;
+    }
+    // Use the current phone pose at activation time as neutral.
+    // A fixed beta baseline made some phones jump the reveal to the
+    // top edge immediately after permission; relative tilt feels much
+    // more predictable across Safari/Chrome and portrait/landscape.
+    const xRaw = 50 + ((gamma - gyroNeutralGamma) / 25) * 45;
+    const yRaw = 50 + ((beta - gyroNeutralBeta) / 25) * 45;
     pendingX = Math.min(95, Math.max(5, xRaw));
     pendingY = Math.min(95, Math.max(5, yRaw));
     scheduleWrite();
@@ -272,8 +381,12 @@ export function mountOrbCursor() {
       gyroPermissionRequested = true;
       try {
         const status = await DOEv.requestPermission();
-        if (status !== 'granted') return false;
+        if (status !== 'granted') {
+          gyroPermissionRequested = false;
+          return false;
+        }
       } catch {
+        gyroPermissionRequested = false;
         return false;
       }
     }
@@ -282,7 +395,7 @@ export function mountOrbCursor() {
     return true;
   }
 
-  // ─── Hint button — surfaces the click+tilt affordance ──────────
+  // ─── Interaction context ───────────────────────────────────────
   const hintButton = wrapper.querySelector<HTMLButtonElement>('[data-orb-hint]');
   const touchMedia = window.matchMedia('(pointer: coarse), (hover: none)');
 
@@ -293,19 +406,32 @@ export function mountOrbCursor() {
   syncHintLabel();
   touchMedia.addEventListener?.('change', syncHintLabel);
 
-  hintButton?.addEventListener('click', (event) => {
-    event.stopPropagation();
-    if (manualMode) {
-      exitManual();
-      return;
-    }
-    const rect = wrapper!.getBoundingClientRect();
-    enterManual(rect.left + rect.width / 2, rect.top + rect.height / 2);
-    // Try gyroscope in parallel — silent if unavailable / denied.
-    enableGyroscope().catch(() => undefined);
-  });
-
   // ─── Wire-up ────────────────────────────────────────────────────
+  let visibilityObserver: IntersectionObserver | null = null;
+  if ('IntersectionObserver' in window) {
+    visibilityObserver = new IntersectionObserver(
+      ([entry]) => {
+        wrapperVisible = !!entry?.isIntersecting;
+        wrapper.classList.toggle('is-orb-visible', wrapperVisible);
+        if (!wrapperVisible) {
+          if (writeRaf !== 0) {
+            cancelAnimationFrame(writeRaf);
+            writeRaf = 0;
+          }
+          pendingTouchId = null;
+          if (manualMode) exitManual();
+          stopOrbit();
+          return;
+        }
+        if (!manualMode && !document.hidden) startOrbit();
+      },
+      { rootMargin: '30% 0px 30% 0px', threshold: 0 },
+    );
+    visibilityObserver.observe(wrapper);
+  } else {
+    wrapper.classList.add('is-orb-visible');
+  }
+
   startOrbit();
   wrapper.addEventListener('pointerdown', onWrapperPointerDown);
   wrapper.addEventListener('pointermove', onWrapperPointerMove, { passive: false });
@@ -314,6 +440,13 @@ export function mountOrbCursor() {
     pendingTouchId = null;
   });
   wrapper.addEventListener('pointerleave', onWrapperPointerLeave);
+  wrapper.addEventListener('keydown', onWrapperKeyDown);
+  wrapper.addEventListener('touchstart', onWrapperTouchStart, { passive: true });
+  wrapper.addEventListener('touchmove', onWrapperTouchMove, { passive: false });
+  wrapper.addEventListener('touchend', onWrapperTouchEnd, { passive: true });
+  wrapper.addEventListener('touchcancel', () => {
+    pendingTouchId = null;
+  }, { passive: true });
   document.addEventListener('pointerdown', onDocumentPointerDown);
 
   // Pause/resume around tab visibility so we don't burn CPU when
@@ -326,7 +459,7 @@ export function mountOrbCursor() {
       }
       stopOrbit();
       if (manualMode) exitManual();
-    } else if (!manualMode) {
+    } else if (!manualMode && wrapperVisible) {
       startOrbit();
     }
   });

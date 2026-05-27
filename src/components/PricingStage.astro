@@ -236,6 +236,7 @@ const currencyShort = lang === 'cs' ? 'Kč' : 'CZK';
         "Měsíčně", and a 50 %-width thumb clipped the wider label).
       */}
       <div class="pricing-toggle" role="tablist" aria-label="Billing period">
+        <span class="pricing-toggle-thumb" aria-hidden="true"></span>
         <button
           type="button"
           role="tab"
@@ -558,6 +559,9 @@ const currencyShort = lang === 'cs' ? 'Kč' : 'CZK';
      "Ročně" wider than "Měsíčně") can't clip the active label. */
 
   .pricing-toggle {
+    --toggle-x: 5px;
+    --toggle-w: 0px;
+    position: relative;
     display: inline-flex;
     align-items: stretch;
     gap: 0.5rem;
@@ -573,7 +577,31 @@ const currencyShort = lang === 'cs' ? 'Kč' : 'CZK';
       0 8px 28px -14px rgba(0, 0, 0, 0.5);
   }
 
+  .pricing-toggle-thumb {
+    position: absolute;
+    top: 5px;
+    bottom: 5px;
+    left: 0;
+    width: var(--toggle-w);
+    border-radius: 9999px;
+    background: var(--color-accent-primary);
+    border: 1px solid rgba(0, 240, 255, 0.62);
+    box-shadow:
+      0 10px 30px -12px rgba(0, 240, 255, 0.62),
+      0 0 0 1px rgba(0, 240, 255, 0.28),
+      inset 0 1px 0 rgba(255, 255, 255, 0.36);
+    transform: translateX(var(--toggle-x));
+    transition:
+      transform 0.48s cubic-bezier(0.22, 1, 0.36, 1),
+      width 0.48s cubic-bezier(0.22, 1, 0.36, 1),
+      box-shadow 0.25s ease;
+    pointer-events: none;
+    z-index: 0;
+  }
+
   .pricing-toggle-btn {
+    position: relative;
+    z-index: 1;
     display: inline-flex;
     align-items: center;
     /* Min 44 px tap target for phone — was 41 px (audit 2026-05-01). */
@@ -615,6 +643,18 @@ const currencyShort = lang === 'cs' ? 'Kč' : 'CZK';
   .pricing-toggle-btn[aria-selected='true']:hover {
     background: var(--color-accent-primary-hover);
     color: var(--color-accent-primary-cta-fg);
+  }
+
+  .pricing-toggle--ready .pricing-toggle-btn--active,
+  .pricing-toggle--ready .pricing-toggle-btn[aria-selected='true'] {
+    background: transparent;
+    border-color: transparent;
+    box-shadow: none;
+  }
+
+  .pricing-toggle--ready .pricing-toggle-btn--active:hover,
+  .pricing-toggle--ready .pricing-toggle-btn[aria-selected='true']:hover {
+    background: transparent;
   }
 
   .pricing-toggle-label {
@@ -705,17 +745,34 @@ const currencyShort = lang === 'cs' ? 'Kč' : 'CZK';
   .pricing-price-block--free {
     /* Always shown for the free plan regardless of toggle. */
   }
-  .pricing-price-block--monthly,
-  .pricing-price-block--yearly {
-    display: none;
+
+  .pricing-card:not(.pricing-card--free) .pricing-card-price {
+    position: relative;
+    min-height: 4.65rem;
   }
-  [data-pricing-section][data-period='monthly']
-    .pricing-price-block--monthly {
+
+  .pricing-card:not(.pricing-card--free) .pricing-price-block--monthly,
+  .pricing-card:not(.pricing-card--free) .pricing-price-block--yearly {
     display: flex;
+    position: absolute;
+    inset: 0 auto auto 0;
+    width: 100%;
+    opacity: 0;
+    transform: translateY(0.55rem) scale(0.985);
+    filter: blur(2px);
+    pointer-events: none;
+    transition:
+      opacity 0.32s ease,
+      transform 0.48s cubic-bezier(0.22, 1, 0.36, 1),
+      filter 0.32s ease;
   }
-  [data-pricing-section][data-period='yearly']
-    .pricing-price-block--yearly {
-    display: flex;
+
+  [data-pricing-section][data-period='monthly'] .pricing-price-block--monthly,
+  [data-pricing-section][data-period='yearly'] .pricing-price-block--yearly {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    filter: blur(0);
+    pointer-events: auto;
   }
 
   .pricing-price-day {
@@ -840,7 +897,9 @@ const currencyShort = lang === 'cs' ? 'Kč' : 'CZK';
   /* ─── Reduced motion ─────────────────────────────────────────── */
 
   @media (prefers-reduced-motion: reduce) {
-    .pricing-toggle-thumb {
+    .pricing-toggle-thumb,
+    .pricing-card:not(.pricing-card--free) .pricing-price-block--monthly,
+    .pricing-card:not(.pricing-card--free) .pricing-price-block--yearly {
       transition: none;
     }
     .pricing-card,

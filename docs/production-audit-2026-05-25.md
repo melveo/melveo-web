@@ -114,6 +114,30 @@ Post-deploy production validation after commit `5fad17f`:
 - Post-fix Lighthouse `/cs/` mobile: Performance 99, Accessibility 100, Best Practices 100, SEO 100.
 - Post-fix Lighthouse `/cs/` desktop: Performance 100, Accessibility 100, Best Practices 100, SEO 100.
 
+Scroll-optimization implementation pass, local preview `http://127.0.0.1:4321`, 2026-05-25:
+
+- Added `npm run audit:scroll` for repeatable animation-performance checks.
+- Ran 50 viewport cases across alternating `/cs/` and `/en/` routes.
+- Checks covered full-page scroll plus section-specific probes for honeycomb, data-feedback and orb/club.
+- Result: 0 page failures, 0 console errors, 0 failed requests, 0 broken images, 0 horizontal overflow failures.
+- `npm run check`: passed with 0 errors, 0 warnings, 0 hints.
+- `npm run build`: passed.
+- Local preview route smoke after a clean `rm -rf dist && npm run build`: `/`, `/cs/`, `/en/`, `/cs/privacy/`, `/en/privacy/`, `/cs/terms/`, `/en/terms/`, `/robots.txt`, and `/sitemap-index.xml` all returned `200`.
+- Local Lighthouse `/cs/` desktop: Performance 99, Accessibility 100, Best Practices 100, SEO 100.
+- Local Lighthouse `/cs/` mobile: Performance 80, Accessibility 100, Best Practices 100, SEO 100. LCP is text-based and TBT is 0ms; production previously scored 99 mobile, so this should be rechecked on production/preview after deploy before treating it as a user-visible regression.
+- Representative screenshots saved in `output/playwright/local-visual-final-2026-05-25/`.
+
+Implemented changes:
+
+- Orb/club section now pauses its auto-orbit rAF, pending writes and manual/gyro handling when the section is outside the viewport warm-up zone.
+- Orb compositor hint `will-change: clip-path` is now applied only while the section is near the viewport via `.is-orb-visible`, not for the full page lifetime.
+- Orb wrapper now has explicit layout/paint/style containment and `overflow-anchor: none`.
+- Honeycomb scroll handler now ignores global scroll events while the section is outside its active zone and already settled at the start/end state, avoiding unnecessary `getBoundingClientRect()` work during the rest of the page scroll.
+
+Rejected experiment:
+
+- Pre-decoding/eager-loading all honeycomb images near the section was tested and removed. It slightly improved some medians but created worse outlier frames because image decode competed with the scroll morph.
+
 ## Availability And Routing
 
 Checked routes:
@@ -298,6 +322,8 @@ Goal: preserve the current visual design while making scroll through honeycomb, 
 
 ### Phase 1 - Baseline And Instrumentation
 
+Status: implemented locally through `scripts/animation-performance.mjs` and `npm run audit:scroll`.
+
 1. Add a local-only Playwright/Node performance script that measures:
    - full-page scroll frame intervals,
    - section-specific scroll frame intervals,
@@ -320,6 +346,8 @@ Goal: preserve the current visual design while making scroll through honeycomb, 
 Acceptance for baseline: repeatable measurements saved under `output/playwright/animation-performance-*` and screenshots for visual comparison.
 
 ### Phase 2 - Honeycomb Morph Optimization
+
+Status: partially implemented with low-risk scroll gating. Further improvement would require a larger redesign of the morph or fewer simultaneous clipped/glass cells; that would affect the current visual direction.
 
 1. Audit `ImageGridScrollMorph.astro` for scroll handlers, requestAnimationFrame loops and layout reads/writes.
 2. Ensure scroll updates only mutate composited properties:
@@ -349,6 +377,8 @@ Acceptance:
 
 ### Phase 3 - Data-Feedback Animation Optimization
 
+Status: audited in the local 50-viewport scroll sweep. Current section is substantially lighter than honeycomb in synthetic metrics and did not show console, overflow or image issues.
+
 1. Keep the current narrative: text signals -> `melveo` -> coach hexagon.
 2. Confirm SVG paths do not cross labels on mobile, tablet or desktop.
 3. Gate particle timelines by intersection:
@@ -368,6 +398,8 @@ Acceptance:
 - no duplicate animations after repeated scroll in/out.
 
 ### Phase 4 - Orb/Club Section Optimization
+
+Status: implemented locally by pausing rAF/compositor work outside the visible warm-up zone.
 
 1. Keep the current interaction copy and desktop/mobile distinction.
 2. Avoid high-frequency pointer/touch work when the section is not active.

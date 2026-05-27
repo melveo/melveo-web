@@ -102,11 +102,11 @@ const MOBILE_HEX_OUT_CENTER = { x: 200, y: 590 };
 // in no predictable order) so the layout reads as scattered rather
 // than a symmetric arc.
 const MOBILE_INPUTS: InputDef[] = [
-  { id: "mood",      label: "Mood",          x: 116, y: 386, r: 25, color: "white", bowDir:  1, bowAmt: 18 },
+  { id: "mood",      label: "Mood",          x: 108, y: 350, r: 25, color: "white", bowDir:  1, bowAmt: 18 },
   { id: "hrv",       label: "HRV",           x: 45,  y: 322, r: 22, color: "white", bowDir: -1, bowAmt: 160 },
   { id: "match",     label: "Match context", x: 104, y: 205, r: 34, color: "cyan",  bowDir: -1, bowAmt: 18 },
   { id: "sleep",     label: "Sleep",         x: 148, y: 252, r: 23, color: "cyan",  bowDir: -1, bowAmt: 3  },
-  { id: "fatigue",   label: "Fatigue",       x: 200, y: 104, r: 30, color: "cyan",  bowDir:  0, bowAmt: 0  },
+  { id: "fatigue",   label: "Fatigue",       x: 200, y: 104, r: 30, color: "cyan",  bowDir:  1, bowAmt: 3  },
   { id: "pain",      label: "Pain",          x: 257, y: 232, r: 26, color: "cyan",  bowDir:  1, bowAmt: 3  },
   { id: "readiness", label: "Readiness",     x: 340, y: 202, r: 32, color: "white", bowDir:  1, bowAmt: 3  },
   { id: "stress",    label: "Stress",        x: 355, y: 288, r: 24, color: "cyan",  bowDir: -1, bowAmt: 38 },
@@ -214,7 +214,7 @@ function outputPathDMobile() {
 
 function buildMobileHoneycomb() {
   const cells: Array<{ cx: number; cy: number; r: number }> = [];
-  const r = 14;
+  const r = 22;
   const stepX = SQRT3_HALF * r * 2;
   const stepY = r * 1.5;
   for (let row = -2; row * stepY < MOBILE_VBH + 30; row++) {
@@ -250,9 +250,9 @@ type GsapInstance = typeof import("gsap")["gsap"];
 // Charge / release tuning — shared by desktop and mobile
 const CHARGE_THRESHOLD = 6;
 const SCALE_PER_CHARGE = 0.038;
-const BLOOM_OP_PER_CHARGE = 0.075;
-const BLOOM_SCALE_PER_CHARGE = 0.065;
-const BASE_BLOOM_OPACITY = 0.32;
+const BLOOM_OP_PER_CHARGE = 0;
+const BLOOM_SCALE_PER_CHARGE = 0;
+const BASE_BLOOM_OPACITY = 0;
 const RELEASE_DURATION = 1.6;
 const BASE_FILTER = "drop-shadow(0 0 22px rgba(0, 240, 255, 0.55))";
 const FLASH_FILTER = "drop-shadow(0 0 36px rgba(190, 250, 255, 0.78))";
@@ -268,13 +268,14 @@ function setupMobileAnimation(
 
   let energy = 0;
   let pendingRelease = false;
-  const shimmerProxy = { x: -1.4 };
+  let running = false;
+  let raf = 0;
+  let visible = true;
+  const mobileChargeThreshold = 5;
+  const maxMobileActiveInputs = 3;
 
   const coreText = svg.querySelector<SVGTextElement>("[data-core-text]");
   const coreBloom = svg.querySelector<SVGEllipseElement>("[data-core-bloom]");
-  const coreShimmer = svg.querySelector<SVGLinearGradientElement>(
-    "[data-core-shimmer]",
-  );
   const outputHexFlash = svg.querySelector<SVGPolygonElement>(
     "[data-output-flash]",
   );
@@ -282,48 +283,67 @@ function setupMobileAnimation(
   const outputHexHalo = svg.querySelector<SVGPolygonElement>(
     "[data-output-halo]",
   );
-  const outputPath = svg.querySelector<SVGPathElement>("[data-output-path]");
-  const outputPulse = svg.querySelector<SVGCircleElement>(
-    "[data-output-pulse]",
-  );
 
-  const runShimmer = () => {
-    if (!coreShimmer) return;
-    shimmerProxy.x = -1.4;
-    coreShimmer.setAttribute(
-      "gradientTransform",
-      `translate(${shimmerProxy.x}, 0)`,
-    );
-    gsap.killTweensOf(shimmerProxy);
-    gsap.to(shimmerProxy, {
-      x: 1.4,
-      duration: 0.75,
-      ease: "power2.inOut",
-      onUpdate: () => {
-        coreShimmer.setAttribute(
-          "gradientTransform",
-          `translate(${shimmerProxy.x}, 0)`,
-        );
-      },
+  const samplePath = (path: SVGPathElement, steps = 96) => {
+    const length = path.getTotalLength();
+    return Array.from({ length: steps + 1 }, (_, index) => {
+      const point = path.getPointAtLength((length * index) / steps);
+      return { x: point.x, y: point.y };
     });
   };
 
-  const flashMelveo = () => {
-    if (!coreText) return;
-    gsap.killTweensOf(coreText, "filter");
-    gsap
-      .timeline()
-      .to(coreText, {
-        filter: FLASH_FILTER,
-        duration: 0.22,
-        ease: "power2.out",
-      })
-      .to(coreText, {
-        filter: BASE_FILTER,
-        duration: 0.78,
-        ease: "power2.inOut",
-      });
+  const sampledInputs = MOBILE_INPUTS.map((inp) => {
+    const path = svg.querySelector<SVGPathElement>(
+      `[data-input-path="${inp.id}"]`,
+    );
+    const pulse = svg.querySelector<SVGCircleElement>(
+      `[data-input-pulse="${inp.id}"]`,
+    );
+    const flash = svg.querySelector<SVGTextElement>(
+      `[data-input-flash="${inp.id}"]`,
+    );
+    if (!path || !pulse) return null;
+    return {
+      inp,
+      path,
+      pulse,
+      flash,
+      points: samplePath(path),
+      active: false,
+      startAt: 0,
+      duration: 960 + Math.random() * 260,
+    };
+  }).filter((item): item is NonNullable<typeof item> => Boolean(item));
+
+  const shuffleSignals = <T,>(items: T[]) => {
+    const shuffled = [...items];
+    for (let index = shuffled.length - 1; index > 0; index -= 1) {
+      const swapIndex = Math.floor(Math.random() * (index + 1));
+      [shuffled[index], shuffled[swapIndex]] = [
+        shuffled[swapIndex],
+        shuffled[index],
+      ];
+    }
+    return shuffled;
   };
+  let signalQueue = shuffleSignals(sampledInputs);
+  let nextMobilePulseAt = performance.now() + 120 + Math.random() * 360;
+
+  if (coreText) {
+    gsap.set(coreText, {
+      scale: 1,
+      transformOrigin: "50% 50%",
+      transformBox: "fill-box",
+    });
+  }
+  if (coreBloom) {
+    gsap.set(coreBloom, {
+      scale: 1,
+      transformOrigin: "50% 50%",
+      transformBox: "fill-box",
+      opacity: BASE_BLOOM_OPACITY,
+    });
+  }
 
   const animateToEnergy = (target: number, duration: number) => {
     const targetScale = 1 + target * SCALE_PER_CHARGE;
@@ -355,11 +375,9 @@ function setupMobileAnimation(
   };
 
   const chargeMelveo = () => {
-    runShimmer();
-    flashMelveo();
     energy += 1;
-    animateToEnergy(energy, 0.68);
-    if (energy >= CHARGE_THRESHOLD && !pendingRelease) {
+    animateToEnergy(energy, 0.58);
+    if (energy >= mobileChargeThreshold && !pendingRelease) {
       pendingRelease = true;
       gsap.delayedCall(0.3, () => {
         const energyAtRelease = energy;
@@ -371,98 +389,47 @@ function setupMobileAnimation(
   };
 
   const releaseToOutput = (energyAtRelease: number) => {
-    if (!outputPath || !outputPulse) return;
-    // Ball size scales with accumulated energy at release time.
-    // At threshold (6): scale 1.0 (baseline). At 2× threshold: 1.5.
-    const ballScale =
-      1 + Math.min(energyAtRelease / CHARGE_THRESHOLD - 1, 1) * 0.5;
-
-    const tl = gsap.timeline();
-    tl.fromTo(
-      outputPulse,
-      {
-        autoAlpha: 0,
-        scale: ballScale * 0.9,
-        transformOrigin: "50% 50%",
-        motionPath: {
-          path: outputPath,
-          align: outputPath,
-          alignOrigin: [0.5, 0.5],
-          start: 0,
-          end: 0,
-        },
-      },
-      {
-        autoAlpha: 1,
-        scale: ballScale * 1.1,
-        duration: RELEASE_DURATION,
-        ease: "power2.out",
-        motionPath: {
-          path: outputPath,
-          align: outputPath,
-          alignOrigin: [0.5, 0.5],
-          start: 0,
-          end: 1,
-        },
-      },
-      0,
-    );
-    tl.to(
-      outputPulse,
-      { autoAlpha: 0, scale: 1, duration: 0.32 },
-      RELEASE_DURATION - 0.05,
-    );
-
     // Drain melveo energy back to 0 over release duration.
     // If new particles arrive during this drain, chargeMelveo will
     // kill these tweens and grow melveo again — fully reactive.
     animateToEnergy(0, RELEASE_DURATION);
+    const outputScale =
+      1 + Math.min(energyAtRelease / mobileChargeThreshold - 1, 1) * 0.5;
+    gsap.delayedCall(0.32, () => pulseCoach(outputScale));
+  };
 
-    const arrivalAt = RELEASE_DURATION - 0.15;
+  const pulseCoach = (outputScale = 1) => {
     if (outputHexFlash) {
-      tl.fromTo(
+      gsap.fromTo(
         outputHexFlash,
         { opacity: 0 },
-        {
-          opacity: 1,
-          duration: 0.18,
-          ease: "power2.out",
-          onComplete: () => {
-            gsap.to(outputHexFlash, {
-              opacity: 0,
-              duration: 0.72,
-              ease: "power3.out",
-            });
-          },
-        },
-        arrivalAt,
+        { opacity: 1, duration: 0.16, yoyo: true, repeat: 1, ease: "power2.out" },
       );
     }
     if (outputHexGroup) {
-      tl.fromTo(
+      gsap.fromTo(
         outputHexGroup,
         {
           scale: 1,
           svgOrigin: `${MOBILE_HEX_OUT_CENTER.x} ${MOBILE_HEX_OUT_CENTER.y}`,
         },
         {
-          scale: 1.065,
+          scale: 1.045 + 0.02 * outputScale,
           duration: 0.26,
           ease: "power3.out",
           onComplete: () => {
             gsap.to(outputHexGroup, {
               scale: 1,
-              duration: 0.9,
-              ease: "elastic.out(1, 0.72)",
+              duration: 0.72,
+              ease: "power3.out",
               svgOrigin: `${MOBILE_HEX_OUT_CENTER.x} ${MOBILE_HEX_OUT_CENTER.y}`,
             });
           },
         },
-        arrivalAt,
       );
     }
     if (outputHexHalo) {
-      tl.fromTo(
+      gsap.fromTo(
         outputHexHalo,
         {
           opacity: 0.9,
@@ -471,111 +438,118 @@ function setupMobileAnimation(
         },
         {
           opacity: 1,
-          scale: 1.045,
+          scale: 1.025 + 0.02 * outputScale,
           duration: 0.24,
           ease: "power3.out",
           onComplete: () => {
             gsap.to(outputHexHalo, {
               opacity: 0.9,
               scale: 1,
-              duration: 0.95,
-              ease: "elastic.out(1, 0.75)",
+              duration: 0.76,
+              ease: "power3.out",
               svgOrigin: `${MOBILE_HEX_OUT_CENTER.x} ${MOBILE_HEX_OUT_CENTER.y}`,
             });
           },
         },
-        arrivalAt,
       );
     }
   };
 
-  const schedulePulse = (inp: InputDef, delay: number) => {
-    if (isCancelled()) return;
-    gsap.delayedCall(delay, () => {
-      if (isCancelled()) return;
-      const path = svg.querySelector<SVGPathElement>(
-        `[data-input-path="${inp.id}"]`,
-      );
-      const pulse = svg.querySelector<SVGCircleElement>(
-        `[data-input-pulse="${inp.id}"]`,
-      );
-      const flash = svg.querySelector<SVGTextElement>(
-        `[data-input-flash="${inp.id}"]`,
-      );
-      if (!path || !pulse) {
-        schedulePulse(inp, 1.5);
-        return;
+  const tick = (now: number) => {
+    if (isCancelled() || !visible || document.hidden) {
+      running = false;
+      return;
+    }
+
+    let activeInputs = 0;
+    for (const signal of sampledInputs) {
+      if (signal.active) activeInputs += 1;
+    }
+
+    if (
+      activeInputs < maxMobileActiveInputs &&
+      now >= nextMobilePulseAt &&
+      sampledInputs.length > 0
+    ) {
+      if (signalQueue.length === 0) {
+        signalQueue = shuffleSignals(sampledInputs);
       }
-      const tl = gsap.timeline();
-      tl.fromTo(
-        pulse,
-        {
-          autoAlpha: 0,
-          motionPath: {
-            path,
-            align: path,
-            alignOrigin: [0.5, 0.5],
-            start: 0,
-            end: 0,
-          },
-        },
-        {
-          autoAlpha: 1,
-          duration: 1.58,
-          ease: "sine.inOut",
-          motionPath: {
-            path,
-            align: path,
-            alignOrigin: [0.5, 0.5],
-            start: 0,
-            end: 1,
-          },
-        },
-        0,
+      const nextSignal = signalQueue.find((signal) => !signal.active);
+      if (nextSignal) {
+        signalQueue = signalQueue.filter((signal) => signal !== nextSignal);
+        nextSignal.active = true;
+        nextSignal.startAt = now;
+        nextSignal.duration = 900 + Math.random() * 360;
+        nextSignal.path.setAttribute("opacity", "0.7");
+        nextMobilePulseAt = now + 120 + Math.random() * 420;
+      }
+    }
+
+    for (const signal of sampledInputs) {
+      if (!signal.active) continue;
+      const raw = Math.min(1, (now - signal.startAt) / signal.duration);
+      const eased = 0.5 - Math.cos(raw * Math.PI) / 2;
+      const index = Math.min(
+        signal.points.length - 1,
+        Math.round(eased * (signal.points.length - 1)),
       );
-      tl.fromTo(
-        path,
-        { opacity: 0.18, strokeWidth: 1 },
-        { opacity: 0.82, strokeWidth: 1.6, duration: 0.46, ease: "sine.out" },
-        0,
+      const point = signal.points[index];
+      const alphaIn = Math.min(1, raw / 0.18);
+      const alphaOut = raw > 0.82 ? Math.max(0, (1 - raw) / 0.18) : 1;
+      const alpha = alphaIn * alphaOut;
+      signal.pulse.setAttribute("cx", point.x.toFixed(1));
+      signal.pulse.setAttribute("cy", point.y.toFixed(1));
+      signal.pulse.setAttribute("opacity", (0.92 * alpha).toFixed(3));
+      signal.pulse.setAttribute("r", (4.2 + 2.2 * alpha).toFixed(2));
+      signal.path.setAttribute(
+        "opacity",
+        (0.2 + Math.sin(raw * Math.PI) * 0.48).toFixed(3),
       );
-      tl.to(path, { opacity: 0.18, strokeWidth: 1, duration: 0.9, ease: "sine.inOut" }, 0.68);
-      tl.to(pulse, { autoAlpha: 0, duration: 0.24 }, 1.46);
-      if (flash) {
-        tl.fromTo(
-          flash,
-          { opacity: 0 },
-          {
-            opacity: 0.95,
-            duration: 0.08,
-            ease: "power2.out",
-            onComplete: () => {
-              gsap.to(flash, {
-                opacity: 0,
-                duration: 0.5,
-                ease: "power2.inOut",
-              });
-            },
-          },
-          0,
+      if (signal.flash) {
+        signal.flash.setAttribute(
+          "opacity",
+          raw < 0.22 ? (0.7 * (1 - raw / 0.22)).toFixed(3) : "0",
         );
       }
-      tl.call(
-        () => {
-          chargeMelveo();
-        },
-        undefined,
-        1.54,
-      );
-      tl.call(() => {
-        schedulePulse(inp, 2.2 + Math.random() * 3.5);
-      });
-    });
+
+      if (raw >= 1) {
+        signal.active = false;
+        signal.pulse.setAttribute("opacity", "0");
+        signal.path.setAttribute("opacity", "0.28");
+        signal.flash?.setAttribute("opacity", "0");
+        nextMobilePulseAt = now + 120 + Math.random() * 460;
+        chargeMelveo();
+      }
+    }
+
+    raf = requestAnimationFrame(tick);
   };
 
-  MOBILE_INPUTS.forEach((inp) => {
-    schedulePulse(inp, 0.3 + Math.random() * 4);
-  });
+  const startLoop = () => {
+    if (running || isCancelled()) return;
+    running = true;
+    raf = requestAnimationFrame(tick);
+  };
+
+  const localIo = new IntersectionObserver(
+    ([entry]) => {
+      visible = !!entry?.isIntersecting;
+      if (visible) startLoop();
+    },
+    { rootMargin: "180px 0px" },
+  );
+  localIo.observe(svg);
+  const onVisibility = () => {
+    if (!document.hidden) startLoop();
+  };
+  document.addEventListener("visibilitychange", onVisibility);
+  startLoop();
+
+  return () => {
+    localIo.disconnect();
+    document.removeEventListener("visibilitychange", onVisibility);
+    cancelAnimationFrame(raf);
+  };
 }
 
 export default function MelveoDataFlowHero({ lang = "en" }: Props) {
@@ -587,15 +561,12 @@ export default function MelveoDataFlowHero({ lang = "en" }: Props) {
   const rootRef = useRef<HTMLElement | null>(null);
   const inputPathRefs = useRef<Record<string, SVGPathElement | null>>({});
   const inputPulseRefs = useRef<Record<string, SVGCircleElement | null>>({});
-  const outputPathRef = useRef<SVGPathElement | null>(null);
-  const outputPulseRef = useRef<SVGCircleElement | null>(null);
   const outputHexFlashRef = useRef<SVGPolygonElement | null>(null);
   const outputHexHaloRef = useRef<SVGPolygonElement | null>(null);
   const outputHexGroupRef = useRef<SVGGElement | null>(null);
   const inputFlashRefs = useRef<Record<string, SVGTextElement | null>>({});
   const coreTextRef = useRef<SVGTextElement | null>(null);
   const coreBloomRef = useRef<SVGEllipseElement | null>(null);
-  const coreShimmerRef = useRef<SVGLinearGradientElement | null>(null);
 
   const [reduced, setReduced] = useState(false);
 
@@ -614,6 +585,7 @@ export default function MelveoDataFlowHero({ lang = "en" }: Props) {
     let gsapInstance: GsapInstance | null = null;
     let io: IntersectionObserver | null = null;
     let onVisibilityChange: (() => void) | null = null;
+    let mobileCleanup: (() => void) | null = null;
     const isMobile = window.matchMedia("(max-width: 900px)").matches;
 
     /*
@@ -639,12 +611,13 @@ export default function MelveoDataFlowHero({ lang = "en" }: Props) {
     }
 
     void (async () => {
-      const [{ gsap }, { MotionPathPlugin }] = await Promise.all([
-        import("gsap"),
-        import("gsap/MotionPathPlugin"),
-      ]);
+      const { gsap } = await import("gsap");
       if (cancelled || !rootRef.current) return;
-      gsap.registerPlugin(MotionPathPlugin);
+      if (!isMobile) {
+        const { MotionPathPlugin } = await import("gsap/MotionPathPlugin");
+        if (cancelled || !rootRef.current) return;
+        gsap.registerPlugin(MotionPathPlugin);
+      }
       gsapInstance = gsap;
 
       // Pause when scrolled out of viewport. rootMargin gives a
@@ -668,34 +641,15 @@ export default function MelveoDataFlowHero({ lang = "en" }: Props) {
 
       ctx = gsap.context(() => {
         if (isMobile) {
-          setupMobileAnimation(gsap, () => cancelled, rootRef.current);
+          mobileCleanup = setupMobileAnimation(
+            gsap,
+            () => cancelled,
+            rootRef.current,
+          ) ?? null;
           return;
         }
         let energy = 0;
         let pendingRelease = false;
-
-        const shimmerProxy = { x: -1.4 };
-        const runShimmer = () => {
-          const shimmer = coreShimmerRef.current;
-          if (!shimmer) return;
-          shimmerProxy.x = -1.4;
-          shimmer.setAttribute(
-            "gradientTransform",
-            `translate(${shimmerProxy.x}, 0)`,
-          );
-          gsap.killTweensOf(shimmerProxy);
-          gsap.to(shimmerProxy, {
-            x: 1.4,
-            duration: 0.75,
-            ease: "power2.inOut",
-            onUpdate: () => {
-              shimmer.setAttribute(
-                "gradientTransform",
-                `translate(${shimmerProxy.x}, 0)`,
-              );
-            },
-          });
-        };
 
         const flashMelveo = () => {
           const text = coreTextRef.current;
@@ -746,7 +700,6 @@ export default function MelveoDataFlowHero({ lang = "en" }: Props) {
         };
 
         const chargeMelveo = () => {
-          runShimmer();
           flashMelveo();
           energy += 1;
           animateToEnergy(energy, 0.68);
@@ -762,51 +715,12 @@ export default function MelveoDataFlowHero({ lang = "en" }: Props) {
         };
 
         const releaseToOutput = (energyAtRelease: number) => {
-          const path = outputPathRef.current;
-          const pulse = outputPulseRef.current;
-          if (!path || !pulse) return;
-          const ballScale =
+          const outputScale =
             1 + Math.min(energyAtRelease / CHARGE_THRESHOLD - 1, 1) * 0.5;
-
-          const tl = gsap.timeline();
-          tl.fromTo(
-            pulse,
-            {
-              autoAlpha: 0,
-              scale: ballScale * 0.9,
-              transformOrigin: "50% 50%",
-              motionPath: {
-                path,
-                align: path,
-                alignOrigin: [0.5, 0.5],
-                start: 0,
-                end: 0,
-              },
-            },
-            {
-              autoAlpha: 1,
-              scale: ballScale * 1.1,
-              duration: RELEASE_DURATION,
-              ease: "power2.out",
-              motionPath: {
-                path,
-                align: path,
-                alignOrigin: [0.5, 0.5],
-                start: 0,
-                end: 1,
-              },
-            },
-            0,
-          );
-          tl.to(
-            pulse,
-            { autoAlpha: 0, scale: 1, duration: 0.32 },
-            RELEASE_DURATION - 0.05,
-          );
 
           animateToEnergy(0, RELEASE_DURATION);
 
-          const arrivalAt = RELEASE_DURATION - 0.15;
+          const tl = gsap.timeline({ delay: 0.34 });
           const coachFlash = outputHexFlashRef.current;
           if (coachFlash) {
             tl.fromTo(
@@ -824,7 +738,7 @@ export default function MelveoDataFlowHero({ lang = "en" }: Props) {
                   });
                 },
               },
-              arrivalAt,
+              0,
             );
           }
           const coachGroup = outputHexGroupRef.current;
@@ -836,7 +750,7 @@ export default function MelveoDataFlowHero({ lang = "en" }: Props) {
                 svgOrigin: `${HEX_OUT_CENTER.x} ${HEX_OUT_CENTER.y}`,
               },
               {
-                scale: 1.058,
+                scale: 1.04 + 0.018 * outputScale,
                 duration: 0.26,
                 ease: "power3.out",
                 onComplete: () => {
@@ -848,7 +762,7 @@ export default function MelveoDataFlowHero({ lang = "en" }: Props) {
                   });
                 },
               },
-              arrivalAt,
+              0,
             );
           }
           const coachHalo = outputHexHaloRef.current;
@@ -862,7 +776,7 @@ export default function MelveoDataFlowHero({ lang = "en" }: Props) {
               },
               {
                 opacity: 1,
-                scale: 1.045,
+                scale: 1.025 + 0.02 * outputScale,
                 duration: 0.24,
                 ease: "power3.out",
                 onComplete: () => {
@@ -875,7 +789,7 @@ export default function MelveoDataFlowHero({ lang = "en" }: Props) {
                   });
                 },
               },
-              arrivalAt,
+              0,
             );
           }
         };
@@ -968,19 +882,20 @@ export default function MelveoDataFlowHero({ lang = "en" }: Props) {
               1.54,
             );
             tl.call(() => {
-              schedulePulse(inp, 2.2 + Math.random() * 3.5);
+              schedulePulse(inp, 1.45 + Math.random() * 2.65);
             });
           });
         };
 
         INPUTS.forEach((inp) => {
-          schedulePulse(inp, 0.3 + Math.random() * 4);
+          schedulePulse(inp, 0.2 + Math.random() * 2.4);
         });
       }, rootRef);
     })();
 
     return () => {
       cancelled = true;
+      mobileCleanup?.();
       ctx?.revert();
       io?.disconnect();
       if (onVisibilityChange) {
@@ -1035,21 +950,6 @@ export default function MelveoDataFlowHero({ lang = "en" }: Props) {
                   <stop offset="35%" stopColor="rgba(0,240,255,0.85)" />
                   <stop offset="100%" stopColor="rgba(0,240,255,0)" />
                 </radialGradient>
-                <linearGradient
-                  id="melveo-shimmer"
-                  ref={coreShimmerRef}
-                  x1="0"
-                  y1="0"
-                  x2="1"
-                  y2="0"
-                  gradientTransform="translate(-1.4, 0)"
-                >
-                  <stop offset="0" stopColor={ACCENT} />
-                  <stop offset="0.42" stopColor={ACCENT} />
-                  <stop offset="0.5" stopColor="#FFFFFF" />
-                  <stop offset="0.58" stopColor={ACCENT} />
-                  <stop offset="1" stopColor={ACCENT} />
-                </linearGradient>
                 <radialGradient id="melveo-bloom" cx="50%" cy="50%" r="50%">
                   <stop offset="0%" stopColor="rgba(0,240,255,0.55)" />
                   <stop offset="55%" stopColor="rgba(0,240,255,0.15)" />
@@ -1134,7 +1034,6 @@ export default function MelveoDataFlowHero({ lang = "en" }: Props) {
               ))}
 
               <path
-                ref={outputPathRef}
                 d={outputPathD()}
                 stroke="url(#melveo-line-out)"
                 strokeWidth="1.8"
@@ -1210,14 +1109,14 @@ export default function MelveoDataFlowHero({ lang = "en" }: Props) {
                 ry={80}
                 fill="url(#melveo-bloom)"
                 filter="url(#melveo-bloom-blur)"
-                opacity="0.32"
+                opacity="0"
               />
               <text
                 ref={coreTextRef}
                 x={CENTER.x}
                 y={CENTER.y + 22}
                 textAnchor="middle"
-                fill="url(#melveo-shimmer)"
+                fill={ACCENT}
                 style={{
                   fontFamily: "var(--font-wordmark)",
                   fontSize: "70px",
@@ -1285,15 +1184,6 @@ export default function MelveoDataFlowHero({ lang = "en" }: Props) {
                     filter="url(#melveo-glow)"
                   />
                 ))}
-              {!reduced && (
-                <circle
-                  ref={outputPulseRef}
-                  r="18"
-                  fill="url(#melveo-pulse)"
-                  opacity="0"
-                  filter="url(#melveo-glow)"
-                />
-              )}
             </svg>
 
           </div>
@@ -1430,21 +1320,6 @@ function MobileFlow({ reduced, lang }: { reduced: boolean; lang: Lang }) {
             <stop offset="55%" stopColor="rgba(0,240,255,0.15)" />
             <stop offset="100%" stopColor="rgba(0,240,255,0)" />
           </radialGradient>
-          <linearGradient
-            id="m-shimmer"
-            data-core-shimmer
-            x1="0"
-            y1="0"
-            x2="1"
-            y2="0"
-            gradientTransform="translate(-1.4, 0)"
-          >
-            <stop offset="0" stopColor={ACCENT} />
-            <stop offset="0.42" stopColor={ACCENT} />
-            <stop offset="0.5" stopColor="#FFFFFF" />
-            <stop offset="0.58" stopColor={ACCENT} />
-            <stop offset="1" stopColor={ACCENT} />
-          </linearGradient>
           <filter id="m-glow">
             <feGaussianBlur stdDeviation="3" />
           </filter>
@@ -1513,7 +1388,7 @@ function MobileFlow({ reduced, lang }: { reduced: boolean; lang: Lang }) {
             stroke="url(#m-line)"
             strokeWidth="1.25"
             fill="none"
-            opacity="0.38"
+            opacity="0.42"
           />
         ))}
 
@@ -1593,15 +1468,14 @@ function MobileFlow({ reduced, lang }: { reduced: boolean; lang: Lang }) {
           rx={160}
           ry={56}
           fill="url(#m-bloom)"
-          filter="url(#m-bloom-blur)"
-          opacity="0.32"
+          opacity="0"
         />
         <text
           data-core-text
           x={MOBILE_CENTER.x}
           y={MOBILE_CENTER.y + 16}
           textAnchor="middle"
-          fill="url(#m-shimmer)"
+          fill={ACCENT}
           style={{
             // Match the brand wordmark — Comfortaa Variable. The
             // desktop core <text> already sets this; the mobile
@@ -1614,7 +1488,6 @@ function MobileFlow({ reduced, lang }: { reduced: boolean; lang: Lang }) {
             fontWeight: 700,
             letterSpacing: "-0.02em",
             textTransform: "lowercase",
-            filter: "drop-shadow(0 0 22px rgba(0,240,255,0.55))",
           }}
         >
           melveo
@@ -1643,7 +1516,9 @@ function MobileFlow({ reduced, lang }: { reduced: boolean; lang: Lang }) {
                         fontSize: `${fontSize}px`,
                         fontWeight: 650,
                         letterSpacing: "0",
-                        filter: "drop-shadow(0 0 9px rgba(0,0,0,0.78))",
+                        paintOrder: "stroke",
+                        stroke: "rgba(0,0,0,0.45)",
+                        strokeWidth: "0.7px",
                       }}
                     >
                       <tspan x="0" dy="-0.25em">
@@ -1666,7 +1541,9 @@ function MobileFlow({ reduced, lang }: { reduced: boolean; lang: Lang }) {
                       fontSize: `${fontSize}px`,
                       fontWeight: 650,
                       letterSpacing: "0",
-                      filter: "drop-shadow(0 0 9px rgba(0,0,0,0.78))",
+                      paintOrder: "stroke",
+                      stroke: "rgba(0,0,0,0.45)",
+                      strokeWidth: "0.7px",
                     }}
                   >
                     {label}
@@ -1684,7 +1561,9 @@ function MobileFlow({ reduced, lang }: { reduced: boolean; lang: Lang }) {
                   fontSize: `${fontSize}px`,
                   fontWeight: 760,
                   letterSpacing: "0",
-                  filter: "drop-shadow(0 0 14px rgba(0,240,255,0.75))",
+                  paintOrder: "stroke",
+                  stroke: "rgba(0,0,0,0.35)",
+                  strokeWidth: "0.55px",
                 }}
               >
                 {label}
@@ -1701,33 +1580,25 @@ function MobileFlow({ reduced, lang }: { reduced: boolean; lang: Lang }) {
               r="5"
               fill="url(#m-pulse)"
               opacity="0"
-              filter="url(#m-glow)"
             />
           ))}
-        {!reduced && (
-          <circle
-            data-output-pulse
-            r="14"
-            fill="url(#m-pulse)"
-            opacity="0"
-            filter="url(#m-glow)"
-          />
-        )}
       </svg>
 
       <style>{`
         .data-flow-mobile {
           position: relative;
           width: 100%;
-          max-width: 28rem;
+          max-width: min(31rem, calc(100vw - 1rem));
           margin: 0 auto;
           aspect-ratio: ${MOBILE_VBW} / ${MOBILE_VBH};
+          contain: layout paint style;
         }
         .data-flow-mobile__svg {
           position: absolute;
           inset: 0;
           width: 100%;
           height: 100%;
+          transform: translateZ(0);
         }
       `}</style>
     </div>

@@ -25,7 +25,13 @@ const { lang } = Astro.props;
 const t = useTranslations(lang);
 ---
 
-<section class="orb-wrapper" data-orb-wrapper>
+<section
+  class="orb-wrapper"
+  data-orb-wrapper
+  role="button"
+  tabindex="0"
+  aria-label={t('orb.hintDesktop' as any)}
+>
   <!-- Primary hero — dark canvas, white primary text -->
   <div class="orb-hero">
     <h2 class="orb-heading">{t('orb.primary')}</h2>
@@ -37,36 +43,6 @@ const t = useTranslations(lang);
     <p class="orb-heading">{t('orb.secondary')}</p>
   </div>
 
-  {/*
-    Hint button — surfaced by default while orb auto-orbits.
-    Clicking it (or anywhere in the section) enters manual mode.
-    On phones with gyroscope support we also try to enable
-    DeviceOrientation tilt control after the user gesture (iOS
-    requires explicit permission).
-  */}
-  <button
-    type="button"
-    class="orb-hint hero-pill hero-pill--ghost"
-    data-orb-hint
-    data-hint-desktop={t('orb.hintDesktop' as any)}
-    data-hint-desktop-active={t('orb.hintDesktopActive' as any)}
-    data-hint-mobile={t('orb.hintMobile' as any)}
-    data-hint-mobile-active={t('orb.hintMobileActive' as any)}
-    aria-label={t('orb.hintDesktop' as any)}
-  >
-    <span class="hero-pill-shimmer" aria-hidden="true"></span>
-    <span class="hero-pill-content">
-      <svg class="orb-hint__icon orb-hint__icon--desktop" viewBox="0 0 24 24" aria-hidden="true">
-        <rect x="3.8" y="5" width="16.4" height="11.2" rx="2.2"></rect>
-        <path d="M9 19h6M12 16.2V19"></path>
-      </svg>
-      <svg class="orb-hint__icon orb-hint__icon--mobile" viewBox="0 0 24 24" aria-hidden="true">
-        <rect x="7.2" y="2.8" width="9.6" height="18.4" rx="2.2"></rect>
-        <path d="M10.3 5h3.4M11.3 18.2h1.4"></path>
-      </svg>
-      <span class="orb-hint__label" data-orb-hint-label>{t('orb.hintDesktop' as any)}</span>
-    </span>
-  </button>
 </section>
 
 <script>
@@ -95,6 +71,11 @@ const t = useTranslations(lang);
   .orb-wrapper {
     position: relative;
     width: 100%;
+    --x: 70%;
+    --y: 50%;
+    contain: layout paint style;
+    overflow-anchor: none;
+    touch-action: pan-y;
     /* border-top removed 2026-05-17: no horizontal dividers between sections */
     -webkit-user-select: none;
     user-select: none;
@@ -172,9 +153,10 @@ const t = useTranslations(lang);
         - cubic-bezier matches GSAP's sine.out feel from codepen
         - 0.4s reads as smoother than 0.3s when the underlying
           movement is sample-throttled to one rAF per frame
-        - will-change: clip-path promotes this layer to its own
-          compositor surface so clip recomputes don't re-paint the
-          surrounding section
+        - will-change is only enabled while the section is near the
+          viewport via .is-orb-visible. Keeping a compositor surface
+          alive for the whole page made scroll-heavy sections compete
+          with the rest of the document after the user had moved on.
         - translate3d is the canonical "force GPU layer" hack for
           older WebKit (otherwise repaints can jank)
         - backface-visibility hidden helps Safari coalesce layers
@@ -182,9 +164,16 @@ const t = useTranslations(lang);
     transition:
       --x 0.48s cubic-bezier(0.39, 0.575, 0.565, 1),
       --y 0.48s cubic-bezier(0.39, 0.575, 0.565, 1);
-    will-change: clip-path;
     transform: translate3d(0, 0, 0);
     backface-visibility: hidden;
+  }
+
+  .orb-wrapper.is-orb-hit {
+    cursor: grab;
+  }
+
+  .orb-wrapper.is-orb-visible .orb-hero--secondary {
+    will-change: clip-path;
   }
 
   /*
@@ -199,6 +188,7 @@ const t = useTranslations(lang);
   */
   .orb-wrapper.is-orb-manual {
     cursor: grab;
+    touch-action: none;
   }
   .orb-wrapper.is-orb-manual:active {
     cursor: grabbing;
@@ -225,67 +215,4 @@ const t = useTranslations(lang);
     margin-right: auto;
   }
 
-  /*
-    Hint pill — intentionally uses the global .hero-pill recipe so it
-    matches the "Scrolovat" button from the image-grid intro. The JS
-    swaps label + icon between desktop and touch contexts.
-  */
-  .orb-hint {
-    position: absolute;
-    left: 50%;
-    bottom: clamp(1.25rem, 3vw, 2.5rem);
-    transform: translateX(-50%);
-    font-family: inherit;
-    z-index: 3;
-    pointer-events: auto;
-  }
-
-  .orb-hint:hover,
-  .orb-hint:focus-visible {
-    transform: translateX(-50%) translateY(-3px) scale(1.02);
-  }
-
-  .orb-hint:active {
-    transform: translateX(-50%) translateY(-1px) scale(0.98);
-  }
-
-  .orb-hint__icon {
-    width: 1.12rem;
-    height: 1.12rem;
-    flex: 0 0 auto;
-    color: var(--color-accent-primary);
-    filter: drop-shadow(0 0 10px color-mix(in srgb, var(--color-accent-primary) 55%, transparent));
-  }
-
-  .orb-hint__icon :global(*) {
-    fill: none;
-    stroke: currentColor;
-    stroke-width: 1.8;
-    stroke-linecap: round;
-    stroke-linejoin: round;
-  }
-
-  .orb-hint__icon--mobile {
-    display: none;
-  }
-
-  .orb-wrapper.is-orb-touch .orb-hint__icon--desktop {
-    display: none;
-  }
-
-  .orb-wrapper.is-orb-touch .orb-hint__icon--mobile {
-    display: block;
-  }
-
-  .orb-wrapper.is-orb-manual .orb-hint {
-    opacity: 0.82;
-  }
-
-  @media (prefers-reduced-motion: reduce) {
-    .orb-hint:hover,
-    .orb-hint:focus-visible,
-    .orb-hint:active {
-      transform: translateX(-50%);
-    }
-  }
 </style>

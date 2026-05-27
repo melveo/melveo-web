@@ -123,6 +123,7 @@ export const ui = {
     'orb.hintDesktopActive': 'Táhni myší',
     'orb.hintMobile': 'Klepni a nakláněj',
     'orb.hintMobileActive': 'Nakláněj telefon nebo táhni',
+    'orb.hintNeedsHttps': 'Naklánění vyžaduje HTTPS',
     'orb.gyroPermission': 'Povolit ovládání nakláněním?',
 
     // Stage 6.25 — Technical-feature mini bridge before pricing.
@@ -386,6 +387,7 @@ export const ui = {
     'orb.hintDesktopActive': 'Drag with mouse',
     'orb.hintMobile': 'Tap and tilt',
     'orb.hintMobileActive': 'Tilt phone or drag',
+    'orb.hintNeedsHttps': 'Tilt requires HTTPS',
     'orb.gyroPermission': 'Allow tilt control?',
 
     'promise.headlinePrefix': 'Real-time data.',
