@@ -900,7 +900,17 @@ const t = useTranslations(lang);
   .image-grid-section .grid > .layer > div {
     opacity: 0;
     transform-origin: 50% 50%;
+    transform: translate3d(0, 12px, 0) scale(0.955);
+    transition:
+      opacity 0.46s cubic-bezier(0.22, 1, 0.36, 1),
+      transform 0.62s cubic-bezier(0.16, 1, 0.3, 1);
+    transition-delay: var(--cell-delay, 0ms);
     contain: layout paint;
+  }
+
+  .image-grid-section .grid > .layer > div.is-revealed {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) scale(1);
   }
 
   .image-grid-section .grid > .scaler {
@@ -1664,6 +1674,8 @@ const t = useTranslations(lang);
     .image-grid-section .grid > .layer,
     .image-grid-section .grid > .layer > div {
       opacity: 1;
+      transform: none;
+      transition: none;
     }
     .image-grid-section .scaler img {
       width: 100%;
@@ -1904,10 +1916,18 @@ const t = useTranslations(lang);
         // (WAAPI overrides inline styles, so neither path needs
         // the inline reset).
 
-        Array.from(cells).forEach((cell) => {
-          cell.style.opacity = '1';
-          cell.style.scale = '';
-          cell.style.y = '';
+        const cellEls = Array.from(cells);
+        const layerEls = Array.from(layers);
+        const layerRevealOffsets = [0.14, 0.12, 0.08, 0.04, 0];
+        const cellRevealThresholds = cellEls.map((cell, index) => {
+          const layerIndex = Math.max(0, layerEls.indexOf(cell.parentElement as HTMLElement));
+          const siblingIndex = Array.prototype.indexOf.call(cell.parentElement?.children ?? [], cell);
+          const microDelay = ((siblingIndex % 4) * 0.012) + ((index % 3) * 0.006);
+          cell.style.removeProperty('opacity');
+          cell.style.removeProperty('scale');
+          cell.style.removeProperty('y');
+          cell.style.setProperty('--cell-delay', `${Math.round(microDelay * 1000)}ms`);
+          return Math.min(0.86, layerRevealOffsets[layerIndex] + microDelay);
         });
 
         const intro = section.querySelector<HTMLElement>('[data-grid-intro]');
@@ -1933,6 +1953,7 @@ const t = useTranslations(lang);
         let lastImgWidth = '';
         let lastImgHeight = '';
         let lastObjectPosition = '';
+        let lastCellRevealKey = '';
         let targetProgress = 0;
         let renderedProgress = 0;
         let settleRaf = 0;
@@ -2053,6 +2074,16 @@ const t = useTranslations(lang);
           if (nextReveal !== lastReveal) {
             lastReveal = nextReveal;
             section.style.setProperty('--reveal-progress', nextReveal);
+          }
+
+          const revealKey = cellRevealThresholds
+            .map((threshold) => (reveal >= threshold ? '1' : '0'))
+            .join('');
+          if (revealKey !== lastCellRevealKey) {
+            lastCellRevealKey = revealKey;
+            cellEls.forEach((cell, index) => {
+              cell.classList.toggle('is-revealed', revealKey[index] === '1');
+            });
           }
         };
 
