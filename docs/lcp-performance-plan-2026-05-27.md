@@ -214,3 +214,42 @@ After implementation:
 - Removing current premium glass styling.
 - Reworking pricing or legal content.
 - Adding a new analytics provider.
+
+## Implementation Log — 2026-05-27
+
+Completed in the local Astro build:
+
+- Identified the real LCP elements with `PerformanceObserver`.
+  - `/cs/` mobile: hero subline text.
+  - `/cs/` desktop: hero headline text.
+  - `/en/` mobile: hero subline text.
+  - `/en/` desktop: hero headline text.
+- Added language-aware preload for the primary Inter subset:
+  - Czech preloads `inter-latin-ext-wght-normal.woff2`.
+  - English preloads `inter-latin-wght-normal.woff2`.
+  - Comfortaa is not preloaded because it is not the LCP element.
+- Generated smaller honeycomb thumbnail variants:
+  - `public/images/melveo-grid/thumbs/180/*.webp`
+  - `public/images/melveo-grid/thumbs/240/*.webp`
+- Added `srcset` and stricter `sizes` to honeycomb thumbnail images so mobile/tablet viewports avoid downloading the 360px fallback unless needed.
+
+Verification:
+
+- `npm run check`: passed with 0 errors, 0 warnings, 0 hints.
+- `npm run build`: passed.
+- `npm run audit:scroll`: 50 route/viewport combinations passed.
+  - 0 failures.
+  - 0 console issues.
+  - 0 request failures.
+  - 0 horizontal overflow.
+  - 0 broken images.
+- Lighthouse local after tuning:
+  - `/cs/`: Performance 84, Accessibility 100, Best Practices 100, SEO 100.
+  - `/en/`: Performance 87, Accessibility 100, Best Practices 100, SEO 100.
+  - TBT remained 0 ms.
+  - Image delivery audit is clean.
+
+Remaining known performance work:
+
+- Lighthouse still reports render-blocking CSS savings. This is a larger structural task because Astro currently ships the landing CSS as render-blocking stylesheets. Do not inline/split this blindly; test any critical CSS extraction carefully against hero, honeycomb, data-feedback, orb and pricing visuals.
+- Synthetic scroll audit still records occasional long frame intervals around the honeycomb morph on very large or very tall viewports. There are no functional failures, but this remains the section to watch during real-device testing.
