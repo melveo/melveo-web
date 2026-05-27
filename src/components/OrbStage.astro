@@ -30,11 +30,12 @@ const t = useTranslations(lang);
   data-orb-wrapper
   role="button"
   tabindex="0"
-  aria-label={t('orb.hintDesktop' as any)}
+  aria-labelledby="orb-interaction-hint orb-primary-heading"
 >
+  <p id="orb-interaction-hint" class="orb-sr-only">{t('orb.hintDesktop' as any)}</p>
   <!-- Primary hero — dark canvas, white primary text -->
   <div class="orb-hero">
-    <h2 class="orb-heading">{t('orb.primary')}</h2>
+    <h2 id="orb-primary-heading" class="orb-heading">{t('orb.primary')}</h2>
   </div>
 
   <!-- Secondary hero — absolute overlay, cyan gradient bg, dark text,
@@ -81,6 +82,18 @@ const t = useTranslations(lang);
     user-select: none;
     -webkit-tap-highlight-color: transparent;
     -webkit-touch-callout: none;
+  }
+
+  .orb-sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
   }
 
   .orb-hero {
