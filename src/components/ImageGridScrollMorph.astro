@@ -44,11 +44,13 @@ const t = useTranslations(lang);
 <section
   class="image-grid-section"
   data-grid-section
+  data-glass-smoke
+  data-glass-smoke-density="0.68"
+  data-glass-smoke-fps="18"
+  data-glass-smoke-static="compact"
 >
-  {/* Static cyan atmosphere behind the grid. This used to be the
-      runtime glass-smoke canvas, but the honeycomb already owns the
-      scroll budget; a CSS field keeps the same mood without a large
-      canvas repaint during the morph. */}
+  {/* Same glass-smoke atmosphere as pricing, tuned calmer here because
+      this section already owns the scroll morph/honeycomb animation. */}
   <canvas class="glass-smoke" data-glass-smoke-canvas aria-hidden="true"></canvas>
 
   <div class="content">
@@ -503,6 +505,35 @@ const t = useTranslations(lang);
   </div>
 </section>
 
+<script>
+  async function startImageGridSmoke() {
+    const { mountGlassSmoke } = await import('../scripts/glass-smoke');
+    mountGlassSmoke();
+  }
+
+  function startImageGridSmokeWhenNear() {
+    const section = document.querySelector<HTMLElement>('.image-grid-section');
+    if (!section) return;
+
+    if (!('IntersectionObserver' in globalThis)) {
+      globalThis.addEventListener('scroll', startImageGridSmoke, { once: true, passive: true });
+      return;
+    }
+
+    const smokeObserver = new window.IntersectionObserver(
+      (entries) => {
+        if (!entries.some((entry) => entry.isIntersecting)) return;
+        smokeObserver.disconnect();
+        startImageGridSmoke();
+      },
+      { rootMargin: '640px 0px' },
+    );
+    smokeObserver.observe(section);
+  }
+
+  startImageGridSmokeWhenNear();
+</script>
+
 <style>
   /*
     Subgrid trick + sticky content — direct port from the codepen.
@@ -565,13 +596,10 @@ const t = useTranslations(lang);
     z-index: 0;
     pointer-events: none;
     background:
-      radial-gradient(circle at 8% 22%, rgba(0, 240, 255, 0.16), transparent 16rem),
-      radial-gradient(circle at 24% 78%, rgba(0, 240, 255, 0.14), transparent 20rem),
-      radial-gradient(circle at 54% 18%, rgba(0, 240, 255, 0.12), transparent 18rem),
-      radial-gradient(circle at 72% 66%, rgba(0, 240, 255, 0.16), transparent 22rem),
-      radial-gradient(circle at 94% 34%, rgba(0, 240, 255, 0.13), transparent 17rem),
-      linear-gradient(180deg, rgba(0, 240, 255, 0.02), transparent 35%, rgba(0, 240, 255, 0.035));
-    opacity: 0.92;
+      radial-gradient(ellipse at 50% 44%, rgba(0, 240, 255, 0.12), transparent 62%),
+      radial-gradient(ellipse at 50% 74%, rgba(0, 240, 255, 0.055), transparent 64%),
+      linear-gradient(180deg, rgba(0, 240, 255, 0.018), transparent 40%, rgba(0, 240, 255, 0.026));
+    opacity: 0.9;
   }
 
   @media (max-width: 1024px) {
@@ -585,22 +613,26 @@ const t = useTranslations(lang);
     }
   }
 
-  /* The canvas element remains in markup for backwards compatibility
-     with old snapshots, but this section now uses the static CSS
-     atmosphere above instead of runtime smoke. */
   .image-grid-section .glass-smoke {
-    display: none;
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    display: block;
+    width: 100%;
+    height: 100svh;
+    height: var(--grid-stable-vh, 100svh);
+    margin-bottom: calc(var(--grid-stable-vh, 100svh) * -1);
     pointer-events: none;
+    opacity: 0.72;
+    mix-blend-mode: screen;
   }
 
   @media (max-width: 900px), (pointer: coarse) {
     .image-grid-section::before {
       background:
-        radial-gradient(circle at 18% 18%, rgba(0, 240, 255, 0.13), transparent 11rem),
-        radial-gradient(circle at 78% 28%, rgba(0, 240, 255, 0.12), transparent 10rem),
-        radial-gradient(circle at 22% 76%, rgba(0, 240, 255, 0.14), transparent 12rem),
-        radial-gradient(circle at 86% 82%, rgba(0, 240, 255, 0.11), transparent 10rem),
-        linear-gradient(180deg, rgba(0, 240, 255, 0.02), transparent 42%, rgba(0, 240, 255, 0.035));
+        radial-gradient(ellipse at 50% 46%, rgba(0, 240, 255, 0.105), transparent 58%),
+        radial-gradient(ellipse at 50% 78%, rgba(0, 240, 255, 0.05), transparent 62%),
+        linear-gradient(180deg, rgba(0, 240, 255, 0.016), transparent 44%, rgba(0, 240, 255, 0.024));
     }
   }
 
@@ -608,7 +640,7 @@ const t = useTranslations(lang);
      siblings doesn't share a stacking context, so we lift it via
      z-index. */
   .image-grid-section .content {
-    z-index: 1;
+    z-index: 2;
   }
 
   /* ─── Intro overlay ─────────────────────────────────────────────
@@ -1147,10 +1179,12 @@ const t = useTranslations(lang);
     in the hexagons.
   */
   .image-grid-section .glass-overlay {
-    background:
-      radial-gradient(circle at 50% 28%, rgba(0, 240, 255, 0.16), transparent 48%),
-      linear-gradient(180deg, rgba(255, 255, 255, 0.055) 0%, rgba(255, 255, 255, 0.018) 48%, rgba(0, 240, 255, 0.04) 100%),
-      rgba(4, 12, 15, 0.48);
+    background: linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.06) 0%,
+      rgba(255, 255, 255, 0.02) 55%,
+      rgba(0, 240, 255, 0.018) 100%
+    );
   }
 
   /* No hover lift in this section. The global .glass-card hover
@@ -1220,31 +1254,17 @@ const t = useTranslations(lang);
     padding: var(--card-pad);
   }
 
-  /* Soft cyan radial behind the icon area — emulates the icon "emitting
-     light into the glass". Sits inside the .glass-content stacking
-     context (z:3 on the parent), with z-index:0 so the icon + heading
-     (default static) draw on top. Anchored to the upper third where
-     the icon naturally lands. */
+  /* Subtle glass sheen only. The previous per-card radial glow made
+     every hexagon show the same visible cyan circle, which fought the
+     pricing-style glass surface. */
   .image-grid-section .tech-card .glass-content::before {
     content: '';
     position: absolute;
-    top: 8%;
-    left: 50%;
-    width: 85%;
-    aspect-ratio: 1;
-    transform: translateX(-50%);
-    /*
-      Perf 2026-05-17 (Chrome jank): dropped `filter: blur(14px)`.
-      The radial-gradient stops already taper softly (0.22→0.08→
-      transparent), so the blur was adding ~zero visual gain at
-      high per-cell paint cost (~24 cells × 14 px blur). Removed.
-    */
-    background: radial-gradient(
-      circle,
-      rgba(0, 240, 255, 0.18) 0%,
-      rgba(0, 240, 255, 0.07) 38%,
-      transparent 70%
-    );
+    inset: 0;
+    background:
+      linear-gradient(135deg, rgba(255, 255, 255, 0.085), transparent 28%),
+      linear-gradient(180deg, rgba(0, 240, 255, 0.04), transparent 62%);
+    opacity: 0.5;
     pointer-events: none;
     z-index: 0;
   }
@@ -1269,13 +1289,11 @@ const t = useTranslations(lang);
     stroke-linecap: round;
     stroke-linejoin: round;
     color: var(--color-accent-primary);
-    /* Layered glow: tight inner halo (close cyan), broad outer halo
-       (atmospheric cyan), and a dark drop-shadow for separation
-       against the bright cyan radial behind. */
+    /* Icon glow stays local to the glyph; the card surface itself now
+       uses the same calm glass tint as pricing cards. */
     filter:
-      drop-shadow(0 0 4px rgba(0, 240, 255, 0.6))
-      drop-shadow(0 0 14px rgba(0, 240, 255, 0.42))
-      drop-shadow(0 0 28px rgba(0, 240, 255, 0.22))
+      drop-shadow(0 0 4px rgba(0, 240, 255, 0.56))
+      drop-shadow(0 0 15px rgba(0, 240, 255, 0.3))
       drop-shadow(0 6px 14px rgba(0, 0, 0, 0.35));
   }
 
