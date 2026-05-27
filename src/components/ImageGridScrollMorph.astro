@@ -1796,10 +1796,30 @@ const t = useTranslations(lang);
 
         const sourceMaxW = 1672;
         const sourceMaxH = 941;
-        const displayWidth = Math.min(viewportWidth, sourceMaxW);
-        const displayHeight = Math.min(viewportHeight, sourceMaxH);
+        const desktopCardAspect = 16 / 9;
+        const desktopCardMaxW = Math.min(viewportWidth * 0.88, sourceMaxW);
+        const desktopCardMaxH = Math.min(viewportHeight * 0.82, sourceMaxH);
+        const desktopCardWidth = Math.min(desktopCardMaxW, desktopCardMaxH * desktopCardAspect);
+        const desktopCardHeight = desktopCardWidth / desktopCardAspect;
+        const displayWidth = compactMotion
+          ? Math.min(viewportWidth, sourceMaxW)
+          : desktopCardWidth;
+        const displayHeight = compactMotion
+          ? Math.min(viewportHeight, sourceMaxH)
+          : desktopCardHeight;
 
         /*
+          Desktop card + mobile scale morph.
+
+          Desktop now starts as a large centred 16:9 card instead
+          of a full-bleed viewport image. It then morphs via
+          width/height down to the centre hex cell. Desktop can
+          afford the isolated layout work and width/height keeps the
+          photo content undistorted while the aspect ratio changes.
+
+          Mobile keeps the scale-based path below because it avoids
+          per-scroll width/height layout on phone GPUs.
+
           Scale-based morph v4 — element rendered at LARGE size
           with cell aspect ratio, scale DOWN to 1 at end.
 
@@ -1835,15 +1855,19 @@ const t = useTranslations(lang);
           coordinate system).
         */
         const cellAspect = naturalWidth / naturalHeight; // ~ 0.866
-        const elementWidth = Math.max(displayWidth, displayHeight * cellAspect);
-        const elementHeight = elementWidth / cellAspect;
+        const elementWidth = compactMotion
+          ? Math.max(displayWidth, displayHeight * cellAspect)
+          : displayWidth;
+        const elementHeight = compactMotion
+          ? elementWidth / cellAspect
+          : displayHeight;
 
         img.style.width = `${elementWidth}px`;
         img.style.height = `${elementHeight}px`;
 
         // Uniform scale END value — fits the cell exactly on both
         // axes because the element is already at cell aspect.
-        const scaleEnd = naturalWidth / elementWidth;
+        const scaleEnd = compactMotion ? naturalWidth / elementWidth : 1;
 
         // Initial transform: scale=1 so the first render frame
         // shows the full-bleed view (Motion's scroll observer hasn't
@@ -1888,6 +1912,9 @@ const t = useTranslations(lang);
         let lastDarkenOpacity = '';
         let lastReveal = '';
         let lastImgTransform = '';
+        let lastImgWidth = '';
+        let lastImgHeight = '';
+        let lastObjectPosition = '';
         let targetProgress = 0;
         let renderedProgress = 0;
         let settleRaf = 0;
@@ -1968,11 +1995,29 @@ const t = useTranslations(lang);
             const morphStart = 0.12;
             const morphEnd = 0.76;
             const morphP = easeInOut((progress - morphStart) / (morphEnd - morphStart));
-            const scale = 1 + (scaleEnd - 1) * morphP;
-            const nextTransform = `translateZ(0) scale(${scale.toFixed(5)})`;
+            const width = elementWidth + (naturalWidth - elementWidth) * morphP;
+            const height = elementHeight + (naturalHeight - elementHeight) * morphP;
+            const nextWidth = `${width.toFixed(2)}px`;
+            const nextHeight = `${height.toFixed(2)}px`;
+            const nextTransform = 'translateZ(0)';
+            if (nextWidth !== lastImgWidth) {
+              lastImgWidth = nextWidth;
+              img.style.width = nextWidth;
+            }
+            if (nextHeight !== lastImgHeight) {
+              lastImgHeight = nextHeight;
+              img.style.height = nextHeight;
+            }
             if (nextTransform !== lastImgTransform) {
               lastImgTransform = nextTransform;
               img.style.transform = nextTransform;
+            }
+
+            const objectY = 8 + (32 - 8) * morphP;
+            const nextObjectPosition = `50% ${objectY.toFixed(2)}%`;
+            if (nextObjectPosition !== lastObjectPosition) {
+              lastObjectPosition = nextObjectPosition;
+              img.style.objectPosition = nextObjectPosition;
             }
 
             const shouldHex = morphP >= 0.58;
