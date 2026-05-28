@@ -56,17 +56,10 @@ const fallbackLocale: Locale = 'cs';
     <meta name="twitter:image" content="https://melveo.app/og-default.jpg" />
     <meta name="twitter:image:alt" content="Melveo" />
 
-    <!-- Wordmark font — same Quicksand load as BaseLayout. The user
-         only sees this page for ~0.1s before the redirect, so the
-         font may not finish downloading; fallback to Inter / system
-         is fine. Mirrored for consistency with the rest of the site
-         and so search-bot snapshots render the wordmark in brand. -->
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      rel="stylesheet"
-      href="https://fonts.googleapis.com/css2?family=Quicksand:wght@500;600;700&display=swap"
-    />
+    <!-- Keep the root redirect page self-contained. The full landing
+         uses self-hosted Inter/Comfortaa from global.css; this page is
+         visible only briefly, so avoid a third-party font request that
+         would violate the production CSP. -->
 
     <!-- hreflang for crawlers landing on root -->
     <link rel="alternate" hreflang="cs" href="https://melveo.app/cs/" />
@@ -107,7 +100,7 @@ const fallbackLocale: Locale = 'cs';
         opacity: 0.6;
       }
       .wordmark {
-        font-family: "Quicksand", "Inter", -apple-system, system-ui, sans-serif;
+        font-family: "Comfortaa Variable", "Comfortaa", "Inter", -apple-system, system-ui, sans-serif;
         font-size: 2rem;
         font-weight: 700;
         letter-spacing: -0.02em;
