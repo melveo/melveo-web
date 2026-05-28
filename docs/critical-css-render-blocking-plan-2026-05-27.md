@@ -24,6 +24,73 @@ Risk:
 
 - The visual design depends on global tokens, section-level CSS, Astro component CSS and Tailwind output. Blindly inlining or deferring CSS can cause FOUC, wrong hero typography, broken honeycomb sizing, missing glass styling or unstable animations.
 
+## Priority Patch — 2026-05-28
+
+Before continuing the critical CSS work, fix two visible regressions that affect the current presentation quality:
+
+### P0 — Honeycomb Intro Viewport Coverage
+
+Problem:
+
+- In the second section (`ImageGridScrollMorph`) the intro state with the large `melveo` wordmark and main photo can expose a slice of the following section at the bottom on some viewport sizes.
+- This makes the section feel like it is not occupying the full viewport.
+
+Tasks:
+
+- Lock the sticky intro content to the stable viewport height, not just `min-height`.
+- Keep the existing card-style desktop composition and mobile full-height behavior.
+- Verify the first stage of the scroll morph does not reveal the next section before the user has progressed past the intro.
+
+Acceptance:
+
+- `/cs/` and `/en/` show the intro section as a complete viewport panel on mobile, tablet, desktop and wide desktop.
+- The following section is not visible at the bottom during the initial intro state.
+- The main photo still morphs into the center hexagon and the honeycomb layout remains unchanged.
+
+### P0 — Data Feedback Output Particle
+
+Problem:
+
+- In the `data-feedback` section the visible particle/path from the `melveo` wordmark to the trainer/coach hexagon has disappeared, even though input particles still flow into `melveo`.
+
+Tasks:
+
+- Restore a visible processed-output particle from `melveo` to the trainer/coach hexagon.
+- Keep the trainer hexagon growth/flash effect on arrival.
+- Apply the fix to both desktop SVG and mobile SVG variants.
+
+Acceptance:
+
+- Input signals visibly flow into `melveo`.
+- After accumulation, a distinct processed pulse visibly travels from `melveo` to the trainer/coach hexagon.
+- On arrival, the trainer/coach hexagon grows from its center and settles smoothly back.
+- No text overflow or path overlap regressions in Czech or English.
+
+### Validation Required For This Patch
+
+- `npm run check`
+- `npm run build`
+- local preview on `0.0.0.0:4321`
+- 50-viewport responsive audit covering `/cs/`, `/en/`, honeycomb intro, honeycomb final state and `/cs/#data-feedback`, `/en/#data-feedback`
+- Visual screenshots for mobile, tablet, desktop and wide desktop.
+
+Status 2026-05-28:
+
+- Implemented.
+- `ImageGridScrollMorph` sticky content now has explicit stable viewport `height` as well as `min-height`.
+- Desktop intro card height was raised from 82% to 88% of the stable viewport to reduce empty bottom space while keeping the card composition.
+- `MelveoDataFlowHero` now renders and animates a dedicated output pulse from `melveo` to the trainer/coach hexagon on desktop and mobile.
+- Asset copy script now copies the full `public/images/melveo-grid` directory into `dist` so WebP intro images and all thumbnail `srcset` candidates are present in production builds.
+
+Verification 2026-05-28:
+
+- `npm run check`: passed, 0 errors.
+- `npm run build`: passed.
+- 50-viewport alternating CS/EN scroll audit: passed, 0 failures, 0 console issues, 0 request failures, 0 horizontal overflow, 0 broken images.
+- 100-case full-locale scroll audit (50 CS + 50 EN): passed, 0 failures, 0 console issues, 0 request failures, 0 horizontal overflow, 0 broken images.
+- Targeted viewport containment check: passed; bottom of the viewport remains inside `[data-grid-section]` at honeycomb intro start across tested mobile, tablet, desktop and wide viewports.
+- Targeted output-pulse check: passed; `[data-output-pulse]` becomes visible on mobile and desktop.
+
 ## Phase 1 — CSS Dependency Map
 
 Tasks:

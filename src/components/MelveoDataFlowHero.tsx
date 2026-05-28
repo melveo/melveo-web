@@ -283,6 +283,8 @@ function setupMobileAnimation(
   const outputHexHalo = svg.querySelector<SVGPolygonElement>(
     "[data-output-halo]",
   );
+  const outputPath = svg.querySelector<SVGPathElement>("[data-output-path]");
+  const outputPulse = svg.querySelector<SVGCircleElement>("[data-output-pulse]");
 
   const samplePath = (path: SVGPathElement, steps = 96) => {
     const length = path.getTotalLength();
@@ -314,6 +316,7 @@ function setupMobileAnimation(
       duration: 960 + Math.random() * 260,
     };
   }).filter((item): item is NonNullable<typeof item> => Boolean(item));
+  const outputPoints = outputPath ? samplePath(outputPath, 84) : [];
 
   const shuffleSignals = <T,>(items: T[]) => {
     const shuffled = [...items];
@@ -395,7 +398,53 @@ function setupMobileAnimation(
     animateToEnergy(0, RELEASE_DURATION);
     const outputScale =
       1 + Math.min(energyAtRelease / mobileChargeThreshold - 1, 1) * 0.5;
-    gsap.delayedCall(0.32, () => pulseCoach(outputScale));
+    gsap.delayedCall(0.22, () => {
+      animateOutputPulse();
+      gsap.delayedCall(0.62, () => pulseCoach(outputScale));
+    });
+  };
+
+  const animateOutputPulse = () => {
+    if (!outputPath || !outputPulse || outputPoints.length === 0) return;
+
+    const state = { progress: 0 };
+    gsap.killTweensOf(state);
+    gsap.fromTo(
+      state,
+      { progress: 0 },
+      {
+        progress: 1,
+        duration: 0.88,
+        ease: "sine.inOut",
+        onStart: () => {
+          outputPulse.setAttribute("opacity", "0");
+          outputPath.setAttribute("opacity", "0.58");
+        },
+        onUpdate: () => {
+          const raw = state.progress;
+          const index = Math.min(
+            outputPoints.length - 1,
+            Math.round(raw * (outputPoints.length - 1)),
+          );
+          const point = outputPoints[index];
+          const alphaIn = Math.min(1, raw / 0.2);
+          const alphaOut = raw > 0.78 ? Math.max(0, (1 - raw) / 0.22) : 1;
+          const alpha = alphaIn * alphaOut;
+          outputPulse.setAttribute("cx", point.x.toFixed(1));
+          outputPulse.setAttribute("cy", point.y.toFixed(1));
+          outputPulse.setAttribute("opacity", (0.94 * alpha).toFixed(3));
+          outputPulse.setAttribute("r", (5.2 + 2.4 * alpha).toFixed(2));
+          outputPath.setAttribute(
+            "opacity",
+            (0.5 + Math.sin(raw * Math.PI) * 0.42).toFixed(3),
+          );
+        },
+        onComplete: () => {
+          outputPulse.setAttribute("opacity", "0");
+          outputPath.setAttribute("opacity", "0.85");
+        },
+      },
+    );
   };
 
   const pulseCoach = (outputScale = 1) => {
@@ -561,6 +610,8 @@ export default function MelveoDataFlowHero({ lang = "en" }: Props) {
   const rootRef = useRef<HTMLElement | null>(null);
   const inputPathRefs = useRef<Record<string, SVGPathElement | null>>({});
   const inputPulseRefs = useRef<Record<string, SVGCircleElement | null>>({});
+  const outputPathRef = useRef<SVGPathElement | null>(null);
+  const outputPulseRef = useRef<SVGCircleElement | null>(null);
   const outputHexFlashRef = useRef<SVGPolygonElement | null>(null);
   const outputHexHaloRef = useRef<SVGPolygonElement | null>(null);
   const outputHexGroupRef = useRef<SVGGElement | null>(null);
@@ -721,6 +772,58 @@ export default function MelveoDataFlowHero({ lang = "en" }: Props) {
           animateToEnergy(0, RELEASE_DURATION);
 
           const tl = gsap.timeline({ delay: 0.34 });
+          const outputPath = outputPathRef.current;
+          const outputPulse = outputPulseRef.current;
+          if (outputPath && outputPulse) {
+            tl.fromTo(
+              outputPulse,
+              {
+                autoAlpha: 0,
+                motionPath: {
+                  path: outputPath,
+                  align: outputPath,
+                  alignOrigin: [0.5, 0.5],
+                  start: 0,
+                  end: 0,
+                },
+              },
+              {
+                autoAlpha: 1,
+                duration: 0.92,
+                ease: "sine.inOut",
+                motionPath: {
+                  path: outputPath,
+                  align: outputPath,
+                  alignOrigin: [0.5, 0.5],
+                  start: 0,
+                  end: 1,
+                },
+              },
+              0,
+            );
+            tl.to(outputPulse, { autoAlpha: 0, duration: 0.22 }, 0.78);
+            tl.fromTo(
+              outputPath,
+              { opacity: 0.35, strokeWidth: 1.5 },
+              {
+                opacity: 0.96,
+                strokeWidth: 2.5,
+                duration: 0.28,
+                ease: "sine.out",
+              },
+              0,
+            );
+            tl.to(
+              outputPath,
+              {
+                opacity: 0.72,
+                strokeWidth: 1.8,
+                duration: 0.55,
+                ease: "sine.inOut",
+              },
+              0.36,
+            );
+          }
           const coachFlash = outputHexFlashRef.current;
           if (coachFlash) {
             tl.fromTo(
@@ -1034,6 +1137,8 @@ export default function MelveoDataFlowHero({ lang = "en" }: Props) {
               ))}
 
               <path
+                ref={outputPathRef}
+                data-output-path
                 d={outputPathD()}
                 stroke="url(#melveo-line-out)"
                 strokeWidth="1.8"
@@ -1172,18 +1277,28 @@ export default function MelveoDataFlowHero({ lang = "en" }: Props) {
               })}
 
               {!reduced &&
-                INPUTS.map((inp) => (
+                <>
+                  {INPUTS.map((inp) => (
+                    <circle
+                      key={`${inp.id}-pulse`}
+                      ref={(el) => {
+                        inputPulseRefs.current[inp.id] = el;
+                      }}
+                      r="6"
+                      fill="url(#melveo-pulse)"
+                      opacity="0"
+                      filter="url(#melveo-glow)"
+                    />
+                  ))}
                   <circle
-                    key={`${inp.id}-pulse`}
-                    ref={(el) => {
-                      inputPulseRefs.current[inp.id] = el;
-                    }}
-                    r="6"
+                    ref={outputPulseRef}
+                    data-output-pulse
+                    r="8"
                     fill="url(#melveo-pulse)"
                     opacity="0"
                     filter="url(#melveo-glow)"
                   />
-                ))}
+                </>}
             </svg>
 
           </div>
@@ -1573,15 +1688,24 @@ function MobileFlow({ reduced, lang }: { reduced: boolean; lang: Lang }) {
         })}
 
         {!reduced &&
-          MOBILE_INPUTS.map((inp) => (
+          <>
+            {MOBILE_INPUTS.map((inp) => (
+              <circle
+                key={`m-pulse-${inp.id}`}
+                data-input-pulse={inp.id}
+                r="5"
+                fill="url(#m-pulse)"
+                opacity="0"
+              />
+            ))}
             <circle
-              key={`m-pulse-${inp.id}`}
-              data-input-pulse={inp.id}
-              r="5"
+              data-output-pulse
+              r="6"
               fill="url(#m-pulse)"
               opacity="0"
+              filter="url(#m-glow)"
             />
-          ))}
+          </>}
       </svg>
 
       <style>{`

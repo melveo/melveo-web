@@ -917,6 +917,9 @@ const t = useTranslations(lang);
     min-height: 100vh;
     min-height: 100svh;
     min-height: var(--grid-stable-vh, 100svh);
+    height: 100vh;
+    height: 100svh;
+    height: var(--grid-stable-vh, 100svh);
     width: 100vw;
     position: sticky;
     top: 0;
@@ -1856,12 +1859,17 @@ const t = useTranslations(lang);
 
   /*
     Mobile browsers fire resize events while the URL bar collapses.
-    If the honeycomb uses dynamic viewport units during that scroll,
-    every hexagon gets re-sized mid-animation and the smoke canvas
-    appears to drift independently from the grid. Lock this section
-    to a stable visual viewport height and only refresh it on real
-    layout changes (rotation / major viewport change), not browser
-    chrome movement.
+    If the honeycomb uses fully dynamic viewport units during that
+    scroll, every hexagon gets re-sized mid-animation and the smoke
+    canvas appears to drift independently from the grid.
+
+    The compromise:
+      - grow the stable height when the browser chrome collapses and
+        the visible viewport becomes taller, so the intro never exposes
+        the next section at the bottom;
+      - do not shrink it again for small URL-bar re-expansions, so the
+        grid does not continuously breathe while the user scrolls;
+      - still refresh on real layout changes such as rotation.
   */
   function lockGridViewport(section: HTMLElement) {
     const read = () => ({
@@ -1878,10 +1886,11 @@ const t = useTranslations(lang);
     const maybeRefresh = () => {
       const next = read();
       const widthChanged = Math.abs(next.width - stable.width) > 24;
-      const majorHeightChanged =
-        Math.abs(next.height - stable.height) > Math.max(180, stable.height * 0.25);
+      const heightGrew = next.height > stable.height + 24;
+      const heightShrankMajor =
+        stable.height - next.height > Math.max(180, stable.height * 0.25);
 
-      if (!widthChanged && !majorHeightChanged) return false;
+      if (!widthChanged && !heightGrew && !heightShrankMajor) return false;
 
       stable = next;
       apply();
@@ -1954,7 +1963,7 @@ const t = useTranslations(lang);
         const sourceMaxH = 941;
         const desktopCardAspect = 16 / 9;
         const desktopCardMaxW = Math.min(viewportWidth * 0.88, sourceMaxW);
-        const desktopCardMaxH = Math.min(viewportHeight * 0.82, sourceMaxH);
+        const desktopCardMaxH = Math.min(viewportHeight * 0.88, sourceMaxH);
         const desktopCardWidth = Math.min(desktopCardMaxW, desktopCardMaxH * desktopCardAspect);
         const desktopCardHeight = desktopCardWidth / desktopCardAspect;
         const displayWidth = compactMotion
@@ -2269,6 +2278,17 @@ const t = useTranslations(lang);
         };
 
         const onScroll = () => {
+          /*
+            iOS/Safari can collapse the bottom browser bar without
+            firing a normal window resize. Check the visual viewport
+            during scroll as well, but the lock only reacts to growth
+            or major layout changes, so this does not reintroduce
+            continuous honeycomb resizing.
+          */
+          const viewportChanged = viewportLock.maybeRefresh();
+          if (viewportChanged) {
+            lastProgress = -1;
+          }
           if (
             !sectionActive &&
             (renderedProgress <= 0.001 || renderedProgress >= 0.999)
@@ -2305,6 +2325,7 @@ const t = useTranslations(lang);
 
         window.addEventListener('scroll', onScroll, { passive: true });
         window.addEventListener('resize', onResize, { passive: true });
+        window.visualViewport?.addEventListener('resize', onResize, { passive: true });
         targetProgress = readProgress();
         renderedProgress = targetProgress;
         renderProgress(renderedProgress);
