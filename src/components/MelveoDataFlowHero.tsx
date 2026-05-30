@@ -655,7 +655,11 @@ export default function MelveoDataFlowHero({ lang = "en" }: Props) {
         const index = activeGsapWork.indexOf(work);
         if (index >= 0) activeGsapWork.splice(index, 1);
       };
-      work.eventCallback("onComplete", remove);
+      const originalOnComplete = work.eventCallback("onComplete");
+      work.eventCallback("onComplete", function (this: unknown, ...args: unknown[]) {
+        originalOnComplete?.apply(this, args);
+        remove();
+      });
       if (!isVisible || tabHidden) work.pause();
       return work;
     };
@@ -986,12 +990,15 @@ export default function MelveoDataFlowHero({ lang = "en" }: Props) {
               () => {
                 chargeMelveo();
               },
-              undefined,
+              [],
               1.54,
             );
-            tl.call(() => {
-              schedulePulse(inp, 1.45 + Math.random() * 2.65);
-            });
+            tl.call(
+              () => {
+                schedulePulse(inp, 1.45 + Math.random() * 2.65);
+              },
+              [],
+            );
           }));
         };
 
