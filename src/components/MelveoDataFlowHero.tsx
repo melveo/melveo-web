@@ -246,6 +246,9 @@ const HONEYCOMB_CELLS = buildHoneycomb();
 const MOBILE_HONEYCOMB_CELLS = buildMobileHoneycomb();
 
 type GsapInstance = typeof import("gsap")["gsap"];
+type GsapTimeline = ReturnType<GsapInstance["timeline"]>;
+type GsapTween = ReturnType<GsapInstance["delayedCall"]>;
+type GsapWork = GsapTimeline | GsapTween;
 
 // Charge / release tuning — shared by desktop and mobile
 const CHARGE_THRESHOLD = 6;
@@ -633,31 +636,34 @@ export default function MelveoDataFlowHero({ lang = "en" }: Props) {
     if (typeof window === "undefined" || reduced) return;
     let cancelled = false;
     let ctx: { revert: () => void } | null = null;
-    let gsapInstance: GsapInstance | null = null;
     let io: IntersectionObserver | null = null;
     let onVisibilityChange: (() => void) | null = null;
     let mobileCleanup: (() => void) | null = null;
+    const activeGsapWork: GsapWork[] = [];
     const isMobile = window.matchMedia("(max-width: 900px)").matches;
 
     /*
-      Pause GSAP globally while the section is out of the viewport
-      OR while the tab is hidden. The 8 input-hex pulse loops use
-      MotionPathPlugin which is expensive (curve sampling per tick)
-      and they kept firing even when the section was scrolled past,
-      taxing the browser's main thread for nothing (user 2026-05-15:
-      "ty 2 sekce se docela lagují"). gsap.ticker.sleep / wake stops
-      *all* tweens in this context without losing schedules.
+      Pause only this section's GSAP work while it is out of view.
+      Sleeping the global ticker also affects unrelated page animation,
+      which can make later sections feel choppy after this island mounts.
     */
     let isVisible = false;
     let tabHidden = document.hidden;
+    const trackGsapWork = <T extends GsapWork>(work: T) => {
+      activeGsapWork.push(work);
+      const remove = () => {
+        const index = activeGsapWork.indexOf(work);
+        if (index >= 0) activeGsapWork.splice(index, 1);
+      };
+      work.eventCallback("onComplete", remove);
+      if (!isVisible || tabHidden) work.pause();
+      return work;
+    };
     function syncPlayState() {
-      const g = gsapInstance;
-      if (!g) return;
       const shouldPlay = isVisible && !tabHidden;
-      if (shouldPlay) {
-        g.ticker.wake?.();
-      } else {
-        g.ticker.sleep?.();
+      for (const work of activeGsapWork) {
+        if (shouldPlay) work.resume();
+        else work.pause();
       }
     }
 
@@ -669,7 +675,6 @@ export default function MelveoDataFlowHero({ lang = "en" }: Props) {
         if (cancelled || !rootRef.current) return;
         gsap.registerPlugin(MotionPathPlugin);
       }
-      gsapInstance = gsap;
 
       // Pause when scrolled out of viewport. rootMargin gives a
       // small "warm-up" zone so the animation is already running
@@ -756,12 +761,12 @@ export default function MelveoDataFlowHero({ lang = "en" }: Props) {
           animateToEnergy(energy, 0.68);
           if (energy >= CHARGE_THRESHOLD && !pendingRelease) {
             pendingRelease = true;
-            gsap.delayedCall(0.3, () => {
+            trackGsapWork(gsap.delayedCall(0.3, () => {
               const energyAtRelease = energy;
               energy = 0;
               pendingRelease = false;
               releaseToOutput(energyAtRelease);
-            });
+            }));
           }
         };
 
@@ -771,7 +776,7 @@ export default function MelveoDataFlowHero({ lang = "en" }: Props) {
 
           animateToEnergy(0, RELEASE_DURATION);
 
-          const tl = gsap.timeline({ delay: 0.34 });
+          const tl = trackGsapWork(gsap.timeline({ delay: 0.34 }));
           const outputPath = outputPathRef.current;
           const outputPulse = outputPulseRef.current;
           if (outputPath && outputPulse) {
@@ -899,7 +904,7 @@ export default function MelveoDataFlowHero({ lang = "en" }: Props) {
 
         const schedulePulse = (inp: InputDef, delay: number) => {
           if (cancelled) return;
-          gsap.delayedCall(delay, () => {
+          trackGsapWork(gsap.delayedCall(delay, () => {
             if (cancelled) return;
             const path = inputPathRefs.current[inp.id];
             const pulse = inputPulseRefs.current[inp.id];
@@ -908,7 +913,7 @@ export default function MelveoDataFlowHero({ lang = "en" }: Props) {
               return;
             }
 
-            const tl = gsap.timeline();
+            const tl = trackGsapWork(gsap.timeline());
             tl.fromTo(
               pulse,
               {
@@ -987,25 +992,26 @@ export default function MelveoDataFlowHero({ lang = "en" }: Props) {
             tl.call(() => {
               schedulePulse(inp, 1.45 + Math.random() * 2.65);
             });
-          });
+          }));
         };
 
         INPUTS.forEach((inp) => {
           schedulePulse(inp, 0.2 + Math.random() * 2.4);
         });
+        syncPlayState();
       }, rootRef);
     })();
 
     return () => {
       cancelled = true;
       mobileCleanup?.();
+      [...activeGsapWork].forEach((work) => work.kill());
+      activeGsapWork.length = 0;
       ctx?.revert();
       io?.disconnect();
       if (onVisibilityChange) {
         document.removeEventListener("visibilitychange", onVisibilityChange);
       }
-      // Make sure ticker wakes if another GSAP user mounts later
-      gsapInstance?.ticker?.wake?.();
     };
   }, [reduced]);
 

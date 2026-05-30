@@ -137,9 +137,11 @@ function mount(section: HTMLElement): Handle | null {
   const ctx = context;
 
   const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const staticMode = section.dataset.glassSmokeStatic;
   const compactStatic =
-    section.dataset.glassSmokeStatic === 'compact' &&
-    window.matchMedia('(max-width: 700px), (pointer: coarse)').matches;
+    staticMode === 'always' ||
+    (staticMode === 'compact' &&
+      window.matchMedia('(max-width: 700px), (pointer: coarse)').matches);
   const targetFps = Math.max(
     0,
     Math.min(60, parseFloat(section.dataset.glassSmokeFps ?? '24')),
