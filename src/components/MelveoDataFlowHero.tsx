@@ -338,15 +338,13 @@ function setupMobileAnimation(
   if (coreText) {
     gsap.set(coreText, {
       scale: 1,
-      transformOrigin: "50% 50%",
-      transformBox: "fill-box",
+      svgOrigin: `${MOBILE_CENTER.x} ${MOBILE_CENTER.y}`,
     });
   }
   if (coreBloom) {
     gsap.set(coreBloom, {
       scale: 1,
-      transformOrigin: "50% 50%",
-      transformBox: "fill-box",
+      svgOrigin: `${MOBILE_CENTER.x} ${MOBILE_CENTER.y}`,
       opacity: BASE_BLOOM_OPACITY,
     });
   }
@@ -364,7 +362,7 @@ function setupMobileAnimation(
       gsap.to(coreText, {
         scale: targetScale,
         duration,
-        transformOrigin: "50% 50%",
+        svgOrigin: `${MOBILE_CENTER.x} ${MOBILE_CENTER.y}`,
         ease: target > 0 ? "power3.out" : "power2.inOut",
       });
     }
@@ -374,7 +372,7 @@ function setupMobileAnimation(
         opacity: targetBloomOp,
         scale: targetBloomScale,
         duration,
-        transformOrigin: "50% 50%",
+        svgOrigin: `${MOBILE_CENTER.x} ${MOBILE_CENTER.y}`,
         ease: "power2.out",
       });
     }
@@ -402,12 +400,11 @@ function setupMobileAnimation(
     const outputScale =
       1 + Math.min(energyAtRelease / mobileChargeThreshold - 1, 1) * 0.5;
     gsap.delayedCall(0.22, () => {
-      animateOutputPulse();
-      gsap.delayedCall(0.62, () => pulseCoach(outputScale));
+      animateOutputPulse(() => pulseCoach(outputScale));
     });
   };
 
-  const animateOutputPulse = () => {
+  const animateOutputPulse = (onImpact?: () => void) => {
     if (!outputPath || !outputPulse || outputPoints.length === 0) return;
 
     const state = { progress: 0 };
@@ -431,7 +428,7 @@ function setupMobileAnimation(
           );
           const point = outputPoints[index];
           const alphaIn = Math.min(1, raw / 0.2);
-          const alphaOut = raw > 0.78 ? Math.max(0, (1 - raw) / 0.22) : 1;
+          const alphaOut = raw > 0.92 ? Math.max(0, (1 - raw) / 0.08) : 1;
           const alpha = alphaIn * alphaOut;
           outputPulse.setAttribute("cx", point.x.toFixed(1));
           outputPulse.setAttribute("cy", point.y.toFixed(1));
@@ -445,6 +442,7 @@ function setupMobileAnimation(
         onComplete: () => {
           outputPulse.setAttribute("opacity", "0");
           outputPath.setAttribute("opacity", "0.85");
+          onImpact?.();
         },
       },
     );
@@ -710,6 +708,18 @@ export default function MelveoDataFlowHero({ lang = "en" }: Props) {
         }
         let energy = 0;
         let pendingRelease = false;
+        if (coreTextRef.current) {
+          gsap.set(coreTextRef.current, {
+            scale: 1,
+            svgOrigin: `${CENTER.x} ${CENTER.y}`,
+          });
+        }
+        if (coreBloomRef.current) {
+          gsap.set(coreBloomRef.current, {
+            scale: 1,
+            svgOrigin: `${CENTER.x} ${CENTER.y}`,
+          });
+        }
 
         const flashMelveo = () => {
           const text = coreTextRef.current;
@@ -744,7 +754,7 @@ export default function MelveoDataFlowHero({ lang = "en" }: Props) {
           gsap.to(text, {
             scale: targetScale,
             duration,
-            transformOrigin: "50% 50%",
+            svgOrigin: `${CENTER.x} ${CENTER.y}`,
             ease: target > 0 ? "power3.out" : "power2.inOut",
           });
           if (bloom) {
@@ -753,7 +763,7 @@ export default function MelveoDataFlowHero({ lang = "en" }: Props) {
               opacity: targetBloomOp,
               scale: targetBloomScale,
               duration,
-              transformOrigin: "50% 50%",
+              svgOrigin: `${CENTER.x} ${CENTER.y}`,
               ease: "power2.out",
             });
           }
@@ -781,6 +791,8 @@ export default function MelveoDataFlowHero({ lang = "en" }: Props) {
           animateToEnergy(0, RELEASE_DURATION);
 
           const tl = trackGsapWork(gsap.timeline({ delay: 0.34 }));
+          const outputTravelDuration = 0.92;
+          const outputImpactAt = 0.9;
           const outputPath = outputPathRef.current;
           const outputPulse = outputPulseRef.current;
           if (outputPath && outputPulse) {
@@ -798,7 +810,7 @@ export default function MelveoDataFlowHero({ lang = "en" }: Props) {
               },
               {
                 autoAlpha: 1,
-                duration: 0.92,
+                duration: outputTravelDuration,
                 ease: "sine.inOut",
                 motionPath: {
                   path: outputPath,
@@ -810,7 +822,7 @@ export default function MelveoDataFlowHero({ lang = "en" }: Props) {
               },
               0,
             );
-            tl.to(outputPulse, { autoAlpha: 0, duration: 0.22 }, 0.78);
+            tl.to(outputPulse, { autoAlpha: 0, duration: 0.2 }, outputImpactAt);
             tl.fromTo(
               outputPath,
               { opacity: 0.35, strokeWidth: 1.5 },
@@ -840,8 +852,8 @@ export default function MelveoDataFlowHero({ lang = "en" }: Props) {
               { opacity: 0 },
               {
                 opacity: 1,
-                duration: 0.18,
-                ease: "power2.out",
+                  duration: 0.18,
+                  ease: "power2.out",
                 onComplete: () => {
                   gsap.to(coachFlash, {
                     opacity: 0,
@@ -850,7 +862,7 @@ export default function MelveoDataFlowHero({ lang = "en" }: Props) {
                   });
                 },
               },
-              0,
+              outputImpactAt,
             );
           }
           const coachGroup = outputHexGroupRef.current;
@@ -874,7 +886,7 @@ export default function MelveoDataFlowHero({ lang = "en" }: Props) {
                   });
                 },
               },
-              0,
+              outputImpactAt,
             );
           }
           const coachHalo = outputHexHaloRef.current;
@@ -901,7 +913,7 @@ export default function MelveoDataFlowHero({ lang = "en" }: Props) {
                   });
                 },
               },
-              0,
+              outputImpactAt,
             );
           }
         };
@@ -1159,7 +1171,7 @@ export default function MelveoDataFlowHero({ lang = "en" }: Props) {
                 opacity="0.85"
               />
 
-              <g ref={outputHexGroupRef}>
+              <g ref={outputHexGroupRef} data-output-group>
                 <polygon
                   ref={outputHexHaloRef}
                   points={hexPolygonFlat(
@@ -1231,6 +1243,7 @@ export default function MelveoDataFlowHero({ lang = "en" }: Props) {
               />
               <text
                 ref={coreTextRef}
+                data-core-text="true"
                 x={CENTER.x}
                 y={CENTER.y + 22}
                 textAnchor="middle"
