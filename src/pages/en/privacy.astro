@@ -8,7 +8,7 @@ import PageHeader from '../../components/PageHeader.astro';
  * Czech version is authoritative in disputes (jurisdiction CZ).
  */
 
-const lastUpdated = '2026-04-30';
+const lastUpdated = '2026-06-01';
 ---
 
 <BaseLayout
@@ -81,6 +81,13 @@ const lastUpdated = '2026-04-30';
       <li>Attendance at training sessions</li>
       <li>Subjective perceived load (RPE) on a 1–10 scale post-session</li>
     </ul>
+    <p>
+      Some sports and wellness signals (for example pain, symptoms, HRV,
+      or data from health integrations) may, in context, reveal health-related
+      information. We process such data only to the extent necessary for team
+      sports operations, with role-based access controls, and optional health
+      integrations only with explicit consent.
+    </p>
 
     <h3>3.3. Device and sensor data (optional, only with consent)</h3>
     <ul>
@@ -106,11 +113,20 @@ const lastUpdated = '2026-04-30';
 
     <h3>3.6. Cookies and similar technologies</h3>
     <ul>
-      <li>Necessary cookies (required for site function)</li>
-      <li>Analytics cookies — only with explicit consent (Google Analytics)</li>
-      <li>Marketing cookies — only with explicit consent (Meta Pixel)</li>
+      <li>Necessary storage — for example saving your consent choice in the
+        browser (<code>melveo:consent</code>) and security or operational
+        features of the website.</li>
+      <li>Cloudflare Web Analytics — if enabled, we use cookieless aggregate
+        analytics without storing identifying cookies.</li>
+      <li>Google Analytics — only after explicit consent in the Analytics
+        category.</li>
+      <li>Meta Pixel — only after explicit consent in the Marketing category.</li>
     </ul>
-    <p>Details under "Cookie settings" in the page footer.</p>
+    <p>
+      You can change your consent at any time through "Cookie settings" in
+      the page footer. Necessary technologies cannot be disabled because the
+      website needs them to operate safely and consistently.
+    </p>
 
     <h2>4. Purpose of processing and legal basis (GDPR Art. 6)</h2>
     <table class="legal-table">
@@ -132,14 +148,15 @@ const lastUpdated = '2026-04-30';
         </tr>
         <tr>
           <td>Analytics and product improvement</td>
-          <td>Consent — Art. 6(1)(a)</td>
+          <td>Consent — Art. 6(1)(a) for cookie-based tools; legitimate
+            interest — Art. 6(1)(f) for cookieless aggregate analytics</td>
         </tr>
         <tr>
           <td>Marketing communication</td>
           <td>Consent — Art. 6(1)(a)</td>
         </tr>
         <tr>
-          <td>Apple Health / Polar integration</td>
+          <td>Apple Health / Polar integration and sensitive wellness signals</td>
           <td>Consent — Art. 6(1)(a) + Art. 9(2)(a)</td>
         </tr>
       </tbody>
@@ -156,7 +173,14 @@ const lastUpdated = '2026-04-30';
     </p>
     <p>
       A player has access only to their own data. A club has access to
-      aggregated reports for its teams.
+      aggregated reports for its teams and to information that is necessary
+      for the coach or club administrator role.
+    </p>
+    <p>
+      Melveo does not provide outputs that by themselves constitute legally
+      binding or similarly significant automated decisions under GDPR Art. 22.
+      App outputs serve as decision-support context for coaches, staff, and
+      clubs.
     </p>
 
     <h2>6. Retention</h2>
@@ -168,8 +192,10 @@ const lastUpdated = '2026-04-30';
       <li>Accounting and billing data: 10 years per Czech VAT Act
         No. 235/2004 Coll. and Accounting Act No. 563/1991 Coll.</li>
       <li>Operational data (IP, crash logs): max 30 days</li>
-      <li>Analytics cookies: per the tool's setting (Google Analytics:
-        14 months, Meta Pixel: 90 days)</li>
+      <li>Cookie consent: until withdrawn or until the consent schema version
+        changes</li>
+      <li>Analytics and marketing data: per the tool's settings (Google
+        Analytics: 14 months, Meta Pixel: typically 90 days)</li>
     </ul>
 
     <h2>7. Recipients and processors</h2>
@@ -225,6 +251,11 @@ const lastUpdated = '2026-04-30';
       <li>European Commission adequacy decision (Data Privacy Framework)</li>
       <li>or Standard Contractual Clauses (SCCs) under GDPR Art. 46</li>
     </ul>
+    <p>
+      For every new processor, we assess whether it is genuinely necessary
+      for the service, what data it processes, and whether it provides
+      appropriate contractual and technical safeguards.
+    </p>
 
     <h2>9. Your rights (GDPR Art. 15-22)</h2>
     <p>As a data subject you have the right:</p>
@@ -261,6 +292,9 @@ const lastUpdated = '2026-04-30';
       players only with the explicit consent of their legal guardian.
       The club is responsible for obtaining this consent before inviting
       a player into the app.
+      If a club uses Melveo for a youth team, it must ensure that the legal
+      guardian understands the purpose of processing and the scope of sharing
+      within the club.
     </p>
 
     <h2>11. Security</h2>
@@ -274,14 +308,48 @@ const lastUpdated = '2026-04-30';
       <li>Two-factor authentication for developer access</li>
     </ul>
 
-    <h2>12. Changes to this policy</h2>
+    <h2>12. Cookie settings</h2>
+    <p>The website uses three categories:</p>
+    <table class="legal-table">
+      <thead>
+        <tr>
+          <th>Category</th>
+          <th>Purpose</th>
+          <th>Consent</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Necessary</td>
+          <td>Saving the consent choice, security, and basic website operation.</td>
+          <td>No, they are required for the website to work.</td>
+        </tr>
+        <tr>
+          <td>Analytics</td>
+          <td>Traffic measurement and website improvement. Cloudflare is
+            cookieless; Google Analytics runs only after consent.</td>
+          <td>Yes, for tools that store cookies or similar identifiers.</td>
+        </tr>
+        <tr>
+          <td>Marketing</td>
+          <td>Advertising measurement and reaching relevant clubs.</td>
+          <td>Yes.</td>
+        </tr>
+      </tbody>
+    </table>
+    <p>
+      You can change your choice at any time in the website footer. Withdrawing
+      consent does not affect the lawfulness of processing before withdrawal.
+    </p>
+
+    <h2>13. Changes to this policy</h2>
     <p>
       We may update this policy. For substantive changes, existing users
       will be notified by email at least 30 days before they take effect.
       Version and effective date are shown at the top.
     </p>
 
-    <h2>13. Contact</h2>
+    <h2>14. Contact</h2>
     <p>
       All inquiries about personal data processing, requests to exercise
       your rights, or complaints, send to:
@@ -291,7 +359,9 @@ const lastUpdated = '2026-04-30';
       Data box: <code>g7v78rx</code>
     </p>
     <p>
-      We respond without undue delay, no later than 30 days from receipt.
+      We respond without undue delay, no later than one month from receipt.
+      For complex requests this period may be extended under GDPR, in which
+      case we will inform you.
     </p>
 
     <p class="legal-disclaimer">

@@ -10,7 +10,8 @@ import PageHeader from '../../components/PageHeader.astro';
  *     a Art. 15-22 (práva subjektu)
  *   - Zákon č. 110/2019 Sb., o zpracování osobních údajů
  *   - Zákon č. 480/2004 Sb. o některých službách informační společnosti
- *     (§7 e-mail, §89 cookies)
+ *     (§7 obchodní sdělení)
+ *   - Zákon č. 127/2005 Sb., o elektronických komunikacích (§89 cookies)
  *   - Zákon č. 89/2012 Sb., občanský zákoník
  *   - Apple App Store Review Guideline 5.1.1
  *
@@ -18,7 +19,7 @@ import PageHeader from '../../components/PageHeader.astro';
  * Tento text je dobrý baseline pro pilot, ne pro enterprise smlouvy.
  */
 
-const lastUpdated = '2026-04-30';
+const lastUpdated = '2026-06-01';
 ---
 
 <BaseLayout
@@ -93,6 +94,13 @@ const lastUpdated = '2026-04-30';
       <li>Účast na tréninkových sessions</li>
       <li>Subjektivní vnímaná zátěž (RPE) na škále 1–10 po skončené session</li>
     </ul>
+    <p>
+      Některé sportovní a wellness signály (např. bolest, symptomy, HRV nebo
+      údaje ze zdravotních integrací) mohou v konkrétním kontextu vypovídat o
+      zdravotním stavu. Takové údaje zpracováváme jen v rozsahu nutném pro
+      sportovní provoz týmu, s omezeným přístupem podle rolí a u volitelných
+      integrací pouze na základě výslovného souhlasu.
+    </p>
 
     <h3>3.3. Údaje ze zařízení a senzorů (volitelné, pouze se souhlasem)</h3>
     <ul>
@@ -118,12 +126,17 @@ const lastUpdated = '2026-04-30';
 
     <h3>3.6. Cookies a podobné technologie</h3>
     <ul>
-      <li>Technické cookies (nezbytné pro funkci webu)</li>
-      <li>Analytické cookies — pouze po výslovném souhlasu (Google Analytics)</li>
-      <li>Marketingové cookies — pouze po výslovném souhlasu (Meta Pixel)</li>
+      <li>Nezbytné ukládání — např. uložení volby souhlasu v prohlížeči
+        (<code>melveo:consent</code>) a bezpečnostní či provozní prvky webu.</li>
+      <li>Cloudflare Web Analytics — pokud je zapnuto, používáme cookieless
+        agregovanou analytiku bez ukládání identifikačních cookies.</li>
+      <li>Google Analytics — pouze po výslovném souhlasu v kategorii Statistiky.</li>
+      <li>Meta Pixel — pouze po výslovném souhlasu v kategorii Marketing.</li>
     </ul>
     <p>
-      Detaily v odkazu „Nastavení cookies" v patičce stránky.
+      Souhlas můžete kdykoliv změnit přes odkaz „Nastavení cookies" v patičce
+      stránky. Nezbytné technologie nelze vypnout, protože bez nich web neumí
+      bezpečně a konzistentně fungovat.
     </p>
 
     <h2>4. Účel zpracování a právní základ (čl. 6 GDPR)</h2>
@@ -150,14 +163,15 @@ const lastUpdated = '2026-04-30';
         </tr>
         <tr>
           <td>Analytika a vylepšení produktu</td>
-          <td>Souhlas — odst. 1 písm. a)</td>
+          <td>Souhlas — odst. 1 písm. a) u nástrojů s cookies; oprávněný
+            zájem — odst. 1 písm. f) u cookieless agregované analytiky</td>
         </tr>
         <tr>
           <td>Marketingová komunikace</td>
           <td>Souhlas — odst. 1 písm. a)</td>
         </tr>
         <tr>
-          <td>Apple Health / Polar integrace</td>
+          <td>Apple Health / Polar integrace a citlivé wellness signály</td>
           <td>Souhlas — odst. 1 písm. a) + čl. 9 odst. 2 písm. a)</td>
         </tr>
       </tbody>
@@ -174,7 +188,14 @@ const lastUpdated = '2026-04-30';
     </p>
     <p>
       Hráč má přístup pouze ke svým vlastním datům. Klub má přístup k
-      agregovaným reportům za své týmy.
+      agregovaným reportům za své týmy a k údajům, které jsou nezbytné pro
+      roli trenéra nebo klubového administrátora.
+    </p>
+    <p>
+      Melveo neposkytuje výsledek, který by sám o sobě představoval právně
+      závazné nebo obdobně významné automatizované rozhodnutí podle čl. 22
+      GDPR. Výstupy aplikace slouží jako podpůrný kontext pro trenéra,
+      realizační tým a klub.
     </p>
 
     <h2>6. Doba uchování</h2>
@@ -186,8 +207,10 @@ const lastUpdated = '2026-04-30';
       <li>Účetní a fakturační údaje: 10 let dle zákona č. 235/2004 Sb.
         o DPH a zákona č. 563/1991 Sb. o účetnictví</li>
       <li>Provozní údaje (IP, crash logs): nejdéle 30 dní</li>
-      <li>Cookies analytics: dle nastavení daného nástroje (Google
-        Analytics: 14 měsíců, Meta Pixel: 90 dní)</li>
+      <li>Souhlas s cookies: do odvolání nebo do změny verze souhlasového
+        nastavení</li>
+      <li>Analytická a marketingová data: dle nastavení daného nástroje
+        (Google Analytics: 14 měsíců, Meta Pixel: typicky 90 dní)</li>
     </ul>
 
     <h2>7. Příjemci a zpracovatelé</h2>
@@ -252,6 +275,11 @@ const lastUpdated = '2026-04-30';
         Framework — DPF)</li>
       <li>nebo standardními smluvními doložkami (SCCs) podle čl. 46 GDPR</li>
     </ul>
+    <p>
+      U každého nového zpracovatele posuzujeme, zda je pro službu skutečně
+      nezbytný, jaká data zpracovává a zda má odpovídající smluvní a technické
+      záruky.
+    </p>
 
     <h2>9. Vaše práva (čl. 15-22 GDPR)</h2>
     <p>Jako subjekt údajů máte právo:</p>
@@ -287,6 +315,9 @@ const lastUpdated = '2026-04-30';
       zákona č. 110/2019 Sb. zpracováváme osobní údaje takových hráčů
       pouze s výslovným souhlasem zákonného zástupce. Klub odpovídá
       za získání tohoto souhlasu před pozváním hráče do aplikace.
+      Pokud klub používá Melveo pro mládežnický tým, musí zajistit, aby
+      zákonný zástupce rozuměl účelu zpracování a rozsahu sdílení v rámci
+      klubu.
     </p>
 
     <h2>11. Bezpečnost</h2>
@@ -302,14 +333,50 @@ const lastUpdated = '2026-04-30';
       <li>Two-factor autentizace pro vývojářský přístup</li>
     </ul>
 
-    <h2>12. Změny zásad</h2>
+    <h2>12. Cookie nastavení</h2>
+    <p>
+      Web pracuje se třemi kategoriemi:
+    </p>
+    <table class="legal-table">
+      <thead>
+        <tr>
+          <th>Kategorie</th>
+          <th>Účel</th>
+          <th>Souhlas</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Nezbytné</td>
+          <td>Uložení volby souhlasu, bezpečnost, základní provoz webu.</td>
+          <td>Ne, jsou nutné pro fungování webu.</td>
+        </tr>
+        <tr>
+          <td>Statistiky</td>
+          <td>Měření návštěvnosti a zlepšování webu. Cloudflare je cookieless;
+            Google Analytics se spouští jen po souhlasu.</td>
+          <td>Ano, u nástrojů ukládajících cookies nebo obdobné identifikátory.</td>
+        </tr>
+        <tr>
+          <td>Marketing</td>
+          <td>Reklamní měření a oslovování relevantních klubů.</td>
+          <td>Ano.</td>
+        </tr>
+      </tbody>
+    </table>
+    <p>
+      Volbu můžete kdykoliv změnit v patičce webu. Odvolání souhlasu nemá vliv
+      na zákonnost zpracování před jeho odvoláním.
+    </p>
+
+    <h2>13. Změny zásad</h2>
     <p>
       Tyto zásady můžeme aktualizovat. Při podstatné změně budou existující
       uživatelé notifikováni e-mailem nejméně 30 dní před účinností. Verze
       a datum účinnosti jsou uvedeny nahoře.
     </p>
 
-    <h2>13. Kontakt</h2>
+    <h2>14. Kontakt</h2>
     <p>
       Veškeré dotazy ohledně zpracování osobních údajů, žádosti o uplatnění
       vašich práv nebo stížnosti zasílejte na:
@@ -319,8 +386,9 @@ const lastUpdated = '2026-04-30';
       Datová schránka: <code>g7v78rx</code>
     </p>
     <p>
-      Na žádosti odpovídáme bez zbytečného odkladu, nejpozději do 30 dnů
-      od obdržení.
+      Na žádosti odpovídáme bez zbytečného odkladu, nejpozději do jednoho
+      měsíce od obdržení. U složitých žádostí může být lhůta prodloužena
+      podle GDPR, o čemž vás budeme informovat.
     </p>
 
     <p class="legal-disclaimer">

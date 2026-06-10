@@ -6,6 +6,12 @@
       "runtimeExecutable": "bun",
       "runtimeArgs": ["run", "dev"],
       "port": 4321
+    },
+    {
+      "name": "video-assets",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": ["-y", "serve", "video-assets", "-l", "8123"],
+      "port": 8123
     }
   ]
 }

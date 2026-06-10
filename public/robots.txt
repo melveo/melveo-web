@@ -2,6 +2,8 @@
 User-agent: *
 Allow: /
 Disallow: /checkout/
+Disallow: /cs/checkout/
+Disallow: /en/checkout/
 Disallow: /.well-known/
 
 Sitemap: https://melveo.app/sitemap-index.xml

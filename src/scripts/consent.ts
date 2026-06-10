@@ -11,7 +11,8 @@
  *
  * Compliance:
  *   - GDPR Art. 6(1)(a) — explicit opt-in
- *   - CZ zák. 480/2004 §89 — opt-in, granular categories
+ *   - CZ zák. 127/2005 Sb. §89 — cookie/device-storage opt-in
+ *   - CZ zák. 480/2004 Sb. §7 — commercial communications
  *   - EDPB 03/2022 — reject as easy as accept
  */
 
