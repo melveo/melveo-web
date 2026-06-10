@@ -296,7 +296,11 @@ body {
 }
 
 .hero-pill:hover {
-  transform: translateY(-3px) scale(1.02);
+  /* --magnet-x/y: subtle cursor-following pull set per-frame from JS
+     (Landing mountHeroButtons). 0px when idle / coarse pointer /
+     reduced motion, so this stays the original lift for everyone else. */
+  transform: translate(var(--magnet-x, 0px), calc(-3px + var(--magnet-y, 0px)))
+    scale(1.02);
   background: linear-gradient(
     135deg,
     rgba(255, 255, 255, 0.15) 0%,
@@ -615,4 +619,33 @@ body {
   -webkit-mask-image: radial-gradient(ellipse at center, black 30%, transparent 70%);
   pointer-events: none;
   z-index: 0;
+}
+
+/*
+  Cross-document View Transitions (2026-06-10) — MPA navigation between
+  landing / privacy / terms / locale switch crossfades instead of hard
+  white-flashing. Pure CSS progressive enhancement (Chrome 126+,
+  Safari 18.2+): no ClientRouter, so every page still does a full load
+  and all mount-once scripts keep working exactly as before.
+*/
+@view-transition {
+  navigation: auto;
+}
+::view-transition-old(root) {
+  animation: vt-fade-out 0.18s ease both;
+}
+::view-transition-new(root) {
+  animation: vt-fade-in 0.22s ease both;
+}
+@keyframes vt-fade-out {
+  to { opacity: 0; }
+}
+@keyframes vt-fade-in {
+  from { opacity: 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-old(root),
+  ::view-transition-new(root) {
+    animation: none;
+  }
 }

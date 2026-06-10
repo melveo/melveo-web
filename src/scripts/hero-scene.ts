@@ -338,12 +338,16 @@ export function mountHeroScene({ canvas }: MountOptions): SceneHandle | null {
       rebuild recompiles the fragment shader (WIDTH/HEIGHT are baked
       as constants in the source) and re-uploads it, producing a
       visible flicker / stutter the user described as "buguje se to".
-      Tolerate height-only changes up to 250 backing px (roughly the
-      URL bar on a 3× phone) — the canvas keeps its old backing size
-      while CSS stretches it to the new visible area, which is
-      imperceptible at the 0.75 internal-resolution multiplier we use.
+      Tolerate height-only changes up to URL_BAR_TOLERANCE_PX backing
+      px — the canvas keeps its old backing size while CSS stretches
+      it to the new visible area, which is imperceptible at the 0.75
+      internal-resolution multiplier we use. Raised 250→400 (audit
+      2026-06-10): large-phone Chrome Android reports up to ~380
+      backing px of URL-bar + gesture chrome at 3×, and 250 still let
+      those devices hit the shader-recompile path mid-scroll.
     */
-    if (widthDelta < 1 && heightDelta < 250) return;
+    const URL_BAR_TOLERANCE_PX = 400;
+    if (widthDelta < 1 && heightDelta < URL_BAR_TOLERANCE_PX) return;
 
     width = nextWidth;
     height = nextHeight;

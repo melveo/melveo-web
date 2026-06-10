@@ -203,6 +203,7 @@ const currencyShort = lang === 'cs' ? 'Kč' : 'CZK';
 ---
 
 <section
+  id="pricing"
   class="pricing-stage"
   data-pricing-section
   data-glass-smoke
@@ -227,6 +228,16 @@ const currencyShort = lang === 'cs' ? 'Kč' : 'CZK';
         <span class="pricing-headline-accent">{t('pricing.headlineAccent')}</span>
       </h2>
       <p class="pricing-subline">{t('pricing.subline')}</p>
+      {/*
+        No VAT note on purpose (owner decision 2026-06-10): the company
+        is currently not VAT-registered so prices are simply final, and
+        we don't surface tax wording on the landing at all. If that ever
+        changes, `pricing.vatNote` in ui.ts still holds the prepared
+        strings — render it here as
+        `<p class="pricing-vat-note">{t('pricing.vatNote')}</p>` and
+        compute actual VAT in checkout (Stripe Tax / MoR), never as a
+        price toggle (correct rate depends on buyer country + VAT ID).
+      */}
 
       {/*
         Twin-pill toggle — each button is its own glass pill that flips
@@ -322,7 +333,7 @@ const currencyShort = lang === 'cs' ? 'Kč' : 'CZK';
                   {/* MONTHLY view — visible when [data-period="monthly"] */}
                   <div class="pricing-price-block pricing-price-block--monthly">
                     <span class="pricing-price-day">
-                      {fmt(plan.priceMonthly)}&nbsp;{currencyShort}
+                      <span class="pricing-amount" data-amount={plan.priceMonthly}>{fmt(plan.priceMonthly)}</span>&nbsp;<span class="pricing-currency">{currencyShort}</span>
                     </span>
                     <span class="pricing-price-suffix">{t('pricing.perMonth')}</span>
                     <span class="pricing-price-secondary">
@@ -333,7 +344,7 @@ const currencyShort = lang === 'cs' ? 'Kč' : 'CZK';
                   {/* YEARLY view — visible when [data-period="yearly"] (default) */}
                   <div class="pricing-price-block pricing-price-block--yearly">
                     <span class="pricing-price-day">
-                      {fmt(plan.priceYearly)}&nbsp;{currencyShort}
+                      <span class="pricing-amount" data-amount={plan.priceYearly}>{fmt(plan.priceYearly)}</span>&nbsp;<span class="pricing-currency">{currencyShort}</span>
                     </span>
                     <span class="pricing-price-suffix">{t('pricing.perYear')}</span>
                     <span class="pricing-price-secondary">
@@ -552,6 +563,18 @@ const currencyShort = lang === 'cs' ? 'Kč' : 'CZK';
     }
   }
 
+  /* Tax footnote — quieter than the subline so it reads as legal
+     fine print, not as a second selling line. */
+  .pricing-vat-note {
+    margin: 0.5rem auto 0;
+    max-width: 38rem;
+    font-size: 0.8125rem;
+    line-height: 1.5;
+    color: var(--color-text-secondary);
+    opacity: 0.72;
+    text-wrap: pretty;
+  }
+
   /* ─── Twin-pill toggle ─────────────────────────────────────────
      Each button is its own glass pill. Active state inherits the
      hero-pill--filled cyan look; inactive inherits hero-pill--ghost.
@@ -680,6 +703,19 @@ const currencyShort = lang === 'cs' ? 'Kč' : 'CZK';
     color: var(--color-accent-primary-cta-fg);
   }
 
+  /* One-shot pop when the user switches TO yearly — the saving is the
+     selling point of that click, so it celebrates briefly. Class is
+     added in pricing-toggle.ts and removed on animationend; never
+     plays for reduced-motion users (JS gate). */
+  .pricing-toggle-savings.is-pop {
+    animation: pricing-badge-pop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+  @keyframes pricing-badge-pop {
+    0% { transform: scale(1); }
+    35% { transform: scale(1.28); }
+    100% { transform: scale(1); }
+  }
+
   /* ─── Cards grid ─────────────────────────────────────────────── */
 
   .pricing-cards {
@@ -711,6 +747,48 @@ const currencyShort = lang === 'cs' ? 'Kč' : 'CZK';
     padding: 1.75rem 1.5rem 1.5rem;
   }
 
+  /*
+    Spotlight border (2026-06-10) — a cyan ring segment that follows the
+    cursor across each card. Implemented as a masked overlay: the radial
+    gradient is centred on --mx/--my (set rAF-batched in
+    pricing-toggle.ts) and the mask keeps only a 1.5px border band, so
+    it reads as the card edge lighting up near the pointer. Hidden until
+    the section is hovered; costs one composited layer per card, nothing
+    on coarse-pointer devices (JS never sets the vars there).
+  */
+  .pricing-card {
+    position: relative;
+  }
+  .pricing-card::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    pointer-events: none;
+    padding: 1.5px;
+    background: radial-gradient(
+      220px circle at var(--mx, 50%) var(--my, 50%),
+      rgba(0, 240, 255, 0.55),
+      rgba(0, 240, 255, 0.12) 38%,
+      transparent 70%
+    );
+    -webkit-mask:
+      linear-gradient(#000 0 0) content-box,
+      linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;
+    mask:
+      linear-gradient(#000 0 0) content-box,
+      linear-gradient(#000 0 0);
+    mask-composite: exclude;
+    opacity: 0;
+    transition: opacity 0.35s ease;
+  }
+  @media (hover: hover) and (pointer: fine) {
+    .pricing-cards:hover .pricing-card::after {
+      opacity: 1;
+    }
+  }
+
   .pricing-card-header {
     margin-bottom: 1.5rem;
   }
@@ -734,6 +812,15 @@ const currencyShort = lang === 'cs' ? 'Kč' : 'CZK';
 
   .pricing-card-price {
     margin-bottom: 1.5rem;
+  }
+
+  /* Currency deliberately smaller than the amount (owner 2026-06-10) —
+     the number is the message, "Kč" is a unit. */
+  .pricing-currency {
+    font-size: 0.55em;
+    font-weight: 700;
+    color: var(--color-text-secondary);
+    letter-spacing: 0.02em;
   }
 
   .pricing-price-block {

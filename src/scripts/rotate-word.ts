@@ -111,16 +111,42 @@ function mountTypedWord(el: HTMLElement, phrases: readonly string[]) {
     }
   }
 
-  // Initial pause matching the codepen's first-paint dwell, so the
-  // user has time to read the SSR phrase before deletion starts.
-  timer = window.setTimeout(tick, BACK_DELAY);
+  // Start only after the first user interaction (audit 2026-06-10).
+  // Every typed character used to enlarge the H1's text paint and
+  // re-trigger a new LCP candidate, so idle sessions (lab runs and
+  // real visitors who just read) recorded LCP at the END of the first
+  // retype cycle (~6s) instead of at first paint. LCP freezes on the
+  // first user input, so gating the typewriter behind interaction
+  // makes both lab and field LCP settle at the initial SSR paint —
+  // and the SSR word is the primary claim, which is exactly what an
+  // idle visitor should keep seeing. Active visitors interact within
+  // a second or two and still get the full effect.
+  const beginAfterInteraction = () => {
+    if (timer == null && !document.hidden) {
+      timer = window.setTimeout(tick, BACK_DELAY);
+    }
+  };
+  const interactionOpts = { once: true, passive: true } as const;
+  window.addEventListener('scroll', beginAfterInteraction, interactionOpts);
+  window.addEventListener('pointermove', beginAfterInteraction, interactionOpts);
+  window.addEventListener('pointerdown', beginAfterInteraction, interactionOpts);
+  window.addEventListener('touchstart', beginAfterInteraction, interactionOpts);
+  window.addEventListener('keydown', beginAfterInteraction, interactionOpts);
 
-  // Pause when tab is hidden, resume when visible
+  // Pause when tab is hidden, resume when visible. On hide we also
+  // snap the word to its COMPLETE form — anything snapshotting the
+  // backgrounded page (crawler render, tab preview, print) must never
+  // capture a half-typed word inside the H1.
   document.addEventListener('visibilitychange', () => {
     if (document.hidden) {
       clear();
+      const phrase = phrases[phraseIdx];
+      el.textContent = phrase;
+      charIdx = phrase.length;
+      isDeleting = true;
+      cluster?.setAttribute('data-rotate-state', 'hold');
     } else if (timer == null) {
-      tick();
+      timer = window.setTimeout(tick, BACK_DELAY);
     }
   });
 }

@@ -46,7 +46,7 @@ export const ui = {
     'hero.cta.appstore': 'Stáhnout v App Store',
     // Key kept as `pilot` for legacy reference; label is now generic
     // contact CTA (pilot offering retired 2026-05-04).
-    'hero.cta.pilot': 'Kontakt →',
+    'hero.cta.pilot': 'Mám zájem →',
     'hero.beta': 'TestFlight beta · brzy',
     'hero.appstoreNotice':
       'Melveo zatím v App Store není. Napiš nám na hello@melveo.app a ozveme se.',
@@ -90,6 +90,24 @@ export const ui = {
     'gridCard.alerts': 'Alerty',
     'gridCard.calendar': 'Kalendář',
     'gridCard.team': 'Tým',
+
+    // Alt texty fotek v image gridu (a11y + image SEO). Věcné popisy
+    // scény — žádný marketing, čte je screen reader.
+    'gridAlt.coach-player-wide-crop': 'Trenér v hale probírá data s hráčem nad tabletem',
+    'gridAlt.team-huddle': 'Tým v kruhu při společném nástupu před zápasem',
+    'gridAlt.player-mobile': 'Hráč v šatně vyplňuje ranní wellness check-in na mobilu',
+    'gridAlt.coach-player-review': 'Trenér s hráčem prochází zpětnou vazbu na tabletu',
+    'gridAlt.coach-field-tablet': 'Trenér na hřišti sleduje tréninková data na tabletu',
+    'gridAlt.equipment-detail': 'Detail sportovního vybavení v šatně',
+    'gridAlt.player-portrait': 'Portrét soustředěného hráče před tréninkem',
+    'gridAlt.player-action': 'Hráč v plné akci během zápasu',
+    'gridAlt.player-defense': 'Hráč v obranném postavení během utkání',
+    'gridAlt.coach-hall-tablet': 'Trenér ve sportovní hale s tabletem v ruce',
+    'gridAlt.player-locker': 'Hráč v šatně při přípravě před tréninkem',
+    'gridAlt.jersey-brand': 'Týmový dres s logem Melveo',
+    'gridAlt.coach-team-dialogue': 'Trenér v dialogu s týmem při tréninku',
+    'gridAlt.coach-evening-tablet': 'Trenér večer plánuje trénink na tabletu',
+    'gridAlt.team-briefing-wide': 'Týmová porada s trenérem před zápasem',
 
     // Stage 3 — gooey punctuation. Split into two parts so the
     // "Synced." word can be coloured with brand cyan.
@@ -145,6 +163,13 @@ export const ui = {
     'pricing.headline': 'Začni zdarma.',
     'pricing.headlineAccent': 'Plať jen za to, co používáš.',
     'pricing.subline': 'Jedna licence pro celý tým. Transparentní ceny v Kč.',
+    // Daňová poznámka — AKTUÁLNĚ SE NERENDERUJE (rozhodnutí majitele
+    // 2026-06-10: na landingu žádné zmínky o DPH). String zůstává
+    // připravený; firma není plátce DPH (ověřeno v registru 2026-06-10).
+    // Kdyby se renderování vracelo: PricingStage.astro pod subline,
+    // a po případné registraci k DPH změnit na „Ceny bez DPH.“ — daň
+    // počítat v checkoutu (Stripe Tax / MoR), nikdy přepínačem.
+    'pricing.vatNote': 'Ceny jsou konečné — nejsme plátci DPH.',
     'pricing.toggleMonthly': 'Měsíčně',
     'pricing.toggleYearly': 'Ročně',
     'pricing.toggleSavings': '−17 %',
@@ -166,7 +191,28 @@ export const ui = {
     'pricing.clubBody':
       'Pro více týmů, akademii nebo celý klub. Vlastní podmínky, integrace a osobní podpora. Napiš nám.',
     'pricing.disclaimer':
-      'Ceny jsou v Kč bez DPH. Provozovatel není plátcem DPH. Všechny platby zpracovává Stripe.',
+      'Všechny platby zpracovává Stripe.',
+
+    // Section dots nav (fixed right, desktop only) + promo video stage
+    'sectionNav.label': 'Navigace sekcí',
+    'sectionNav.top': 'Úvod',
+    'sectionNav.app': 'Aplikace',
+    'sectionNav.data': 'Data',
+    'sectionNav.coach': 'Trenér ví',
+    'sectionNav.video': 'Ukázka',
+    'sectionNav.pricing': 'Ceník',
+    'sectionNav.faq': 'Otázky',
+    'sectionNav.contact': 'Kontakt',
+
+    // Stage 4.5 — promo video v iPhone rámu
+    'promo.eyebrow': '',
+    'promo.headline': 'Podívej se, jak to hraje.',
+    'promo.body': '30 sekund od hráčských signálů k rozhodnutí trenéra.',
+    'promo.soundOn': 'Zapnout zvuk',
+    'promo.soundOff': 'Vypnout zvuk',
+    'promo.play': 'Přehrát video',
+    'promo.pause': 'Pozastavit video',
+    'promo.videoAria': 'Promo video Melveo — z hráčských signálů k rozhodnutí trenéra',
 
     // Stage 6.75 — Data-flow visualization.
     // Standalone section for now; planned replacement for the simpler
@@ -284,7 +330,7 @@ export const ui = {
       'Melveo pracuje i s neúplnými daty. Trenér uvidí, kdo signál poslal, a trend týmu zůstane viditelný.',
     'faq.q4': 'Kdo vidí hráčská data?',
     'faq.a4':
-      'Klub spravuje workspace, hráč má kontrolu nad svým vstupem. Data neprodáváme a nepoužíváme k marketingu.',
+      'Data zůstávají v klubu. Workspace spravuje klub, hráč má kontrolu nad svým vstupem — data neprodáváme a nepoužíváme k marketingu.',
 
     // Stage 9 — pilot CTA
     'pilot.headline': 'Pojďme to spustit.',
@@ -364,6 +410,24 @@ export const ui = {
     'gridCard.calendar': 'Calendar',
     'gridCard.team': 'Team',
 
+    // Image-grid photo alt texts (a11y + image SEO). Factual scene
+    // descriptions — no marketing copy, screen readers consume these.
+    'gridAlt.coach-player-wide-crop': 'Coach reviewing data with a player over a tablet in the hall',
+    'gridAlt.team-huddle': 'Team standing in a huddle before the match',
+    'gridAlt.player-mobile': 'Player filling in the morning wellness check-in on a phone in the locker room',
+    'gridAlt.coach-player-review': 'Coach and player going through feedback on a tablet',
+    'gridAlt.coach-field-tablet': 'Coach on the pitch checking training data on a tablet',
+    'gridAlt.equipment-detail': 'Close-up of sports equipment in the locker room',
+    'gridAlt.player-portrait': 'Portrait of a focused player before training',
+    'gridAlt.player-action': 'Player in full action during a match',
+    'gridAlt.player-defense': 'Player in a defensive stance during a game',
+    'gridAlt.coach-hall-tablet': 'Coach in a sports hall holding a tablet',
+    'gridAlt.player-locker': 'Player getting ready in the locker room before training',
+    'gridAlt.jersey-brand': 'Team jersey with the Melveo logo',
+    'gridAlt.coach-team-dialogue': 'Coach talking with the team during training',
+    'gridAlt.coach-evening-tablet': 'Coach planning a session on a tablet in the evening',
+    'gridAlt.team-briefing-wide': 'Team briefing with the coach before the match',
+
     'gooey.headlinePrefix': 'Coach + player.',
     'gooey.headlineAccent': 'Synced.',
 
@@ -403,6 +467,9 @@ export const ui = {
     'pricing.headline': 'Start free.',
     'pricing.headlineAccent': 'Pay only for what you use.',
     'pricing.subline': 'One license for the whole team. Transparent CZK pricing.',
+    // Tax note — CURRENTLY NOT RENDERED (owner decision 2026-06-10:
+    // no VAT wording on the landing). Kept ready; see CS comment above.
+    'pricing.vatNote': 'Prices are final — no VAT is added (seller not VAT-registered).',
     'pricing.toggleMonthly': 'Monthly',
     'pricing.toggleYearly': 'Yearly',
     'pricing.toggleSavings': '−17 %',
@@ -424,7 +491,29 @@ export const ui = {
     'pricing.clubBody':
       'For multiple teams, an academy or a whole club. Custom terms, integrations and dedicated support. Get in touch.',
     'pricing.disclaimer':
-      'Prices in CZK, VAT not applicable. Operator is not a VAT payer. All payments processed by Stripe.',
+      'All payments processed by Stripe.',
+
+    // Section dots nav + promo video stage
+    'sectionNav.label': 'Section navigation',
+    'sectionNav.top': 'Top',
+    'sectionNav.app': 'The app',
+    'sectionNav.data': 'Data',
+    'sectionNav.coach': 'Coach knows',
+    'sectionNav.video': 'Watch',
+    'sectionNav.pricing': 'Pricing',
+    'sectionNav.faq': 'FAQ',
+    'sectionNav.contact': 'Contact',
+
+    // Stage 4.5 — promo video in an iPhone frame
+    'promo.eyebrow': '',
+    'promo.headline': 'See it in motion.',
+    'promo.body': '30 seconds from athlete signals to a coach decision.',
+    'promo.soundOn': 'Unmute video',
+    'promo.soundOff': 'Mute video',
+    'promo.play': 'Play video',
+    'promo.pause': 'Pause video',
+    'promo.videoAria': 'Melveo promo video — athlete signals become coach decisions',
+
 
     'dataFlow.eyebrow': '',
     'dataFlow.headline': 'Player inputs become coaching context.',
@@ -519,7 +608,7 @@ export const ui = {
       'Melveo works with incomplete data. Coaches see who sent a signal and the team trend stays visible.',
     'faq.q4': 'Who can see player data?',
     'faq.a4':
-      'The club runs the workspace, players control their own input. We never sell data or use it for marketing.',
+      'Data stays within the club. The club runs the workspace, players control their own input — we never sell data or use it for marketing.',
 
     'pilot.headline': 'Let’s start it.',
     'pilot.body': 'A short email is enough.',

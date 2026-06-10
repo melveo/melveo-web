@@ -51,13 +51,13 @@ const faqSchema = {
 };
 ---
 
-<section class="faq-stage" aria-labelledby="faq-heading">
+<section id="faq" class="faq-stage" aria-labelledby="faq-heading">
   <div class="faq-stage__inner">
     <h2 id="faq-heading" class="faq-stage__headline">{t('faq.headline')}</h2>
 
-    <ul class="faq-stage__list" role="list">
-      {items.map((item) => (
-        <li class="faq-stage__item">
+    <ul class="faq-stage__list" role="list" data-faq-list>
+      {items.map((item, index) => (
+        <li class="faq-stage__item" style={`--i: ${index};`}>
           <details class="faq-stage__details">
             <summary class="faq-stage__summary">
               <span class="faq-stage__summary-text">{item.q}</span>
@@ -225,6 +225,25 @@ const faqSchema = {
     text-wrap: pretty;
   }
 
+  /*
+    Smooth open/close (2026-06-10, v2) — animated from JS via the Web
+    Animations API (see mountFaqAccordion below) because the CSS-only
+    `interpolate-size` route only works in Chrome 131+; Safari/Firefox
+    snapped, which read as aggressive. The answer still gets a small
+    fade/slide tied to [open]; the height slide itself is WAAPI.
+  */
+  .faq-stage__answer {
+    opacity: 0;
+    transform: translateY(-4px);
+    transition:
+      opacity 240ms ease 70ms,
+      transform 240ms cubic-bezier(0.32, 0.72, 0.24, 1) 70ms;
+  }
+  .faq-stage__details[open] .faq-stage__answer {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
   /* Hover treatment — subtle border lift on cursor devices only.
      Touch devices skip the hover via @media (hover: hover). */
   @media (hover: hover) {
@@ -239,6 +258,24 @@ const faqSchema = {
     }
   }
 
+  /*
+    Entrance reveal (2026-06-10) — items stagger up as the section
+    scrolls into view. Armed by JS (`is-armed` on the list) so no-JS
+    visitors always see the content; `is-revealed` releases the
+    cascade. 70ms per item.
+  */
+  .faq-stage__list.is-armed .faq-stage__item {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+  .faq-stage__list.is-armed.is-revealed .faq-stage__item {
+    opacity: 1;
+    transform: translateY(0);
+    transition:
+      opacity 0.55s ease calc(var(--i, 0) * 70ms),
+      transform 0.6s cubic-bezier(0.22, 0.9, 0.3, 1) calc(var(--i, 0) * 70ms);
+  }
+
   @media (prefers-reduced-motion: reduce) {
     .faq-stage__chevron {
       transition: none;
@@ -246,5 +283,95 @@ const faqSchema = {
     .faq-stage__details {
       transition: none;
     }
+    .faq-stage__answer {
+      opacity: 1;
+      transform: none;
+      transition: none;
+    }
+    .faq-stage__list.is-armed .faq-stage__item,
+    .faq-stage__list.is-armed.is-revealed .faq-stage__item {
+      opacity: 1;
+      transform: none;
+      transition: none;
+    }
   }
 </style>
+
+<script>
+  /*
+    WAAPI accordion (2026-06-10): intercept summary clicks and slide the
+    <details> height open/closed. Works in every modern browser (unlike
+    CSS interpolate-size). [open] stays set during the closing slide so
+    the content remains rendered; it's removed on finish. Rapid clicks
+    cancel the in-flight animation and reverse from the current height.
+    Reduced-motion users keep the native instant toggle.
+  */
+  function mountFaqAccordion() {
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    const EASE = 'cubic-bezier(0.32, 0.72, 0.24, 1)';
+    document.querySelectorAll<HTMLElement>('.faq-stage__details').forEach((detailsEl) => {
+      const details = detailsEl as HTMLDetailsElement;
+      const summary = details.querySelector<HTMLElement>('summary');
+      if (!summary) return;
+      let anim: Animation | null = null;
+
+      const slide = (from: number, to: number, onFinish?: () => void) => {
+        anim?.cancel();
+        details.style.overflow = 'clip';
+        anim = details.animate(
+          [{ height: `${from}px` }, { height: `${to}px` }],
+          { duration: 340, easing: EASE },
+        );
+        anim.onfinish = () => {
+          details.style.overflow = '';
+          anim = null;
+          onFinish?.();
+        };
+      };
+
+      summary.addEventListener('click', (event) => {
+        event.preventDefault();
+        const current = details.offsetHeight;
+        if (!details.open) {
+          details.open = true;
+          const target = details.offsetHeight;
+          slide(current, target);
+        } else {
+          // keep [open] during the slide so content stays rendered;
+          // measure the collapsed height by reading the summary box.
+          const target =
+            summary.offsetHeight +
+            (details.offsetHeight - details.clientHeight); // borders
+          slide(current, target, () => {
+            details.open = false;
+          });
+        }
+      });
+    });
+  }
+
+  function mountFaqReveal() {
+    const list = document.querySelector<HTMLElement>('[data-faq-list]');
+    if (!list || !('IntersectionObserver' in window)) return;
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    list.classList.add('is-armed');
+    const io = new IntersectionObserver(
+      ([entry]) => {
+        if (!entry?.isIntersecting) return;
+        io.disconnect();
+        list.classList.add('is-revealed');
+      },
+      { rootMargin: '-80px 0px', threshold: 0.1 },
+    );
+    io.observe(list);
+  }
+  function mountFaq() {
+    mountFaqAccordion();
+    mountFaqReveal();
+  }
+  if ('requestIdleCallback' in window) {
+    (window as any).requestIdleCallback(mountFaq, { timeout: 2000 });
+  } else {
+    setTimeout(mountFaq, 300);
+  }
+</script>

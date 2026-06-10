@@ -1,0 +1,524 @@
+---
+/**
+ * PromoVideoStage — the 30s promo video as a "wow" centrepiece scene.
+ *
+ * v2 (2026-06-10, owner feedback): the phone IS the section. Video
+ * aspect now drives the frame (9:16 — no more side cropping), and the
+ * device floats inside a staged scene:
+ *   - aurora: two slow-drifting cyan/teal gradient blobs behind
+ *   - two tilted orbital rings with a glowing dot riding each orbit
+ *   - light floor reflection + elliptical contact shadow under the phone
+ *   - subtle pointer-follow 3D tilt (fine pointers only)
+ *   - one-shot entrance choreography on first scroll into view
+ *
+ * Discipline unchanged: <video preload="none"> + poster, IO autoplay
+ * muted/looped in view only, sound on explicit tap, reduced-motion
+ * gets a static scene with poster + play button. Everything animated
+ * is transform/opacity-only (compositor), rings pause out of view via
+ * the same .is-entered + CSS play-state pattern.
+ */
+import { useTranslations, type Lang } from '../i18n/ui';
+
+interface Props {
+  lang: Lang;
+}
+
+const { lang } = Astro.props;
+const t = useTranslations(lang);
+---
+
+<section id="video" class="promo-stage" aria-labelledby="promo-heading">
+  <div class="promo-stage__inner">
+    <header class="promo-stage__header">
+      <h2 id="promo-heading" class="promo-stage__headline">{t('promo.headline' as any)}</h2>
+      <p class="promo-stage__body">{t('promo.body' as any)}</p>
+    </header>
+
+    <div class="promo-scene" data-promo-phone>
+      {/* ambient aurora — always on (gentle), pure transform drift */}
+      <span class="promo-aurora promo-aurora--a" aria-hidden="true"></span>
+      <span class="promo-aurora promo-aurora--b" aria-hidden="true"></span>
+
+      {/* orbital rings with riding glow dots */}
+      <span class="promo-ring promo-ring--1" aria-hidden="true">
+        <span class="promo-ring__dot"></span>
+      </span>
+      <span class="promo-ring promo-ring--2" aria-hidden="true">
+        <span class="promo-ring__dot"></span>
+      </span>
+
+      <div class="promo-phone__device" data-promo-tilt>
+        <span class="promo-phone__island" aria-hidden="true"></span>
+        <video
+          class="promo-phone__video"
+          data-promo-video
+          data-src="/video/melveo-promo-720.mp4"
+          poster="/video/melveo-promo-poster.jpg"
+          preload="none"
+          muted
+          loop
+          playsinline
+          width="720"
+          height="1280"
+          aria-label={t('promo.videoAria' as any)}
+        ></video>
+        <button
+          type="button"
+          class="promo-phone__sound"
+          data-promo-sound
+          aria-label={t('promo.soundOn' as any)}
+          data-label-on={t('promo.soundOn' as any)}
+          data-label-off={t('promo.soundOff' as any)}
+        >
+          <svg class="promo-phone__icon promo-phone__icon--muted" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M11 5 6 9H2v6h4l5 4V5Z" /><line x1="22" x2="16" y1="9" y2="15" /><line x1="16" x2="22" y1="9" y2="15" />
+          </svg>
+          <svg class="promo-phone__icon promo-phone__icon--sound" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M11 5 6 9H2v6h4l5 4V5Z" /><path d="M15.54 8.46a5 5 0 0 1 0 7.07" /><path d="M19.07 4.93a10 10 0 0 1 0 14.14" />
+          </svg>
+        </button>
+        <button
+          type="button"
+          class="promo-phone__play"
+          data-promo-play
+          aria-label={t('promo.play' as any)}
+          data-label-play={t('promo.play' as any)}
+          data-label-pause={t('promo.pause' as any)}
+          hidden
+        >
+          <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5v14l11-7z" /></svg>
+        </button>
+      </div>
+
+      {/* floor: contact shadow + faint screen reflection */}
+      <span class="promo-floor" aria-hidden="true"></span>
+    </div>
+  </div>
+</section>
+
+<style>
+  .promo-stage {
+    position: relative;
+    isolation: isolate;
+    width: 100%;
+    background: var(--color-bg-canvas);
+    overflow: hidden;
+  }
+
+  .promo-stage__inner {
+    max-width: 76rem;
+    margin: 0 auto;
+    padding: clamp(4.5rem, 9vw, 7.5rem) clamp(1rem, 4vw, 2rem) clamp(5rem, 10vw, 8.5rem);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: clamp(2.5rem, 5vw, 4rem);
+  }
+
+  .promo-stage__header {
+    text-align: center;
+  }
+  .promo-stage__headline {
+    margin: 0 0 0.85rem;
+    font-size: clamp(2rem, 5vw, 3.25rem);
+    font-weight: 800;
+    line-height: 1;
+    letter-spacing: -0.04em;
+    color: var(--color-text-primary);
+  }
+  .promo-stage__body {
+    margin: 0 auto;
+    max-width: 34rem;
+    color: var(--color-text-secondary);
+    font-size: clamp(0.95rem, 1.6vw, 1.1rem);
+    line-height: 1.6;
+  }
+
+  /* ── Scene ─────────────────────────────────────────────────────── */
+  .promo-scene {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    /* breathing room for rings + floor */
+    padding: clamp(2rem, 5vw, 4rem) clamp(3rem, 10vw, 8rem) clamp(3.5rem, 7vw, 5.5rem);
+    perspective: 1400px;
+  }
+
+  /* aurora blobs — slow compositor-only drift */
+  .promo-aurora {
+    position: absolute;
+    width: min(46rem, 90vw);
+    aspect-ratio: 1;
+    border-radius: 50%;
+    pointer-events: none;
+    filter: blur(70px);
+    z-index: 0;
+  }
+  .promo-aurora--a {
+    background: radial-gradient(
+      circle,
+      color-mix(in srgb, var(--color-accent-primary) 16%, transparent),
+      transparent 65%
+    );
+    animation: promo-aurora-a 16s ease-in-out infinite alternate;
+  }
+  .promo-aurora--b {
+    width: min(38rem, 80vw);
+    background: radial-gradient(
+      circle,
+      color-mix(in srgb, #1b5bff 14%, transparent),
+      transparent 65%
+    );
+    animation: promo-aurora-b 21s ease-in-out infinite alternate;
+  }
+  @keyframes promo-aurora-a {
+    from { transform: translate(-12%, -6%) scale(1); }
+    to { transform: translate(10%, 8%) scale(1.12); }
+  }
+  @keyframes promo-aurora-b {
+    from { transform: translate(14%, 6%) scale(1.08); }
+    to { transform: translate(-10%, -8%) scale(0.96); }
+  }
+
+  /* orbital rings — tilted planes circling the phone */
+  .promo-ring {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: min(40rem, 96vw);
+    aspect-ratio: 1;
+    margin: calc(min(40rem, 96vw) / -2);
+    border-radius: 50%;
+    border: 1px solid color-mix(in srgb, var(--color-accent-primary) 26%, transparent);
+    box-shadow: 0 0 24px color-mix(in srgb, var(--color-accent-primary) 8%, transparent);
+    transform-style: preserve-3d;
+    pointer-events: none;
+    z-index: 1;
+    /* visible by default (no-JS fallback); the script arms the scene
+       and the entrance fades them in with a delay */
+    opacity: 1;
+    transition: opacity 0.9s ease 0.35s;
+  }
+  .promo-scene.is-armed:not(.is-entered) .promo-ring {
+    opacity: 0;
+    transition: none;
+  }
+  .promo-ring--1 {
+    transform: rotateX(74deg) rotateY(-9deg);
+    animation: promo-ring-spin 26s linear infinite;
+  }
+  .promo-ring--2 {
+    width: min(31rem, 80vw);
+    margin: calc(min(31rem, 80vw) / -2);
+    border-color: color-mix(in srgb, var(--color-accent-primary) 16%, transparent);
+    transform: rotateX(78deg) rotateY(12deg);
+    animation: promo-ring-spin 18s linear infinite reverse;
+  }
+  /* rotate the ring within its own tilted plane so the dot orbits */
+  @keyframes promo-ring-spin {
+    from { rotate: z 0deg; }
+    to { rotate: z 360deg; }
+  }
+  .promo-ring__dot {
+    position: absolute;
+    top: -3px;
+    left: 50%;
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--color-accent-primary);
+    box-shadow:
+      0 0 12px var(--color-accent-primary),
+      0 0 28px color-mix(in srgb, var(--color-accent-primary) 60%, transparent);
+  }
+
+  /* ── Phone — frame sized BY the 9:16 video (no side crop) ─────── */
+  .promo-phone__device {
+    position: relative;
+    width: min(78vw, 20.5rem);
+    padding: 0.55rem;
+    border-radius: 2.9rem;
+    background: linear-gradient(150deg, #5b6066 0%, #2b2e33 18%, #16181c 50%, #0c0e11 100%);
+    box-shadow:
+      0 40px 90px rgba(0, 0, 0, 0.6),
+      0 0 0 1px rgba(255, 255, 255, 0.1),
+      0 0 70px color-mix(in srgb, var(--color-accent-primary) 13%, transparent),
+      inset 0 0 0 2px rgba(255, 255, 255, 0.06),
+      inset 0 0 0 6px #000;
+    z-index: 2;
+    transform: rotateX(calc(var(--tilt-y, 0) * 1deg)) rotateY(calc(var(--tilt-x, 0) * 1deg));
+    transition: transform 0.35s cubic-bezier(0.22, 0.61, 0.36, 1);
+    will-change: transform;
+  }
+  /* entrance choreography — keyframes, NOT a transform transition, so
+     the pointer-tilt transition above stays at its snappy 0.35s */
+  .promo-scene.is-armed:not(.is-entered) .promo-phone__device {
+    opacity: 0;
+    transition: none;
+  }
+  .promo-scene.is-entered .promo-phone__device {
+    animation: promo-device-in 0.8s cubic-bezier(0.22, 0.9, 0.3, 1) both;
+  }
+  @keyframes promo-device-in {
+    from { opacity: 0; transform: translateY(34px) scale(0.94); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+  }
+
+  .promo-phone__island {
+    position: absolute;
+    top: 1.1rem;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 5.4rem;
+    height: 1.5rem;
+    background: #000;
+    border-radius: 999px;
+    z-index: 3;
+  }
+  .promo-phone__video {
+    display: block;
+    width: 100%;
+    height: auto;
+    /* 9:16 — exactly the encoded video, so nothing gets cropped */
+    aspect-ratio: 9 / 16;
+    object-fit: cover;
+    border-radius: 2.35rem;
+    background: #05060a;
+  }
+
+  /* floor: elliptical contact shadow + soft cyan light pool */
+  .promo-floor {
+    position: absolute;
+    bottom: clamp(0.6rem, 2vw, 1.6rem);
+    left: 50%;
+    transform: translateX(-50%);
+    width: min(30rem, 76vw);
+    height: 3.4rem;
+    border-radius: 50%;
+    background: radial-gradient(
+      ellipse at center,
+      rgba(0, 0, 0, 0.75) 0%,
+      color-mix(in srgb, var(--color-accent-primary) 10%, transparent) 45%,
+      transparent 72%
+    );
+    filter: blur(14px);
+    pointer-events: none;
+    z-index: 1;
+    opacity: 1;
+    transition: opacity 0.9s ease 0.25s;
+  }
+  .promo-scene.is-armed:not(.is-entered) .promo-floor {
+    opacity: 0;
+    transition: none;
+  }
+
+  /* ── Controls ─────────────────────────────────────────────────── */
+  .promo-phone__sound {
+    position: absolute;
+    right: 1.1rem;
+    bottom: 1.15rem;
+    z-index: 4;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.6rem;
+    height: 2.6rem;
+    border-radius: 50%;
+    border: 1px solid rgba(255, 255, 255, 0.22);
+    background: rgba(8, 10, 13, 0.62);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    color: #eafdff;
+    cursor: pointer;
+    transition: background 0.25s ease, transform 0.25s ease;
+  }
+  .promo-phone__sound:hover {
+    background: rgba(8, 10, 13, 0.85);
+    transform: scale(1.06);
+  }
+  .promo-phone__sound:focus-visible {
+    outline: 2px solid var(--color-accent-primary);
+    outline-offset: 2px;
+  }
+  .promo-phone__icon {
+    width: 1.15rem;
+    height: 1.15rem;
+  }
+  .promo-phone__icon--sound { display: none; }
+  .promo-scene[data-sound='on'] .promo-phone__icon--sound { display: block; }
+  .promo-scene[data-sound='on'] .promo-phone__icon--muted { display: none; }
+
+  .promo-phone__play {
+    position: absolute;
+    inset: 0;
+    margin: auto;
+    z-index: 4;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 4.4rem;
+    height: 4.4rem;
+    border-radius: 50%;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    background: rgba(8, 10, 13, 0.66);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    color: #eafdff;
+    cursor: pointer;
+    transition: transform 0.25s ease, background 0.25s ease;
+  }
+  .promo-phone__play:hover {
+    transform: scale(1.07);
+    background: rgba(8, 10, 13, 0.85);
+  }
+  .promo-phone__play:focus-visible {
+    outline: 2px solid var(--color-accent-primary);
+    outline-offset: 2px;
+  }
+  .promo-phone__play svg {
+    width: 1.7rem;
+    height: 1.7rem;
+    margin-left: 0.2rem;
+  }
+
+  /* ── Reduced motion: static, dignified ────────────────────────── */
+  @media (prefers-reduced-motion: reduce) {
+    .promo-aurora,
+    .promo-ring {
+      animation: none;
+    }
+    .promo-ring,
+    .promo-floor {
+      opacity: 1;
+      transition: none;
+    }
+    .promo-scene.is-armed:not(.is-entered) .promo-phone__device,
+    .promo-scene.is-entered .promo-phone__device {
+      opacity: 1;
+      transform: none;
+      transition: none;
+      animation: none;
+    }
+  }
+</style>
+
+<script>
+  function mountPromoVideo() {
+    const scene = document.querySelector<HTMLElement>('[data-promo-phone]');
+    const device = scene?.querySelector<HTMLElement>('[data-promo-tilt]');
+    const video = scene?.querySelector<HTMLVideoElement>('[data-promo-video]');
+    const soundBtn = scene?.querySelector<HTMLButtonElement>('[data-promo-sound]');
+    const playBtn = scene?.querySelector<HTMLButtonElement>('[data-promo-play]');
+    if (!scene || !device || !video || !soundBtn || !playBtn) return;
+
+    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const finePointer = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+    let srcLoaded = false;
+
+    const ensureSrc = () => {
+      if (srcLoaded) return;
+      srcLoaded = true;
+      video.src = video.dataset.src ?? '';
+    };
+
+    const tryPlay = () => {
+      ensureSrc();
+      video.play().catch(() => {
+        playBtn.hidden = false;
+      });
+    };
+
+    if (reduceMotion) {
+      scene.classList.add('is-entered');
+      playBtn.hidden = false;
+      playBtn.addEventListener('click', () => {
+        ensureSrc();
+        if (video.paused) {
+          video.play().catch(() => undefined);
+          playBtn.setAttribute('aria-label', playBtn.dataset.labelPause ?? '');
+          playBtn.style.opacity = '0';
+        } else {
+          video.pause();
+          playBtn.setAttribute('aria-label', playBtn.dataset.labelPlay ?? '');
+          playBtn.style.opacity = '';
+        }
+      });
+      video.addEventListener('click', () => {
+        if (!video.paused) {
+          video.pause();
+          playBtn.style.opacity = '';
+        }
+      });
+    } else if ('IntersectionObserver' in window) {
+      scene.classList.add('is-armed');
+      const io = new IntersectionObserver(
+        (entries) => {
+          const entry = entries[0];
+          if (!entry) return;
+          if (entry.isIntersecting) {
+            scene.classList.add('is-entered');
+            tryPlay();
+          } else if (!video.paused) {
+            video.pause();
+          }
+        },
+        { rootMargin: '120px 0px', threshold: 0.3 },
+      );
+      io.observe(scene);
+    } else {
+      scene.classList.add('is-entered');
+      tryPlay();
+    }
+
+    soundBtn.addEventListener('click', () => {
+      ensureSrc();
+      video.muted = !video.muted;
+      scene.dataset.sound = video.muted ? 'off' : 'on';
+      soundBtn.setAttribute(
+        'aria-label',
+        (video.muted ? soundBtn.dataset.labelOn : soundBtn.dataset.labelOff) ?? '',
+      );
+      if (video.paused) video.play().catch(() => undefined);
+    });
+
+    /*
+      Pointer-follow 3D tilt — the phone leans up to ±6° toward the
+      cursor while it travels across the scene. rAF-batched, springs
+      back on leave. Fine pointers only; reduced-motion never mounts it.
+    */
+    if (finePointer && !reduceMotion) {
+      let raf = 0;
+      let last: PointerEvent | null = null;
+      const MAX_DEG = 6;
+      const apply = () => {
+        raf = 0;
+        if (!last) return;
+        const rect = scene.getBoundingClientRect();
+        const nx = ((last.clientX - rect.left) / rect.width) * 2 - 1;
+        const ny = ((last.clientY - rect.top) / rect.height) * 2 - 1;
+        device.style.setProperty('--tilt-x', (nx * MAX_DEG).toFixed(2));
+        device.style.setProperty('--tilt-y', (-ny * MAX_DEG).toFixed(2));
+      };
+      scene.addEventListener(
+        'pointermove',
+        (event) => {
+          last = event;
+          if (raf === 0) raf = requestAnimationFrame(apply);
+        },
+        { passive: true },
+      );
+      scene.addEventListener('pointerleave', () => {
+        last = null;
+        device.style.setProperty('--tilt-x', '0');
+        device.style.setProperty('--tilt-y', '0');
+      });
+    }
+  }
+
+  if ('requestIdleCallback' in window) {
+    (window as any).requestIdleCallback(mountPromoVideo, { timeout: 2500 });
+  } else {
+    setTimeout(mountPromoVideo, 400);
+  }
+</script>

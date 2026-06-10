@@ -152,6 +152,21 @@ function mountParticleStage(stage: HTMLElement): ParticleStageHandle | null {
   function draw() {
     ctx.clearRect(0, 0, width, height);
 
+    /*
+      Pair-connection hot loop (O(N²), ~12k pairs at 112 particles).
+      Perf-tuned 2026-06-10 with identical visual output:
+        - maxDistance hoisted out of the loops — window.innerWidth is
+          a layout read and was being hit once per PAIR per frame;
+        - cheap axis-aligned bbox rejection before any math — the vast
+          majority of pairs are further apart than maxDistance on at
+          least one axis;
+        - squared-distance compare, sqrt only for the few pairs that
+          actually draw (Math.hypot per pair was the single hottest
+          call in the frame profile).
+    */
+    const maxDistance = window.innerWidth < 768 ? 112 : 150;
+    const maxDistanceSq = maxDistance * maxDistance;
+
     for (let i = 0; i < particles.length; i += 1) {
       const a = particles[i];
       if (!reduceMotion) {
@@ -164,11 +179,13 @@ function mountParticleStage(stage: HTMLElement): ParticleStageHandle | null {
       for (let j = i + 1; j < particles.length; j += 1) {
         const b = particles[j];
         const dx = a.x - b.x;
+        if (dx > maxDistance || dx < -maxDistance) continue;
         const dy = a.y - b.y;
-        const distance = Math.hypot(dx, dy);
-        const maxDistance = window.innerWidth < 768 ? 112 : 150;
+        if (dy > maxDistance || dy < -maxDistance) continue;
+        const distanceSq = dx * dx + dy * dy;
 
-        if (distance < maxDistance) {
+        if (distanceSq < maxDistanceSq) {
+          const distance = Math.sqrt(distanceSq);
           drawLine(a, b, (1 - distance / maxDistance) * 0.52);
         }
       }

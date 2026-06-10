@@ -158,6 +158,9 @@ export function mountOrbCursor() {
       gyroNeutralBeta = null;
     }
     wrapper!.classList.add('is-orb-manual');
+    // permanently retire the discoverability hint pill after the first
+    // successful interaction (CSS fades .orb-hint-pill on this class)
+    wrapper!.classList.add('is-orb-discovered');
     stopOrbit();
     setFromClientPoint(clientX, clientY);
     window.addEventListener('pointermove', onManualPointerMove, { passive: false });
@@ -318,13 +321,46 @@ export function mountOrbCursor() {
   }
 
   function onWrapperKeyDown(event: KeyboardEvent) {
-    if (event.key !== 'Enter' && event.key !== ' ') return;
+    // Keyboard parity with pointer control (WCAG 2.1.1): Enter/Space
+    // takes manual control, arrow keys steer the reveal circle,
+    // Escape hands it back to auto-orbit.
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault();
+      const rect = wrapper!.getBoundingClientRect();
+      enterManual(
+        rect.left + (pendingX / 100) * rect.width,
+        rect.top + (pendingY / 100) * rect.height,
+      );
+      return;
+    }
+    if (event.key === 'Escape') {
+      if (manualMode) {
+        event.preventDefault();
+        exitManual();
+      }
+      return;
+    }
+    const ARROW_STEP_PCT = 4;
+    const deltas: Record<string, [number, number]> = {
+      ArrowLeft: [-ARROW_STEP_PCT, 0],
+      ArrowRight: [ARROW_STEP_PCT, 0],
+      ArrowUp: [0, -ARROW_STEP_PCT],
+      ArrowDown: [0, ARROW_STEP_PCT],
+    };
+    const delta = deltas[event.key];
+    if (!delta) return;
     event.preventDefault();
-    const rect = wrapper!.getBoundingClientRect();
-    enterManual(
-      rect.left + (pendingX / 100) * rect.width,
-      rect.top + (pendingY / 100) * rect.height,
-    );
+    if (!manualMode) {
+      const rect = wrapper!.getBoundingClientRect();
+      enterManual(
+        rect.left + (pendingX / 100) * rect.width,
+        rect.top + (pendingY / 100) * rect.height,
+      );
+    }
+    pendingX = Math.min(95, Math.max(5, pendingX + delta[0]));
+    pendingY = Math.min(95, Math.max(5, pendingY + delta[1]));
+    scheduleWrite();
+    bumpIdleTimer();
   }
 
   // ─── Deactivation: click outside or leave section ───────────────

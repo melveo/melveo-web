@@ -29,6 +29,7 @@ const hueStep = (hueEnd - hueStart) / Math.max(1, words.length - 1);
 ---
 
 <section
+  id="coach"
   class="word-scroll-stage"
   data-word-scroll-stage
   data-start-index={startIndex}
@@ -97,7 +98,16 @@ const hueStep = (hueEnd - hueStart) / Math.max(1, words.length - 1);
     height: 100%;
     min-width: min-content;
     padding-inline: 1.5rem;
-    font-size: clamp(3.35rem, 5.6vw, 4.875rem);
+    /*
+      4.5vw (was 5.6vw, 2026-06-10): the row "Coach knows + what to
+      change in the plan" is ~21em wide; at 5.6vw it physically
+      exceeded the viewport between ~1100–1600px and the longest
+      phrase clipped at the right edge (visible since the cyan
+      keyword box made the overflow obvious). 4.5vw keeps the row
+      ≤ ~96vw across that band; the 4.875rem cap means large
+      desktops are pixel-identical to before.
+    */
+    font-size: clamp(3.35rem, 4.5vw, 4.875rem);
     font-weight: 500;
     line-height: 1.25;
     letter-spacing: 0;
@@ -183,26 +193,58 @@ const hueStep = (hueEnd - hueStart) / Math.max(1, words.length - 1);
     position: relative;
     display: block;
     width: max-content;
-    max-width: min(72vw, 58rem);
     overflow: visible;
     border-radius: 0.34em;
-    background: transparent;
+    /*
+      Kinetic keyword box (2026-06-10) — the focused word gets the
+      brand-cyan highlight box with dark text: the exact motif the
+      promo-video titles use ("Capture every [moment]"), so video and
+      web speak one visual language. --word-focus is continuous (set
+      per-frame by the scroll driver below), so the box breathes
+      in/out with scroll instead of snapping. --word-boxed squares it
+      so the box only blooms near full focus while opacity still
+      ramps earlier. Constant padding ⇒ zero layout shift.
+    */
+    --word-boxed: calc(var(--word-focus, 0) * var(--word-focus, 0));
+    padding-inline: 0.3em;
+    margin-inline: -0.3em;
+    /*
+      No max-width clamp here (2026-06-10 fix): the text is nowrap, so
+      the old min(72vw, 58rem) clamp never changed glyph layout — it
+      only shrank THIS box, and once the box paints the cyan highlight
+      the longest EN phrase ("what to change in the plan") visibly
+      spilled past it. max-content lets the highlight hug the full
+      phrase; the ≤860px media block below still re-clamps for mobile.
+    */
+    background: color-mix(
+      in srgb,
+      var(--color-accent-primary) calc(var(--word-boxed) * 92%),
+      transparent
+    );
     --word-accent: oklch(0.82 0.16 var(--word-hue));
     --word-accent-muted: color-mix(
       in oklch,
       var(--word-accent) 45%,
       var(--color-text-primary)
     );
-    color: var(--word-accent-muted);
+    color: color-mix(
+      in oklch,
+      oklch(0.2 0.03 220) calc(var(--word-boxed) * 100%),
+      var(--word-accent-muted)
+    );
     opacity: clamp(0.62, calc(0.62 + (var(--word-focus) * 0.38)), 1);
     filter: brightness(clamp(0.9, calc(0.94 + (var(--word-focus) * 0.2)), 1.14));
-    box-shadow: none;
+    box-shadow: 0 0 calc(var(--word-boxed) * 26px)
+      color-mix(in srgb, var(--color-accent-primary) 38%, transparent);
     transition: none;
     will-change: opacity, filter;
   }
 
   .word-scroll-stage__item:last-of-type {
+    /* The closing line keeps its bespoke white-gradient finale — no box. */
+    --word-boxed: 0;
     background: transparent;
+    box-shadow: none;
     color: var(--color-text-primary);
   }
 
@@ -223,10 +265,22 @@ const hueStep = (hueEnd - hueStart) / Math.max(1, words.length - 1);
   .word-scroll-stage__word {
     display: inline-block;
     flex: none;
-    max-width: min(72vw, 58rem);
+    /*
+      NO max-width here (2026-06-10, second fix): with nowrap the clamp
+      never wrapped anything — it only shrank this span's BOX while the
+      glyphs overflowed it invisibly. The parent item sizes itself
+      max-content from THIS span's clamped box, so the cyan highlight
+      ended ~1 character short of the phrase on viewports ≥ ~1730px
+      (where the font hits its 4.875rem cap and the longest EN phrase
+      exceeds 58rem). Box must always equal the real glyph run; the
+      ≤860px media block below still constrains mobile.
+    */
     overflow: visible;
     white-space: nowrap;
-    text-shadow: 0 0 calc(30px * var(--word-focus)) color-mix(in oklch, var(--word-accent) 46%, transparent);
+    /* Glow fades out as the cyan box blooms — dark text inside the box
+       must stay crisp, the box-shadow on the item carries the glow. */
+    text-shadow: 0 0 calc(30px * var(--word-focus) * (1 - var(--word-boxed, 0)))
+      color-mix(in oklch, var(--word-accent) 46%, transparent);
   }
 
   .word-scroll-stage__sr-only {
@@ -247,7 +301,8 @@ const hueStep = (hueEnd - hueStart) / Math.max(1, words.length - 1);
     }
 
     .word-scroll-stage__inner {
-      font-size: clamp(2.75rem, 5.4vw, 4.2rem);
+      /* 4.4vw (was 5.4vw) — same overflow fix for the 860–1100px band */
+      font-size: clamp(2.75rem, 4.4vw, 4.2rem);
     }
   }
 

@@ -10,14 +10,30 @@
 import SplitType from 'split-type';
 import { animate, stagger } from 'motion';
 
-export function mountTextReveal() {
+export async function mountTextReveal() {
   const targets = document.querySelectorAll<HTMLElement>('[data-text-reveal]');
   if (targets.length === 0) return;
 
   const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   if (reduceMotion) return;
 
+  // SplitType measures line boxes at split time. If the webfont lands
+  // AFTER we split, every measured line break is wrong and the clip
+  // masks cut words mid-glyph. Wait for fonts before measuring.
+  // (audit 2026-06-10)
+  if (document.fonts?.ready) {
+    try {
+      await document.fonts.ready;
+    } catch {
+      /* font loading failure — split with fallback metrics */
+    }
+  }
+
   targets.forEach((target) => {
+    // Idempotency — mount can be re-entered (bfcache restore, HMR)
+    if (target.dataset.revealMounted === 'true') return;
+    target.dataset.revealMounted = 'true';
+
     // Wrap each line in a clip mask so chars slide up from below
     const split = new SplitType(target, { types: 'lines,chars' });
     const chars = (split.chars ?? []) as HTMLElement[];

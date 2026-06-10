@@ -25,25 +25,59 @@ const { lang } = Astro.props;
 const t = useTranslations(lang);
 ---
 
-<section
-  class="orb-wrapper"
-  data-orb-wrapper
-  role="button"
-  tabindex="0"
-  aria-labelledby="orb-interaction-hint orb-primary-heading"
->
-  <p id="orb-interaction-hint" class="orb-sr-only">{t('orb.hintDesktop' as any)}</p>
-  <!-- Primary hero — dark canvas, white primary text -->
-  <div class="orb-hero">
-    <h2 id="orb-primary-heading" class="orb-heading">{t('orb.primary')}</h2>
-  </div>
+{/*
+  A11y structure (audit 2026-06-10): role="button" is not an allowed
+  role on <section> (Lighthouse aria-allowed-role), so the landmark
+  stays a plain section and the interactive role lives on an inner
+  div, where it is valid. aria-labelledby lists the VISIBLE heading
+  first so the accessible name starts with the on-screen label
+  (fixes label-content-name-mismatch). Arrow keys move the reveal
+  circle for keyboard users (handled in orb-cursor.ts).
+*/}
+<section class="orb-stage" aria-labelledby="orb-primary-heading">
+  {/*
+    aria-labelledby includes the secondary (visually masked) heading
+    too — axe's label-content-name-mismatch requires every piece of
+    visible text inside a role=button to appear in its accessible
+    name, and the cyan reveal text is visible through the mask.
+    Referencing an aria-hidden element from labelledby is valid; its
+    text still joins the name computation.
+  */}
+  <div
+    class="orb-wrapper"
+    data-orb-wrapper
+    role="button"
+    tabindex="0"
+    aria-labelledby="orb-primary-heading orb-secondary-text orb-interaction-hint"
+  >
+    <p id="orb-interaction-hint" class="orb-sr-only">{t('orb.hintDesktop' as any)}</p>
+    <!-- Primary hero — dark canvas, white primary text -->
+    <div class="orb-hero">
+      <h2 id="orb-primary-heading" class="orb-heading">{t('orb.primary')}</h2>
+    </div>
 
-  <!-- Secondary hero — absolute overlay, cyan gradient bg, dark text,
-       revealed only through radial mask centred at cursor. -->
-  <div class="orb-hero orb-hero--secondary" aria-hidden="true" data-orb-secondary>
-    <p class="orb-heading">{t('orb.secondary')}</p>
-  </div>
+    <!-- Secondary hero — absolute overlay, cyan gradient bg, dark text,
+         revealed only through radial mask centred at cursor. -->
+    <div class="orb-hero orb-hero--secondary" aria-hidden="true" data-orb-secondary>
+      <p id="orb-secondary-text" class="orb-heading">{t('orb.secondary')}</p>
+    </div>
 
+    {/*
+      Discoverability hint (2026-06-10) — almost nobody realised the
+      section is interactive. A quiet pulsing pill names the gesture;
+      orb-cursor.ts adds `is-orb-discovered` on the wrapper after the
+      first manual interaction and the hint retires for good. The
+      pointer/touch label variant is driven by the existing
+      `is-orb-touch` class. aria-hidden: the same text already exists
+      for AT in #orb-interaction-hint.
+    */}
+    <div class="orb-hint-pill" data-orb-hint aria-hidden="true">
+      <span class="orb-hint-pill__ring"></span>
+      <span class="orb-hint-pill__label orb-hint-pill__label--pointer">{t('orb.hintDesktop' as any)}</span>
+      <span class="orb-hint-pill__label orb-hint-pill__label--touch">{t('orb.hintMobile' as any)}</span>
+    </div>
+
+  </div>
 </section>
 
 <script>
@@ -226,6 +260,66 @@ const t = useTranslations(lang);
     max-width: fit-content;
     margin-left: auto;
     margin-right: auto;
+  }
+
+  /* ── Discoverability hint pill ─────────────────────────────────── */
+  .orb-hint-pill {
+    position: absolute;
+    left: 50%;
+    bottom: clamp(1.5rem, 5vh, 3rem);
+    transform: translateX(-50%);
+    display: inline-flex;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0.5rem 1.05rem;
+    border-radius: 999px;
+    border: 1px solid rgba(0, 240, 255, 0.28);
+    /* near-opaque: the translucent version blended with the cyan orb
+       behind it into a teal that failed WCAG contrast (axe computes the
+       effective backdrop). 0.92 keeps the glass look but pins contrast. */
+    background: rgba(7, 10, 13, 0.92);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    /* light tone — secondary grey failed WCAG contrast on the translucent
+       dark pill (Lighthouse color-contrast, 2026-06-10) */
+    color: #dbe7ee;
+    font-size: 0.8rem;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    pointer-events: none;
+    z-index: 3;
+    opacity: 0.92;
+    transition: opacity 0.6s ease, transform 0.6s ease;
+  }
+  .orb-hint-pill__ring {
+    width: 0.7rem;
+    height: 0.7rem;
+    border-radius: 50%;
+    border: 1.5px solid var(--color-accent-primary);
+    box-shadow: 0 0 10px rgba(0, 240, 255, 0.5);
+    animation: orb-hint-pulse 1.9s ease-in-out infinite;
+  }
+  @keyframes orb-hint-pulse {
+    0%, 100% { transform: scale(1); opacity: 0.7; }
+    50% { transform: scale(1.45); opacity: 1; }
+  }
+  /* pointer vs touch label — driven by is-orb-touch from orb-cursor */
+  .orb-hint-pill__label--touch { display: none; }
+  .orb-wrapper.is-orb-touch .orb-hint-pill__label--pointer { display: none; }
+  .orb-wrapper.is-orb-touch .orb-hint-pill__label--touch { display: inline; }
+  /* retire forever once the user has interacted */
+  .orb-wrapper.is-orb-discovered .orb-hint-pill {
+    opacity: 0;
+    transform: translateX(-50%) translateY(8px);
+  }
+  /* the cookie banner is fixed bottom-center too — while it's open,
+     yield (first-visit overlap, audit 2026-06-10) */
+  :global(body:has(#cookie-banner:not([data-banner-state='hidden']))) .orb-hint-pill {
+    opacity: 0;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .orb-hint-pill__ring { animation: none; }
+    .orb-hint-pill { transition: none; }
   }
 
 </style>

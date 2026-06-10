@@ -55,3 +55,10 @@ post-change-*.png
 .vscode/*
 !.vscode/extensions.json
 audit-*.png
+
+# AI promo video production workspace (708MB raw clips/exports) — lives
+# locally only; the web-served encode is public/video/melveo-promo-720.mp4
+video-assets/
+
+# npm artifact — this repo's lockfile is bun.lock (Workers Builds runs bun)
+package-lock.json

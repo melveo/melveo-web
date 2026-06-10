@@ -33,6 +33,11 @@ export default defineConfig({
         defaultLocale: 'cs',
         locales: { cs: 'cs-CZ', en: 'en-US' },
       },
+      // Exclude checkout (noindex) and the bare root "/" — it is a
+      // meta-refresh redirect to /cs/, not indexable content; listing
+      // it in the sitemap just sends crawlers to a redirect.
+      filter: (page) =>
+        !page.includes('/checkout/') && new URL(page).pathname !== '/',
     }),
   ],
   // Disable the floating Astro dev toolbar — its `dev-bar-hitbox-above`

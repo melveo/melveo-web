@@ -25,6 +25,8 @@ import PromiseStage from './PromiseStage.astro';
 import PricingStage from './PricingStage.astro';
 import MelveoDataFlowHero from './MelveoDataFlowHero';
 import FaqStage from './FaqStage.astro';
+import PromoVideoStage from './PromoVideoStage.astro';
+import SectionDotsNav from './SectionDotsNav.astro';
 import { useTranslations, type Lang } from '../i18n/ui';
 
 interface Props {
@@ -39,7 +41,13 @@ const t = useTranslations(lang);
   <!-- ============================================================== -->
   <!-- HERO — pitch-black, full viewport, prism shader, claim, CTA    -->
   <!-- ============================================================== -->
-  <section class="relative isolate flex min-h-screen w-full flex-col overflow-hidden bg-[var(--color-bg-canvas)]">
+  <SectionDotsNav lang={lang} />
+
+  <section
+    id="top"
+    data-hero-exit
+    class="relative isolate flex min-h-screen w-full flex-col overflow-hidden bg-[var(--color-bg-canvas)]"
+  >
     <HeroScene />
 
     {/*
@@ -86,7 +94,10 @@ const t = useTranslations(lang);
       header on very short viewports) while letting justify-center
       do the actual centring work.
     */}
-    <div class="relative z-10 flex flex-1 flex-col items-center justify-center px-6 py-6 text-center sm:py-10">
+    <div
+      data-hero-exit-content
+      class="relative z-10 flex flex-1 flex-col items-center justify-center px-6 py-6 text-center sm:py-10"
+    >
       <h1
         class="hero-headline leading-[0.95] tracking-tight text-[var(--color-text-primary)]"
         aria-label={t('hero.headlinePrefix')}
@@ -95,16 +106,23 @@ const t = useTranslations(lang);
           <span>{t('hero.headlineLine1')}</span>
           <span>{t('hero.headlineLine2')}</span>
         </span>
-        <span class="hero-rotate-cluster">
+        {/*
+          aria-hidden: the <h1> carries the full stable claim via
+          aria-label above, so AT users hear one clean headline instead
+          of a live region re-announcing every typewriter keystroke.
+          The rotation script also snaps the word to its complete form
+          whenever the tab is hidden, so crawler render snapshots never
+          capture a half-typed word inside the H1.
+        */}
+        <span class="hero-rotate-cluster" aria-hidden="true">
           <span class="hero-rotate-current">
             <span
               class="text-[var(--color-accent-primary)]"
               data-rotate-word
               data-rotate-words={t('hero.headlineRotations')}
-              aria-live="polite"
             >
               {t('hero.headlineInitial')}
-            </span><span class="hero-headline-dot" aria-hidden="true"></span>
+            </span><span class="hero-headline-dot"></span>
           </span>
         </span>
       </h1>
@@ -195,6 +213,9 @@ const t = useTranslations(lang);
   <!-- ============================================================== -->
   <WordScrollStage lang={lang} />
 
+  {/* Stage 4.5 — promo video in an iPhone frame ("see it in motion") */}
+  <PromoVideoStage lang={lang} />
+
   <!-- ============================================================== -->
   <!-- STAGE 5 — Glass orb + rotating text (Giomgio codepen)           -->
   <!-- ============================================================== -->
@@ -248,7 +269,15 @@ const t = useTranslations(lang);
   <!--   Final page action. Keep this as the only bottom CTA: no       -->
   <!--   operator/company block and no duplicate notify form.           -->
   <!-- ============================================================== -->
-  <section id="contact" class="pilot-cta-stage">
+  <section id="contact" class="pilot-cta-stage" data-cta-particles>
+    {/*
+      Convergence canvas (2026-06-10) — sparse dim cyan particles drift
+      toward the e-mail link: the page's "signals → decision" story
+      resolving on the CTA. Kept deliberately quiet (≤26 particles,
+      ≤0.35 alpha) per the 2026-05-01 "minimal closing" direction;
+      mounted from cta-particles.ts, skipped for reduced motion.
+    */}
+    <canvas class="pilot-cta-stage__particles" aria-hidden="true"></canvas>
     <div class="pilot-cta-stage__inner">
       <p class="pilot-cta-stage__body">
         {t('pilot.body')}
@@ -256,6 +285,7 @@ const t = useTranslations(lang);
       <a
         href={`mailto:${t('pilot.email')}`}
         class="pilot-cta-stage__email"
+        data-cta-target
         aria-label={lang === 'cs' ? 'Napsat na ' + t('pilot.email') : 'Email ' + t('pilot.email')}
       >
         {t('pilot.email')}
@@ -275,11 +305,23 @@ const t = useTranslations(lang);
   .pilot-cta-stage {
     position: relative;
     width: 100%;
+    overflow: hidden;
     /* border-top removed 2026-05-17: no horizontal dividers between sections */
     background: var(--color-bg-canvas);
   }
 
+  .pilot-cta-stage__particles {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 0;
+  }
+
   .pilot-cta-stage__inner {
+    position: relative;
+    z-index: 1;
     width: min(100% - 2rem, 64rem);
     margin: 0 auto;
     padding: clamp(5.5rem, 11vw, 9rem) 0;
@@ -691,19 +733,67 @@ const t = useTranslations(lang);
       transition: none;
     }
   }
+
+  /*
+    Hero exit parallax (2026-06-10) — --hero-exit goes 0→1 as the hero
+    scrolls out (set rAF-batched in the script below; never set for
+    reduced-motion users, so everything below stays at the 0 state).
+    The headline block lags behind the scroll and fades while the
+    canvas drifts slower and dims — the hero leaves with intent
+    instead of being clipped mid-sentence.
+  */
+  [data-hero-exit] [data-hero-exit-content] {
+    transform: translateY(calc(var(--hero-exit, 0) * 11vh));
+    opacity: calc(1 - var(--hero-exit, 0) * 0.9);
+    will-change: transform, opacity;
+  }
+  [data-hero-exit] :global(.hero-canvas) {
+    transform: translateY(calc(var(--hero-exit, 0) * 4vh)) scale(calc(1 + var(--hero-exit, 0) * 0.04));
+  }
 </style>
 
 <script>
   import { mountRotateWord } from '../scripts/rotate-word';
 
   function mountHeroButtons() {
+    /*
+      Glow tracking (existing) + magnetic pull (2026-06-10): the pill
+      leans up to MAGNET_MAX px toward the cursor and springs back on
+      leave. Desktop-precision pointers only, skipped entirely for
+      reduced-motion users. One rAF per frame coalesces both writes.
+    */
+    const fine = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const MAGNET_MAX = 5;
+
     document.querySelectorAll<HTMLElement>('.hero-pill').forEach((button) => {
-      button.addEventListener('pointermove', (event) => {
+      let raf = 0;
+      let nextEvent: PointerEvent | null = null;
+
+      const apply = () => {
+        raf = 0;
+        if (!nextEvent) return;
         const rect = button.getBoundingClientRect();
-        const x = ((event.clientX - rect.left) / rect.width) * 100;
-        const y = ((event.clientY - rect.top) / rect.height) * 100;
+        const x = ((nextEvent.clientX - rect.left) / rect.width) * 100;
+        const y = ((nextEvent.clientY - rect.top) / rect.height) * 100;
         button.style.setProperty('--x', `${x}%`);
         button.style.setProperty('--y', `${y}%`);
+        if (fine && !reduceMotion) {
+          const mx = ((x - 50) / 50) * MAGNET_MAX;
+          const my = ((y - 50) / 50) * MAGNET_MAX;
+          button.style.setProperty('--magnet-x', `${mx.toFixed(2)}px`);
+          button.style.setProperty('--magnet-y', `${my.toFixed(2)}px`);
+        }
+      };
+
+      button.addEventListener('pointermove', (event) => {
+        nextEvent = event;
+        if (raf === 0) raf = requestAnimationFrame(apply);
+      });
+      button.addEventListener('pointerleave', () => {
+        nextEvent = null;
+        button.style.setProperty('--magnet-x', '0px');
+        button.style.setProperty('--magnet-y', '0px');
       });
     });
   }
@@ -762,12 +852,42 @@ const t = useTranslations(lang);
     targets.forEach((target) => observer.observe(target));
   }
 
+  function mountHeroExitParallax() {
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    const hero = document.querySelector<HTMLElement>('[data-hero-exit]');
+    if (!hero) return;
+    let raf = 0;
+    let lastValue = '';
+    const update = () => {
+      raf = 0;
+      const h = hero.offsetHeight || window.innerHeight;
+      const p = Math.min(1, Math.max(0, window.scrollY / (h * 0.92)));
+      const next = p.toFixed(3);
+      if (next !== lastValue) {
+        lastValue = next;
+        hero.style.setProperty('--hero-exit', next);
+      }
+    };
+    window.addEventListener(
+      'scroll',
+      () => {
+        if (raf === 0) raf = requestAnimationFrame(update);
+      },
+      { passive: true },
+    );
+    update();
+  }
+
   // Defer to idle so hero LCP is unaffected
   function init() {
     mountHeroButtons();
     mountAppStoreNotifyCta();
     mountRotateWord();
     mountTextRevealWhenNeeded();
+    mountHeroExitParallax();
+    import('../scripts/cta-particles').then(({ mountCtaParticles }) => {
+      mountCtaParticles();
+    });
   }
 
   if ('requestIdleCallback' in window) {

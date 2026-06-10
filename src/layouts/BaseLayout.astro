@@ -36,6 +36,8 @@ interface Props {
   /** When true, render the minimal landing footer (default).
    *  Privacy/Terms pages set this false to render an even lighter footer. */
   showLandingFooter?: boolean;
+  /** Hide utility / transaction pages from search indexes. */
+  noindex?: boolean;
 }
 
 const {
@@ -43,16 +45,17 @@ const {
   description,
   lang,
   canonical,
-  ogImage = '/og-default.jpg',
+  ogImage = '/og-melveo-wordmark-2026-06-01.jpg',
   showLandingFooter = true,
+  noindex = false,
 } = Astro.props;
 
 const t = useTranslations(lang);
 
 const defaultDescription =
   lang === 'cs'
-    ? 'Melveo — chytřejší tréninky a zdravější hráči pro kluby, trenéry i hráče.'
-    : 'Melveo — smarter trainings and healthier players. App for sports clubs.';
+    ? 'Melveo propojí wellness, readiness a zátěž hráčů do jednoho přehledu. Trenér ráno ví, kdo je připravený, koho šetřit a co změnit v plánu. Vyzkoušejte pilot.'
+    : 'Melveo turns player wellness, readiness and load into one clear view. Coaches know who is ready, who to rest and what to change — before training starts.';
 
 const finalDescription = description ?? defaultDescription;
 
@@ -117,15 +120,29 @@ const altUrls = {
     <link rel="apple-touch-icon" href="/app-icon-melveo.png?v=2026-05-15d" sizes="1024x1024" />
     <link rel="manifest" href="/site.webmanifest?v=2026-05-15d" />
     <link rel="canonical" href={canonicalUrl} />
+    {/*
+      Inter `latin` carries the base A–Z glyphs, `latin-ext` only the
+      diacritics (č ě ř ž …). Czech headlines therefore need BOTH
+      subsets before the hero headline can take its final paint —
+      preloading only ext left the latin file to late CSS discovery
+      and pushed mobile LCP to ~6s (audit 2026-06-10).
+    */}
     <link
       rel="preload"
-      href={lang === 'cs'
-        ? '/fonts/inter-latin-ext-wght-normal.woff2'
-        : '/fonts/inter-latin-wght-normal.woff2'}
+      href="/fonts/inter-latin-wght-normal.woff2"
       as="font"
       type="font/woff2"
       crossorigin
     />
+    {lang === 'cs' && (
+      <link
+        rel="preload"
+        href="/fonts/inter-latin-ext-wght-normal.woff2"
+        as="font"
+        type="font/woff2"
+        crossorigin
+      />
+    )}
 
     {/*
       Two-font stack — see docs/fonts.md for the full rationale.
@@ -159,6 +176,7 @@ const altUrls = {
 
     <title>{fullTitle}</title>
     <meta name="description" content={finalDescription} />
+    {noindex && <meta name="robots" content="noindex, nofollow" />}
 
     <!-- OG / Twitter -->
     <meta property="og:title" content={fullTitle} />
@@ -166,6 +184,7 @@ const altUrls = {
     <meta property="og:url" content={canonicalUrl} />
     <meta property="og:image" content={new URL(ogImage, Astro.site).toString()} />
     <meta property="og:image:alt" content={fullTitle} />
+    <meta property="og:image:type" content="image/jpeg" />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
     <meta property="og:type" content="website" />

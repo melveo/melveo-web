@@ -647,6 +647,10 @@ export default function MelveoDataFlowHero({ lang = "en" }: Props) {
     */
     let isVisible = false;
     let tabHidden = document.hidden;
+    // One-shot entrance choreography — assigned inside the gsap.context
+    // (desktop branch) and fired on the FIRST intersection so the
+    // section arrives as a moment instead of already-running wallpaper.
+    let playEntrance: () => void = () => {};
     const trackGsapWork = <T extends GsapWork>(work: T) => {
       activeGsapWork.push(work);
       const remove = () => {
@@ -685,6 +689,7 @@ export default function MelveoDataFlowHero({ lang = "en" }: Props) {
         ([entry]) => {
           isVisible = !!entry?.isIntersecting;
           syncPlayState();
+          if (isVisible) playEntrance();
         },
         { rootMargin: "200px 0px" },
       );
@@ -706,6 +711,61 @@ export default function MelveoDataFlowHero({ lang = "en" }: Props) {
           ) ?? null;
           return;
         }
+        /*
+          One-shot entrance (2026-06-10): the first time the section
+          scrolls into view, the signal labels rise in staggered, the
+          melveo core breathes up and the coach hex pops — after that
+          the ambient pulse loop carries on as before. Runs inside the
+          gsap.context so revert() cleans it; gated by the same
+          `reduced` guard as the whole effect.
+        */
+        let entranceDone = false;
+        playEntrance = () => {
+          if (entranceDone || cancelled || !rootRef.current) return;
+          entranceDone = true;
+          const svgRoot = rootRef.current.querySelector<SVGSVGElement>(
+            ".data-flow-svg",
+          );
+          if (!svgRoot) return;
+          const nodes = svgRoot.querySelectorAll("[data-input-node]");
+          const tl = trackGsapWork(gsap.timeline());
+          if (nodes.length > 0) {
+            tl.from(nodes, {
+              opacity: 0,
+              y: 14,
+              duration: 0.55,
+              ease: "power2.out",
+              stagger: 0.05,
+            });
+          }
+          if (coreTextRef.current) {
+            tl.from(
+              coreTextRef.current,
+              {
+                opacity: 0,
+                scale: 0.9,
+                svgOrigin: `${CENTER.x} ${CENTER.y}`,
+                duration: 0.5,
+                ease: "power2.out",
+              },
+              0.15,
+            );
+          }
+          if (outputHexGroupRef.current) {
+            tl.from(
+              outputHexGroupRef.current,
+              {
+                opacity: 0,
+                scale: 0.88,
+                transformOrigin: "50% 50%",
+                duration: 0.55,
+                ease: "back.out(1.6)",
+              },
+              0.4,
+            );
+          }
+        };
+
         let energy = 0;
         let pendingRelease = false;
         if (coreTextRef.current) {
@@ -1018,6 +1078,10 @@ export default function MelveoDataFlowHero({ lang = "en" }: Props) {
           schedulePulse(inp, 0.2 + Math.random() * 2.4);
         });
         syncPlayState();
+        // If the section was already in view before this context wired
+        // up (slow gsap import), fire the entrance now — the IO
+        // callback that normally does it has already happened.
+        if (isVisible) playEntrance();
       }, rootRef);
     })();
 
@@ -1264,7 +1328,11 @@ export default function MelveoDataFlowHero({ lang = "en" }: Props) {
                 const label = getInputLabel(lang, inp.id, inp.label);
                 const fontSize = inp.r < 35 ? 17 : inp.r < 50 ? 18 : 20;
                 return (
-                  <g key={inp.id} transform={`translate(${inp.x}, ${inp.y})`}>
+                  <g
+                    key={inp.id}
+                    data-input-node={inp.id}
+                    transform={`translate(${inp.x}, ${inp.y})`}
+                  >
                     <text
                       data-input-label={inp.id}
                       x={0}

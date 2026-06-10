@@ -158,7 +158,7 @@ function mount(section: HTMLElement): Handle | null {
 
   let width = 1;
   let height = 1;
-  let dpr = Math.min(window.devicePixelRatio || 1, 2);
+  let dpr = 1; // set properly in resize() via smokeDpr()
   let puffs: Puff[] = [];
   let raf = 0;
   let last = 0;
@@ -170,6 +170,20 @@ function mount(section: HTMLElement): Handle | null {
     return Math.round(base * density);
   }
 
+  /*
+    DPR budget (audit 2026-06-10): the only >100ms frames in the
+    50-viewport scroll audit came from 4K-class screens (3840×2160,
+    3000×2000) — a DPR-2 canvas there is ~33MP per paint. The smoke is
+    a blurred fog; nobody can tell DPR 2 from 1.25 on it, so cap the
+    backing resolution harder as the viewport grows.
+  */
+  function smokeDpr(): number {
+    const raw = window.devicePixelRatio || 1;
+    if (window.innerWidth >= 2560) return Math.min(raw, 1.25);
+    if (window.innerWidth >= 1920) return Math.min(raw, 1.5);
+    return Math.min(raw, 2);
+  }
+
   function resize() {
     // Measure the CANVAS, not the section. The pricing section's
     // canvas is `inset: 0` of the section (= same height); the image
@@ -179,7 +193,7 @@ function mount(section: HTMLElement): Handle | null {
     const rect = canvasEl.getBoundingClientRect();
     width = Math.max(1, rect.width || section.clientWidth);
     height = Math.max(1, rect.height || window.innerHeight);
-    dpr = Math.min(window.devicePixelRatio || 1, 2);
+    dpr = smokeDpr();
     canvasEl.width = Math.round(width * dpr);
     canvasEl.height = Math.round(height * dpr);
     // Don't override style.width/height — the host CSS already sets
