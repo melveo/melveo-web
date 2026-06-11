@@ -94,7 +94,7 @@ export const ui = {
     // Alt texty fotek v image gridu (a11y + image SEO). Věcné popisy
     // scény — žádný marketing, čte je screen reader.
     'gridAlt.coach-player-wide-crop': 'Trenér v hale probírá data s hráčem nad tabletem',
-    'gridAlt.team-huddle': 'Tým v kruhu při společném nástupu před zápasem',
+    'gridAlt.player-checkin': 'Hráč v šatně vyplňuje ranní check-in v aplikaci Melveo',
     'gridAlt.player-mobile': 'Hráč v šatně vyplňuje ranní wellness check-in na mobilu',
     'gridAlt.coach-player-review': 'Trenér s hráčem prochází zpětnou vazbu na tabletu',
     'gridAlt.coach-field-tablet': 'Trenér na hřišti sleduje tréninková data na tabletu',
@@ -106,7 +106,7 @@ export const ui = {
     'gridAlt.player-locker': 'Hráč v šatně při přípravě před tréninkem',
     'gridAlt.jersey-brand': 'Týmový dres s logem Melveo',
     'gridAlt.coach-team-dialogue': 'Trenér v dialogu s týmem při tréninku',
-    'gridAlt.coach-evening-tablet': 'Trenér večer plánuje trénink na tabletu',
+    'gridAlt.coach-player-close': 'Trenér v rozhovoru s hráči na tréninkovém hřišti',
     'gridAlt.team-briefing-wide': 'Týmová porada s trenérem před zápasem',
 
     // Stage 3 — gooey punctuation. Split into two parts so the
@@ -413,7 +413,7 @@ export const ui = {
     // Image-grid photo alt texts (a11y + image SEO). Factual scene
     // descriptions — no marketing copy, screen readers consume these.
     'gridAlt.coach-player-wide-crop': 'Coach reviewing data with a player over a tablet in the hall',
-    'gridAlt.team-huddle': 'Team standing in a huddle before the match',
+    'gridAlt.player-checkin': 'Player filling in the morning check-in in the Melveo app in the locker room',
     'gridAlt.player-mobile': 'Player filling in the morning wellness check-in on a phone in the locker room',
     'gridAlt.coach-player-review': 'Coach and player going through feedback on a tablet',
     'gridAlt.coach-field-tablet': 'Coach on the pitch checking training data on a tablet',
@@ -425,7 +425,7 @@ export const ui = {
     'gridAlt.player-locker': 'Player getting ready in the locker room before training',
     'gridAlt.jersey-brand': 'Team jersey with the Melveo logo',
     'gridAlt.coach-team-dialogue': 'Coach talking with the team during training',
-    'gridAlt.coach-evening-tablet': 'Coach planning a session on a tablet in the evening',
+    'gridAlt.coach-player-close': 'Coach talking with players on the training pitch',
     'gridAlt.team-briefing-wide': 'Team briefing with the coach before the match',
 
     'gooey.headlinePrefix': 'Coach + player.',

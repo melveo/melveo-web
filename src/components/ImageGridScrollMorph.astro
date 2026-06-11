@@ -117,7 +117,7 @@ const t = useTranslations(lang);
       of the grid is now product information, half human/sport feel.
 
       Mobile (3×5) layout view (P=photo, C=card, S=scaler):
-        Row 1: P C P    (coach-wide / 5osý / team-huddle)
+        Row 1: P C P    (coach-wide / 5osý / player-checkin)
         Row 2: C P C    (Sessions / coach-rev / Zátěž)
         Row 3: C S C    (Regenerace / SCALER / Rozhodnutí)
         Row 4: P C P    (coach-tab / Coach board / equipment)
@@ -177,10 +177,10 @@ const t = useTranslations(lang);
             <span class="glass-specular" aria-hidden="true" />
             <div class="glass-content">
               <img
-                src="/images/melveo-grid/thumbs/team-huddle-thumb.webp?v=2026-06-11"
-                srcset="/images/melveo-grid/thumbs/180/team-huddle-180.webp?v=2026-06-11 180w, /images/melveo-grid/thumbs/240/team-huddle-240.webp?v=2026-06-11 240w, /images/melveo-grid/thumbs/360/team-huddle-360.webp?v=2026-06-11 360w, /images/melveo-grid/thumbs/600/team-huddle-600.webp?v=2026-06-11 600w, /images/melveo-grid/thumbs/team-huddle-thumb.webp?v=2026-06-11 720w"
+                src="/images/melveo-grid/thumbs/player-checkin-thumb.webp?v=2026-06-11"
+                srcset="/images/melveo-grid/thumbs/180/player-checkin-180.webp?v=2026-06-11 180w, /images/melveo-grid/thumbs/240/player-checkin-240.webp?v=2026-06-11 240w, /images/melveo-grid/thumbs/360/player-checkin-360.webp?v=2026-06-11 360w, /images/melveo-grid/thumbs/600/player-checkin-600.webp?v=2026-06-11 600w, /images/melveo-grid/thumbs/player-checkin-thumb.webp?v=2026-06-11 720w"
                 sizes="(max-width: 640px) 100px, (max-width: 900px) 180px, (max-width: 1400px) 220px, 296px"
-                alt={t('gridAlt.team-huddle')}
+                alt={t('gridAlt.player-checkin')}
                 width="360"
                 height="450"
                 loading="lazy"
@@ -594,10 +594,10 @@ const t = useTranslations(lang);
               /></div></figure></div>
         <div><article class="tech-card tech-card--outer glass-card" aria-label={t('gridCard.alerts' as any)}><span class="glass-filter" aria-hidden="true" /><span class="glass-overlay" aria-hidden="true" /><span class="glass-specular" aria-hidden="true" /><div class="glass-content"><svg class="tech-card__icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M6.5 17h11l-1.2-2V10a4.3 4.3 0 0 0-8.6 0v5Z" /><path d="M10 19h4" /><path d="M12 3.7v1.4" /></svg><h3>{t('gridCard.alerts' as any)}</h3></div></article></div>
         <div><figure class="grid-photo glass-card" aria-hidden="true"><span class="glass-filter" aria-hidden="true" /><span class="glass-overlay" aria-hidden="true" /><span class="glass-specular" aria-hidden="true" /><div class="glass-content"><img
-                src="/images/melveo-grid/thumbs/coach-evening-tablet-thumb.webp?v=2026-06-11"
-                srcset="/images/melveo-grid/thumbs/180/coach-evening-tablet-180.webp?v=2026-06-11 180w, /images/melveo-grid/thumbs/240/coach-evening-tablet-240.webp?v=2026-06-11 240w, /images/melveo-grid/thumbs/360/coach-evening-tablet-360.webp?v=2026-06-11 360w, /images/melveo-grid/thumbs/600/coach-evening-tablet-600.webp?v=2026-06-11 600w, /images/melveo-grid/thumbs/coach-evening-tablet-thumb.webp?v=2026-06-11 720w"
+                src="/images/melveo-grid/thumbs/coach-player-close-thumb.webp?v=2026-06-11"
+                srcset="/images/melveo-grid/thumbs/180/coach-player-close-180.webp?v=2026-06-11 180w, /images/melveo-grid/thumbs/240/coach-player-close-240.webp?v=2026-06-11 240w, /images/melveo-grid/thumbs/360/coach-player-close-360.webp?v=2026-06-11 360w, /images/melveo-grid/thumbs/600/coach-player-close-600.webp?v=2026-06-11 600w, /images/melveo-grid/thumbs/coach-player-close-thumb.webp?v=2026-06-11 720w"
                 sizes="(max-width: 640px) 100px, (max-width: 900px) 180px, (max-width: 1400px) 220px, 296px"
-                alt={t('gridAlt.coach-evening-tablet')}
+                alt={t('gridAlt.coach-player-close')}
                 width="360"
                 height="450"
                 loading="lazy"
@@ -627,18 +627,19 @@ const t = useTranslations(lang);
         lossless at q80 — cache-bust v=2026-06-10.)
       -->
       <!--
-        srcset added (audit 2026-06-11): the scaler's largest rendered
-        state is the full viewport width, so sizes="100vw" is exact.
-        Phones pick 828w (53 KB) or 1280w (103 KB) instead of always
-        downloading the 1672w master (156 KB); desktop keeps 1672w.
-        width/height attrs stay — they preserve the aspect-ratio slot
-        and the full-texture decode rationale above.
+        srcset REVERTED (2026-06-11, same day it was added): with
+        sizes="100vw" phones picked the 828/1280w variants, but the
+        hero state of this wide 16:9 image COVERS the viewport HEIGHT
+        on portrait screens — its rendered width is ~187vw on a 390px
+        phone, so the smaller picks visibly pixelated the morph (user
+        report). The 1672w master is the minimum that keeps the cover
+        state sharp; the ~100KB mobile saving wasn't worth it. Don't
+        re-add a srcset here without sizing against the COVER width,
+        not the viewport width.
       -->
       <div class="scaler">
         <img
           src="/images/melveo-grid/team-briefing-wide.webp?v=2026-06-10"
-          srcset="/images/melveo-grid/team-briefing-wide-828.webp?v=2026-06-11 828w, /images/melveo-grid/team-briefing-wide-1280.webp?v=2026-06-11 1280w, /images/melveo-grid/team-briefing-wide.webp?v=2026-06-10 1672w"
-          sizes="100vw"
           alt={t('gridAlt.team-briefing-wide')}
           width="1672"
           height="941"
