@@ -354,11 +354,20 @@ const t = useTranslations(lang);
             <span class="glass-overlay" aria-hidden="true" />
             <span class="glass-specular" aria-hidden="true" />
             <div class="glass-content">
+              {/*
+                equipment-detail swapped out (2026-06-11): it is a crop
+                of the SAME generated scene as the scaler hero photo
+                (team-briefing-wide) and they ended up adjacent in the
+                desktop grid — read as a duplicate (user report).
+                team-sideline-wide's 4:5 crop is only 540px native
+                (1200×675 source), so srcset tops out at 540w — never
+                upscale; 540 still covers a 296px cell at DPR2 (0.91×).
+              */}
               <img
-                src="/images/melveo-grid/thumbs/equipment-detail-thumb.webp?v=2026-06-11"
-                srcset="/images/melveo-grid/thumbs/180/equipment-detail-180.webp?v=2026-06-11 180w, /images/melveo-grid/thumbs/240/equipment-detail-240.webp?v=2026-06-11 240w, /images/melveo-grid/thumbs/360/equipment-detail-360.webp?v=2026-06-11 360w, /images/melveo-grid/thumbs/600/equipment-detail-600.webp?v=2026-06-11 600w, /images/melveo-grid/thumbs/equipment-detail-thumb.webp?v=2026-06-11 720w"
+                src="/images/melveo-grid/thumbs/team-sideline-wide-thumb.webp?v=2026-06-11"
+                srcset="/images/melveo-grid/thumbs/180/team-sideline-wide-180.webp?v=2026-06-11 180w, /images/melveo-grid/thumbs/240/team-sideline-wide-240.webp?v=2026-06-11 240w, /images/melveo-grid/thumbs/360/team-sideline-wide-360.webp?v=2026-06-11 360w, /images/melveo-grid/thumbs/team-sideline-wide-thumb.webp?v=2026-06-11 540w"
                 sizes="(max-width: 640px) 100px, (max-width: 900px) 180px, (max-width: 1400px) 220px, 296px"
-                alt={t('gridAlt.equipment-detail')}
+                alt={t('gridAlt.team-sideline-wide')}
                 width="360"
                 height="450"
                 loading="lazy"
