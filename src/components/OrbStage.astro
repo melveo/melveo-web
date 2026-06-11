@@ -42,13 +42,19 @@ const t = useTranslations(lang);
     name, and the cyan reveal text is visible through the mask.
     Referencing an aria-hidden element from labelledby is valid; its
     text still joins the name computation.
+    The interaction hint moved name → description (audit 2026-06-11):
+    the visible hint pill has TWO wording variants (pointer/touch via
+    `is-orb-touch`) while the name could only ever carry one of them,
+    which read as a name/content mismatch. As a description it informs
+    AT without constraining the name.
   */}
   <div
     class="orb-wrapper"
     data-orb-wrapper
     role="button"
     tabindex="0"
-    aria-labelledby="orb-primary-heading orb-secondary-text orb-interaction-hint"
+    aria-labelledby="orb-primary-heading orb-secondary-text"
+    aria-describedby="orb-interaction-hint"
   >
     <p id="orb-interaction-hint" class="orb-sr-only">{t('orb.hintDesktop' as any)}</p>
     <!-- Primary hero — dark canvas, white primary text -->

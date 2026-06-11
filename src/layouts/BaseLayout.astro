@@ -109,16 +109,21 @@ const altUrls = {
 
     {/*
       Favicon set — light-silver Melveo "M" icon. Includes a cache-
-      bust query param (v=2026-05-15d) to force browsers off any
-      stale older favicon they may have pinned at /favicon.ico.
-      Update the value whenever the icon visuals change.
+      bust query param to force browsers off any stale older favicon
+      they may have pinned at /favicon.ico. Update the value whenever
+      the icon visuals change.
+      Perf (audit 2026-06-11): the PNG icon link used to point at the
+      1024×1024 master (115 KB downloaded by every cold visit just for
+      a tab icon). Now 192px for rel=icon, 180px for apple-touch-icon
+      (Apple's documented size), and favicon.ico re-packed 48/32/16
+      (32→15 KB). The 1024 master stays only as the OG/manifest source.
     */}
     <link rel="icon" type="image/svg+xml" href="/app-icon-melveo.svg?v=2026-05-15d" />
-    <link rel="icon" type="image/png" href="/app-icon-melveo.png?v=2026-05-15d" sizes="1024x1024" />
-    <link rel="icon" type="image/x-icon" href="/favicon.ico?v=2026-05-15d" sizes="any" />
-    <link rel="shortcut icon" href="/favicon.ico?v=2026-05-15d" />
-    <link rel="apple-touch-icon" href="/app-icon-melveo.png?v=2026-05-15d" sizes="1024x1024" />
-    <link rel="manifest" href="/site.webmanifest?v=2026-05-15d" />
+    <link rel="icon" type="image/png" href="/app-icon-192.png?v=2026-06-11" sizes="192x192" />
+    <link rel="icon" type="image/x-icon" href="/favicon.ico?v=2026-06-11" sizes="any" />
+    <link rel="shortcut icon" href="/favicon.ico?v=2026-06-11" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png?v=2026-06-11" sizes="180x180" />
+    <link rel="manifest" href="/site.webmanifest?v=2026-06-11" />
     <link rel="canonical" href={canonicalUrl} />
     {/*
       Inter `latin` carries the base A–Z glyphs, `latin-ext` only the

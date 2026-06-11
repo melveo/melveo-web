@@ -44,11 +44,21 @@
 /images/*
   Cache-Control: public, max-age=2592000
 
-# Favicons — week cache
+# Favicons + touch icons — week cache (cache-busted via ?v= query)
 /favicon.svg
   Cache-Control: public, max-age=604800
 /favicon.ico
   Cache-Control: public, max-age=604800
+/app-icon-192.png
+  Cache-Control: public, max-age=604800
+/app-icon-512.png
+  Cache-Control: public, max-age=604800
+/apple-touch-icon.png
+  Cache-Control: public, max-age=604800
+
+# Promo video assets — month cache (rename on change)
+/video/*
+  Cache-Control: public, max-age=2592000
 
 /badges/*
   Cache-Control: public, max-age=86400
