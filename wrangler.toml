@@ -15,14 +15,21 @@
 # → Settings → Builds for the connection.
 
 name = "melveo-web"
-account_id = "b8a715f4cd10ef66f00fa6c48a5b6b78"
+# Account moved 2026-06-12: zone melveo.app migrated from the personal
+# account (b8a715f4…) to the Hello@melveo.app account. The Worker does
+# NOT move with a zone — it had to be re-deployed here and the GitHub
+# Workers Builds connection re-created in the new account's dashboard.
+account_id = "6e9587b4650fd1c8e31a4065517b30d5"
 main = "src/worker.ts"
 compatibility_date = "2026-05-01"
 compatibility_flags = ["global_fetch_strictly_public"]
 
+# Custom domains (vs. zone routes) — Cloudflare auto-creates and owns
+# the DNS records for these hostnames, which also restored the www
+# record that was lost in the account move.
 routes = [
-  { pattern = "melveo.app/*", zone_name = "melveo.app" },
-  { pattern = "www.melveo.app/*", zone_name = "melveo.app" },
+  { pattern = "melveo.app", custom_domain = true },
+  { pattern = "www.melveo.app", custom_domain = true },
 ]
 
 # Static asset serving — the Astro build output goes here. Workers
