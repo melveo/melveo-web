@@ -147,6 +147,13 @@ const t = useTranslations(lang);
         primary action. Mailto link is the honest primary path
         right now. App Store stays as secondary ghost button so the
         notify-me option remains visible without competing.
+
+        2026-05-20: "App Store" button now links straight to the
+        TestFlight beta invite instead of opening the notify toast —
+        the app IS available now, just via TestFlight rather than
+        the public App Store. Label/icon unchanged per user request
+        ("nemen nazev tlačítek, jen pridej link") — only the href
+        + notify-toast wiring changed.
       */}
       <div class="hero-cta-row">
         <a
@@ -159,11 +166,11 @@ const t = useTranslations(lang);
           <span class="hero-pill-content">{t('hero.cta.pilot')}</span>
         </a>
         <a
-          href="#contact"
+          href="https://testflight.apple.com/join/M6Td9ADA"
+          target="_blank"
+          rel="noopener noreferrer"
           aria-label={t('hero.cta.appstore')}
           class="hero-pill hero-pill--ghost"
-          data-appstore-notify
-          data-notice={t('hero.appstoreNotice')}
         >
           <span class="hero-pill-shimmer" aria-hidden="true"></span>
           <span class="hero-pill-content">
@@ -185,7 +192,6 @@ const t = useTranslations(lang);
           </span>
         </a>
       </div>
-      <div class="appstore-toast" data-appstore-toast role="status" aria-live="polite" hidden></div>
     </div>
 
   </section>
@@ -682,58 +688,6 @@ const t = useTranslations(lang);
      .hero-pill in the DOM, so pricing CTAs get the same effect for
      free as long as they live on the same page. */
 
-  .appstore-toast {
-    position: fixed;
-    left: 50%;
-    bottom: max(1.25rem, env(safe-area-inset-bottom));
-    z-index: 80;
-    width: min(calc(100% - 2rem), 28rem);
-    transform: translate(-50%, 0);
-    border: 1px solid color-mix(in srgb, var(--color-accent-primary) 24%, var(--color-stroke-emphasized));
-    border-radius: 999px;
-    padding: 0.9rem 1.15rem;
-    background:
-      linear-gradient(135deg, rgba(0, 240, 255, 0.16), rgba(255, 255, 255, 0.055)),
-      rgba(5, 6, 8, 0.86);
-    color: var(--color-text-primary);
-    box-shadow:
-      0 22px 70px rgba(0, 240, 255, 0.16),
-      inset 0 1px 0 rgba(255, 255, 255, 0.16);
-    backdrop-filter: blur(24px);
-    -webkit-backdrop-filter: blur(24px);
-    font-size: 0.9rem;
-    font-weight: 600;
-    line-height: 1.35;
-    text-align: center;
-    opacity: 0;
-    pointer-events: none;
-    transition:
-      opacity 0.22s ease,
-      transform 0.22s ease;
-  }
-
-  .appstore-toast.is-visible {
-    opacity: 1;
-    transform: translate(-50%, -0.35rem);
-  }
-
-  .appstore-toast[hidden] {
-    display: block;
-    visibility: hidden;
-  }
-
-  @media (min-width: 640px) {
-    .appstore-toast {
-      font-size: 0.95rem;
-    }
-  }
-
-  @media (prefers-reduced-motion: reduce) {
-    .appstore-toast {
-      transition: none;
-    }
-  }
-
   /*
     Hero exit parallax (2026-06-10) — --hero-exit goes 0→1 as the hero
     scrolls out (set rAF-batched in the script below; never set for
@@ -798,34 +752,6 @@ const t = useTranslations(lang);
     });
   }
 
-  function mountAppStoreNotifyCta() {
-    const cta = document.querySelector<HTMLAnchorElement>('[data-appstore-notify]');
-    const target = document.querySelector<HTMLElement>('#contact');
-    const toast = document.querySelector<HTMLElement>('[data-appstore-toast]');
-    let toastTimer: number | undefined;
-
-    if (!cta || !toast) return;
-
-    cta.addEventListener('click', (event) => {
-      event.preventDefault();
-
-      const message = cta.dataset.notice || '';
-      toast.textContent = message;
-      toast.hidden = false;
-      requestAnimationFrame(() => toast.classList.add('is-visible'));
-
-      window.clearTimeout(toastTimer);
-      toastTimer = window.setTimeout(() => {
-        toast.classList.remove('is-visible');
-        window.setTimeout(() => {
-          toast.hidden = true;
-        }, 240);
-      }, 4200);
-
-      target?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    });
-  }
-
   function mountTextRevealWhenNeeded() {
     const targets = document.querySelectorAll<HTMLElement>('[data-text-reveal]');
     if (targets.length === 0) return;
@@ -881,7 +807,6 @@ const t = useTranslations(lang);
   // Defer to idle so hero LCP is unaffected
   function init() {
     mountHeroButtons();
-    mountAppStoreNotifyCta();
     mountRotateWord();
     mountTextRevealWhenNeeded();
     mountHeroExitParallax();

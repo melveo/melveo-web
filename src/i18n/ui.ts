@@ -48,8 +48,6 @@ export const ui = {
     // contact CTA (pilot offering retired 2026-05-04).
     'hero.cta.pilot': 'Mám zájem →',
     'hero.beta': 'TestFlight beta · brzy',
-    'hero.appstoreNotice':
-      'Melveo zatím v App Store není. Napiš nám na hello@melveo.app a ozveme se.',
 
     // Stage 2+3 — scroll-linked image grid morph (Kevin Gutowski codepen)
     'gridMorph.headlineLine1': 'Pojďme',
@@ -370,8 +368,6 @@ export const ui = {
     'hero.cta.appstore': 'Download on the App Store',
     'hero.cta.pilot': 'Get in touch →',
     'hero.beta': 'TestFlight beta · soon',
-    'hero.appstoreNotice':
-      "Melveo isn't on the App Store yet. Email us at hello@melveo.app and we'll get back to you.",
 
     'gridMorph.headlineLine1': "Let's",
     'gridMorph.headlineLine2': 'scroll.',
