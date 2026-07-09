@@ -2,16 +2,17 @@
   "applinks": {
     "details": [
       {
-        "appIDs": ["TEAMID.app.melveo.melveo"],
+        "appIDs": ["87FK8WB56L.com.melveo.app"],
         "components": [
           { "/": "/checkout/success", "comment": "Stripe checkout success returns to app" },
           { "/": "/checkout/success/*", "comment": "With session_id query" },
-          { "/": "/i/*", "comment": "Invite redeem deep link" }
+          { "/": "/i/*", "comment": "Invite redeem deep link" },
+          { "/": "/j/*", "comment": "Team QR join deep link" }
         ]
       }
     ]
   },
   "webcredentials": {
-    "apps": ["TEAMID.app.melveo.melveo"]
+    "apps": ["87FK8WB56L.com.melveo.app"]
   }
 }
