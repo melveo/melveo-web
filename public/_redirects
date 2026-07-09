@@ -24,3 +24,9 @@
 # target — iOS opens the app directly. Browsers without the app see
 # the homepage.
 /i/*                 /cs/                    302
+
+# Universal Link path for team QR join tokens (doc 414). Same handling as
+# /i/* — AASA declares /j/* so iOS with the app opens it directly; browsers
+# without the app fall back to the homepage instead of an empty 404 (which
+# iOS otherwise treats as a file download).
+/j/*                 /cs/                    302
