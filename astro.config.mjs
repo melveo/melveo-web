@@ -1,6 +1,10 @@
 // @ts-check
 import { defineConfig } from 'astro/config';
-import react from '@astrojs/react';
+// Preact + compat replaces React (audit 2026-07-10 §5): the only
+// island is MelveoDataFlowHero (useState/useRef/useEffect + GSAP),
+// fully compat-covered. Saves ~150 KB of lazy JS (react-dom 186 KB
+// → preact ~36 KB with compat).
+import preact from '@astrojs/preact';
 import sitemap from '@astrojs/sitemap';
 import tailwindcss from '@tailwindcss/vite';
 
@@ -27,7 +31,7 @@ export default defineConfig({
     },
   },
   integrations: [
-    react(),
+    preact({ compat: true }),
     sitemap({
       i18n: {
         defaultLocale: 'cs',

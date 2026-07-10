@@ -241,7 +241,13 @@ const altUrls = {
   </head>
   <body class="min-h-screen bg-[var(--color-bg-canvas)] text-[var(--color-text-primary)]">
     <AnalyticsBody />
-    <main>
+    {/* Skip link — first focusable element; visible only on keyboard
+        focus. Lets keyboard/AT users jump straight past the header
+        to the content (a11y audit 2026-07-10). */}
+    <a href="#main-content" class="skip-link">
+      {lang === 'cs' ? 'Přeskočit na obsah' : 'Skip to content'}
+    </a>
+    <main id="main-content">
       <slot />
     </main>
     <CookieBanner lang={lang} />

@@ -1,0 +1,45 @@
+# Minimal CI gate — the only still-open finding from the 2026-05-18
+# audit. Runs typecheck + production build + dependency audit on
+# every PR and push to main. Deploys stay on Cloudflare Workers
+# Builds (or manual `wrangler deploy`) — this workflow only guards
+# against broken builds/regressions landing on main.
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  check-build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Install
+        run: bun install --frozen-lockfile
+
+      - name: Typecheck (astro check)
+        run: bun run check
+
+      - name: Build
+        run: bun run build
+
+      - name: Dependency audit
+        # Fail only on HIGH+ so transitive moderate advisories don't
+        # block releases; bump severity once the tree is quiet.
+        run: bun audit --audit-level high
+
+      - name: Guard — no Finder duplicates in dist
+        run: |
+          if find dist -name "* 2.*" -o -name "* 3.*" | grep -q .; then
+            echo "::error::Finder duplicate files leaked into dist/"
+            find dist -name "* 2.*" -o -name "* 3.*"
+            exit 1
+          fi
+          echo "dist/ clean"

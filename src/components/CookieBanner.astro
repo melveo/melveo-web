@@ -267,6 +267,19 @@ const t = useTranslations(lang);
     justify-content: flex-end;
   }
 
+  /* Short viewports (phone landscape ≤ ~500px tall): the centred
+     bottom card would cover most of the hero. Tuck it into the
+     bottom-right corner, narrower, so content stays readable while
+     the choice is still one tap away. (Audit 2026-07-10 §4.) */
+  @media (max-height: 500px) {
+    #cookie-banner {
+      inset: auto 0.75rem 0.6rem auto;
+      margin: 0;
+      max-width: 22rem;
+      padding-inline: 0;
+    }
+  }
+
   @media (max-width: 480px) {
     #cookie-banner {
       inset: auto 0 0.45rem 0;

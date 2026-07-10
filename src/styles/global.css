@@ -173,6 +173,31 @@ body {
   min-height: 100vh;
 }
 
+/* Skip-to-content link (BaseLayout) — visually hidden until focused
+   via keyboard, then slides in as a branded pill in the top-left.
+   First focusable element on every page. */
+.skip-link {
+  position: fixed;
+  top: 0.75rem;
+  left: 0.75rem;
+  z-index: 200;
+  padding: 0.65rem 1.1rem;
+  border-radius: 999px;
+  background: var(--color-bg-canvas);
+  border: 1px solid var(--color-accent-primary);
+  color: var(--color-text-primary);
+  font-size: 0.9rem;
+  font-weight: 600;
+  text-decoration: none;
+  transform: translateY(-200%);
+  transition: transform 0.15s ease;
+}
+.skip-link:focus-visible {
+  transform: translateY(0);
+  outline: 2px solid var(--color-accent-primary);
+  outline-offset: 2px;
+}
+
 /* Typographic helpers */
 .text-balance {
   text-wrap: balance;
