@@ -39,7 +39,15 @@
  */
 
 const gtmId = import.meta.env.PUBLIC_GTM_CONTAINER_ID ?? '';
-const cfToken = import.meta.env.PUBLIC_CF_ANALYTICS_TOKEN ?? '';
+/*
+  CF Web Analytics token — created 2026-07-10 for hostname melveo.app
+  (dashboard → Analytics → Web Analytics → melveo.app). Committed as
+  the default because the token is public by design: it ships in the
+  HTML of every page as the beacon identifier and grants no access
+  to anything (dashboard data stays behind the CF login). The env
+  var still takes precedence for stage/preview overrides.
+*/
+const cfToken = import.meta.env.PUBLIC_CF_ANALYTICS_TOKEN || 'b7c331a1455a45dd877d30c9a969f66e';
 ---
 
 {/* Google Consent Mode v2 — default denied. Must run before GTM. */}
