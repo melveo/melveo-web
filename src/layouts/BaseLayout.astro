@@ -231,6 +231,14 @@ const altUrls = {
           },
           email: 'hello@melveo.app',
           url: 'https://melveo.app',
+          // Official brand profiles — sameAs lets Google/Bing link the
+          // site to these accounts (knowledge panel, entity graph).
+          // Only branded org/product accounts belong here (not the
+          // founder's personal X).
+          sameAs: [
+            'https://github.com/melveo',
+            'https://www.instagram.com/melveo.app/',
+          ],
         },
         inLanguage: lang === 'cs' ? 'cs-CZ' : 'en-US',
         url: canonicalUrl,
