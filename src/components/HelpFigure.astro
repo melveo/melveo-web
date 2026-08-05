@@ -1,0 +1,26 @@
+---
+interface Props {
+  src: string;
+  width: number;
+  height: number;
+  alt: string;
+  caption: string;
+  wide?: boolean;
+}
+
+const { src, width, height, alt, caption, wide = false } = Astro.props;
+---
+
+<figure class:list={['help-figure', { 'help-figure--wide': wide }] }>
+  <div class="help-figure__frame">
+    <img
+      src={src}
+      width={width}
+      height={height}
+      alt={alt}
+      loading="lazy"
+      decoding="async"
+    />
+  </div>
+  <figcaption>{caption}</figcaption>
+</figure>

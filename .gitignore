@@ -62,3 +62,8 @@ video-assets/
 
 # npm artifact — this repo's lockfile is bun.lock (Workers Builds runs bun)
 package-lock.json
+
+# Zdrojové PNG screenshoty z iOS appky, ze kterých se generují webp do
+# public/images/help/. Originály jsou 3,4 MB a v gitu nemají co dělat —
+# stejný důvod jako u video-assets/. Zůstávají lokálně pro přeříznutí.
+docs/screenshots-*/

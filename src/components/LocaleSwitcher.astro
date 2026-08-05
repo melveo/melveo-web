@@ -1,13 +1,17 @@
 ---
-import { ui, type Lang } from '../i18n/ui';
+import { ui, useTranslations, type Lang } from '../i18n/ui';
 
 interface Props {
   current: Lang;
   /** Path to swap locale on. Default: current page path. */
   pathname?: string;
+  /** Exact path of this page in the other locale when slugs differ. */
+  alternatePath?: string;
+  ariaLabel?: string;
 }
 
-const { current, pathname = Astro.url.pathname } = Astro.props;
+const { current, pathname = Astro.url.pathname, alternatePath, ariaLabel } = Astro.props;
+const t = useTranslations(current);
 
 /**
  * Build the swapped path. Rules:
@@ -29,11 +33,11 @@ function swap(path: string, fromLocale: Lang, toLocale: Lang): string {
 const locales = Object.keys(ui) as Lang[];
 ---
 
-<nav class="flex items-center gap-1 text-sm" aria-label="Language">
+<nav class="flex items-center gap-1 text-sm" aria-label={ariaLabel ?? t('help.localeAria')}>
   {
     locales.map((locale) => {
       const isCurrent = locale === current;
-      const href = swap(pathname, current, locale);
+      const href = locale === current ? pathname : alternatePath ?? swap(pathname, current, locale);
       return (
         <a
           href={href}

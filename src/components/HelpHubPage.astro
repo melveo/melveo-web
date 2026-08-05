@@ -1,0 +1,51 @@
+---
+import HelpShell from './HelpShell.astro';
+import { useTranslations, type Lang } from '../i18n/ui';
+
+interface Props {
+  lang: Lang;
+}
+
+const { lang } = Astro.props;
+const t = useTranslations(lang);
+const isCs = lang === 'cs';
+const canonical = isCs ? '/cs/napoveda/' : '/en/help/';
+const alternatePath = isCs ? '/en/help/' : '/cs/napoveda/';
+const base = isCs ? '/cs/napoveda' : '/en/help';
+const cards = [
+  { slug: isCs ? 'instalace' : 'install', key: 'install', mark: '01' },
+  { slug: isCs ? 'trener' : 'coach', key: 'coach', mark: '02' },
+  { slug: isCs ? 'hrac' : 'player', key: 'player', mark: '03' },
+  { slug: isCs ? 'platby' : 'billing', key: 'billing', mark: '04' },
+  { slug: 'faq', key: 'faq', mark: '05' },
+] as const;
+---
+
+<HelpShell
+  lang={lang}
+  title={t('help.hub.metaTitle')}
+  description={t('help.hub.metaDescription')}
+  canonical={canonical}
+  alternatePath={alternatePath}
+  isHub
+>
+  <section class="help-hero help-hero--hub">
+    <p class="help-eyebrow">{t('help.hub.eyebrow')}</p>
+    <h1>{t('help.hub.title')}</h1>
+    <p class="help-lead">{t('help.hub.lead')}</p>
+  </section>
+
+  <section class="help-card-grid" aria-label={t('help.navLabel')}>
+    {cards.map((card) => (
+      <a class="help-card" href={`${base}/${card.slug}/`}>
+        <span class="help-card__mark" aria-hidden="true">{card.mark}</span>
+        <span class="help-card__meta">{t(`help.hub.${card.key}.meta`)}</span>
+        <h2>{t(`help.hub.${card.key}.title`)}</h2>
+        <p>{t(`help.hub.${card.key}.body`)}</p>
+        <span class="help-card__link">{t('help.openArticle')} <span aria-hidden="true">→</span></span>
+      </a>
+    ))}
+  </section>
+
+  <p class="help-contact">{t('help.contact')}</p>
+</HelpShell>

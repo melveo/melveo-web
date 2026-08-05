@@ -1,0 +1,50 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import LocaleSwitcher from './LocaleSwitcher.astro';
+import { useTranslations, type Lang } from '../i18n/ui';
+
+interface Props {
+  lang: Lang;
+  title: string;
+  description: string;
+  canonical: string;
+  alternatePath: string;
+  isHub?: boolean;
+}
+
+const { lang, title, description, canonical, alternatePath, isHub = false } = Astro.props;
+const t = useTranslations(lang);
+const hubPath = lang === 'cs' ? '/cs/napoveda/' : '/en/help/';
+---
+
+<BaseLayout
+  title={title}
+  description={description}
+  lang={lang}
+  canonical={canonical}
+  alternatePath={alternatePath}
+>
+  <header class="help-site-header" slot="site-header">
+    <div class="help-site-header__inner">
+      <div class="help-site-header__brand">
+        <a href={`/${lang}/`} class="melveo-wordmark help-wordmark" aria-label={t('help.homeAria')}>
+          melveo
+        </a>
+        <span class="help-site-header__divider" aria-hidden="true"></span>
+        <a href={hubPath} class="help-site-header__section" aria-current={isHub ? 'page' : undefined}>
+          {t('help.navLabel')}
+        </a>
+      </div>
+      <LocaleSwitcher current={lang} alternatePath={alternatePath} ariaLabel={t('help.localeAria')} />
+    </div>
+  </header>
+
+  <div class="help-page">
+    {!isHub && (
+      <nav class="help-breadcrumb" aria-label={t('help.breadcrumbAria')}>
+        <a href={hubPath}>← {t('help.backHub')}</a>
+      </nav>
+    )}
+    <slot />
+  </div>
+</BaseLayout>

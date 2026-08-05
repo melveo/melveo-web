@@ -1,0 +1,243 @@
+---
+import HelpFigure from './HelpFigure.astro';
+import HelpShell from './HelpShell.astro';
+import { testFlightUrl, ui, useTranslations, type Lang } from '../i18n/ui';
+
+type Topic = 'install' | 'coach' | 'player' | 'billing' | 'faq';
+
+interface Props {
+  lang: Lang;
+  topic: Topic;
+}
+
+const { lang, topic } = Astro.props;
+const t = useTranslations(lang);
+const tr = (key: string) => t(key as keyof typeof ui.cs);
+const isCs = lang === 'cs';
+const routes = {
+  install: isCs ? '/cs/napoveda/instalace/' : '/en/help/install/',
+  coach: isCs ? '/cs/napoveda/trener/' : '/en/help/coach/',
+  player: isCs ? '/cs/napoveda/hrac/' : '/en/help/player/',
+  billing: isCs ? '/cs/napoveda/platby/' : '/en/help/billing/',
+  faq: isCs ? '/cs/napoveda/faq/' : '/en/help/faq/',
+};
+const alternateRoutes = {
+  install: isCs ? '/en/help/install/' : '/cs/napoveda/instalace/',
+  coach: isCs ? '/en/help/coach/' : '/cs/napoveda/trener/',
+  player: isCs ? '/en/help/player/' : '/cs/napoveda/hrac/',
+  billing: isCs ? '/en/help/billing/' : '/cs/napoveda/platby/',
+  faq: isCs ? '/en/help/faq/' : '/cs/napoveda/faq/',
+};
+
+const steps: Partial<Record<Topic, number>> = {
+  install: 5,
+  coach: 4,
+  player: 5,
+  billing: 3,
+};
+
+const related: Record<Topic, Topic[]> = {
+  install: ['player', 'coach'],
+  coach: ['player', 'faq'],
+  player: ['coach', 'faq'],
+  billing: ['install', 'faq'],
+  faq: ['install', 'player', 'coach', 'billing'],
+};
+
+const topicTitleKeys: Record<Topic, string> = {
+  install: 'help.hub.install.title',
+  coach: 'help.hub.coach.title',
+  player: 'help.hub.player.title',
+  billing: 'help.hub.billing.title',
+  faq: 'help.hub.faq.title',
+};
+---
+
+<HelpShell
+  lang={lang}
+  title={tr(`help.${topic}.metaTitle`)}
+  description={tr(`help.${topic}.metaDescription`)}
+  canonical={routes[topic]}
+  alternatePath={alternateRoutes[topic]}
+>
+  <article class="help-topic">
+    <header class="help-hero">
+      <p class="help-eyebrow">{tr(`help.${topic}.eyebrow`)}</p>
+      <h1>{tr(`help.${topic}.title`)}</h1>
+      <p class="help-lead">{tr(`help.${topic}.lead`)}</p>
+    </header>
+
+    {topic === 'install' && (
+      <>
+        <aside class="help-callout">
+          <h2>{t('help.install.betaTitle')}</h2>
+          <p>{t('help.install.betaBody')}</p>
+        </aside>
+        <section class="help-section">
+          <h2>{t('help.install.stepsTitle')}</h2>
+          <ol class="help-steps" aria-label={t('help.stepsLabel')}>
+            {Array.from({ length: steps.install ?? 0 }, (_, index) => index + 1).map((number) => (
+              <li>
+                <span class="help-step__number" aria-hidden="true">{String(number).padStart(2, '0')}</span>
+                <div><h3>{tr(`help.install.step${number}.title`)}</h3><p>{tr(`help.install.step${number}.body`)}</p></div>
+              </li>
+            ))}
+          </ol>
+          <a class="help-primary-link" href={testFlightUrl} target="_blank" rel="noopener noreferrer">
+            {t('help.install.cta')} <span aria-hidden="true">↗</span>
+          </a>
+        </section>
+        <section class="help-section">
+          <h2>{t('help.install.galleryTitle')}</h2>
+          <div class="help-figure-grid help-figure-grid--phones">
+            <HelpFigure src="/images/help/signin.webp" width={780} height={1100} alt={t('help.install.signin.alt')} caption={t('help.install.signin.caption')} />
+            <HelpFigure src="/images/help/email-signin.webp" width={780} height={744} alt={t('help.install.email.alt')} caption={t('help.install.email.caption')} />
+            <HelpFigure src="/images/help/notifications.webp" width={828} height={1627} alt={t('help.install.notifications.alt')} caption={t('help.install.notifications.caption')} />
+            <HelpFigure src="/images/help/healthkit.webp" width={828} height={1627} alt={t('help.install.healthkit.alt')} caption={t('help.install.healthkit.caption')} />
+            <HelpFigure src="/images/help/first-landing.webp" width={828} height={1678} alt={t('help.install.first.alt')} caption={t('help.install.first.caption')} />
+          </div>
+        </section>
+      </>
+    )}
+
+    {topic === 'coach' && (
+      <>
+        <section class="help-section">
+          <h2>{t('help.coach.createTitle')}</h2>
+          <div>
+            <ol class="help-steps" aria-label={t('help.stepsLabel')}>
+              {Array.from({ length: steps.coach ?? 0 }, (_, index) => index + 1).map((number) => (
+                <li>
+                  <span class="help-step__number" aria-hidden="true">{String(number).padStart(2, '0')}</span>
+                  <div><h3>{tr(`help.coach.step${number}.title`)}</h3><p>{tr(`help.coach.step${number}.body`)}</p></div>
+                </li>
+              ))}
+            </ol>
+            <HelpFigure src="/images/help/create-team.webp" width={828} height={1375} alt={t('help.coach.create.alt')} caption={t('help.coach.create.caption')} />
+          </div>
+        </section>
+        <section class="help-section help-split">
+          <div>
+            <h2>{t('help.coach.inviteTitle')}</h2>
+            <p class="help-section__lead">{t('help.coach.inviteBody')}</p>
+          </div>
+          <HelpFigure src="/images/help/coach-invite.webp" width={828} height={941} alt={t('help.coach.invite.alt')} caption={t('help.coach.invite.caption')} />
+        </section>
+        <aside class="help-callout">
+          <h2>{t('help.coach.homeTitle')}</h2>
+          <p>{t('help.coach.homeBody')}</p>
+        </aside>
+        <section class="help-section">
+          <h2>{t('help.coach.toolsTitle')}</h2>
+          <div class="help-tool-grid">
+            {Array.from({ length: 5 }, (_, index) => index + 1).map((number) => (
+              <div><h3>{tr(`help.coach.tool${number}.title`)}</h3><p>{tr(`help.coach.tool${number}.body`)}</p></div>
+            ))}
+          </div>
+          <div class="help-figure-grid help-figure-grid--wide">
+            <HelpFigure wide src="/images/help/coach-board.webp" width={1496} height={435} alt={t('help.coach.board.alt')} caption={t('help.coach.board.caption')} />
+            <HelpFigure wide src="/images/help/roster.webp" width={1496} height={1223} alt={t('help.coach.roster.alt')} caption={t('help.coach.roster.caption')} />
+            <HelpFigure src="/images/help/coach-roster.webp" width={828} height={739} alt={t('help.coach.rosterLive.alt')} caption={t('help.coach.rosterLive.caption')} />
+            <HelpFigure wide src="/images/help/sessions.webp" width={1496} height={871} alt={t('help.coach.sessions.alt')} caption={t('help.coach.sessions.caption')} />
+          </div>
+        </section>
+      </>
+    )}
+
+    {topic === 'player' && (
+      <>
+        <section class="help-section">
+          <h2>{t('help.player.joinTitle')}</h2>
+          <ol class="help-steps" aria-label={t('help.stepsLabel')}>
+            {Array.from({ length: steps.player ?? 0 }, (_, index) => index + 1).map((number) => (
+              <li>
+                <span class="help-step__number" aria-hidden="true">{String(number).padStart(2, '0')}</span>
+                <div><h3>{tr(`help.player.step${number}.title`)}</h3><p>{tr(`help.player.step${number}.body`)}</p></div>
+              </li>
+            ))}
+          </ol>
+          <div class="help-figure-grid help-figure-grid--phones">
+            <HelpFigure src="/images/help/rozcestnik.webp" width={828} height={754} alt={t('help.player.rozcestnik.alt')} caption={t('help.player.rozcestnik.caption')} />
+            <HelpFigure src="/images/help/invite-code.webp" width={828} height={1125} alt={t('help.player.code.alt')} caption={t('help.player.code.caption')} />
+            <HelpFigure src="/images/help/invite-confirm.webp" width={828} height={1247} alt={t('help.player.confirm.alt')} caption={t('help.player.confirm.caption')} />
+          </div>
+        </section>
+        <aside class="help-callout">
+          <h2>{t('help.player.expiredTitle')}</h2>
+          <p>{t('help.player.expiredBody')}</p>
+        </aside>
+        <section class="help-section help-split help-split--reverse">
+          <div>
+            <h2>{t('help.player.checkinTitle')}</h2>
+            <p class="help-section__lead">{t('help.player.checkinBody')}</p>
+          </div>
+          <HelpFigure src="/images/help/checkin.webp" width={828} height={1678} alt={t('help.player.checkin.alt')} caption={t('help.player.checkin.caption')} />
+        </section>
+        <section class="help-section">
+          <h2>{t('help.player.homeTitle')}</h2>
+          <div class="help-figure-grid help-figure-grid--phones">
+            <HelpFigure src="/images/help/player-home.webp" width={828} height={1836} alt={t('help.player.home.alt')} caption={t('help.player.home.caption')} />
+            <HelpFigure src="/images/help/team.webp" width={828} height={1888} alt={t('help.player.team.alt')} caption={t('help.player.team.caption')} />
+          </div>
+        </section>
+      </>
+    )}
+
+    {topic === 'billing' && (
+      <>
+        <aside class="help-callout">
+          <h2>{t('help.billing.whyTitle')}</h2>
+          <p>{t('help.billing.whyBody')}</p>
+        </aside>
+        <section class="help-section">
+          <h2>{t('help.billing.howTitle')}</h2>
+          <ol class="help-steps" aria-label={t('help.stepsLabel')}>
+            {Array.from({ length: steps.billing ?? 0 }, (_, index) => index + 1).map((number) => (
+              <li>
+                <span class="help-step__number" aria-hidden="true">{String(number).padStart(2, '0')}</span>
+                <div><h3>{tr(`help.billing.step${number}.title`)}</h3><p>{tr(`help.billing.step${number}.body`)}</p></div>
+              </li>
+            ))}
+          </ol>
+          <div class="help-actions">
+            <a class="help-primary-link" href={`/${lang}/#pricing`}>{t('help.billing.pricingCta')} <span aria-hidden="true">→</span></a>
+            <a class="help-secondary-link" href="mailto:hello@melveo.app">{t('help.billing.contactCta')} <span aria-hidden="true">→</span></a>
+          </div>
+        </section>
+      </>
+    )}
+
+    {topic === 'faq' && (
+      <section class="help-section help-faq-list">
+        {Array.from({ length: 6 }, (_, index) => index + 1).map((number) => (
+          <details>
+            <summary><span>{tr(`help.faq.q${number}`)}</span><span class="help-faq-icon" aria-hidden="true">+</span></summary>
+            <p>{tr(`help.faq.a${number}`)}</p>
+          </details>
+        ))}
+      </section>
+    )}
+
+    {topic === 'faq' && (
+      <section class="help-section">
+        <h2>{t('help.faq.figuresTitle')}</h2>
+        <div class="help-figure-grid help-figure-grid--phones">
+          <HelpFigure src="/images/help/delete-account.webp" width={828} height={1768} alt={t('help.faq.delete.alt')} caption={t('help.faq.delete.caption')} />
+          <HelpFigure src="/images/help/language.webp" width={828} height={600} alt={t('help.faq.language.alt')} caption={t('help.faq.language.caption')} />
+          <HelpFigure src="/images/help/apple-health.webp" width={828} height={789} alt={t('help.faq.health.alt')} caption={t('help.faq.health.caption')} />
+        </div>
+      </section>
+    )}
+
+    <nav class="help-related" aria-label={t('help.related')}>
+      <p>{t('help.related')}</p>
+      <div>
+        {related[topic].map((nextTopic) => (
+          <a href={routes[nextTopic]}>{tr(topicTitleKeys[nextTopic])} <span aria-hidden="true">→</span></a>
+        ))}
+      </div>
+    </nav>
+
+    <p class="help-contact">{t('help.contact')}</p>
+  </article>
+</HelpShell>

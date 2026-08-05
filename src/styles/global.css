@@ -13,6 +13,7 @@
 
 @import "tailwindcss";
 @import "./legal.css";
+@import "./help.css";
 
 /*
   Self-hosted fonts. Keep only latin + latin-ext subsets because the

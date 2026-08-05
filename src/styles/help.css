@@ -1,0 +1,621 @@
+/* ─── Elevation instead of outlines ──────────────────────────────────
+   No 1px borders anywhere in this section (owner preference). Surfaces
+   separate themselves the way .glass-card in global.css does: a lifted
+   background, a soft shadow envelope, and a hairline of *light* along
+   the top edge rather than a drawn box. --help-lift is the resting
+   state, --help-lift-raised the hover/active one. */
+:root {
+  --help-sheen: inset 0 1px 0 rgb(255 255 255 / 0.055);
+  --help-lift:
+    var(--help-sheen),
+    0 1px 2px rgb(0 0 0 / 0.4),
+    0 10px 28px -12px rgb(0 0 0 / 0.65);
+  --help-lift-raised:
+    inset 0 1px 0 rgb(255 255 255 / 0.09),
+    0 2px 4px rgb(0 0 0 / 0.45),
+    0 18px 44px -14px rgb(0 0 0 / 0.8);
+}
+
+.help-site-header {
+  position: relative;
+  z-index: 10;
+  background: color-mix(in srgb, var(--color-bg-canvas) 88%, transparent);
+  backdrop-filter: blur(18px);
+  box-shadow: 0 1px 24px -8px rgb(0 0 0 / 0.9);
+}
+
+.help-site-header__inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: min(100% - 2rem, 72rem);
+  min-height: 4.75rem;
+  margin-inline: auto;
+  gap: 1rem;
+}
+
+.help-site-header__brand {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+  gap: 0.8rem;
+}
+
+.help-wordmark,
+.help-site-header__section {
+  color: var(--color-text-primary);
+  text-decoration: none;
+}
+
+.help-wordmark {
+  font-size: 1.2rem;
+  font-weight: 600;
+}
+
+.help-site-header__divider {
+  width: 3px;
+  height: 3px;
+  border-radius: 50%;
+  background: var(--color-text-tertiary);
+}
+
+.help-site-header__section {
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+.help-page {
+  width: min(100% - 2rem, 72rem);
+  margin-inline: auto;
+  padding-block: 1.5rem 6rem;
+}
+
+.help-breadcrumb {
+  margin-bottom: clamp(2.5rem, 7vw, 5rem);
+}
+
+.help-breadcrumb a,
+.help-secondary-link {
+  color: var(--color-text-secondary);
+  font-size: 0.875rem;
+  font-weight: 600;
+  text-decoration: none;
+  transition: color 150ms ease;
+}
+
+.help-breadcrumb a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 2.75rem;
+}
+
+.help-breadcrumb a:hover,
+.help-secondary-link:hover {
+  color: var(--color-text-primary);
+}
+
+.help-hero {
+  max-width: 52rem;
+  padding-bottom: clamp(3.5rem, 9vw, 7rem);
+}
+
+.help-hero--hub {
+  padding-top: clamp(3rem, 9vw, 7rem);
+}
+
+.help-eyebrow {
+  margin: 0 0 1.25rem;
+  color: var(--color-accent-primary);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.help-hero h1 {
+  max-width: 15ch;
+  margin: 0;
+  color: var(--color-text-primary);
+  font-size: clamp(2.25rem, 7vw, 5rem);
+  font-weight: 650;
+  letter-spacing: -0.055em;
+  line-height: 0.98;
+  text-wrap: balance;
+}
+
+.help-lead {
+  max-width: 42rem;
+  margin: 1.75rem 0 0;
+  color: var(--color-text-secondary);
+  font-size: clamp(1.05rem, 2.5vw, 1.35rem);
+  line-height: 1.65;
+  text-wrap: pretty;
+}
+
+.help-card-grid {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.help-card {
+  position: relative;
+  grid-column: span 6;
+  min-height: 19rem;
+  overflow: hidden;
+  padding: clamp(1.5rem, 4vw, 2.25rem);
+  border-radius: var(--radius-xl);
+  background: var(--color-bg-surface);
+  box-shadow: var(--help-lift);
+  color: var(--color-text-primary);
+  text-decoration: none;
+  transition: box-shadow 180ms ease, background 180ms ease, transform 180ms ease;
+}
+
+.help-card:first-child {
+  grid-column: span 12;
+}
+
+.help-card:hover {
+  background: var(--color-bg-surface-elevated);
+  box-shadow: var(--help-lift-raised);
+  transform: translateY(-2px);
+}
+
+.help-card__mark {
+  position: absolute;
+  top: 1rem;
+  right: 1.25rem;
+  color: var(--color-stroke-emphasized);
+  font-size: clamp(3rem, 8vw, 6rem);
+  font-weight: 700;
+  letter-spacing: -0.08em;
+  line-height: 1;
+}
+
+.help-card__meta {
+  position: relative;
+  color: var(--color-accent-primary);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.help-card h2 {
+  position: relative;
+  max-width: 13ch;
+  margin: 4.5rem 0 0;
+  font-size: clamp(1.45rem, 3vw, 2rem);
+  letter-spacing: -0.035em;
+  line-height: 1.1;
+}
+
+.help-card p {
+  position: relative;
+  max-width: 34rem;
+  margin: 1rem 0 3rem;
+  color: var(--color-text-secondary);
+  line-height: 1.65;
+}
+
+.help-card__link {
+  position: absolute;
+  bottom: 2rem;
+  left: clamp(1.5rem, 4vw, 2.25rem);
+  color: var(--color-text-primary);
+  font-size: 0.875rem;
+  font-weight: 650;
+}
+
+.help-section {
+  padding-block: clamp(3.5rem, 9vw, 7rem);
+}
+
+.help-section > h2,
+.help-split h2,
+.help-callout h2 {
+  margin: 0 0 2rem;
+  color: var(--color-text-primary);
+  font-size: clamp(1.75rem, 4vw, 2.75rem);
+  font-weight: 620;
+  letter-spacing: -0.04em;
+  line-height: 1.08;
+  text-wrap: balance;
+}
+
+.help-section__lead,
+.help-callout p {
+  margin: 0;
+  color: var(--color-text-secondary);
+  font-size: 1.05rem;
+  line-height: 1.75;
+}
+
+/* The callout is the one surface that should read as "stop and read
+   this", so it earns a tinted wash and a cyan light spilling down its
+   leading edge — attention without an outline. */
+.help-callout {
+  position: relative;
+  margin-bottom: clamp(3.5rem, 9vw, 7rem);
+  padding: clamp(1.5rem, 5vw, 3rem);
+  border-radius: var(--radius-xl);
+  background:
+    linear-gradient(
+      100deg,
+      color-mix(in srgb, var(--color-bg-tint) 34%, var(--color-bg-surface-elevated)) 0%,
+      var(--color-bg-surface-elevated) 46%
+    );
+  box-shadow:
+    var(--help-lift),
+    inset 3px 0 0 -1px color-mix(in srgb, var(--color-accent-primary) 55%, transparent);
+}
+
+.help-callout h2 {
+  margin-bottom: 1rem;
+  font-size: clamp(1.45rem, 3vw, 2rem);
+}
+
+.help-callout p {
+  max-width: 52rem;
+}
+
+.help-steps {
+  display: grid;
+  gap: 0.6rem;
+  max-width: 52rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* Steps used to be hairline-separated rows. Each one is now its own
+   low surface, so the sequence reads as distinct blocks and the eye can
+   count them without a rule drawn between. */
+.help-steps li {
+  display: grid;
+  grid-template-columns: 3.25rem minmax(0, 1fr);
+  gap: 1.25rem;
+  padding: 1.5rem clamp(1.1rem, 3vw, 1.75rem);
+  border-radius: var(--radius-l);
+  background: var(--color-bg-surface);
+  box-shadow: var(--help-sheen);
+}
+
+.help-step__number {
+  color: var(--color-accent-primary);
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  line-height: 1.6;
+}
+
+.help-steps h3,
+.help-tool-grid h3 {
+  margin: 0;
+  color: var(--color-text-primary);
+  font-size: 1.05rem;
+  font-weight: 650;
+  line-height: 1.4;
+}
+
+.help-steps p,
+.help-tool-grid p {
+  margin: 0.5rem 0 0;
+  color: var(--color-text-secondary);
+  line-height: 1.7;
+}
+
+.help-primary-link,
+.help-secondary-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 3rem;
+  margin-top: 2rem;
+  border-radius: var(--radius-m);
+}
+
+.help-primary-link {
+  padding: 0.8rem 1.1rem;
+  background: var(--color-accent-primary);
+  color: var(--color-text-inverse);
+  font-size: 0.9rem;
+  font-weight: 700;
+  text-decoration: none;
+  transition: background 150ms ease, transform 150ms ease;
+}
+
+.help-primary-link:hover {
+  background: var(--color-accent-primary-hover);
+  transform: translateY(-1px);
+}
+
+.help-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem 1.5rem;
+}
+
+.help-figure-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: clamp(1rem, 3vw, 2rem);
+  margin-top: 3rem;
+  align-items: start;
+}
+
+.help-figure-grid--phones {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  /* The captures are cropped to their content, so a sparse screen (the
+     rozcestník) is a third the height of a dense one. Stretching the
+     frames keeps the row reading as one set of cards instead of three
+     ragged ones; the image stays top-aligned inside its frame. */
+  align-items: stretch;
+}
+
+.help-figure-grid--phones .help-figure {
+  display: flex;
+  flex-direction: column;
+}
+
+.help-figure-grid--phones .help-figure__frame {
+  flex: 1;
+}
+
+/* Landscape tablet captures are ~1496px wide — halving them in the
+   generic two-column grid makes their content unreadable, so they get
+   the full column. */
+.help-figure-grid--wide {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.help-figure {
+  min-width: 0;
+  margin: 0;
+}
+
+.help-figure__frame {
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  overflow: hidden;
+  padding: clamp(0.5rem, 1.5vw, 0.9rem);
+  border-radius: var(--radius-xl);
+  background: var(--color-bg-surface);
+  box-shadow: var(--help-lift);
+}
+
+.help-figure img {
+  display: block;
+  width: auto;
+  max-width: 100%;
+  height: auto;
+  max-height: 46rem;
+  border-radius: var(--radius-m);
+}
+
+.help-figure--wide img {
+  width: 100%;
+  max-height: none;
+}
+
+.help-figure figcaption {
+  margin-top: 0.8rem;
+  color: var(--color-text-secondary);
+  font-size: 0.8rem;
+  line-height: 1.55;
+}
+
+.help-split {
+  display: grid;
+  grid-template-columns: minmax(0, 1.4fr) minmax(15rem, 0.6fr);
+  gap: clamp(2rem, 7vw, 6rem);
+  align-items: start;
+}
+
+.help-split > .help-figure {
+  max-width: 23rem;
+  justify-self: end;
+}
+
+.help-split--reverse {
+  grid-template-columns: minmax(0, 1fr) minmax(15rem, 0.55fr);
+}
+
+.help-tool-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.help-tool-grid > div {
+  min-height: 10rem;
+  padding: 1.5rem;
+  border-radius: var(--radius-l);
+  background: var(--color-bg-surface);
+  box-shadow: var(--help-lift);
+}
+
+.help-faq-list {
+  max-width: 56rem;
+  margin-inline: auto;
+}
+
+.help-faq-list {
+  display: grid;
+  gap: 0.6rem;
+}
+
+.help-faq-list details {
+  border-radius: var(--radius-l);
+  background: var(--color-bg-surface);
+  box-shadow: var(--help-sheen);
+  transition: background 150ms ease, box-shadow 150ms ease;
+}
+
+.help-faq-list details:hover,
+.help-faq-list details[open] {
+  background: var(--color-bg-surface-elevated);
+  box-shadow: var(--help-lift);
+}
+
+.help-faq-list summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 4.5rem;
+  gap: 1.5rem;
+  padding: 1rem clamp(1.1rem, 3vw, 1.75rem);
+  color: var(--color-text-primary);
+  font-size: clamp(1rem, 2.5vw, 1.2rem);
+  font-weight: 600;
+  cursor: pointer;
+  list-style: none;
+}
+
+.help-faq-list summary::-webkit-details-marker {
+  display: none;
+}
+
+.help-faq-list details p {
+  max-width: 46rem;
+  margin: 0;
+  padding: 0 3rem 1.75rem clamp(1.1rem, 3vw, 1.75rem);
+  color: var(--color-text-secondary);
+  line-height: 1.75;
+}
+
+.help-faq-icon {
+  flex: 0 0 auto;
+  color: var(--color-accent-primary);
+  font-size: 1.5rem;
+  font-weight: 400;
+  transition: transform 150ms ease;
+}
+
+.help-faq-list details[open] .help-faq-icon {
+  transform: rotate(45deg);
+}
+
+.help-related {
+  margin-top: clamp(3rem, 8vw, 6rem);
+  padding: clamp(1.5rem, 4vw, 2.5rem);
+  border-radius: var(--radius-xl);
+  background: var(--color-bg-surface);
+  box-shadow: var(--help-lift);
+}
+
+.help-related > p {
+  margin: 0 0 1rem;
+  color: var(--color-text-tertiary);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.help-related > div {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.help-related a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 2.75rem;
+  padding: 0.5rem 1rem;
+  border-radius: var(--radius-m);
+  background: var(--color-bg-surface-elevated);
+  box-shadow: var(--help-sheen);
+  color: var(--color-text-primary);
+  font-size: 0.875rem;
+  font-weight: 600;
+  text-decoration: none;
+  transition: background 150ms ease, box-shadow 150ms ease, color 150ms ease;
+}
+
+.help-related a:hover {
+  background: color-mix(in srgb, var(--color-accent-primary) 14%, var(--color-bg-surface-elevated));
+  box-shadow: var(--help-lift);
+  color: var(--color-text-primary);
+}
+
+.help-contact {
+  margin: 3rem 0 0;
+  color: var(--color-text-secondary);
+  font-size: 0.875rem;
+  text-align: center;
+}
+
+.help-page :where(a, summary):focus-visible {
+  outline: 2px solid var(--color-accent-primary);
+  outline-offset: 4px;
+}
+
+@media (max-width: 760px) {
+  .help-card,
+  .help-card:first-child {
+    grid-column: span 12;
+    min-height: 17rem;
+  }
+
+  .help-card h2 {
+    margin-top: 3.75rem;
+  }
+
+  .help-figure-grid--phones {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .help-split,
+  .help-split--reverse {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .help-split > .help-figure {
+    width: min(100%, 24rem);
+    justify-self: center;
+  }
+
+  .help-tool-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 480px) {
+  .help-site-header__inner,
+  .help-page {
+    width: min(100% - 1.25rem, 72rem);
+  }
+
+  .help-site-header__brand {
+    gap: 0.6rem;
+  }
+
+  .help-steps li {
+    grid-template-columns: 2.25rem minmax(0, 1fr);
+    gap: 0.75rem;
+  }
+
+  .help-figure-grid,
+  .help-figure-grid--phones,
+  .help-tool-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .help-figure-grid--phones .help-figure {
+    width: min(100%, 23rem);
+    justify-self: center;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .help-card,
+  .help-primary-link,
+  .help-faq-icon {
+    transition: none;
+  }
+}

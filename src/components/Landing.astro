@@ -27,7 +27,7 @@ import MelveoDataFlowHero from './MelveoDataFlowHero';
 import FaqStage from './FaqStage.astro';
 import PromoVideoStage from './PromoVideoStage.astro';
 import SectionDotsNav from './SectionDotsNav.astro';
-import { useTranslations, type Lang } from '../i18n/ui';
+import { testFlightUrl, useTranslations, type Lang } from '../i18n/ui';
 
 interface Props {
   lang: Lang;
@@ -165,32 +165,35 @@ const t = useTranslations(lang);
           <span class="hero-pill-shimmer" aria-hidden="true"></span>
           <span class="hero-pill-content">{t('hero.cta.pilot')}</span>
         </a>
-        <a
-          href="https://testflight.apple.com/join/M6Td9ADA"
-          target="_blank"
-          rel="noopener noreferrer"
-          aria-label={t('hero.cta.appstore')}
-          class="hero-pill hero-pill--ghost"
-        >
-          <span class="hero-pill-shimmer" aria-hidden="true"></span>
-          <span class="hero-pill-content">
-            {/* Apple logo glyph in inline SVG so we control colour */}
-            <svg
-              class="hero-pill-icon"
-              viewBox="0 0 24 24"
-              fill="currentColor"
-              aria-hidden="true"
-            >
-              <path d="M17.05 20.28c-.98.95-2.05.8-3.08.35-1.09-.46-2.09-.48-3.24 0-1.44.62-2.2.44-3.06-.35C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.8 1.18-.24 2.31-.93 3.57-.84 1.51.12 2.65.72 3.4 1.8-3.12 1.87-2.38 5.98.48 7.13-.57 1.5-1.31 2.99-2.54 4.09l.01-.01zM12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29 2.58-2.34 4.5-3.74 4.25z" />
-            </svg>
-            <span class="hero-pill-text">
-              <span class="hero-pill-eyebrow">
-                {lang === 'cs' ? 'Stáhnout v' : 'Download on the'}
+        <div class="hero-appstore-group">
+          <a
+            href={testFlightUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label={t('hero.cta.appstore')}
+            class="hero-pill hero-pill--ghost"
+          >
+            <span class="hero-pill-shimmer" aria-hidden="true"></span>
+            <span class="hero-pill-content">
+              {/* Apple logo glyph in inline SVG so we control colour */}
+              <svg
+                class="hero-pill-icon"
+                viewBox="0 0 24 24"
+                fill="currentColor"
+                aria-hidden="true"
+              >
+                <path d="M17.05 20.28c-.98.95-2.05.8-3.08.35-1.09-.46-2.09-.48-3.24 0-1.44.62-2.2.44-3.06-.35C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.8 1.18-.24 2.31-.93 3.57-.84 1.51.12 2.65.72 3.4 1.8-3.12 1.87-2.38 5.98.48 7.13-.57 1.5-1.31 2.99-2.54 4.09l.01-.01zM12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29 2.58-2.34 4.5-3.74 4.25z" />
+              </svg>
+              <span class="hero-pill-text">
+                <span class="hero-pill-eyebrow">{t('hero.cta.appstoreEyebrow')}</span>
+                <span class="hero-pill-title">{t('hero.cta.appstoreTitle')}</span>
               </span>
-              <span class="hero-pill-title">App Store</span>
             </span>
-          </span>
-        </a>
+          </a>
+          <a class="hero-install-help" href={lang === 'cs' ? '/cs/napoveda/instalace/' : '/en/help/install/'}>
+            {t('hero.cta.installHelp')}
+          </a>
+        </div>
       </div>
     </div>
 
@@ -669,11 +672,39 @@ const t = useTranslations(lang);
   .hero-cta-row {
     display: flex;
     flex-direction: row;
-    align-items: center;
+    /* flex-start, not center: the App Store pill now sits in a column
+       group with the install-help link under it, so centring would push
+       the taller group's pill off the contact pill's top edge. */
+    align-items: flex-start;
     justify-content: center;
     flex-wrap: wrap;
     gap: 0.75rem;
     margin-top: 2.5rem;
+  }
+
+  .hero-appstore-group {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.55rem;
+  }
+
+  .hero-install-help {
+    color: var(--color-text-secondary);
+    font-size: 0.75rem;
+    font-weight: 500;
+    text-underline-offset: 0.2em;
+    transition: color 150ms ease;
+  }
+
+  .hero-install-help:hover {
+    color: var(--color-text-primary);
+  }
+
+  .hero-install-help:focus-visible {
+    outline: 2px solid var(--color-accent-primary);
+    outline-offset: 4px;
+    border-radius: var(--radius-s);
   }
   @media (min-width: 640px) {
     .hero-cta-row {
