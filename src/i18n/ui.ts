@@ -444,6 +444,15 @@ export const ui = {
       'Trenérská soupiska s čísly dresů, posty a proužkem připravenosti u každého hráče',
     'help.coach.rosterLive.caption':
       'V soupisce vidíš u každého hráče post a jeho dnešní připravenost.',
+    'help.coach.todayTitle': 'Co trenér vidí ráno',
+    'help.coach.today.alt':
+      'Trenérský přehled dne: 7 z 8 vyplněných check-inů, průměrná připravenost 4,0 z 5 a upozornění na jedno hlášení ke kontrole',
+    'help.coach.today.caption':
+      'Kolik lidí dnes odpovědělo, jaká je průměrná připravenost a koho si projít.',
+    'help.coach.detail.alt':
+      'Detail check-inu hráče očima trenéra: pět hodnocených os a mapa těla s vyznačeným bolavým ramenem',
+    'help.coach.detail.caption':
+      'U hráče, který hlásí bolest, vidíš jeho odpovědi i místo, které ho bolí — pokud sdílení povolil.',
     'help.coach.inviteTitle': 'Pozvi hráče',
     'help.coach.inviteBody': 'Pošli hráčům aktuální pozvánkový kód, odkaz nebo QR. Kód má 6 až 8 znaků a hráč před přijetím uvidí název týmu i sport.',
     'help.coach.homeTitle': 'Týmové nástroje nejsou uvnitř Domů',
@@ -498,6 +507,11 @@ export const ui = {
       'Obrazovka ranního check-inu: energie a spánek na stupnici 1 až 5 a mapa těla pro označení bolestivosti svalů',
     'help.player.checkin.caption':
       'Každou osu klepneš na stupnici 1–5. Bolavé místo označíš v mapě těla. Pak „Odeslat“.',
+    'help.player.trendTitle': 'Jak se to sčítá v čase',
+    'help.player.trend.alt':
+      'Wellness trend hráče za posledních sedm dní s křivkou bolestivosti a denním deníkem',
+    'help.player.trend.caption':
+      'Z denních check-inů vzniká trend. Přepneš si 7, 30 nebo 90 dní.',
     'help.player.homeTitle': 'Co uvidíš po přihlášení',
     'help.player.team.alt': 'Seznam spoluhráčů v týmu v aplikaci Melveo',
     'help.player.team.caption': 'Záložka Tým ukazuje soupisku, ve které jsi.',
@@ -925,6 +939,15 @@ export const ui = {
       'The coach roster with jersey numbers, positions, and a readiness bar per player',
     'help.coach.rosterLive.caption':
       'The roster shows each player’s position and how ready they are today.',
+    'help.coach.todayTitle': 'What the coach sees in the morning',
+    'help.coach.today.alt':
+      'The coach day view: 7 of 8 check-ins submitted, average readiness 4.0 out of 5, and one report flagged for review',
+    'help.coach.today.caption':
+      'How many answered today, the team average, and who to look at.',
+    'help.coach.detail.alt':
+      'A player’s check-in as the coach sees it: five rated axes and a body map with a sore shoulder marked',
+    'help.coach.detail.caption':
+      'For a player reporting pain you see their answers and where it hurts — if they shared it.',
     'help.coach.inviteTitle': 'Invite players',
     'help.coach.inviteBody': 'Share the current invite code, invitation link, or QR code with players. Codes contain 6 to 8 characters, and players see the team name and sport before joining.',
     'help.coach.homeTitle': 'Team tools are not inside Home',
@@ -979,6 +1002,11 @@ export const ui = {
       'The morning check-in screen: energy and sleep rated one to five, plus a body map for marking muscle soreness',
     'help.player.checkin.caption':
       'Tap each scale from 1 to 5, mark any sore spot on the body map, then send it.',
+    'help.player.trendTitle': 'How it adds up over time',
+    'help.player.trend.alt':
+      'A player’s wellness trend over the last seven days, with a soreness curve and a daily log',
+    'help.player.trend.caption':
+      'Daily check-ins build a trend. Switch between 7, 30, and 90 days.',
     'help.player.homeTitle': 'What you see after signing in',
     'help.player.team.alt': 'The list of teammates in the Melveo app',
     'help.player.team.caption': 'The Team tab shows the squad you belong to.',
