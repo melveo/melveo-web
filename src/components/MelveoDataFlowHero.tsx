@@ -1,4 +1,10 @@
-import { type CSSProperties, useEffect, useRef, useState } from "react";
+// preact/compat, not "react": the preact({ compat: true }) integration rewrites
+// "react" to exactly this at build time, but TypeScript resolved the bare
+// specifier to the untyped node_modules/react shim and every hook came back
+// `any`. Importing the real target keeps the bundle identical and gives the
+// typechecker something to work with. (Mapping it via tsconfig `paths` instead
+// breaks the build — Astro feeds those to the bundler too.)
+import { type CSSProperties, useEffect, useRef, useState } from "preact/compat";
 import { useTranslations, type Lang } from "../i18n/ui";
 
 type HexColor = "cyan" | "white";

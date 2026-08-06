@@ -1,5 +1,15 @@
 {
   "extends": "astro/tsconfigs/strict",
+  "compilerOptions": {
+    // astro/tsconfigs/base sets `"jsx": "preserve"` with no jsxImportSource,
+    // which leaves TypeScript with no JSX.IntrinsicElements for the one .tsx
+    // island in this repo (MelveoDataFlowHero). Every element in it then
+    // resolves to `any` — 210 ts(7026) errors that made `astro check` fail
+    // on main since 2026-07-24. Astro files are unaffected; they go through
+    // Astro's own compiler, not this setting.
+    "jsx": "react-jsx",
+    "jsxImportSource": "preact"
+  },
   "include": [
     ".astro/types.d.ts",
     "**/*"
