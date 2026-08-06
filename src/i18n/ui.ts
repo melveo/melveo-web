@@ -421,10 +421,10 @@ export const ui = {
     'help.install.first.caption': 'Po dokončení nastavení se otevře první osobní přehled.',
 
     'help.coach.metaTitle': 'Melveo pro trenéra',
-    'help.coach.metaDescription': 'Jak v Melveo založit tým, pozvat hráče a pracovat s coach boardem, rozpisem a sessions.',
+    'help.coach.metaDescription': 'Jak v Melveo založit tým, pozvat hráče a pracovat s denním přehledem, soupiskou a tréninky.',
     'help.coach.eyebrow': 'Pro trenéra',
     'help.coach.title': 'Založ tým a připrav první session',
-    'help.coach.lead': 'Po přihlášení vytvoříš tým ve dvou krocích. Potom můžeš spravovat soupisku, rozpis a tréninky.',
+    'help.coach.lead': 'Po přihlášení vytvoříš tým ve dvou krocích. Potom vidíš denní připravenost týmu a spouštíš tréninky a zápasy.',
     'help.coach.createTitle': 'Vytvoření týmu',
     'help.coach.step1.title': 'Zvol „Vytvořit vlastní tým“',
     'help.coach.step1.body': 'Po přihlášení a doplnění jména se otevře rozcestník. Vyber vytvoření týmu.',
@@ -453,6 +453,14 @@ export const ui = {
       'Detail check-inu hráče očima trenéra: pět hodnocených os a mapa těla s vyznačeným bolavým ramenem',
     'help.coach.detail.caption':
       'U hráče, který hlásí bolest, vidíš jeho odpovědi i místo, které ho bolí — pokud sdílení povolil.',
+    'help.coach.session.alt':
+      'Detail dokončeného tréninku: plán 360 AU proti skutečným 372 AU a rozdíl +12 AU',
+    'help.coach.session.caption':
+      'Po tréninku vidíš plán proti skutečnosti a doporučení, co s příštím.',
+    'help.coach.live.alt':
+      'Živý trénink na iPadu s běžícími stopkami a hráči rozdělenými do tepových zón',
+    'help.coach.live.caption':
+      'Během tréninku vidíš, kdo je v jaké tepové zóně.',
     'help.coach.inviteTitle': 'Pozvi hráče',
     'help.coach.inviteBody': 'Pošli hráčům aktuální pozvánkový kód, odkaz nebo QR. Kód má 6 až 8 znaků a hráč před přijetím uvidí název týmu i sport.',
     'help.coach.homeTitle': 'Týmové nástroje nejsou uvnitř Domů',
@@ -462,8 +470,8 @@ export const ui = {
     'help.coach.tool1.body': 'Dnešní týmový přehled pro práci před tréninkem nebo zápasem.',
     'help.coach.tool2.title': 'Soupiska',
     'help.coach.tool2.body': 'Přehled hráčů v týmu.',
-    'help.coach.tool3.title': 'Týdenní rozpis',
-    'help.coach.tool3.body': 'Přehled naplánovaného týdne.',
+    'help.coach.tool3.title': 'Spuštění tréninku',
+    'help.coach.tool3.body': 'Trénink nebo zápas spustíš v Aktivitách. Zátěž a RPE zapíšeš po skončení.',
     'help.coach.tool4.title': 'Sessions',
     'help.coach.tool4.body': 'Spuštění tréninku nebo zápasu.',
     'help.coach.tool5.title': 'Reporty ze zápasů',
@@ -512,6 +520,14 @@ export const ui = {
       'Wellness trend hráče za posledních sedm dní s křivkou bolestivosti a denním deníkem',
     'help.player.trend.caption':
       'Z denních check-inů vzniká trend. Přepneš si 7, 30 nebo 90 dní.',
+    'help.player.overview.alt':
+      'Osobní přehled hráče: 1 345 AU za týden, 3 tréninky, kardio zátěž TRIMP 496 a klidový tep',
+    'help.player.overview.caption':
+      'Z odtrénovaného vzniká týdenní zátěž, kardio zátěž a zotavení.',
+    'help.player.match.alt':
+      'Zápasový report hráče se střeleckými mapami a úspěšností zakončení',
+    'help.player.match.caption':
+      'Po zápase vidíš svoje statistiky, odkud jsi střílel a kam.',
     'help.player.homeTitle': 'Co uvidíš po přihlášení',
     'help.player.team.alt': 'Seznam spoluhráčů v týmu v aplikaci Melveo',
     'help.player.team.caption': 'Záložka Tým ukazuje soupisku, ve které jsi.',
@@ -916,10 +932,10 @@ export const ui = {
     'help.install.first.caption': 'The first personal dashboard opens after setup.',
 
     'help.coach.metaTitle': 'Melveo for coaches',
-    'help.coach.metaDescription': 'How to create a team in Melveo and work with the coach board, roster, schedule, and sessions.',
+    'help.coach.metaDescription': 'How to create a team in Melveo and work with the daily team view, roster, and training sessions.',
     'help.coach.eyebrow': 'For coaches',
     'help.coach.title': 'Create a team and prepare the first session',
-    'help.coach.lead': 'After signing in, you create a team in a two-step wizard. You can then manage the roster, schedule, and training sessions.',
+    'help.coach.lead': 'After signing in, you create a team in a two-step wizard. You then see the team’s daily readiness and start training sessions and matches.',
     'help.coach.createTitle': 'Create a team',
     'help.coach.step1.title': 'Choose the create-team option',
     'help.coach.step1.body': 'After sign-in and your profile name, the three-way chooser opens. Select the option to create your own team.',
@@ -948,6 +964,14 @@ export const ui = {
       'A player’s check-in as the coach sees it: five rated axes and a body map with a sore shoulder marked',
     'help.coach.detail.caption':
       'For a player reporting pain you see their answers and where it hurts — if they shared it.',
+    'help.coach.session.alt':
+      'A finished session: a 360 AU plan against 372 AU actual, a +12 AU difference',
+    'help.coach.session.caption':
+      'After a session you see plan against reality, and what to do with the next one.',
+    'help.coach.live.alt':
+      'A live training session on iPad with a running clock and players grouped by heart-rate zone',
+    'help.coach.live.caption':
+      'During a session you see which heart-rate zone each player is in.',
     'help.coach.inviteTitle': 'Invite players',
     'help.coach.inviteBody': 'Share the current invite code, invitation link, or QR code with players. Codes contain 6 to 8 characters, and players see the team name and sport before joining.',
     'help.coach.homeTitle': 'Team tools are not inside Home',
@@ -957,8 +981,8 @@ export const ui = {
     'help.coach.tool1.body': 'Today’s team view for work before training or a match.',
     'help.coach.tool2.title': 'Roster',
     'help.coach.tool2.body': 'An overview of players on the team.',
-    'help.coach.tool3.title': 'Weekly schedule',
-    'help.coach.tool3.body': 'A view of the planned week.',
+    'help.coach.tool3.title': 'Starting a session',
+    'help.coach.tool3.body': 'Start a training session or match from Activities. Load and RPE get recorded afterwards.',
     'help.coach.tool4.title': 'Sessions',
     'help.coach.tool4.body': 'Launch a training session or match.',
     'help.coach.tool5.title': 'Match reports',
@@ -1007,6 +1031,14 @@ export const ui = {
       'A player’s wellness trend over the last seven days, with a soreness curve and a daily log',
     'help.player.trend.caption':
       'Daily check-ins build a trend. Switch between 7, 30, and 90 days.',
+    'help.player.overview.alt':
+      'A player’s overview: 1,345 AU for the week, 3 sessions, cardio load TRIMP 496, and resting heart rate',
+    'help.player.overview.caption':
+      'What you train becomes weekly load, cardio load, and recovery.',
+    'help.player.match.alt':
+      'A player’s match report with shot maps and finishing accuracy',
+    'help.player.match.caption':
+      'After a match you see your stats, where you shot from, and where it went.',
     'help.player.homeTitle': 'What you see after signing in',
     'help.player.team.alt': 'The list of teammates in the Melveo app',
     'help.player.team.caption': 'The Team tab shows the squad you belong to.',
