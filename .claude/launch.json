@@ -4,14 +4,35 @@
     {
       "name": "melveo-web",
       "runtimeExecutable": "bun",
-      "runtimeArgs": ["run", "dev"],
+      "runtimeArgs": [
+        "run",
+        "dev"
+      ],
       "port": 4321
     },
     {
       "name": "video-assets",
       "runtimeExecutable": "npx",
-      "runtimeArgs": ["-y", "serve", "video-assets", "-l", "8123"],
+      "runtimeArgs": [
+        "-y",
+        "serve",
+        "video-assets",
+        "-l",
+        "8123"
+      ],
       "port": 8123
+    },
+    {
+      "name": "help-preview",
+      "runtimeExecutable": "python3",
+      "runtimeArgs": [
+        "-m",
+        "http.server",
+        "4399",
+        "--directory",
+        "/Users/matty/Developer/melveo-web/dist"
+      ],
+      "port": 4399
     }
   ]
 }

@@ -220,6 +220,9 @@ const topicTitleKeys: Record<Topic, string> = {
               </li>
             ))}
           </ol>
+          <div class="help-figure-grid help-figure-grid--wide">
+            <HelpFigure wide src="/images/help/match-start.webp" width={1488} height={1129} alt={t('help.match.startAlt')} caption={t('help.match.startCaption')} />
+          </div>
         </section>
         <section class="help-section">
           <h2>{t('help.match.liveTitle')}</h2>
@@ -227,6 +230,11 @@ const topicTitleKeys: Record<Topic, string> = {
             {Array.from({ length: 3 }, (_, index) => index + 1).map((number) => (
               <div><h3>{tr(`help.match.live${number}.title`)}</h3><p>{tr(`help.match.live${number}.body`)}</p></div>
             ))}
+          </div>
+          <div class="help-figure-grid help-figure-grid--wide">
+            <HelpFigure wide src="/images/help/match-live.webp" width={1488} height={1129} alt={t('help.match.liveAlt')} caption={t('help.match.liveCaption')} />
+            <HelpFigure wide src="/images/help/match-events.webp" width={1488} height={1129} alt={t('help.match.eventsAlt')} caption={t('help.match.eventsCaption')} />
+            <HelpFigure wide src="/images/help/match-sanctions.webp" width={1488} height={1129} alt={t('help.match.sanctionsAlt')} caption={t('help.match.sanctionsCaption')} />
           </div>
         </section>
         <aside class="help-callout">
@@ -236,6 +244,11 @@ const topicTitleKeys: Record<Topic, string> = {
         <section class="help-section">
           <h2>{t('help.match.reportTitle')}</h2>
           <p class="help-section__lead">{t('help.match.reportBody')}</p>
+          <div class="help-figure-grid help-figure-grid--wide">
+            <HelpFigure wide src="/images/help/match-detail.webp" width={1488} height={1129} alt={t('help.match.detailAlt')} caption={t('help.match.detailCaption')} />
+            <HelpFigure wide src="/images/help/match-history.webp" width={1488} height={1125} alt={t('help.match.historyAlt')} caption={t('help.match.historyCaption')} />
+            <HelpFigure wide src="/images/help/match-player-report.webp" width={1488} height={1125} alt={t('help.match.reportAlt')} caption={t('help.match.reportCaption')} />
+          </div>
         </section>
       </>
     )}
