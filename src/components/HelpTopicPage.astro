@@ -3,7 +3,7 @@ import HelpFigure from './HelpFigure.astro';
 import HelpShell from './HelpShell.astro';
 import { testFlightUrl, ui, useTranslations, type Lang } from '../i18n/ui';
 
-type Topic = 'install' | 'coach' | 'player' | 'billing' | 'faq';
+type Topic = 'install' | 'coach' | 'player' | 'match' | 'billing' | 'faq';
 
 interface Props {
   lang: Lang;
@@ -18,6 +18,7 @@ const routes = {
   install: isCs ? '/cs/napoveda/instalace/' : '/en/help/install/',
   coach: isCs ? '/cs/napoveda/trener/' : '/en/help/coach/',
   player: isCs ? '/cs/napoveda/hrac/' : '/en/help/player/',
+  match: isCs ? '/cs/napoveda/zapas/' : '/en/help/match/',
   billing: isCs ? '/cs/napoveda/platby/' : '/en/help/billing/',
   faq: isCs ? '/cs/napoveda/faq/' : '/en/help/faq/',
 };
@@ -25,6 +26,7 @@ const alternateRoutes = {
   install: isCs ? '/en/help/install/' : '/cs/napoveda/instalace/',
   coach: isCs ? '/en/help/coach/' : '/cs/napoveda/trener/',
   player: isCs ? '/en/help/player/' : '/cs/napoveda/hrac/',
+  match: isCs ? '/en/help/match/' : '/cs/napoveda/zapas/',
   billing: isCs ? '/en/help/billing/' : '/cs/napoveda/platby/',
   faq: isCs ? '/en/help/faq/' : '/cs/napoveda/faq/',
 };
@@ -33,13 +35,15 @@ const steps: Partial<Record<Topic, number>> = {
   install: 5,
   coach: 4,
   player: 5,
+  match: 2,
   billing: 3,
 };
 
 const related: Record<Topic, Topic[]> = {
   install: ['player', 'coach'],
-  coach: ['player', 'faq'],
-  player: ['coach', 'faq'],
+  coach: ['match', 'player', 'faq'],
+  player: ['match', 'coach', 'faq'],
+  match: ['coach', 'player', 'faq'],
   billing: ['install', 'faq'],
   faq: ['install', 'player', 'coach', 'billing'],
 };
@@ -48,6 +52,7 @@ const topicTitleKeys: Record<Topic, string> = {
   install: 'help.hub.install.title',
   coach: 'help.hub.coach.title',
   player: 'help.hub.player.title',
+  match: 'help.hub.match.title',
   billing: 'help.hub.billing.title',
   faq: 'help.hub.faq.title',
 };
@@ -199,6 +204,38 @@ const topicTitleKeys: Record<Topic, string> = {
           <div class="help-figure-grid help-figure-grid--wide">
             <HelpFigure wide src="/images/help/match-report.webp" width={1488} height={1437} alt={t('help.player.match.alt')} caption={t('help.player.match.caption')} />
           </div>
+        </section>
+      </>
+    )}
+
+    {topic === 'match' && (
+      <>
+        <section class="help-section">
+          <h2>{t('help.match.startTitle')}</h2>
+          <ol class="help-steps" aria-label={t('help.stepsLabel')}>
+            {Array.from({ length: steps.match ?? 0 }, (_, index) => index + 1).map((number) => (
+              <li>
+                <span class="help-step__number" aria-hidden="true">{String(number).padStart(2, '0')}</span>
+                <div><h3>{tr(`help.match.step${number}.title`)}</h3><p>{tr(`help.match.step${number}.body`)}</p></div>
+              </li>
+            ))}
+          </ol>
+        </section>
+        <section class="help-section">
+          <h2>{t('help.match.liveTitle')}</h2>
+          <div class="help-tool-grid">
+            {Array.from({ length: 3 }, (_, index) => index + 1).map((number) => (
+              <div><h3>{tr(`help.match.live${number}.title`)}</h3><p>{tr(`help.match.live${number}.body`)}</p></div>
+            ))}
+          </div>
+        </section>
+        <aside class="help-callout">
+          <h2>{t('help.match.endTitle')}</h2>
+          <p>{t('help.match.endBody')}</p>
+        </aside>
+        <section class="help-section">
+          <h2>{t('help.match.reportTitle')}</h2>
+          <p class="help-section__lead">{t('help.match.reportBody')}</p>
         </section>
       </>
     )}
