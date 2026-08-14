@@ -712,19 +712,16 @@ const currencyShort = lang === 'cs' ? 'Kč' : 'CZK';
          beside them. Two columns, capped and centred, so the pair sits in
          the middle of the section like the header above it.
 
-         Not equal columns: with five features against ten, matched widths
-         made two cards of the same kind at wildly different heights, which
-         reads as a mistake. Giving the paid plan the wider column turns the
-         size difference into hierarchy — a starter card beside the actual
-         product — and closes some of the height gap on its own. */
-      grid-template-columns: minmax(0, 0.82fr) minmax(0, 1.18fr);
+         Equal columns and equal heights. An asymmetric grid was tried to
+         justify the shorter free card and read worse — two cards of the
+         same kind should match. The free plan's shorter list is handled
+         inside the card instead: its closing line is pushed to the bottom
+         edge so the card fills rather than trailing off. */
+      grid-template-columns: repeat(2, minmax(0, 1fr));
       max-width: 52rem;
       margin-inline: auto;
       gap: 1.25rem;
-      /* Free lists five features, the paid one ten. Stretching made the
-         free card a tall box with a hole under its last bullet; letting
-         each card end where its content ends reads as intentional. */
-      align-items: start;
+      align-items: stretch;
     }
   }
 
@@ -733,6 +730,11 @@ const currencyShort = lang === 'cs' ? 'Kč' : 'CZK';
      here only contributes pricing-specific padding inside .glass-content. */
   .pricing-card .glass-content {
     padding: 1.75rem 1.5rem 1.5rem;
+    /* Column so the free card's closing line can be pushed to the bottom
+       edge with margin-top:auto once the cards stretch to equal height. */
+    display: flex;
+    flex-direction: column;
+    height: 100%;
   }
 
   /*
@@ -902,7 +904,12 @@ const currencyShort = lang === 'cs' ? 'Kč' : 'CZK';
   }
 
   .pricing-card-upsell {
+    /* auto pushes it to the bottom of the stretched card, so the free
+       plan's shorter feature list ends on a closing line at the card's
+       edge instead of trailing off mid-card. */
     margin: 1.25rem 0 0;
+    margin-top: auto;
+    padding-top: 1.25rem;
     color: var(--color-text-tertiary);
     font-size: 0.8rem;
     line-height: 1.5;
