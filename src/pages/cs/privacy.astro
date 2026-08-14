@@ -3,7 +3,7 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
 import PageHeader from '../../components/PageHeader.astro';
 
 /**
- * Privacy policy CS — V4-B draft.
+ * Privacy policy CS — V4-C.
  *
  * Per PLAN.md §16.6 written against:
  *   - Nařízení EU 2016/679 (GDPR), zejm. Art. 13 + 14 (transparentnost)
@@ -19,7 +19,7 @@ import PageHeader from '../../components/PageHeader.astro';
  * Tento text je dobrý baseline pro pilot, ne pro enterprise smlouvy.
  */
 
-const lastUpdated = '2026-06-01';
+const lastUpdated = '2026-08-14';
 ---
 
 <BaseLayout
@@ -91,8 +91,9 @@ const lastUpdated = '2026-06-01';
     <ul>
       <li>Wellness check-iny — pětice číselných hodnot 1–5 s časovým razítkem</li>
       <li>Volitelné poznámky o bolesti, soukromé poznámky hráče</li>
-      <li>Účast na tréninkových sessions</li>
+      <li>Účast a události tréninků a zápasů, sestavy, statistiky a reporty</li>
       <li>Subjektivní vnímaná zátěž (RPE) na škále 1–10 po skončené session</li>
+      <li>Volitelný osobnostní profil a preference týmové komunikace</li>
     </ul>
     <p>
       Některé sportovní a wellness signály (např. bolest, symptomy, HRV nebo
@@ -104,27 +105,44 @@ const lastUpdated = '2026-06-01';
 
     <h3>3.3. Údaje ze zařízení a senzorů (volitelné, pouze se souhlasem)</h3>
     <ul>
-      <li>Apple Health: pouze hodnoty, které hráč v iOS Health
-        explicitně sdílí s aplikací</li>
-      <li>Polar (volitelné): tepová frekvence během tréninku</li>
+      <li>Apple Health: spánek, tep, klidový tep, HRV, kroky a dokončené
+        aktivity, které uživatel v iOS Health výslovně zpřístupní aplikaci</li>
+      <li>Polar (volitelné): ranní měření HRV a tepová frekvence během aktivity</li>
     </ul>
 
-    <h3>3.4. Provozní a technické údaje</h3>
+    <h3>3.4. Uživatelský obsah a média</h3>
+    <ul>
+      <li>Volitelná profilová a týmová fotografie</li>
+      <li>Textové poznámky z check-inů, tréninků, zápasů a reportů</li>
+      <li>Volitelný videozáznam zápasu, jeho technická metadata a vytvořené klipy</li>
+    </ul>
+    <p>
+      Zápasové video se nepoužívá k biometrické identifikaci ani k reklamě.
+      Je dostupné pouze oprávněným členům stejného klubového prostoru.
+    </p>
+
+    <h3>3.5. Provozní a technické údaje</h3>
     <ul>
       <li>Čas přihlášení, IP adresa (zpracována pouze pro detekci podvodu,
         neukládá se déle než 30 dní)</li>
-      <li>Identifikátor zařízení (pro push notifikace)</li>
-      <li>Anonymizované informace o pádu aplikace (Crash Logs)</li>
+      <li>Náhodný identifikátor instalace pro korelaci požadavků,
+        bezpečnostní audit a řešení duplicit; nepoužívá se pro reklamu</li>
+      <li>Dobrovolné omezené události používání produktu (například otevření
+        přehledu nebo dokončení check-inu) svázané s účtem. Ukládají se jen po
+        výslovném souhlasu v aplikaci a neobsahují odpovědi wellness, HRV,
+        bolest, poznámky ani data jiné osoby.</li>
+      <li>Diagnostika MetricKit zůstává pouze v zařízení. Na server se odešle
+        jen tehdy, když ji uživatel sám vyexportuje a předá podpoře.</li>
     </ul>
 
-    <h3>3.5. Údaje pro účely platby (pouze klubů)</h3>
+    <h3>3.6. Údaje pro účely platby (pouze klubů)</h3>
     <ul>
       <li>Fakturační údaje klubu (název, IČO, adresa)</li>
       <li>Stripe Customer ID (samotné údaje o kartě nikdy
         nezpracováváme — vše drží Stripe Inc.)</li>
     </ul>
 
-    <h3>3.6. Cookies a podobné technologie</h3>
+    <h3>3.7. Cookies a podobné technologie</h3>
     <ul>
       <li>Nezbytné ukládání — např. uložení volby souhlasu v prohlížeči
         (<code>melveo:consent</code>) a bezpečnostní či provozní prvky webu.</li>
@@ -163,8 +181,9 @@ const lastUpdated = '2026-06-01';
         </tr>
         <tr>
           <td>Analytika a vylepšení produktu</td>
-          <td>Souhlas — odst. 1 písm. a) u nástrojů s cookies; oprávněný
-            zájem — odst. 1 písm. f) u cookieless agregované analytiky</td>
+          <td>Souhlas — odst. 1 písm. a) u dobrovolné produktové analytiky
+            aplikace a u webových nástrojů s cookies; oprávněný zájem — odst.
+            1 písm. f) pouze u cookieless agregované analytiky webu</td>
         </tr>
         <tr>
           <td>Marketingová komunikace</td>
@@ -200,13 +219,21 @@ const lastUpdated = '2026-06-01';
 
     <h2>6. Doba uchování</h2>
     <ul>
-      <li>Identifikační údaje: po dobu trvání účtu + 1 rok po smazání
-        (pro vyřízení případných sporů)</li>
-      <li>Wellness check-iny a sportovní data: po dobu členství v klubu
-        + 1 rok</li>
+      <li>Identifikační údaje: po dobu trvání účtu; při smazání účtu se
+        účet a údaje navázané na jeho identitu odstraní. Výjimkou jsou pouze
+        záznamy, které musíme uchovat z právního důvodu, uvedené níže.</li>
+      <li>Wellness check-iny a osobní sportovní data: po dobu používání účtu
+        nebo členství v klubu; při smazání účtu se odstraní nebo nevratně
+        oddělí od identity podle vlastnictví daného týmového záznamu.</li>
       <li>Účetní a fakturační údaje: 10 let dle zákona č. 235/2004 Sb.
         o DPH a zákona č. 563/1991 Sb. o účetnictví</li>
       <li>Provozní údaje (IP, crash logs): nejdéle 30 dní</li>
+      <li>Události používání produktu: pouze po dobu uděleného souhlasu;
+        odvoláním souhlasu v aplikaci se dosavadní události účtu ihned smažou</li>
+      <li>Zápasové video a vytvořené klipy: do smazání oprávněným uživatelem
+        nebo ukončení příslušného týmového prostoru. Po požadavku na smazání
+        je zdroj i odvozené soubory odstraněn řízeným mazacím procesem; krátce
+        zůstává jen technický záznam nutný k dokončení a auditu mazání.</li>
       <li>Souhlas s cookies: do odvolání nebo do změny verze souhlasového
         nastavení</li>
       <li>Analytická a marketingová data: dle nastavení daného nástroje
@@ -244,8 +271,16 @@ const lastUpdated = '2026-06-01';
         </tr>
         <tr>
           <td>Cloudflare, Inc.</td>
-          <td>CDN, ochrana před útoky, analytika webu</td>
+          <td>CDN, ochrana před útoky, analytika webu a neveřejné uložení
+            zápasového videa v R2</td>
           <td>EU/USA — DPF</td>
+        </tr>
+        <tr>
+          <td>OpenAI Ireland Ltd. / OpenAI</td>
+          <td>Volitelné AI shrnutí zápasu po výslovném potvrzení uživatele.
+            Odesílá se pouze souhrn zápasových událostí a iniciály hráčů;
+            nikdy wellness, HRV ani video. Data nejsou použita k trénování modelů.</td>
+          <td>EU/USA — DPA a příslušné smluvní záruky</td>
         </tr>
         <tr>
           <td>Apple Inc.</td>
@@ -299,8 +334,10 @@ const lastUpdated = '2026-06-01';
       <li><strong>Vznést námitku</strong> proti zpracování na základě
         oprávněného zájmu.</li>
       <li><strong>Odvolat souhlas</strong> kdykoliv, bez vlivu na zákonnost
-        zpracování provedeného před odvoláním. Pro analytické / marketingové
-        cookies přes patičku „Nastavení cookies".</li>
+        zpracování provedeného před odvoláním. Produktovou analytiku aplikace
+        lze vypnout v Účet → Soukromí; tím se dosavadní produktové události
+        účtu smažou. Analytické / marketingové cookies se mění přes patičku
+        „Nastavení cookies".</li>
       <li><strong>Podat stížnost</strong> u dozorového úřadu:
         <br />
         <strong>Úřad pro ochranu osobních údajů</strong><br />
@@ -391,11 +428,6 @@ const lastUpdated = '2026-06-01';
       podle GDPR, o čemž vás budeme informovat.
     </p>
 
-    <p class="legal-disclaimer">
-      Tento dokument je vlastní zpracování provozovatele a vychází z
-      platné legislativy. Pro enterprise smlouvy a komplexní zpracování
-      doporučujeme advokátní revizi.
-    </p>
   </article>
 </BaseLayout>
 

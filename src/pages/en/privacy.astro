@@ -3,12 +3,12 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
 import PageHeader from '../../components/PageHeader.astro';
 
 /**
- * Privacy policy EN — V4-B mirror of cs/privacy.astro.
+ * Privacy policy EN — V4-C mirror of cs/privacy.astro.
  * Same legal substance; English translation for international readers.
  * Czech version is authoritative in disputes (jurisdiction CZ).
  */
 
-const lastUpdated = '2026-06-01';
+const lastUpdated = '2026-08-14';
 ---
 
 <BaseLayout
@@ -78,8 +78,9 @@ const lastUpdated = '2026-06-01';
     <ul>
       <li>Wellness check-ins — five numeric values 1–5 with timestamp</li>
       <li>Optional pain notes; player-private notes</li>
-      <li>Attendance at training sessions</li>
+      <li>Training and match attendance, events, lineups, statistics, and reports</li>
       <li>Subjective perceived load (RPE) on a 1–10 scale post-session</li>
+      <li>Optional personality profile and team communication preferences</li>
     </ul>
     <p>
       Some sports and wellness signals (for example pain, symptoms, HRV,
@@ -91,27 +92,44 @@ const lastUpdated = '2026-06-01';
 
     <h3>3.3. Device and sensor data (optional, only with consent)</h3>
     <ul>
-      <li>Apple Health: only the values the player explicitly shares from
-        iOS Health</li>
-      <li>Polar (optional): heart rate during training</li>
+      <li>Apple Health: sleep, heart rate, resting heart rate, HRV, steps,
+        and completed activities explicitly shared with the app</li>
+      <li>Polar (optional): morning HRV measurement and heart rate during activity</li>
     </ul>
 
-    <h3>3.4. Operational and technical data</h3>
+    <h3>3.4. User content and media</h3>
+    <ul>
+      <li>Optional profile and team photo</li>
+      <li>Free-form notes in check-ins, training sessions, matches, and reports</li>
+      <li>Optional match video, its technical metadata, and generated clips</li>
+    </ul>
+    <p>
+      Match video is not used for biometric identification or advertising.
+      It is available only to authorized members of the same club workspace.
+    </p>
+
+    <h3>3.5. Operational and technical data</h3>
     <ul>
       <li>Login time, IP address (processed only for fraud detection,
         retained max 30 days)</li>
-      <li>Device identifier (for push notifications)</li>
-      <li>Anonymized crash logs</li>
+      <li>A random installation identifier for request correlation, security
+        auditing, and duplicate handling; it is never used for advertising</li>
+      <li>Optional limited product-use events (for example opening an overview
+        or completing a check-in), linked to the account. They are stored only
+        after explicit in-app consent and never contain wellness answers, HRV,
+        pain, notes, or another person's data.</li>
+      <li>MetricKit diagnostics stay on the device. They leave the device only
+        if the user explicitly exports and sends them to support.</li>
     </ul>
 
-    <h3>3.5. Payment data (clubs only)</h3>
+    <h3>3.6. Payment data (clubs only)</h3>
     <ul>
       <li>Club billing details (name, IČO/VAT, address)</li>
       <li>Stripe Customer ID (we never process card data — handled
         entirely by Stripe Inc.)</li>
     </ul>
 
-    <h3>3.6. Cookies and similar technologies</h3>
+    <h3>3.7. Cookies and similar technologies</h3>
     <ul>
       <li>Necessary storage — for example saving your consent choice in the
         browser (<code>melveo:consent</code>) and security or operational
@@ -148,8 +166,9 @@ const lastUpdated = '2026-06-01';
         </tr>
         <tr>
           <td>Analytics and product improvement</td>
-          <td>Consent — Art. 6(1)(a) for cookie-based tools; legitimate
-            interest — Art. 6(1)(f) for cookieless aggregate analytics</td>
+          <td>Consent — Art. 6(1)(a) for optional in-app product analytics and
+            cookie-based website tools; legitimate interest — Art. 6(1)(f)
+            only for cookieless aggregate website analytics</td>
         </tr>
         <tr>
           <td>Marketing communication</td>
@@ -185,13 +204,23 @@ const lastUpdated = '2026-06-01';
 
     <h2>6. Retention</h2>
     <ul>
-      <li>Identifiers: for the duration of the account + 1 year after
-        deletion (for handling potential disputes)</li>
-      <li>Wellness check-ins and sports data: for the duration of club
-        membership + 1 year</li>
+      <li>Identifiers: for the lifetime of the account. Deleting the account
+        removes the account and data linked to its identity, except records
+        that must be retained for a legal reason as listed below.</li>
+      <li>Wellness check-ins and personal sports data: while the account is
+        used or the person remains a club member. Account deletion removes
+        them or irreversibly separates them from the identity according to
+        ownership of the relevant team record.</li>
       <li>Accounting and billing data: 10 years per Czech VAT Act
         No. 235/2004 Coll. and Accounting Act No. 563/1991 Coll.</li>
       <li>Operational data (IP, crash logs): max 30 days</li>
+      <li>Product-use events: only while consent remains active; withdrawing
+        consent in the app immediately deletes the account's existing events</li>
+      <li>Match video and generated clips: until deleted by an authorized user
+        or the relevant team workspace is closed. After a deletion request,
+        the source and derived objects are removed by a controlled deletion
+        process; only a short-lived technical record remains to finish and
+        audit that deletion.</li>
       <li>Cookie consent: until withdrawn or until the consent schema version
         changes</li>
       <li>Analytics and marketing data: per the tool's settings (Google
@@ -221,8 +250,16 @@ const lastUpdated = '2026-06-01';
         </tr>
         <tr>
           <td>Cloudflare, Inc.</td>
-          <td>CDN, DDoS protection, web analytics</td>
+          <td>CDN, DDoS protection, web analytics, and private match-video
+            storage in R2</td>
           <td>EU/USA — DPF</td>
+        </tr>
+        <tr>
+          <td>OpenAI Ireland Ltd. / OpenAI</td>
+          <td>Optional AI match commentary after the user's explicit
+            confirmation. Only a summary of match events and player initials
+            is sent; never wellness, HRV, or video. Data is not used to train models.</td>
+          <td>EU/USA — DPA and applicable contractual safeguards</td>
         </tr>
         <tr>
           <td>Apple Inc.</td>
@@ -275,8 +312,10 @@ const lastUpdated = '2026-06-01';
       <li><strong>To object</strong> to processing based on legitimate
         interest.</li>
       <li><strong>To withdraw consent</strong> at any time, without affecting
-        the lawfulness of processing before withdrawal. For analytics /
-        marketing cookies via the footer link "Cookie settings".</li>
+        the lawfulness of processing before withdrawal. In-app product
+        analytics can be disabled under Account → Privacy, which deletes the
+        account's existing product-use events. Analytics / marketing cookies
+        can be changed via the footer link "Cookie settings".</li>
       <li><strong>To file a complaint</strong> with the supervisory authority:
         <br />
         <strong>Office for Personal Data Protection</strong><br />
@@ -365,10 +404,8 @@ const lastUpdated = '2026-06-01';
     </p>
 
     <p class="legal-disclaimer">
-      This document is the operator's own draft based on applicable
-      legislation. For enterprise contracts and complex processing,
-      we recommend a legal review. <strong>The Czech version is
-      authoritative in case of disputes</strong> (jurisdiction CZ).
+      <strong>The Czech version is authoritative in case of disputes</strong>
+      (jurisdiction CZ).
     </p>
   </article>
 </BaseLayout>
