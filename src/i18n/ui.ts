@@ -168,7 +168,7 @@ export const ui = {
     // Stage 6.5 — Pricing
     'pricing.eyebrow': '',
     'pricing.headline': 'Začni zdarma.',
-    'pricing.headlineAccent': 'Plať jen za to, co používáš.',
+    'pricing.headlineAccent': 'Jeden tarif pro celý tým.',
     'pricing.subline': 'Jedna licence pro celý tým. Transparentní ceny v Kč.',
     // Daňová poznámka — AKTUÁLNĚ SE NERENDERUJE (rozhodnutí majitele
     // 2026-06-10: na landingu žádné zmínky o DPH). String zůstává
@@ -746,7 +746,7 @@ export const ui = {
     // Stage 6.5 — Pricing
     'pricing.eyebrow': '',
     'pricing.headline': 'Start free.',
-    'pricing.headlineAccent': 'Pay only for what you use.',
+    'pricing.headlineAccent': 'One plan for the whole team.',
     'pricing.subline': 'One license for the whole team. Transparent CZK pricing.',
     // Tax note — CURRENTLY NOT RENDERED (owner decision 2026-06-10:
     // no VAT wording on the landing). Kept ready; see CS comment above.

@@ -71,53 +71,37 @@ const featuresFreeEn = [
   'Small-group test with up to 8 players',
 ];
 
-const featuresCoreCs = [
+/*
+  2026-08-06: Core / Live / Intelligence collapsed into a single paid plan
+  at the former Intelligence price (owner decision). The three feature
+  lists are merged here, deduplicated, with the "Vše z …" cross-references
+  dropped — they only made sense while the tiers stacked on each other.
+  Ordered everyday-first, so the reader meets what they will use daily
+  before the analytics and onboarding lines.
+*/
+const featuresTeamCs = [
   'Vše z Free Starter',
   'Plný coach board s historií',
   'Agregovaná readiness týmu',
   'Role-based týmový kontext',
-  'E-mail podpora',
+  'Coach Board Live',
+  'Realtime sledování zátěže',
+  'Vedení zápasu s živými tepy',
+  'Pokročilá analytika a periodizace',
+  'PDF / CSV exporty a vlastní reporty',
+  'Onboarding s konzultantem a prioritní podpora',
 ];
-const featuresCoreEn = [
+const featuresTeamEn = [
   'Everything in Free Starter',
   'Full coach board with history',
   'Aggregate team readiness',
   'Role-based team context',
-  'Email support',
-];
-
-const featuresLiveCs = [
-  'Vše z Team Core',
-  'Coach Board Live',
-  'Realtime sledování zátěže',
-  'Decision room během zápasu',
-  'Match-day live mode',
-  'Prioritní podpora',
-];
-const featuresLiveEn = [
-  'Everything in Team Core',
   'Coach Board Live',
   'Realtime load tracking',
-  'In-match decision room',
-  'Match-day live mode',
-  'Priority support',
-];
-
-const featuresIntelCs = [
-  'Vše z Team Live',
-  'Pokročilá analytika a periodizace',
-  'PDF / CSV exporty',
-  'Vlastní reporty',
-  'Onboarding s konzultantem',
-  'Dedikovaný account manager',
-];
-const featuresIntelEn = [
-  'Everything in Team Live',
+  'Live match logging with heart rates',
   'Advanced analytics + periodisation',
-  'PDF / CSV exports',
-  'Custom reports',
-  'Onboarding with a consultant',
-  'Dedicated account manager',
+  'PDF / CSV exports and custom reports',
+  'Onboarding with a consultant and priority support',
 ];
 
 const mailto = (subject: string) =>
@@ -141,42 +125,11 @@ const plans: Plan[] = [
     ctaHref: '#contact',
   },
   {
-    id: 'core',
-    name: 'Team Core',
+    id: 'team',
+    name: 'Melveo Team',
     badge: null,
-    popular: false,
-    free: false,
-    priceMonthly: 1790,
-    priceYearly: 17900,
-    perDayMonthly: 60,
-    perDayYearly: 49,
-    perMonthFromYearly: 1492,
-    limits: { players: 24, staff: 3 },
-    features: lang === 'cs' ? featuresCoreCs : featuresCoreEn,
-    ctaLabel: ctaLabelPilot,
-    ctaHref: mailto(lang === 'cs' ? 'Zájem o Team Core' : 'Team Core enquiry'),
-  },
-  {
-    id: 'live',
-    name: 'Team Live',
-    badge: null,
-    popular: false,
-    free: false,
-    priceMonthly: 2990,
-    priceYearly: 29900,
-    perDayMonthly: 100,
-    perDayYearly: 82,
-    perMonthFromYearly: 2492,
-    limits: { players: 24, staff: 6 },
-    features: lang === 'cs' ? featuresLiveCs : featuresLiveEn,
-    ctaLabel: ctaLabelPilot,
-    ctaHref: mailto(lang === 'cs' ? 'Zájem o Team Live' : 'Team Live enquiry'),
-  },
-  {
-    id: 'intelligence',
-    name: 'Team Intelligence',
-    badge: null,
-    popular: false,
+    // The only paid card now, so it carries the filled brand-cyan treatment.
+    popular: true,
     free: false,
     priceMonthly: 4990,
     priceYearly: 49900,
@@ -184,11 +137,9 @@ const plans: Plan[] = [
     perDayYearly: 137,
     perMonthFromYearly: 4158,
     limits: { players: 24, staff: 8 },
-    features: lang === 'cs' ? featuresIntelCs : featuresIntelEn,
+    features: lang === 'cs' ? featuresTeamCs : featuresTeamEn,
     ctaLabel: ctaLabelPilot,
-    ctaHref: mailto(
-      lang === 'cs' ? 'Zájem o Team Intelligence' : 'Team Intelligence enquiry',
-    ),
+    ctaHref: mailto(lang === 'cs' ? 'Zájem o Melveo Team' : 'Melveo Team enquiry'),
   },
 ];
 
