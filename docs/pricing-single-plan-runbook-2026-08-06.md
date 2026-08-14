@@ -37,10 +37,10 @@ se přestává nabízet. To je řádově menší a bezpečnější zásah než p
 **Tohle udělej první, ať víš, jestli vůbec něco migruješ.**
 
 ```sql
-select p.slug, s.status, count(*)
+select p.code, s.status, count(*)
 from public.subscriptions s
 join public.plans p on p.id = s.plan_id
-where p.slug in ('team_core','team_live')
+where p.code in ('team_core','team_live')
 group by 1, 2;
 ```
 
@@ -53,34 +53,38 @@ group by 1, 2;
 
 ## Krok 2 — Supabase
 
+> Sloupce tabulky `plans` jsou **`code`, `display_name`, `tier`, `is_public`** —
+> ne `slug` / `name` / `sort_order` / `is_active`. Ověřeno proti schématu.
+
 Přejmenovat zbývající placený tarif a schovat dva rušené. **Nemazat** — historické
 předplatné a faktury se na ně odkazují.
 
 ```sql
 -- jediný placený tarif dostane neutrální jméno
 update public.plans
-   set slug = 'team',
-       name = 'Melveo Team',
-       sort_order = 1
- where slug = 'team_intelligence';
+   set code = 'team',
+       display_name = 'Melveo Team',
+       tier = 1
+ where code = 'team_intelligence';
 
--- rušené tarify přestanou být nabízené
-update public.plans set is_active = false
- where slug in ('team_core','team_live');
+-- rušené tarify přestanou být veřejně nabízené
+update public.plans set is_public = false
+ where code in ('team_core','team_live');
 
 -- popis Athlete Packu odkazuje na zrušené tarify
 update public.plans
    set description = 'Add-on: +10 hráčů per team_season. Účtováno samostatně k tarifu Melveo Team.'
- where slug = 'team_athlete_pack';
+ where code = 'team_athlete_pack';
 ```
 
 Ověření:
 
 ```sql
-select slug, name, is_active, sort_order from public.plans order by sort_order;
+select code, display_name, tier, is_public from public.plans order by tier;
 ```
 
-Očekávaný výsledek: aktivní jsou `team_starter`, `team`, `team_athlete_pack`.
+Očekávaný výsledek: `is_public = true` má jen `team_starter` a `team`.
+`team_athlete_pack` je `false` už dnes (je to add-on, ne samostatný tarif).
 
 ## Krok 3 — Stripe
 
@@ -101,11 +105,11 @@ Co **nedělat**: nemazat Price objekty a nesahat na `price_1TirVa…` a
 ## Krok 4 — zpětná kontrola
 
 ```sql
-select p.slug, pp.interval, pp.amount_minor, pp.stripe_price_id, pp.archived_at
+select p.code, pp.interval, pp.amount_minor, pp.stripe_price_id, pp.archived_at
 from public.plan_prices pp
 join public.plans p on p.id = pp.plan_id
-where p.is_active
-order by p.sort_order, pp.interval;
+where p.is_public
+order by p.tier, pp.interval;
 ```
 
 Sedět má: Free Starter na nule, `team` na `499000` / `4990000`, Athlete Pack na
