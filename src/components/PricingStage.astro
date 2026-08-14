@@ -317,14 +317,16 @@ const currencyShort = lang === 'cs' ? 'Kč' : 'CZK';
                 The pointer-tracking handler in Landing.astro's
                 mountHeroButtons() picks these up for free because it
                 queries .hero-pill across the whole document. */}
-            {/* The paid card carries the filled pill, the free one the ghost.
-                Before this, both rendered plain and the free plan's CTA read
-                as the louder of the two — backwards for the card we want
-                people to choose. */}
+            {/* The paid card's CTA is the filled one. Note this does NOT use
+                hero-pill--filled: that class and hero-pill--ghost appear in
+                markup here and on the landing hero, but no rule anywhere
+                defines them, so both buttons have always rendered identically.
+                Styled locally instead, rather than defining the global
+                variants and silently restyling the hero as a side effect. */}
             <a
               class:list={[
                 'hero-pill pricing-card-cta',
-                plan.free ? 'hero-pill--ghost' : 'hero-pill--filled',
+                !plan.free && 'pricing-card-cta--primary',
               ]}
               href={plan.ctaHref}
             >
@@ -351,6 +353,12 @@ const currencyShort = lang === 'cs' ? 'Kč' : 'CZK';
                 </li>
               ))}
             </ul>
+            {/* The free plan lists five features against the paid plan's ten,
+                which left its card ending well short. This closes it with the
+                next step instead of empty space. */}
+            {plan.free && (
+              <p class="pricing-card-upsell">{t('pricing.freeUpsell')}</p>
+            )}
             </div>{/* /.glass-content */}
           </li>
         ))
@@ -702,8 +710,14 @@ const currencyShort = lang === 'cs' ? 'Kč' : 'CZK';
       /* Two plans since 2026-08-06, not four. A four-column grid left them
          huddled in the left half of an 84rem container with dead space
          beside them. Two columns, capped and centred, so the pair sits in
-         the middle of the section like the header above it. */
-      grid-template-columns: repeat(2, minmax(0, 1fr));
+         the middle of the section like the header above it.
+
+         Not equal columns: with five features against ten, matched widths
+         made two cards of the same kind at wildly different heights, which
+         reads as a mistake. Giving the paid plan the wider column turns the
+         size difference into hierarchy — a starter card beside the actual
+         product — and closes some of the height gap on its own. */
+      grid-template-columns: minmax(0, 0.82fr) minmax(0, 1.18fr);
       max-width: 52rem;
       margin-inline: auto;
       gap: 1.25rem;
@@ -871,6 +885,27 @@ const currencyShort = lang === 'cs' ? 'Kč' : 'CZK';
     margin-bottom: 1.5rem;
     font-size: 0.95rem;
     letter-spacing: 0.04em;
+  }
+
+  /* The paid plan's CTA, filled with the brand cyan so it outranks the
+     free card's outline button. */
+  .pricing-card-cta--primary {
+    background: var(--color-accent-primary);
+    color: var(--color-accent-primary-cta-fg);
+    font-weight: 700;
+  }
+  .pricing-card-cta--primary:hover {
+    background: var(--color-accent-primary-hover);
+  }
+  .pricing-card-cta--primary:active {
+    background: var(--color-accent-primary-pressed);
+  }
+
+  .pricing-card-upsell {
+    margin: 1.25rem 0 0;
+    color: var(--color-text-tertiary);
+    font-size: 0.8rem;
+    line-height: 1.5;
   }
 
   /* ─── Features list ─────────────────────────────────────────── */

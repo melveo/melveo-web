@@ -191,6 +191,7 @@ export const ui = {
     'pricing.ctaFree': 'Test s menší skupinou',
     'pricing.ctaPilot': 'Mám zájem',
     'pricing.free': 'Zdarma',
+    'pricing.freeUpsell': 'Až tým povyroste přes 8 hráčů, přejdeš na Melveo Team.',
     'pricing.athleteHeading': 'Potřebujete víc hráčů?',
     'pricing.athleteBody':
       'Athlete Pack rozšíří tým o dalších 10 hráčů za 5 900 Kč/rok (max 1 pack na tým).',
@@ -765,6 +766,7 @@ export const ui = {
     'pricing.ctaFree': 'Start with small group',
     'pricing.ctaPilot': 'Get in touch',
     'pricing.free': 'Free',
+    'pricing.freeUpsell': 'When the squad outgrows 8 players, you move up to Melveo Team.',
     'pricing.athleteHeading': 'Need more players?',
     'pricing.athleteBody':
       'The Athlete Pack adds 10 more players for 5,900 CZK / year (max 1 pack per team).',
