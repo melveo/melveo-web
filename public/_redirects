@@ -19,14 +19,13 @@
 /cs                  /cs/                    301
 /en                  /en/                    301
 
-# Universal Link path for invite codes (forward to app or fallback to
-# default landing). The AASA file declares /i/* as a Universal Link
-# target — iOS opens the app directly. Browsers without the app see
-# the homepage.
-/i/*                 /cs/                    302
+# Universal Link path for invite codes. The AASA file declares /i/* as a
+# Universal Link target, so iOS with the app opens it directly. Browsers
+# without the app (Android, desktop) continue to the web player surface on
+# app.melveo.app, which stores the code and asks for sign-in (plan 519 W0.1).
+/i/*                 https://app.melveo.app/invite/:splat    302
 
 # Universal Link path for team QR join tokens (doc 414). Same handling as
-# /i/* — AASA declares /j/* so iOS with the app opens it directly; browsers
-# without the app fall back to the homepage instead of an empty 404 (which
-# iOS otherwise treats as a file download).
-/j/*                 /cs/                    302
+# /i/*: AASA declares /j/* so iOS with the app opens it directly; every other
+# browser goes to app.melveo.app/join/<token> (plan 519 W0.1).
+/j/*                 https://app.melveo.app/join/:splat      302
