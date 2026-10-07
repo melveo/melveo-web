@@ -7,6 +7,8 @@ SOUBORY / FILES
   melveo-mark-ink.svg, melveo-mark-white.svg  samotná značka / mark only
   melveo-wordmark-ink.svg, -white.svg         samotný nápis / wordmark only
   melveo-appicon-cyan-rounded.svg, melveo-appicon-1024.png   ikona aplikace / app icon
+  melveo-iphone-*.png, melveo-ipad-*.png      screenshoty aplikace (demo tým, žádná data skutečných hráčů)
+                                              app screenshots (demo team, no real player data)
 
 PRAVIDLA POUŽITÍ
   - Kolem loga nechte volné místo alespoň na výšku míčku ze značky.
