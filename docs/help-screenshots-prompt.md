@@ -19,7 +19,7 @@ nezabývej.
 
 ## Prostředí — už je připravené, takhle se spouští
 
-Repo aplikace: `~/Developer/team_app_melveo_v1`
+Repo aplikace: `~/Developer/melveo-app`
 Web, kam screenshoty míří: `~/Developer/melveo-web/public/images/help/`
 
 **Simulátor:** `Melveo-CI-Marketing`, UDID `8FA2559C-05C4-4498-9C63-8BB9DFF4E345`
@@ -30,7 +30,7 @@ databázový kontejner `supabase_db_melveo_ci_marketing`, DB port 56422.
 **Build a spuštění:**
 
 ```
-xcodebuild -project ~/Developer/team_app_melveo_v1/Melveo/Melveo.xcodeproj -scheme Melveo -destination "id=8FA2559C-05C4-4498-9C63-8BB9DFF4E345" build
+xcodebuild -project ~/Developer/melveo-app/Melveo/Melveo.xcodeproj -scheme Melveo -destination "id=8FA2559C-05C4-4498-9C63-8BB9DFF4E345" build
 ```
 
 Aplikaci je nutné spustit s proměnnými, jinak nenajde backend a demo přihlášení
@@ -47,7 +47,7 @@ xcrun simctl launch 8FA2559C-05C4-4498-9C63-8BB9DFF4E345 com.melveo.app
 ownera, trenéra, 8 hráčů, dnešní check-iny, dokončený trénink s RPE a odehraný zápas:
 
 ```
-cd ~/Developer/team_app_melveo_v1
+cd ~/Developer/melveo-app
 SUPABASE_DB_CONTAINER=supabase_db_melveo_ci_marketing SUPABASE_API_PORT=56421 \
 SUPABASE_DB_PORT=56422 SUPABASE_LOCAL_API_URL=http://127.0.0.1:56421 \
 bash scripts/seed_demo_club.sh
@@ -126,7 +126,7 @@ znovu, nafoť je **z iPadu na šířku**, jak jsou teď. Priorita nízká.
 ## Co dodat spolu se snímky
 
 1. Cestu ke složce se snímky.
-2. **Commit SHA aplikace**, proti kterému jsi fotil (`git -C ~/Developer/team_app_melveo_v1 rev-parse --short HEAD`). Bez toho se za rok nedá zjistit, jak jsou staré.
+2. **Commit SHA aplikace**, proti kterému jsi fotil (`git -C ~/Developer/melveo-app rev-parse --short HEAD`). Bez toho se za rok nedá zjistit, jak jsou staré.
 3. Seznam obrazovek ze skupin A–C, které se nafotit **nepodařilo**, a proč.
 4. Upozornění na cokoli, co v appce vypadá rozbitě. (Známý případ: na hráčském
    „Domů“ je uprostřed české obrazovky anglické „Today“ — nepřeložený řetězec.)

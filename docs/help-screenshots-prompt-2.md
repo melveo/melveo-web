@@ -102,7 +102,7 @@ z 3,4 MB PNG jsem posledně vyrobil 636 KB.
 ## Co dodat spolu se snímky
 
 1. Cestu ke složce.
-2. **Commit SHA aplikace** (`git -C ~/Developer/team_app_melveo_v1 rev-parse --short HEAD`).
+2. **Commit SHA aplikace** (`git -C ~/Developer/melveo-app rev-parse --short HEAD`).
 3. **Jak jsi data dostal do appky** — jestli skriptem, ručním vyplněním, nebo SQL.
    Až budou screenshoty za půl roku zase staré, tohle ušetří celý den.
 4. Které obrazovky se nafotit nepodařilo a proč.
