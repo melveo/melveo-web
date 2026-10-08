@@ -28,6 +28,7 @@ export const ui = {
     'footer.cookieSettings': 'Nastavení cookies',
     'footer.githubAria': 'Melveo na GitHubu',
     'footer.instagramAria': 'Melveo na Instagramu',
+    'footer.press': 'Pro média',
     'a11y.skipContent': 'Přeskočit na obsah',
 
     // Hero
@@ -618,6 +619,51 @@ export const ui = {
     'help.faq.q6': 'Kde koupím nebo změním tarif?',
     'help.faq.a6': 'Na webu Melveo. iOS aplikace nemá nákupní tlačítka a platby zpracovává Stripe.',
 
+    // Press kit (/cs/press/) — issue #7
+    'press.metaTitle': 'Pro média',
+    'press.metaDescription':
+      'Press kit Melvea: oficiální loga, barvy, písmo, krátký popis a kontakt pro média.',
+    'press.eyebrow': 'Press kit',
+    'press.title': 'Podklady pro média',
+    'press.lead':
+      'Oficiální logo, barvy a popis Melvea pro novináře, kluby, svazy a partnery. Prosíme, nepoužívejte screenshoty ani logo z vyhledávače.',
+    'press.downloadZip': 'Stáhnout celý press kit',
+    'press.zipMeta': 'ZIP · 1,6 MB',
+    'press.logos.title': 'Loga',
+    'press.logos.lockup': 'Logo (značka + nápis)',
+    'press.logos.mark': 'Značka',
+    'press.logos.wordmark': 'Nápis',
+    'press.logos.appicon': 'Ikona aplikace',
+    'press.logos.onLight': 'Pro světlé pozadí',
+    'press.logos.onDark': 'Pro tmavé pozadí',
+    'press.shots.title': 'Screenshoty aplikace',
+    'press.shots.lead': 'Snímky z demo týmu. Neobsahují data skutečných hráčů.',
+    'press.shots.home': 'iPhone — přehled trenéra na začátku dne',
+    'press.shots.team': 'iPhone — soupiska týmu s readiness hráčů',
+    'press.shots.wellness': 'iPhone — vývoj wellness hráče',
+    'press.shots.heartRate': 'iPad — tepové zóny hráčů během zápasu',
+    'press.shots.events': 'iPad — zápis událostí zápasu',
+    'press.rules.title': 'Pravidla použití',
+    'press.rules.space': 'Kolem loga nechte volné místo alespoň na výšku míčku ze značky.',
+    'press.rules.recolor': 'Logo nepřebarvujte a nepřidávejte mu stíny ani jiné efekty.',
+    'press.rules.distort': 'Logo nedeformujte, neotáčejte a neměňte poměr stran.',
+    'press.rules.background': 'Varianta ink patří na světlé pozadí, varianta white na tmavé.',
+    'press.colors.title': 'Barvy a písmo',
+    'press.colors.ink': 'Ink',
+    'press.colors.cyanLight': 'Cyan na světlém pozadí',
+    'press.colors.cyanDark': 'Cyan na tmavém pozadí',
+    'press.colors.white': 'Bílá na tmavém pozadí',
+    'press.type.wordmark': 'Comfortaa — nápis melveo',
+    'press.type.text': 'Inter — text',
+    'press.about.title': 'O Melveu',
+    'press.about.hint': 'Texty jsou připravené ke zkopírování — kliknutím je označíte celé.',
+    'press.about.short':
+      'Melveo je aplikace pro sportovní týmy, která propojí wellness, readiness a zátěž hráčů do jednoho přehledu, aby trenér věděl, co udělat dál.',
+    'press.about.long':
+      'Hráči v aplikaci Melveo každý den zaznamenají, jak se cítí, a data z Apple Health nebo Polaru doplní spánek a zátěž. Trenér a realizační tým pak v jednom přehledu vidí, kdo je připravený, koho šetřit a co upravit v tréninkovém plánu. Melveo je pro iPhone a iPad, platí klub, hráči nikdy. Za aplikací stojí pražská společnost QUIX Global s.r.o.',
+    'press.contact.title': 'Kontakt pro média',
+    'press.contact.body': 'Dotazy, rozhovory a podklady, které v kitu chybí:',
+
     // Cookie banner
     'cookie.title': 'Cookies',
     'cookie.body': 'Používáme cookies pro statistiky a vylepšení stránky.',
@@ -635,6 +681,7 @@ export const ui = {
     'footer.cookieSettings': 'Cookie settings',
     'footer.githubAria': 'Melveo on GitHub',
     'footer.instagramAria': 'Melveo on Instagram',
+    'footer.press': 'Press',
     'a11y.skipContent': 'Skip to content',
 
     /* See CS comment above — same trim applied in English. */
@@ -1168,6 +1215,52 @@ export const ui = {
     'help.faq.a5': 'No. HealthKit is offered to players, notifications to coaching staff, and Polar to both roles. Every permission is optional and can be skipped.',
     'help.faq.q6': 'Where do I buy or change a plan?',
     'help.faq.a6': 'On the Melveo website. The iOS app has no purchase buttons, and Stripe processes payments.',
+
+
+    // Press kit (/en/press/) — issue #7
+    'press.metaTitle': 'Press',
+    'press.metaDescription':
+      'Melveo press kit: official logos, colours, typefaces, a short description and a media contact.',
+    'press.eyebrow': 'Press kit',
+    'press.title': 'Press kit',
+    'press.lead':
+      'The official Melveo logo, colours and description for journalists, clubs, federations and partners. Please do not use screenshots or logos found through search engines.',
+    'press.downloadZip': 'Download the full press kit',
+    'press.zipMeta': 'ZIP · 1.6 MB',
+    'press.logos.title': 'Logos',
+    'press.logos.lockup': 'Logo (mark + wordmark)',
+    'press.logos.mark': 'Mark',
+    'press.logos.wordmark': 'Wordmark',
+    'press.logos.appicon': 'App icon',
+    'press.logos.onLight': 'For light backgrounds',
+    'press.logos.onDark': 'For dark backgrounds',
+    'press.shots.title': 'App screenshots',
+    'press.shots.lead': 'Taken from a demo team. They contain no real player data.',
+    'press.shots.home': 'iPhone — the coach’s overview at the start of the day',
+    'press.shots.team': 'iPhone — the team roster with player readiness',
+    'press.shots.wellness': 'iPhone — a player’s wellness trend',
+    'press.shots.heartRate': 'iPad — player heart-rate zones during a match',
+    'press.shots.events': 'iPad — logging match events',
+    'press.rules.title': 'Usage rules',
+    'press.rules.space': 'Keep clear space around the logo of at least the height of the ball in the mark.',
+    'press.rules.recolor': 'Do not recolour the logo or add shadows or other effects.',
+    'press.rules.distort': 'Do not distort, rotate or change the proportions of the logo.',
+    'press.rules.background': 'Use the ink version on light backgrounds and the white version on dark ones.',
+    'press.colors.title': 'Colours and type',
+    'press.colors.ink': 'Ink',
+    'press.colors.cyanLight': 'Cyan on light backgrounds',
+    'press.colors.cyanDark': 'Cyan on dark backgrounds',
+    'press.colors.white': 'White on dark backgrounds',
+    'press.type.wordmark': 'Comfortaa — the melveo wordmark',
+    'press.type.text': 'Inter — body text',
+    'press.about.title': 'About Melveo',
+    'press.about.hint': 'Ready to copy — click a text to select all of it.',
+    'press.about.short':
+      'Melveo is an app for sports teams that brings player wellness, readiness and load into one clear view, so coaches know what to do next.',
+    'press.about.long':
+      'Players log how they feel in Melveo every day, and data from Apple Health or Polar adds sleep and training load. Coaches and staff then see in one view who is ready, who to rest and what to change in the training plan. Melveo runs on iPhone and iPad; clubs pay, players never. The app is made by QUIX Global s.r.o., based in Prague.',
+    'press.contact.title': 'Media contact',
+    'press.contact.body': 'Questions, interviews and anything missing from the kit:',
 
     'cookie.title': 'Cookies',
     'cookie.body': 'We use cookies for analytics and to improve the site.',

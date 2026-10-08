@@ -1,0 +1,280 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import PageHeader from './PageHeader.astro';
+import { languages, ui, useTranslations, type Lang } from '../i18n/ui';
+
+/**
+ * Press kit — shared body of /cs/press/ and /en/press/ (issue #7).
+ * Files live in public/press/ (generated from melveo-branding/logo-v2).
+ * Web-grid photos and third-party logos are deliberately not offered.
+ */
+
+interface Props {
+  lang: Lang;
+}
+
+const { lang } = Astro.props;
+const t = useTranslations(lang);
+const contact = 'hello@melveo.app';
+
+const logos = [
+  {
+    label: 'press.logos.lockup',
+    variants: [
+      { tone: 'light', src: '/press/melveo-logo-ink.svg', files: [['SVG', '/press/melveo-logo-ink.svg'], ['PNG 200 px', '/press/melveo-logo-ink-200.png'], ['PNG 800 px', '/press/melveo-logo-ink-800.png']] },
+      { tone: 'dark', src: '/press/melveo-logo-white.svg', files: [['SVG', '/press/melveo-logo-white.svg'], ['PNG 200 px', '/press/melveo-logo-white-200.png'], ['PNG 800 px', '/press/melveo-logo-white-800.png']] },
+    ],
+  },
+  {
+    label: 'press.logos.mark',
+    variants: [
+      { tone: 'light', src: '/press/melveo-mark-ink.svg', files: [['SVG', '/press/melveo-mark-ink.svg']] },
+      { tone: 'dark', src: '/press/melveo-mark-white.svg', files: [['SVG', '/press/melveo-mark-white.svg']] },
+    ],
+  },
+  {
+    label: 'press.logos.wordmark',
+    variants: [
+      { tone: 'light', src: '/press/melveo-wordmark-ink.svg', files: [['SVG', '/press/melveo-wordmark-ink.svg']] },
+      { tone: 'dark', src: '/press/melveo-wordmark-white.svg', files: [['SVG', '/press/melveo-wordmark-white.svg']] },
+    ],
+  },
+  {
+    label: 'press.logos.appicon',
+    variants: [
+      { tone: 'light', src: '/press/melveo-appicon-cyan-rounded.svg', files: [['SVG', '/press/melveo-appicon-cyan-rounded.svg'], ['PNG 1024 px', '/press/melveo-appicon-1024.png']] },
+    ],
+  },
+] as const;
+
+const shots = [
+  ['press.shots.home', 'melveo-iphone-home', 'phone'],
+  ['press.shots.team', 'melveo-iphone-team', 'phone'],
+  ['press.shots.wellness', 'melveo-iphone-wellness', 'phone'],
+  ['press.shots.heartRate', 'melveo-ipad-match-heart-rate', 'tablet'],
+  ['press.shots.events', 'melveo-ipad-match-events', 'tablet'],
+] as const;
+
+const colors = [
+  ['press.colors.ink', '#1B2831'],
+  ['press.colors.cyanLight', '#00D4E8'],
+  ['press.colors.cyanDark', '#00F0FF'],
+  ['press.colors.white', '#F4FBFC'],
+] as const;
+
+// The About texts are shown in both languages on both pages — editors
+// writing in the other language should not have to switch locale.
+const aboutLangs: Lang[] = lang === 'cs' ? ['cs', 'en'] : ['en', 'cs'];
+---
+
+<BaseLayout
+  title={t('press.metaTitle')}
+  description={t('press.metaDescription')}
+  lang={lang}
+>
+  <PageHeader lang={lang} />
+  <article class="legal-article press-article">
+    <p class="legal-eyebrow">{t('press.eyebrow')}</p>
+    <h1 class="legal-h1">{t('press.title')}</h1>
+    <p class="legal-lead">{t('press.lead')}</p>
+    <p>
+      <a class="press-download" href="/press/melveo-press-kit.zip" download>
+        {t('press.downloadZip')} <span>{t('press.zipMeta')}</span>
+      </a>
+    </p>
+
+    <hr />
+
+    <h2>{t('press.logos.title')}</h2>
+    {logos.map((logo) => (
+      <section class="press-logo">
+        <h3>{t(logo.label)}</h3>
+        <div class="press-logo-grid">
+          {logo.variants.map((v) => (
+            <figure class="press-tile">
+              <div class={`press-preview press-preview--${v.tone}`}>
+                <img src={v.src} alt="" loading="lazy" decoding="async" />
+              </div>
+              <figcaption>
+                <span>{t(v.tone === 'light' ? 'press.logos.onLight' : 'press.logos.onDark')}</span>
+                <span class="press-files">
+                  {v.files.map(([name, href]) => (
+                    <a href={href} download>{name}</a>
+                  ))}
+                </span>
+              </figcaption>
+            </figure>
+          ))}
+        </div>
+      </section>
+    ))}
+
+    <h2>{t('press.shots.title')}</h2>
+    <p>{t('press.shots.lead')}</p>
+    <div class="press-shots">
+      {shots.map(([label, file, device]) => (
+        <figure class={`press-shot press-shot--${device}`}>
+          <a href={`/press/${file}.png`} download>
+            <img src={`/press/${file}-preview.webp`} alt={t(label)} loading="lazy" decoding="async" />
+          </a>
+          <figcaption>{t(label)}</figcaption>
+        </figure>
+      ))}
+    </div>
+
+    <h2>{t('press.rules.title')}</h2>
+    <ul>
+      <li>{t('press.rules.space')}</li>
+      <li>{t('press.rules.recolor')}</li>
+      <li>{t('press.rules.distort')}</li>
+      <li>{t('press.rules.background')}</li>
+    </ul>
+
+    <h2>{t('press.colors.title')}</h2>
+    <ul class="press-swatches">
+      {colors.map(([label, hex]) => (
+        <li>
+          <span class="press-swatch" style={`background:${hex}`} aria-hidden="true"></span>
+          <span>{t(label)}</span>
+          <code>{hex}</code>
+        </li>
+      ))}
+    </ul>
+    <ul>
+      <li>{t('press.type.wordmark')}</li>
+      <li>{t('press.type.text')}</li>
+    </ul>
+
+    <h2>{t('press.about.title')}</h2>
+    <p>{t('press.about.hint')}</p>
+    {aboutLangs.map((l) => (
+      <div lang={l}>
+        <h3>{languages[l]}</h3>
+        <p class="legal-block press-copy">{ui[l]['press.about.short']}</p>
+        <p class="legal-block press-copy">{ui[l]['press.about.long']}</p>
+      </div>
+    ))}
+
+    <h2>{t('press.contact.title')}</h2>
+    <p>
+      {t('press.contact.body')}<br />
+      <a href={`mailto:${contact}`}>{contact}</a>
+    </p>
+  </article>
+</BaseLayout>
+
+<style>
+  .press-download {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.75rem;
+    min-height: 44px;
+    padding: 0.625rem 1.25rem;
+    border: 1px solid var(--color-stroke-emphasized);
+    border-radius: 999px;
+    font-weight: 600;
+    text-decoration: none !important;
+  }
+  .press-download span {
+    font-weight: 400;
+    color: var(--color-text-secondary);
+  }
+  .press-logo-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+    gap: 1rem;
+  }
+  .press-tile {
+    margin: 0;
+    border: 1px solid var(--color-stroke-base);
+    border-radius: 0.75rem;
+    overflow: hidden;
+  }
+  /* Fixed backgrounds, independent of the site theme — white logos
+     must always sit on dark, ink logos on light. */
+  .press-preview {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 9rem;
+    padding: 1.5rem;
+  }
+  .press-preview--light {
+    background: #ffffff;
+  }
+  .press-preview--dark {
+    background: #0b1117;
+  }
+  .press-preview img {
+    max-width: 100%;
+    max-height: 100%;
+  }
+  .press-tile figcaption {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 0.25rem 1rem;
+    padding: 0.5rem 1rem;
+    font-size: 0.875rem;
+    background: var(--color-bg-surface);
+  }
+  .press-files {
+    display: inline-flex;
+    flex-wrap: wrap;
+    gap: 0 1rem;
+  }
+  .press-files a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+  }
+  .press-shots {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.5rem 1rem;
+  }
+  @media (min-width: 40rem) {
+    .press-shots {
+      grid-template-columns: repeat(3, 1fr);
+    }
+  }
+  .press-shot {
+    margin: 0;
+    font-size: 0.875rem;
+  }
+  .press-shot--tablet {
+    grid-column: 1 / -1;
+  }
+  .press-shot img {
+    display: block;
+    width: 100%;
+    height: auto;
+    border: 1px solid var(--color-stroke-base);
+    border-radius: 0.75rem;
+  }
+  .press-shot figcaption {
+    margin-top: 0.5rem;
+  }
+  .press-swatches {
+    list-style: none;
+    padding: 0 !important;
+  }
+  .press-swatches li {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+  .press-swatch {
+    flex: none;
+    width: 2rem;
+    height: 2rem;
+    border-radius: 0.5rem;
+    border: 1px solid var(--color-stroke-emphasized);
+  }
+  .press-swatches code {
+    margin-left: auto;
+  }
+  .press-copy {
+    user-select: all;
+  }
+</style>
