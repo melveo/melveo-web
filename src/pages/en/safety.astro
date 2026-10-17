@@ -1,0 +1,101 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import PageHeader from '../../components/PageHeader.astro';
+
+/**
+ * Safety, community rules and child protection EN, mirror of
+ * cs/bezpecnost.astro. Czech version is authoritative.
+ */
+
+const lastUpdated = '2026-10-17';
+---
+
+<BaseLayout
+  title="Safety and Child Protection"
+  description="Melveo community rules, how to report inappropriate content and how we protect children and young athletes."
+  lang="en"
+>
+  <PageHeader lang="en" />
+  <article class="legal-article">
+    <p class="legal-eyebrow">Effective · {lastUpdated}</p>
+    <h1 class="legal-h1">Safety and Child Protection</h1>
+    <p class="legal-lead">
+      Melveo is used by clubs and teams, many of them youth teams. Content in
+      the app is visible only to members of the team the club invited them
+      to, according to their role. This page explains what does not belong in
+      the app, how to report content and how we protect children.
+    </p>
+
+    <hr />
+
+    <h2>1. Community rules</h2>
+    <p>The following does not belong in Melveo:</p>
+    <ul>
+      <li>insults, ridicule, bullying and harassment,</li>
+      <li>sexual content and anything that sexualises minors,</li>
+      <li>violence, threats and incitement to hatred,</li>
+      <li>publishing other people's personal or health data without authorisation,</li>
+      <li>spam and content unrelated to sports preparation.</li>
+    </ul>
+    <p>
+      The rules apply to names and nicknames, team names and logos, notes,
+      training plans, measurement results, videos, clips and commentary.
+    </p>
+
+    <h2>2. How to report content</h2>
+    <ul>
+      <li><strong>In the app:</strong> touch and hold the content (member
+        name, team name, note, training plan, measurement note, commentary)
+        and choose Report. For videos and clips, Report is in the top bar.
+        Pick a reason and optionally add a note.</li>
+      <li><strong>By email:</strong> at
+        <a href="mailto:hello@melveo.app">hello@melveo.app</a>, even without
+        an account in the app.</li>
+    </ul>
+    <p>
+      Reports go to Melveo support and to the team admins. Neither the admins
+      nor the author of the content can see who reported it.
+    </p>
+
+    <h2>3. What happens after a report</h2>
+    <ul>
+      <li>We reply within 24 hours on working days.</li>
+      <li>Reports with the reason Danger to minors are handled first.</li>
+      <li>Content that breaks these rules or the law is removed, and depending
+        on severity we restrict or end its author's access.</li>
+      <li>A team admin can remove a member from the team at any time.</li>
+    </ul>
+
+    <h2>4. Child protection</h2>
+    <p>
+      Melveo does not tolerate any form of child abuse or endangerment.
+    </p>
+    <ul>
+      <li>For players under 15, the club obtains the consent of a parent or
+        legal guardian to the processing of their data (Section 7 of Czech
+        Act No. 110/2019 Coll.). When joining a team, the player enters their
+        year of birth and confirms that the club has this consent. A team
+        admin confirms it for the club in the team settings.</li>
+      <li>Team content is visible only to team members according to their
+        role. The app has no public profiles and no messaging between
+        strangers.</li>
+      <li>We pass any suspicion of child abuse to the Police of the Czech
+        Republic and other competent authorities and cooperate with them.</li>
+      <li>In immediate danger, call 158 or 112. Children and young people can
+        call the Czech helpline Linka bezpečí at 116 111.</li>
+    </ul>
+    <p class="legal-block">
+      Child protection contact:
+      <a href="mailto:hello@melveo.app?subject=Child%20protection">hello@melveo.app</a>,
+      subject Child protection.
+    </p>
+
+    <h2>5. Operator</h2>
+    <p class="legal-block">
+      <strong>QUIX Global s.r.o.</strong>, Company ID 22466444,
+      Příčná 1892/4, Nové Město, 110 00 Prague 1, Czech Republic.
+      More details in the <a href="/en/terms/">Terms</a> and the
+      <a href="/en/privacy/">Privacy Policy</a>.
+    </p>
+  </article>
+</BaseLayout>

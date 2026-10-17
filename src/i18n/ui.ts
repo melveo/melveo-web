@@ -29,6 +29,7 @@ export const ui = {
     'footer.githubAria': 'Melveo na GitHubu',
     'footer.instagramAria': 'Melveo na Instagramu',
     'footer.press': 'Pro média',
+    'footer.safety': 'Bezpečnost',
     'a11y.skipContent': 'Přeskočit na obsah',
 
     // Hero
@@ -682,6 +683,7 @@ export const ui = {
     'footer.githubAria': 'Melveo on GitHub',
     'footer.instagramAria': 'Melveo on Instagram',
     'footer.press': 'Press',
+    'footer.safety': 'Safety',
     'a11y.skipContent': 'Skip to content',
 
     /* See CS comment above — same trim applied in English. */

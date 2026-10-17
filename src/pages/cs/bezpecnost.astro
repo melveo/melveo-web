@@ -1,0 +1,103 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import PageHeader from '../../components/PageHeader.astro';
+
+/**
+ * Bezpečnost, pravidla komunity a ochrana dětí CS.
+ *
+ * App Review 1.2 (obsah uživatelů: pravidla, hlášení, kontakt) a 5
+ * (ochrana dětí), melveo/melveo-app#801 a #802. Lhůta 24 hodin
+ * v pracovní dny a kontakt hello@melveo.app podle rozhodnutí vlastníka
+ * ze 17. 10. 2026. Postup podpory: docs/operations v melveo-app.
+ */
+
+const lastUpdated = '2026-10-17';
+---
+
+<BaseLayout
+  title="Bezpečnost a ochrana dětí"
+  description="Pravidla komunity Melveo, jak nahlásit nevhodný obsah a jak chráníme děti a mládež."
+  lang="cs"
+>
+  <PageHeader lang="cs" />
+  <article class="legal-article">
+    <p class="legal-eyebrow">Účinnost · {lastUpdated}</p>
+    <h1 class="legal-h1">Bezpečnost a ochrana dětí</h1>
+    <p class="legal-lead">
+      Melveo používají kluby a týmy, často mládežnické. Obsah v aplikaci
+      vidí jen členové týmu, do kterého je pozval klub, a to podle své role.
+      Tady popisujeme, co do aplikace nepatří, jak obsah nahlásit a jak
+      chráníme děti.
+    </p>
+
+    <hr />
+
+    <h2>1. Pravidla komunity</h2>
+    <p>Do Melveo nepatří:</p>
+    <ul>
+      <li>urážky, zesměšňování, šikana a obtěžování,</li>
+      <li>sexuální obsah a cokoli, co sexualizuje nezletilé,</li>
+      <li>násilí, vyhrožování a podněcování k nenávisti,</li>
+      <li>zveřejňování cizích osobních nebo zdravotních údajů bez oprávnění,</li>
+      <li>spam a obsah, který nesouvisí se sportovní přípravou.</li>
+    </ul>
+    <p>
+      Pravidla platí pro jména a přezdívky, názvy a loga týmů, poznámky,
+      tréninkové plány, výsledky měření, videa, klipy a komentáře.
+    </p>
+
+    <h2>2. Jak nahlásit obsah</h2>
+    <ul>
+      <li><strong>V aplikaci:</strong> podržte prst na obsahu (jméno člena,
+        název týmu, poznámka, tréninkový plán, poznámka k měření, komentář)
+        a zvolte Nahlásit. U videa a klipů je volba Nahlásit v horní liště.
+        Vyberte důvod a případně připište poznámku.</li>
+      <li><strong>E-mailem:</strong> na
+        <a href="mailto:hello@melveo.app">hello@melveo.app</a>, i bez účtu
+        v aplikaci.</li>
+    </ul>
+    <p>
+      Hlášení dostane podpora Melveo a správci týmu. Správci ani autor
+      obsahu nevidí, kdo obsah nahlásil.
+    </p>
+
+    <h2>3. Co se stane po nahlášení</h2>
+    <ul>
+      <li>Ozveme se do 24 hodin v pracovní dny.</li>
+      <li>Hlášení s důvodem Ohrožení nezletilých řešíme přednostně.</li>
+      <li>Obsah, který porušuje tato pravidla nebo zákon, odstraníme
+        a podle závažnosti omezíme nebo ukončíme přístup jeho autora.</li>
+      <li>Správce týmu může člena z týmu kdykoli odebrat.</li>
+    </ul>
+
+    <h2>4. Ochrana dětí</h2>
+    <p>
+      Melveo netoleruje žádnou formu zneužívání nebo ohrožování dětí.
+    </p>
+    <ul>
+      <li>U hráčů mladších 15 let zajišťuje souhlas zákonného zástupce se
+        zpracováním údajů klub (§ 7 zákona č. 110/2019 Sb.). Hráč při
+        vstupu do týmu uvede rok narození a potvrdí, že klub souhlas má.
+        Správce týmu to za klub potvrzuje v nastavení týmu.</li>
+      <li>Týmový obsah vidí jen členové týmu podle své role. Veřejné profily
+        ani zprávy mezi cizími lidmi v aplikaci nejsou.</li>
+      <li>Podezření na zneužívání dítěte předáme Policii ČR a dalším
+        příslušným orgánům a poskytneme jim součinnost.</li>
+      <li>Když hrozí bezprostřední nebezpečí, volejte 158 nebo 112. Děti
+        a mladí lidé mohou zavolat na Linku bezpečí 116 111.</li>
+    </ul>
+    <p class="legal-block">
+      Kontakt pro ochranu dětí:
+      <a href="mailto:hello@melveo.app?subject=Ochrana%20d%C4%9Bt%C3%AD">hello@melveo.app</a>,
+      předmět Ochrana dětí.
+    </p>
+
+    <h2>5. Provozovatel</h2>
+    <p class="legal-block">
+      <strong>QUIX Global s.r.o.</strong>, IČO 22466444,
+      Příčná 1892/4, Nové Město, 110 00 Praha 1.
+      Další podrobnosti najdete ve <a href="/cs/terms/">Smluvních podmínkách</a>
+      a v <a href="/cs/privacy/">Ochraně soukromí</a>.
+    </p>
+  </article>
+</BaseLayout>
