@@ -60,6 +60,13 @@ export default defineConfig({
   },
   vite: {
     plugins: [/** @type {any} */ (tailwindcss())],
+    build: {
+      // Vite 8 (Astro 7) minifies CSS with Lightning CSS, which drops
+      // `translate: -50% -50%` from a rule that also sets `transform`
+      // — that un-centred the morph photo (.scaler img). esbuild was
+      // the minifier this CSS was built and checked against.
+      cssMinify: 'esbuild',
+    },
     server: {
       watch: {
         ignored: [
