@@ -63,7 +63,7 @@ const t = useTranslations(lang);
     <header class="relative z-10 flex w-full items-center justify-between px-6 pt-6 sm:px-12 sm:pt-10">
       <a
         href={`/${lang}/`}
-        class="melveo-wordmark text-xl tracking-tight text-[var(--color-text-primary)]"
+        class="melveo-wordmark -my-2 py-2 text-xl tracking-tight text-[var(--color-text-primary)]"
         aria-label="Melveo"
       >
         melveo
@@ -689,7 +689,12 @@ const t = useTranslations(lang);
     gap: 0.55rem;
   }
 
+  /* Padding + equal negative margin: a 44 px tap target without
+     moving the link away from the CTA row. */
   .hero-install-help {
+    display: inline-block;
+    padding-block: 0.8125rem;
+    margin-block: -0.8125rem;
     color: var(--color-text-secondary);
     font-size: 0.75rem;
     font-weight: 500;

@@ -20,6 +20,7 @@ const contact = 'hello@melveo.app';
 const logos = [
   {
     label: 'press.logos.lockup',
+    size: [2821, 810],
     variants: [
       { tone: 'light', src: '/press/melveo-logo-ink.svg', files: [['SVG', '/press/melveo-logo-ink.svg'], ['PNG 200 px', '/press/melveo-logo-ink-200.png'], ['PNG 800 px', '/press/melveo-logo-ink-800.png']] },
       { tone: 'dark', src: '/press/melveo-logo-white.svg', files: [['SVG', '/press/melveo-logo-white.svg'], ['PNG 200 px', '/press/melveo-logo-white-200.png'], ['PNG 800 px', '/press/melveo-logo-white-800.png']] },
@@ -27,6 +28,7 @@ const logos = [
   },
   {
     label: 'press.logos.mark',
+    size: [920, 760],
     variants: [
       { tone: 'light', src: '/press/melveo-mark-ink.svg', files: [['SVG', '/press/melveo-mark-ink.svg']] },
       { tone: 'dark', src: '/press/melveo-mark-white.svg', files: [['SVG', '/press/melveo-mark-white.svg']] },
@@ -34,6 +36,7 @@ const logos = [
   },
   {
     label: 'press.logos.wordmark',
+    size: [1260, 318],
     variants: [
       { tone: 'light', src: '/press/melveo-wordmark-ink.svg', files: [['SVG', '/press/melveo-wordmark-ink.svg']] },
       { tone: 'dark', src: '/press/melveo-wordmark-white.svg', files: [['SVG', '/press/melveo-wordmark-white.svg']] },
@@ -41,11 +44,19 @@ const logos = [
   },
   {
     label: 'press.logos.appicon',
+    size: [1024, 1024],
     variants: [
       { tone: 'light', src: '/press/melveo-appicon-cyan-rounded.svg', files: [['SVG', '/press/melveo-appicon-cyan-rounded.svg'], ['PNG 1024 px', '/press/melveo-appicon-1024.png']] },
     ],
   },
 ] as const;
+
+// Preview widths: [small, large] — both are -preview-sm / -preview webp
+// files next to the full PNG; the browser picks one via srcset.
+const shotSizes = {
+  phone: { w: [240, 414], h: [522, 900], sizes: '(min-width: 40rem) 14rem, 45vw' },
+  tablet: { w: [720, 1200], h: [540, 900], sizes: '(min-width: 48rem) 45rem, 100vw' },
+} as const;
 
 const shots = [
   ['press.shots.home', 'melveo-iphone-home', 'phone'],
@@ -93,7 +104,7 @@ const aboutLangs: Lang[] = lang === 'cs' ? ['cs', 'en'] : ['en', 'cs'];
           {logo.variants.map((v) => (
             <figure class="press-tile">
               <div class={`press-preview press-preview--${v.tone}`}>
-                <img src={v.src} alt="" loading="lazy" decoding="async" />
+                <img src={v.src} alt="" width={logo.size[0]} height={logo.size[1]} loading="lazy" decoding="async" />
               </div>
               <figcaption>
                 <span>{t(v.tone === 'light' ? 'press.logos.onLight' : 'press.logos.onDark')}</span>
@@ -115,7 +126,16 @@ const aboutLangs: Lang[] = lang === 'cs' ? ['cs', 'en'] : ['en', 'cs'];
       {shots.map(([label, file, device]) => (
         <figure class={`press-shot press-shot--${device}`}>
           <a href={`/press/${file}.png`} download>
-            <img src={`/press/${file}-preview.webp`} alt={t(label)} loading="lazy" decoding="async" />
+            <img
+              src={`/press/${file}-preview.webp`}
+              srcset={`/press/${file}-preview-sm.webp ${shotSizes[device].w[0]}w, /press/${file}-preview.webp ${shotSizes[device].w[1]}w`}
+              sizes={shotSizes[device].sizes}
+              width={shotSizes[device].w[1]}
+              height={shotSizes[device].h[1]}
+              alt={t(label)}
+              loading="lazy"
+              decoding="async"
+            />
           </a>
           <figcaption>{t(label)}</figcaption>
         </figure>
@@ -206,6 +226,8 @@ const aboutLangs: Lang[] = lang === 'cs' ? ['cs', 'en'] : ['en', 'cs'];
     background: #0b1117;
   }
   .press-preview img {
+    width: auto;
+    height: auto;
     max-width: 100%;
     max-height: 100%;
   }
@@ -244,6 +266,9 @@ const aboutLangs: Lang[] = lang === 'cs' ? ['cs', 'en'] : ['en', 'cs'];
   }
   .press-shot--tablet {
     grid-column: 1 / -1;
+  }
+  .press-shot a {
+    display: block;
   }
   .press-shot img {
     display: block;
