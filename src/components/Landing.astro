@@ -27,6 +27,7 @@ import MelveoDataFlowHero from './MelveoDataFlowHero';
 import FaqStage from './FaqStage.astro';
 import PromoVideoStage from './PromoVideoStage.astro';
 import SectionDotsNav from './SectionDotsNav.astro';
+import BrandMark from './BrandMark.astro';
 import { testFlightUrl, useTranslations, type Lang } from '../i18n/ui';
 
 interface Props {
@@ -63,9 +64,10 @@ const t = useTranslations(lang);
     <header class="relative z-10 flex w-full items-center justify-between px-6 pt-6 sm:px-12 sm:pt-10">
       <a
         href={`/${lang}/`}
-        class="melveo-wordmark -my-2 py-2 text-xl tracking-tight text-[var(--color-text-primary)]"
+        class="melveo-wordmark -my-2 inline-flex items-center gap-[0.45em] py-2 text-xl tracking-tight text-[var(--color-text-primary)]"
         aria-label="Melveo"
       >
+        <BrandMark />
         melveo
       </a>
       {/*
