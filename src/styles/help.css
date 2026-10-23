@@ -51,6 +51,7 @@
 }
 
 .help-wordmark {
+  gap: 0.45em;
   font-size: 1.2rem;
   font-weight: 600;
 }
