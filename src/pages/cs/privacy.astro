@@ -19,7 +19,7 @@ import PageHeader from '../../components/PageHeader.astro';
  * Tento text je dobrý baseline pro pilot, ne pro enterprise smlouvy.
  */
 
-const lastUpdated = '2026-08-14';
+const lastUpdated = '2026-10-23';
 ---
 
 <BaseLayout
@@ -105,8 +105,10 @@ const lastUpdated = '2026-08-14';
 
     <h3>3.3. Údaje ze zařízení a senzorů (volitelné, pouze se souhlasem)</h3>
     <ul>
-      <li>Apple Health: spánek, tep, klidový tep, HRV, kroky a dokončené
-        aktivity, které uživatel v iOS Health výslovně zpřístupní aplikaci</li>
+      <li>Apple Health: HRV, klidový a aktivitní tep, kroky, dokončené aktivity,
+        aktivní energie, vzdálenosti a hodnocení úsilí, které uživatel výslovně
+        zpřístupní aplikaci. Aplikace tato data pouze čte. Spánek se zadává
+        ručně v check-inu; z Apple Health jej tato verze neimportuje.</li>
       <li>Polar (volitelné): ranní měření HRV a tepová frekvence během aktivity</li>
     </ul>
 
