@@ -21,8 +21,10 @@ const remainingSteps = Math.max(1, endIndex - startIndex);
 const scrollFriction = 1.65;
 const scrollDistance = `${remainingSteps * 6.09375 * scrollFriction}rem`;
 const scrollDistanceTablet = `${remainingSteps * 5.4375 * scrollFriction}rem`;
-const scrollDistanceMobile = `${remainingSteps * 3.125 * scrollFriction}rem`;
-const scrollDistanceSmall = `${remainingSteps * 2.375 * scrollFriction}rem`;
+const scrollDistanceMobile = `${remainingSteps * 5 * scrollFriction}rem`;
+const scrollDistanceSmall = `${remainingSteps * 4.5 * scrollFriction}rem`;
+// Phones size the type so the longest phrase fits one line.
+const longestWord = Math.max(...words.map((word) => word.length));
 const hueStart = 205;
 const hueEnd = 178;
 const hueStep = (hueEnd - hueStart) / Math.max(1, words.length - 1);
@@ -34,7 +36,7 @@ const hueStep = (hueEnd - hueStart) / Math.max(1, words.length - 1);
   data-word-scroll-stage
   data-start-index={startIndex}
   data-end-index={endIndex}
-  style={`--word-scroll-count: ${words.length}; --word-scroll-active-index: ${startIndex}; --word-scroll-distance: ${scrollDistance}; --word-scroll-distance-tablet: ${scrollDistanceTablet}; --word-scroll-distance-mobile: ${scrollDistanceMobile}; --word-scroll-distance-small: ${scrollDistanceSmall};`}
+  style={`--word-scroll-count: ${words.length}; --word-scroll-active-index: ${startIndex}; --word-scroll-distance: ${scrollDistance}; --word-scroll-distance-tablet: ${scrollDistanceTablet}; --word-scroll-distance-mobile: ${scrollDistanceMobile}; --word-scroll-distance-small: ${scrollDistanceSmall}; --word-scroll-longest: ${longestWord};`}
 >
   <div class="word-scroll-stage__pin">
     <div class="word-scroll-stage__inner">
@@ -307,12 +309,13 @@ const hueStep = (hueEnd - hueStart) / Math.max(1, words.length - 1);
   }
 
   /*
-    Below 860px the prefix + word list can no longer share a row
-    cleanly: long phrases ("rozhodnutí trenéra.", "what to change
-    in the plan.") overflow the viewport's width cap and bleed
-    horizontally through the pinned prefix, making it look as if
-    the active word passes through "Trenér ví." / "Coach knows.".
-    Stack them vertically and centre the list under the prefix.
+    Phones (2026-10-24 redesign): prefix on top, then a short fading
+    list — the active phrase sits right under the prefix in its cyan
+    box, the next phrases trail below it dimmed, past ones slide up
+    and fade out. The list is clipped below the prefix, so no word
+    ever passes through "Trenér ví" / "Coach knows". Type is sized so
+    the longest phrase fits one line (--word-scroll-longest is its
+    character count; ~0.56em per glyph + the box padding).
   */
   @media (max-width: 860px) {
     .word-scroll-stage {
@@ -321,10 +324,14 @@ const hueStep = (hueEnd - hueStart) / Math.max(1, words.length - 1);
 
     .word-scroll-stage__inner {
       flex-direction: column;
-      gap: 0.22em;
+      gap: 0;
       padding-inline: 1rem;
-      font-size: clamp(2rem, 5.6vw, 2.85rem);
-      line-height: 1.22;
+      font-size: clamp(
+        1.25rem,
+        calc((100vw - 2rem) / (var(--word-scroll-longest, 20) * 0.56 + 0.6)),
+        2.6rem
+      );
+      line-height: 1.25;
       text-align: center;
     }
 
@@ -332,47 +339,47 @@ const hueStep = (hueEnd - hueStart) / Math.max(1, words.length - 1);
       line-height: 1.1;
     }
 
-    /*
-      In column mode the prefix sits above the viewport; if the
-      viewport keeps `overflow: visible` (as on desktop) the faded
-      items above the active one bleed upward and overlap the
-      prefix line. Clip vertically so only the active word renders
-      under the prefix — this is the real fix for the "Spojí gets
-      centred and words pass through it" bug on phones.
-    */
     .word-scroll-stage__list-viewport {
+      --word-fade: 0.55em;
       width: 100%;
-      max-width: 94vw;
+      max-width: none;
+      height: calc(var(--word-fade) + 4 * 1.25em);
       overflow: hidden;
+      mask-image: linear-gradient(
+        to bottom,
+        transparent 0,
+        transparent calc(var(--word-fade) - 0.15em),
+        #000 var(--word-fade),
+        #000 calc(var(--word-fade) + 1.25em),
+        rgba(0, 0, 0, 0.5) calc(var(--word-fade) + 2.5em),
+        transparent 100%
+      );
+      -webkit-mask-image: linear-gradient(
+        to bottom,
+        transparent 0,
+        transparent calc(var(--word-fade) - 0.15em),
+        #000 var(--word-fade),
+        #000 calc(var(--word-fade) + 1.25em),
+        rgba(0, 0, 0, 0.5) calc(var(--word-fade) + 2.5em),
+        transparent 100%
+      );
     }
 
     .word-scroll-stage__list {
+      top: 0;
       width: 100%;
-      max-width: 94vw;
-      left: 50%;
+      max-width: none;
       transform: translate3d(
-        -50%,
-        calc(-0.625em - (var(--word-scroll-active-index) * 1.25em)),
+        0,
+        calc(var(--word-fade) - (var(--word-scroll-active-index) * 1.25em)),
         0
       );
     }
 
-    .word-scroll-stage__item,
-    .word-scroll-stage__word {
-      width: 100%;
-      max-width: 94vw;
+    .word-scroll-stage__item {
+      width: fit-content;
+      margin-inline: auto;
       text-align: center;
-    }
-  }
-
-  @media (max-width: 480px) {
-    .word-scroll-stage {
-      --word-scroll-distance: var(--word-scroll-distance-small);
-    }
-
-    .word-scroll-stage__inner {
-      gap: 0.18em;
-      font-size: clamp(1.25rem, 5.4vw, 1.85rem);
     }
   }
 
@@ -388,6 +395,8 @@ const hueStep = (hueEnd - hueStart) / Math.max(1, words.length - 1);
   const clampWordScroll = (value: number, min: number, max: number) =>
     Math.min(Math.max(value, min), max);
 
+  const mobileWordScroll = window.matchMedia('(max-width: 860px)');
+
   const updateWordScrollStages = () => {
     document.querySelectorAll<HTMLElement>('[data-word-scroll-stage]').forEach((root) => {
       const startIndex = Number(root.getAttribute('data-start-index') || 0);
@@ -395,7 +404,21 @@ const hueStep = (hueEnd - hueStart) / Math.max(1, words.length - 1);
       const rect = root.getBoundingClientRect();
       const scrollableDistance = Math.max(1, root.offsetHeight - window.innerHeight);
       const progress = clampWordScroll(-rect.top / scrollableDistance, 0, 1);
-      const activeIndex = startIndex + progress * (endIndex - startIndex);
+      let activeIndex = startIndex + progress * (endIndex - startIndex);
+
+      if (mobileWordScroll.matches) {
+        /*
+          Phones: each phrase owns an equal slice of the scroll and
+          rests in place for most of it, then glides to the next one —
+          a linear mapping left words half-way between slots most of
+          the time on a short phone scroll.
+        */
+        const count = endIndex - startIndex + 1;
+        const raw = clampWordScroll(progress * count - 0.5, 0, count - 1);
+        const base = Math.floor(raw);
+        const t = clampWordScroll((raw - base - 0.3) / 0.4, 0, 1);
+        activeIndex = startIndex + base + t * t * (3 - 2 * t);
+      }
 
       root.style.setProperty('--word-scroll-active-index', activeIndex.toFixed(4));
 
