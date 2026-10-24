@@ -19,7 +19,7 @@ import PageHeader from '../../components/PageHeader.astro';
  * Tento text je dobrý baseline pro pilot, ne pro enterprise smlouvy.
  */
 
-const lastUpdated = '2026-10-23';
+const lastUpdated = '2026-10-24';
 ---
 
 <BaseLayout
@@ -120,7 +120,10 @@ const lastUpdated = '2026-10-23';
     </ul>
     <p>
       Zápasové video se nepoužívá k biometrické identifikaci ani k reklamě.
-      Je dostupné pouze oprávněným členům stejného klubového prostoru.
+      Je dostupné oprávněnému realizačnímu týmu a aktivním hráčům stejného
+      týmu v dokončeném reportu. Po odebrání přístupu nelze získat nový
+      přehrávací odkaz; již vydaný krátkodobý odkaz může fungovat až do
+      vypršení platnosti.
     </p>
 
     <h3>3.5. Provozní a technické údaje</h3>
@@ -208,9 +211,14 @@ const lastUpdated = '2026-10-23';
       (RLS politiky a SECURITY DEFINER RPC funkce).
     </p>
     <p>
-      Hráč má přístup pouze ke svým vlastním datům. Klub má přístup k
-      agregovaným reportům za své týmy a k údajům, které jsou nezbytné pro
-      roli trenéra nebo klubového administrátora.
+      Hráč má přístup ke svým vlastním datům a jako aktivní člen týmu také
+      k souhrnu dokončeného reportu, jeho časové ose a videu. Tepovou
+      frekvenci v týmovém reportu vidí pouze realizační tým. Trenér může
+      v konkrétním reportu povolit přidávání a úpravy vlastních tagů; hráč
+      nemůže měnit cizí tagy, společný zdroj videa ani srovnání času. Odebrání
+      tohoto povolení blokuje další úpravy. Klub má přístup k agregovaným
+      reportům za své týmy a k údajům, které jsou nezbytné pro roli trenéra
+      nebo klubového administrátora.
     </p>
     <p>
       Melveo neposkytuje výsledek, který by sám o sobě představoval právně
