@@ -107,7 +107,10 @@ const lastUpdated = '2026-10-23';
     </ul>
     <p>
       Match video is not used for biometric identification or advertising.
-      It is available only to authorized members of the same club workspace.
+      It is available to authorized coaching staff and active players of the
+      same team in a completed report. After access is revoked, no new
+      playback link can be obtained; a short-lived link already issued may
+      still work until it expires.
     </p>
 
     <h3>3.5. Operational and technical data</h3>
@@ -193,9 +196,13 @@ const lastUpdated = '2026-10-23';
       SECURITY DEFINER RPC functions).
     </p>
     <p>
-      A player has access only to their own data. A club has access to
-      aggregated reports for its teams and to information that is necessary
-      for the coach or club administrator role.
+      A player has access to their own data and, as an active team member,
+      to the completed report’s summary, timeline, and video. A coach can
+      allow a player to add and edit their own tags in a specific report;
+      players cannot change other people’s tags, the shared video source,
+      or time alignment. Revoking this permission prevents further edits.
+      A club has access to aggregated reports for its teams and to
+      information that is necessary for the coach or club administrator role.
     </p>
     <p>
       Melveo does not provide outputs that by themselves constitute legally
