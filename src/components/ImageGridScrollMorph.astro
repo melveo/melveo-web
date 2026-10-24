@@ -2046,86 +2046,102 @@ const t = useTranslations(lang);
           frame layout work is isolated to this element.
         */
         const contentEl = section.querySelector<HTMLElement>('.content');
-        const viewportWidth = contentEl?.offsetWidth || window.innerWidth;
-        const viewportHeight = contentEl?.offsetHeight || window.innerHeight;
-
-        const naturalWidth = scalerEl.offsetWidth || 92;
-        const naturalHeight = scalerEl.offsetHeight || naturalWidth / 0.8660254038;
-
-        const sourceMaxW = 1672;
-        const sourceMaxH = 941;
-        const desktopCardAspect = 16 / 9;
-        const desktopCardMaxW = Math.min(viewportWidth * 0.88, sourceMaxW);
-        const desktopCardMaxH = Math.min(viewportHeight * 0.88, sourceMaxH);
-        const desktopCardWidth = Math.min(desktopCardMaxW, desktopCardMaxH * desktopCardAspect);
-        const desktopCardHeight = desktopCardWidth / desktopCardAspect;
-        const displayWidth = compactMotion
-          ? Math.min(viewportWidth, sourceMaxW)
-          : desktopCardWidth;
-        const displayHeight = compactMotion
-          ? Math.min(viewportHeight, sourceMaxH)
-          : desktopCardHeight;
 
         /*
-          Desktop card + mobile scale morph.
-
-          Desktop now starts as a large centred 16:9 card instead
-          of a full-bleed viewport image. It then morphs via
-          width/height down to the centre hex cell. Desktop can
-          afford the isolated layout work and width/height keeps the
-          photo content undistorted while the aspect ratio changes.
-
-          Mobile keeps the scale-based path below because it avoids
-          per-scroll width/height layout on phone GPUs.
-
-          Scale-based morph v4 — element rendered at LARGE size
-          with cell aspect ratio, scale DOWN to 1 at end.
-
-          Why v4 (vs v3): v3 sized the element at the tiny hex
-          cell itself and scaled UP to cover the viewport. That
-          looked geometrically right but the browser decoded the
-          IMG at the small element box, then nearest-sampled up
-          when composited — pixelated mess on every device.
-          User: "v plne kvalite a ne rozpixelovane".
-
-          v4 sizes the element so it covers the viewport at
-          scale = 1 while still preserving the hex cell aspect:
-          elementWidth = max(displayW, displayH * cellAspect),
-          elementHeight = elementWidth / cellAspect.
-          The browser decodes the IMG at this large element box
-          (sharp at full bleed) and we only scale DOWN to the
-          cell size at end — downscaling never adds pixelation.
-
-          Because elementAspect ≡ cellAspect, a uniform scale
-          fits the cell exactly: scaleEnd = naturalW / elementW.
-          No overflow past the cell outline at end, no axis
-          distortion, and the clip-path hex (at 100 % of a
-          cell-aspect element) renders as a clean regular hex
-          throughout the morph.
-
-          User also said "ve velkem ta fotka nema byt hexagon, má
-          se na hexagon menit" — start state must read as a
-          full-bleed rectangle and morph INTO the hex. Initial
-          clip-path is the rectangle polygon; the scroll-driven
-          animation morphs it to the hex polygon (on both phone
-          and desktop now — the previous phone-skip was tied to
-          the v3 geometry and isn't needed with the cleaner v4
-          coordinate system).
+          Geometry is re-measured whenever the viewport lock changes
+          (URL bar collapse, rotation). The hex cells resize with
+          --grid-stable-vh, so a mount-only measurement left the
+          centre photo smaller than its neighbours at the end state.
         */
-        const cellAspect = naturalWidth / naturalHeight; // ~ 0.866
-        const elementWidth = compactMotion
-          ? Math.max(displayWidth, displayHeight * cellAspect)
-          : displayWidth;
-        const elementHeight = compactMotion
-          ? elementWidth / cellAspect
-          : displayHeight;
+        let naturalWidth = 0;
+        let naturalHeight = 0;
+        let elementWidth = 0;
+        let elementHeight = 0;
+        let scaleEnd = 1;
 
-        img.style.width = `${elementWidth}px`;
-        img.style.height = `${elementHeight}px`;
+        const measure = () => {
+          const viewportWidth = contentEl?.offsetWidth || window.innerWidth;
+          const viewportHeight = contentEl?.offsetHeight || window.innerHeight;
 
-        // Uniform scale END value — fits the cell exactly on both
-        // axes because the element is already at cell aspect.
-        const scaleEnd = compactMotion ? naturalWidth / elementWidth : 1;
+          naturalWidth = scalerEl.offsetWidth || 92;
+          naturalHeight = scalerEl.offsetHeight || naturalWidth / 0.8660254038;
+
+          const sourceMaxW = 1672;
+          const sourceMaxH = 941;
+          const desktopCardAspect = 16 / 9;
+          const desktopCardMaxW = Math.min(viewportWidth * 0.88, sourceMaxW);
+          const desktopCardMaxH = Math.min(viewportHeight * 0.88, sourceMaxH);
+          const desktopCardWidth = Math.min(desktopCardMaxW, desktopCardMaxH * desktopCardAspect);
+          const desktopCardHeight = desktopCardWidth / desktopCardAspect;
+          const displayWidth = compactMotion
+            ? Math.min(viewportWidth, sourceMaxW)
+            : desktopCardWidth;
+          const displayHeight = compactMotion
+            ? Math.min(viewportHeight, sourceMaxH)
+            : desktopCardHeight;
+
+          /*
+            Desktop card + mobile scale morph.
+
+            Desktop now starts as a large centred 16:9 card instead
+            of a full-bleed viewport image. It then morphs via
+            width/height down to the centre hex cell. Desktop can
+            afford the isolated layout work and width/height keeps the
+            photo content undistorted while the aspect ratio changes.
+
+            Mobile keeps the scale-based path below because it avoids
+            per-scroll width/height layout on phone GPUs.
+
+            Scale-based morph v4 — element rendered at LARGE size
+            with cell aspect ratio, scale DOWN to 1 at end.
+
+            Why v4 (vs v3): v3 sized the element at the tiny hex
+            cell itself and scaled UP to cover the viewport. That
+            looked geometrically right but the browser decoded the
+            IMG at the small element box, then nearest-sampled up
+            when composited — pixelated mess on every device.
+            User: "v plne kvalite a ne rozpixelovane".
+
+            v4 sizes the element so it covers the viewport at
+            scale = 1 while still preserving the hex cell aspect:
+            elementWidth = max(displayW, displayH * cellAspect),
+            elementHeight = elementWidth / cellAspect.
+            The browser decodes the IMG at this large element box
+            (sharp at full bleed) and we only scale DOWN to the
+            cell size at end — downscaling never adds pixelation.
+
+            Because elementAspect ≡ cellAspect, a uniform scale
+            fits the cell exactly: scaleEnd = naturalW / elementW.
+            No overflow past the cell outline at end, no axis
+            distortion, and the clip-path hex (at 100 % of a
+            cell-aspect element) renders as a clean regular hex
+            throughout the morph.
+
+            User also said "ve velkem ta fotka nema byt hexagon, má
+            se na hexagon menit" — start state must read as a
+            full-bleed rectangle and morph INTO the hex. Initial
+            clip-path is the rectangle polygon; the scroll-driven
+            animation morphs it to the hex polygon (on both phone
+            and desktop now — the previous phone-skip was tied to
+            the v3 geometry and isn't needed with the cleaner v4
+            coordinate system).
+          */
+          const cellAspect = naturalWidth / naturalHeight; // ~ 0.866
+          elementWidth = compactMotion
+            ? Math.max(displayWidth, displayHeight * cellAspect)
+            : displayWidth;
+          elementHeight = compactMotion
+            ? elementWidth / cellAspect
+            : displayHeight;
+
+          img.style.width = `${elementWidth}px`;
+          img.style.height = `${elementHeight}px`;
+
+          // Uniform scale END value — fits the cell exactly on both
+          // axes because the element is already at cell aspect.
+          scaleEnd = compactMotion ? naturalWidth / elementWidth : 1;
+        };
+        measure();
 
         // Initial transform: scale=1 so the first render frame
         // shows the full-bleed view (Motion's scroll observer hasn't
@@ -2169,7 +2185,6 @@ const t = useTranslations(lang);
         const easeOut = (value: number) => 1 - Math.pow(1 - clamp01(value), 3);
 
         let isHex = false;
-        let compactShrunk = false;
         let sectionActive = false;
         let lastProgress = -1;
         let lastIntroOpacity = '';
@@ -2244,13 +2259,10 @@ const t = useTranslations(lang);
               only controls the lightweight reveal variable after that.
             */
             const shouldShrink = progress >= 0.28;
-            if (shouldShrink !== compactShrunk) {
-              compactShrunk = shouldShrink;
-              const nextTransform = `translateZ(0) scale(${shouldShrink ? scaleEnd : 1})`;
-              if (nextTransform !== lastImgTransform) {
-                lastImgTransform = nextTransform;
-                img.style.transform = nextTransform;
-              }
+            const nextTransform = `translateZ(0) scale(${shouldShrink ? scaleEnd : 1})`;
+            if (nextTransform !== lastImgTransform) {
+              lastImgTransform = nextTransform;
+              img.style.transform = nextTransform;
             }
 
             const shouldHex = progress >= 0.42;
@@ -2392,6 +2404,14 @@ const t = useTranslations(lang);
           }
         };
 
+        const onViewportChange = () => {
+          measure();
+          lastProgress = -1;
+          lastImgWidth = '';
+          lastImgHeight = '';
+          lastImgTransform = '';
+        };
+
         const onScroll = () => {
           /*
             iOS/Safari can collapse the bottom browser bar without
@@ -2402,7 +2422,7 @@ const t = useTranslations(lang);
           */
           const viewportChanged = viewportLock.maybeRefresh();
           if (viewportChanged) {
-            lastProgress = -1;
+            onViewportChange();
           }
           if (
             !sectionActive &&
@@ -2420,7 +2440,7 @@ const t = useTranslations(lang);
             measured progress state.
           */
           if (!viewportLock.maybeRefresh()) return;
-          lastProgress = -1;
+          onViewportChange();
           targetProgress = readProgress();
           renderedProgress = targetProgress;
           renderProgress(renderedProgress);
