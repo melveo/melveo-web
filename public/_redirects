@@ -19,6 +19,10 @@
 /cs                  /cs/                    301
 /en                  /en/                    301
 
+# Instagram bio short links.
+/hazena  /cs/hazena/  302
+/handball  /en/handball/  302
+
 # Universal Link path for invite codes. The AASA file declares /i/* as a
 # Universal Link target, so iOS with the app opens it directly. Browsers
 # without the app (Android, desktop) continue to the web player surface on
