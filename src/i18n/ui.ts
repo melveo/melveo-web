@@ -19,6 +19,28 @@ export const testFlightUrl = 'https://testflight.apple.com/join/M6Td9ADA';
 
 export const ui = {
   cs: {
+    // Handball landing (/cs/hazena/)
+    'handball.metaTitle': 'Melveo pro trenéry házené',
+    'handball.metaDescription': 'Zápis střel živě ze střídačky, mapa střel po každém zápase, zátěž a připravenost hráček. Beta verze zdarma.',
+    'handball.eyebrow': 'Pro trenéry házené',
+    'handball.title': 'Mapa střel z našich videí. Pro váš tým.',
+    'handball.lead': 'Každý gól, který vidíte na @melveo.app, je zapsaný tak, jak ho trenér zapíše v Melveo: hráčka, místo střely, roh branky, výsledek. Čtyři klepnutí ze střídačky a mapa se během zápasu vyplní sama.',
+    'handball.ctaPrimary': 'Vyzkoušet beta verzi zdarma',
+    'handball.ctaPrimaryNote': 'iPhone a iPad, přes TestFlight.',
+    'handball.installHelp': 'Jak nainstalovat',
+    'handball.ctaSecondary': 'Kluby a týmy: napište nám',
+    'handball.contactSubject': 'Melveo pro házenou',
+    'handball.imageAlt': 'Mapa střel v Melveo: branka a hřiště s místy střel',
+    'handball.f1Title': 'Zápis živě na čtyři klepnutí',
+    'handball.f1Text': 'Hráčka, místo střely, roh branky, gól nebo zákrok. Skóre i přehled střel se hned aktualizují, s časem zápasu.',
+    'handball.f2Title': 'Mapa střel po každém zápase',
+    'handball.f2Text': 'Odkud padají vaše góly, zóna po zóně, a kde gólmanku překonávají, roh po rohu.',
+    'handball.f3Title': 'Zátěž a připravenost',
+    'handball.f3Text': 'Hráčky hodnotí každý trénink a ráno vyplní check-in. Trenér vidí týden i ráno na jedné obrazovce.',
+    'handball.closing': 'Začít můžete zdarma. Melveo Team pro celé kluby.',
+    'handball.pricingLink': 'Ceník',
+    'handball.instagramLink': 'Ligu sledujte na Instagramu @melveo.app',
+
     // Header / footer
     'nav.contact': 'hello@melveo.app',
     'footer.copyright': '© 2026 melveo',
@@ -689,6 +711,28 @@ export const ui = {
     'cookie.accept': 'Přijmout vše',
   },
   en: {
+    // Handball landing (/en/handball/)
+    'handball.metaTitle': 'Melveo for handball coaches',
+    'handball.metaDescription': 'Live shot tagging from the bench, a shot map after every match, player load and readiness. Free beta.',
+    'handball.eyebrow': 'For handball coaches',
+    'handball.title': 'The shot map from our reels. For your team.',
+    'handball.lead': 'Every goal you see on @melveo.app is tagged the way a coach does it in Melveo: player, court spot, corner, outcome. Four taps from the bench, and the map fills itself during the match.',
+    'handball.ctaPrimary': 'Join the free beta',
+    'handball.ctaPrimaryNote': 'iPhone and iPad, via TestFlight.',
+    'handball.installHelp': 'How to install',
+    'handball.ctaSecondary': 'Clubs and teams: write to us',
+    'handball.contactSubject': 'Melveo for handball',
+    'handball.imageAlt': 'Melveo shot map: the goal and the court with shot spots',
+    'handball.f1Title': 'Live tagging in four taps',
+    'handball.f1Text': 'Player, court spot, corner, goal or save. The score and the shot list update at once, with the match time.',
+    'handball.f2Title': 'A shot map after every match',
+    'handball.f2Text': 'Where your goals come from, zone by zone, and where the keeper gets beaten, corner by corner.',
+    'handball.f3Title': 'Load and readiness',
+    'handball.f3Text': 'Players rate every session and check in each morning. The coach sees the week and the morning on one screen.',
+    'handball.closing': 'Free to start. Melveo Team for whole clubs.',
+    'handball.pricingLink': 'Pricing',
+    'handball.instagramLink': 'Follow the league on Instagram @melveo.app',
+
     'nav.contact': 'hello@melveo.app',
     'footer.copyright': '© 2026 melveo',
     'footer.privacy': 'Privacy',
