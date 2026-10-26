@@ -58,6 +58,16 @@ const hueStep = (hueEnd - hueStart) / Math.max(1, words.length - 1);
             </li>
           ))}
         </ul>
+        {/* Phones only: a fixed cyan lens the phrases scroll through. Its
+            copy of the list is the dark in-box text; both lists share
+            --word-scroll-active-index, so they move as one. */}
+        <div class="word-scroll-stage__lens">
+          <ul class="word-scroll-stage__lens-list">
+            {words.map((word) => (
+              <li class="word-scroll-stage__lens-item">{word}</li>
+            ))}
+          </ul>
+        </div>
       </div>
     </div>
   </div>
@@ -285,6 +295,10 @@ const hueStep = (hueEnd - hueStart) / Math.max(1, words.length - 1);
       color-mix(in oklch, var(--word-accent) 46%, transparent);
   }
 
+  .word-scroll-stage__lens {
+    display: none;
+  }
+
   .word-scroll-stage__sr-only {
     position: absolute;
     width: 1px;
@@ -309,13 +323,13 @@ const hueStep = (hueEnd - hueStart) / Math.max(1, words.length - 1);
   }
 
   /*
-    Phones (2026-10-24 redesign): prefix on top, then a short fading
-    list — the active phrase sits right under the prefix in its cyan
-    box, the next phrases trail below it dimmed, past ones slide up
-    and fade out. The list is clipped below the prefix, so no word
-    ever passes through "Trenér ví" / "Coach knows". Type is sized so
-    the longest phrase fits one line (--word-scroll-longest is its
-    character count; ~0.56em per glyph + the box padding).
+    Phones (2026-10-26): picker-wheel layout. The cyan lens sits fixed
+    one row under the prefix; phrases scroll through it continuously
+    (no stop-and-jump), the lens width follows the phrase in it, and
+    the dark in-box text is a second copy of the list clipped by the
+    lens. One dimmed row above, two below, soft-masked — nothing is
+    cut by a hard edge and nothing passes through the prefix. Type is
+    sized so the longest phrase fits one line (~0.56em per glyph).
   */
   @media (max-width: 860px) {
     .word-scroll-stage {
@@ -324,7 +338,7 @@ const hueStep = (hueEnd - hueStart) / Math.max(1, words.length - 1);
 
     .word-scroll-stage__inner {
       flex-direction: column;
-      gap: 0;
+      gap: 0.1em;
       padding-inline: 1rem;
       font-size: clamp(
         1.25rem,
@@ -340,27 +354,27 @@ const hueStep = (hueEnd - hueStart) / Math.max(1, words.length - 1);
     }
 
     .word-scroll-stage__list-viewport {
-      --word-fade: 0.55em;
+      container-type: inline-size;
       width: 100%;
       max-width: none;
-      height: calc(var(--word-fade) + 4 * 1.25em);
+      height: 5em;
       overflow: hidden;
       mask-image: linear-gradient(
         to bottom,
         transparent 0,
-        transparent calc(var(--word-fade) - 0.15em),
-        #000 var(--word-fade),
-        #000 calc(var(--word-fade) + 1.25em),
-        rgba(0, 0, 0, 0.5) calc(var(--word-fade) + 2.5em),
+        rgba(0, 0, 0, 0.5) 0.6em,
+        #000 1.25em,
+        #000 2.5em,
+        rgba(0, 0, 0, 0.55) 3.75em,
         transparent 100%
       );
       -webkit-mask-image: linear-gradient(
         to bottom,
         transparent 0,
-        transparent calc(var(--word-fade) - 0.15em),
-        #000 var(--word-fade),
-        #000 calc(var(--word-fade) + 1.25em),
-        rgba(0, 0, 0, 0.5) calc(var(--word-fade) + 2.5em),
+        rgba(0, 0, 0, 0.5) 0.6em,
+        #000 1.25em,
+        #000 2.5em,
+        rgba(0, 0, 0, 0.55) 3.75em,
         transparent 100%
       );
     }
@@ -371,14 +385,62 @@ const hueStep = (hueEnd - hueStart) / Math.max(1, words.length - 1);
       max-width: none;
       transform: translate3d(
         0,
-        calc(var(--word-fade) - (var(--word-scroll-active-index) * 1.25em)),
+        calc(1.25em - (var(--word-scroll-active-index) * 1.25em)),
         0
       );
     }
 
     .word-scroll-stage__item {
+      --word-boxed: 0;
       width: fit-content;
       margin-inline: auto;
+      text-align: center;
+      background: transparent;
+      box-shadow: none;
+      opacity: clamp(0.25, calc(1 - var(--word-distance, 0) * 0.42), 1);
+      filter: none;
+      will-change: opacity;
+    }
+
+    .word-scroll-stage__word {
+      text-shadow: none;
+    }
+
+    .word-scroll-stage__lens {
+      display: block;
+      position: absolute;
+      top: 1.25em;
+      left: 50%;
+      width: var(--word-lens-width, 6em);
+      height: 1.25em;
+      overflow: hidden;
+      border-radius: 0.34em;
+      background: color-mix(in srgb, var(--color-accent-primary) 92%, transparent);
+      box-shadow: 0 0 22px color-mix(in srgb, var(--color-accent-primary) 38%, transparent);
+      transform: translateX(-50%);
+      pointer-events: none;
+    }
+
+    .word-scroll-stage__lens-list {
+      position: absolute;
+      top: 0;
+      left: 50%;
+      width: 100cqw;
+      margin: 0;
+      padding: 0;
+      list-style: none;
+      color: oklch(0.2 0.03 220);
+      white-space: nowrap;
+      transform: translate3d(
+        -50%,
+        calc(var(--word-scroll-active-index) * -1.25em),
+        0
+      );
+      will-change: transform;
+    }
+
+    .word-scroll-stage__lens-item {
+      height: 1.25em;
       text-align: center;
     }
   }
@@ -408,28 +470,74 @@ const hueStep = (hueEnd - hueStart) / Math.max(1, words.length - 1);
 
       if (mobileWordScroll.matches) {
         /*
-          Phones: each phrase owns an equal slice of the scroll and
-          rests in place for most of it, then glides to the next one —
-          a linear mapping left words half-way between slots most of
-          the time on a short phone scroll.
+          Phones: continuous motion with a pull toward each phrase
+          (35 % linear, 65 % smoothstep per slot) — it never stops
+          dead, it slows while a phrase sits in the lens and crosses
+          the lens edge quickly.
+          The rendered index then eases toward that target per frame,
+          so coarse touch-scroll steps still read as one glide.
         */
-        const count = endIndex - startIndex + 1;
-        const raw = clampWordScroll(progress * count - 0.5, 0, count - 1);
-        const base = Math.floor(raw);
-        const t = clampWordScroll((raw - base - 0.3) / 0.4, 0, 1);
-        activeIndex = startIndex + base + t * t * (3 - 2 * t);
+        const base = Math.floor(activeIndex);
+        const f = activeIndex - base;
+        const target = base + 0.35 * f + 0.65 * f * f * (3 - 2 * f);
+        mobileTargets.set(root, target);
+        return;
       }
 
-      root.style.setProperty('--word-scroll-active-index', activeIndex.toFixed(4));
-
-      root.querySelectorAll<HTMLElement>('.word-scroll-stage__item').forEach((item, index) => {
-        const distance = Math.abs(index - activeIndex);
-        const focus = clampWordScroll(1 - distance * 1.08, 0, 1);
-
-        item.style.setProperty('--word-distance', distance.toFixed(4));
-        item.style.setProperty('--word-focus', focus.toFixed(4));
-      });
+      paintWordScroll(root, activeIndex);
     });
+
+    if (mobileWordScroll.matches && !mobileGlideFrame) {
+      mobileGlideFrame = window.requestAnimationFrame(glideMobileWordScroll);
+    }
+  };
+
+  const paintWordScroll = (root: HTMLElement, activeIndex: number) => {
+    root.style.setProperty('--word-scroll-active-index', activeIndex.toFixed(4));
+
+    const items = root.querySelectorAll<HTMLElement>('.word-scroll-stage__item');
+    items.forEach((item, index) => {
+      const distance = Math.abs(index - activeIndex);
+      const focus = clampWordScroll(1 - distance * 1.08, 0, 1);
+
+      item.style.setProperty('--word-distance', distance.toFixed(4));
+      item.style.setProperty('--word-focus', focus.toFixed(4));
+    });
+
+    if (mobileWordScroll.matches && items.length) {
+      // Lens width follows the phrase in it.
+      const base = clampWordScroll(Math.floor(activeIndex), 0, items.length - 1);
+      const next = Math.min(base + 1, items.length - 1);
+      const f = activeIndex - base;
+      const widthOf = (item: HTMLElement) =>
+        (item.querySelector<HTMLElement>('.word-scroll-stage__word')?.offsetWidth ?? 0) +
+        parseFloat(getComputedStyle(item).fontSize) * 0.6;
+      const width = widthOf(items[base]) * (1 - f) + widthOf(items[next]) * f;
+      root.style.setProperty('--word-lens-width', `${width.toFixed(1)}px`);
+    }
+  };
+
+  const mobileTargets = new Map<HTMLElement, number>();
+  const mobileCurrent = new Map<HTMLElement, number>();
+  const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+  let mobileGlideFrame = 0;
+
+  const glideMobileWordScroll = () => {
+    mobileGlideFrame = 0;
+    let moving = false;
+
+    mobileTargets.forEach((target, root) => {
+      const current = mobileCurrent.get(root) ?? target;
+      const next = reducedMotion.matches ? target : current + (target - current) * 0.22;
+      const settled = Math.abs(target - next) < 0.001;
+      const value = settled ? target : next;
+
+      mobileCurrent.set(root, value);
+      paintWordScroll(root, value);
+      if (!settled) moving = true;
+    });
+
+    if (moving) mobileGlideFrame = window.requestAnimationFrame(glideMobileWordScroll);
   };
 
   let wordScrollFrame = 0;
