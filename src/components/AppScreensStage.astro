@@ -3,10 +3,11 @@
  * AppScreensStage — real app screens right after "Coach knows…", so the
  * claim is backed by the product itself (2026-10-26).
  *
- * Screens are from the demo team (no real player data), taken from the
- * press kit and re-encoded into public/images/app-screens/. Phones use
- * the same device frame as PromoVideoStage; on phones the row becomes
- * a horizontal scroll-snap strip. No JS.
+ * Screens are captured from the current app build against a local demo
+ * stack with simulated data (no real players), one set per locale in
+ * public/images/app-screens/{cs,en}/ — see docs/app-screenshots-2026-10-26.md.
+ * Phones use the same device frame as PromoVideoStage; on small screens
+ * both rows become horizontal scroll-snap strips. No JS.
  */
 import { ui, useTranslations, type Lang } from '../i18n/ui';
 
@@ -21,8 +22,19 @@ const tr = (key: string) => t(key as keyof typeof ui.cs);
 const phones = [
   { file: 'iphone-home', key: 'home' },
   { file: 'iphone-team', key: 'team' },
-  { file: 'iphone-wellness', key: 'wellness' },
+  { file: 'iphone-player', key: 'player' },
+  { file: 'iphone-checkin', key: 'checkin' },
 ] as const;
+
+const tablets = [
+  { file: 'ipad-heart-rate', key: 'heartRate' },
+  { file: 'ipad-report', key: 'report' },
+  { file: 'ipad-video', key: 'video' },
+  { file: 'ipad-preparation', key: 'preparation' },
+] as const;
+
+// Screens are captured per locale (the app runs in the page's language).
+const dir = `/images/app-screens/${lang}`;
 ---
 
 <section id="screens" class="screens-stage" aria-labelledby="screens-heading">
@@ -38,9 +50,9 @@ const phones = [
           <figure>
             <div class="screens-device">
               <img
-                src={`/images/app-screens/${phone.file}-640.webp`}
-                srcset={`/images/app-screens/${phone.file}-400.webp 400w, /images/app-screens/${phone.file}-640.webp 640w`}
-                sizes="(max-width: 760px) 64vw, 16rem"
+                src={`${dir}/${phone.file}-640.webp`}
+                srcset={`${dir}/${phone.file}-400.webp 400w, ${dir}/${phone.file}-640.webp 640w`}
+                sizes="(max-width: 1000px) 60vw, 14rem"
                 width="640"
                 height="1391"
                 alt={tr(`screens.${phone.key}.alt`)}
@@ -57,24 +69,30 @@ const phones = [
       ))}
     </ul>
 
-    <figure class="screens-stage__tablet">
-      <div class="screens-device screens-device--tablet">
-        <img
-          src="/images/app-screens/ipad-match-events-1400.webp"
-          srcset="/images/app-screens/ipad-match-events-900.webp 900w, /images/app-screens/ipad-match-events-1400.webp 1400w"
-          sizes="(max-width: 900px) 92vw, 44rem"
-          width="1400"
-          height="1050"
-          alt={t('screens.match.alt')}
-          loading="lazy"
-          decoding="async"
-        />
-      </div>
-      <figcaption>
-        <strong>{t('screens.match.title')}</strong>
-        <span>{t('screens.match.body')}</span>
-      </figcaption>
-    </figure>
+    <ul class="screens-stage__tablets">
+      {tablets.map((tablet) => (
+        <li class="screens-stage__tablet">
+          <figure>
+            <div class="screens-device screens-device--tablet">
+              <img
+                src={`${dir}/${tablet.file}-1400.webp`}
+                srcset={`${dir}/${tablet.file}-900.webp 900w, ${dir}/${tablet.file}-1400.webp 1400w`}
+                sizes="(max-width: 900px) 84vw, 36rem"
+                width="1400"
+                height="1050"
+                alt={tr(`screens.${tablet.key}.alt`)}
+                loading="lazy"
+                decoding="async"
+              />
+            </div>
+            <figcaption>
+              <strong>{tr(`screens.${tablet.key}.title`)}</strong>
+              <span>{tr(`screens.${tablet.key}.body`)}</span>
+            </figcaption>
+          </figure>
+        </li>
+      ))}
+    </ul>
 
     <p class="screens-stage__note">{t('screens.note')}</p>
   </div>
@@ -150,18 +168,30 @@ const phones = [
     list-style: none;
   }
 
-  /* Middle phone sits a touch higher — a calmer, staged row. */
-  .screens-stage__item:nth-child(2) {
+  /* Inner phones sit a touch higher — a calmer, staged arc. */
+  .screens-stage__item:nth-child(2),
+  .screens-stage__item:nth-child(3) {
     margin-top: -1.5rem;
   }
 
   .screens-stage__item figure,
-  .screens-stage__tablet {
+  .screens-stage__tablet figure {
     margin: 0;
   }
 
+  .screens-stage__tablets {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 36rem));
+    justify-content: center;
+    gap: clamp(2rem, 4vw, 3rem) clamp(1.5rem, 3vw, 2.5rem);
+    width: 100%;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
   .screens-device {
-    width: 16rem;
+    width: 14rem;
     padding: 0.5rem;
     border-radius: 2.6rem;
     background: linear-gradient(150deg, #5b6066 0%, #2b2e33 18%, #16181c 50%, #0c0e11 100%);
@@ -182,7 +212,7 @@ const phones = [
   }
 
   .screens-device--tablet {
-    width: min(44rem, 92vw);
+    width: 100%;
     padding: 0.7rem;
     border-radius: 1.9rem;
   }
@@ -195,7 +225,7 @@ const phones = [
     display: flex;
     flex-direction: column;
     gap: 0.3rem;
-    max-width: 16rem;
+    max-width: 14rem;
     margin: 1.25rem auto 0;
     text-align: center;
     font-size: 0.95rem;
@@ -221,8 +251,8 @@ const phones = [
     text-align: center;
   }
 
-  /* Phones: horizontal scroll-snap strip, the next phone peeks in. */
-  @media (max-width: 760px) {
+  /* Small screens: both rows become scroll-snap strips, the next device peeks in. */
+  @media (max-width: 1000px) {
     .screens-stage__phones {
       justify-content: flex-start;
       gap: 1rem;
@@ -244,7 +274,8 @@ const phones = [
       scroll-snap-align: center;
     }
 
-    .screens-stage__item:nth-child(2) {
+    .screens-stage__item:nth-child(2),
+    .screens-stage__item:nth-child(3) {
       margin-top: 0;
     }
 
@@ -252,8 +283,32 @@ const phones = [
       width: min(64vw, 15rem);
     }
 
-    figcaption {
+    .screens-stage__item figcaption {
       max-width: min(64vw, 15rem);
+    }
+  }
+
+  @media (max-width: 900px) {
+    .screens-stage__tablets {
+      display: flex;
+      justify-content: flex-start;
+      gap: 1rem;
+      margin-inline: calc(-1 * clamp(1rem, 4vw, 2rem));
+      padding: 0 clamp(1rem, 4vw, 2rem) 0.5rem;
+      overflow-x: auto;
+      scroll-snap-type: x mandatory;
+      scroll-padding-inline: clamp(1rem, 4vw, 2rem);
+      scrollbar-width: none;
+      width: calc(100% + 2 * clamp(1rem, 4vw, 2rem));
+    }
+
+    .screens-stage__tablets::-webkit-scrollbar {
+      display: none;
+    }
+
+    .screens-stage__tablet {
+      flex: 0 0 min(84vw, 36rem);
+      scroll-snap-align: start;
     }
   }
 </style>
