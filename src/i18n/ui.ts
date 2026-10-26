@@ -140,6 +140,10 @@ export const ui = {
     'gridAlt.team-briefing-wide': 'Týmová porada s trenérem před zápasem',
     'gridAlt.gym-deadlift': 'Hráčka při mrtvém tahu v posilovně, trenér jí měří čas',
     'gridAlt.youth-coach-hall': 'Trenérka vysvětluje mladým házenkářům v hale',
+    'gridAlt.team-celebration': 'Házenkářky slaví výhru v hale',
+    'gridAlt.morning-checkin': 'Hráčka ráno vyplňuje check-in na telefonu',
+    'gridAlt.coach-portrait-rain': 'Trenér s tabletem u hřiště v dešti',
+    'gridAlt.physio-recovery': 'Fyzioterapeutka ošetřuje hráče na lehátku',
 
     // Stage 3 — gooey punctuation. Split into two parts so the
     // "Synced." word can be coloured with brand cyan.
@@ -820,6 +824,10 @@ export const ui = {
     'gridAlt.team-briefing-wide': 'Team briefing with the coach before the match',
     'gridAlt.gym-deadlift': 'Athlete doing a trap-bar deadlift in the gym while the coach times the set',
     'gridAlt.youth-coach-hall': 'Coach talking to a youth handball team in the sports hall',
+    'gridAlt.team-celebration': 'Handball players celebrating a win in the sports hall',
+    'gridAlt.morning-checkin': 'Player filling in her morning check-in on a phone',
+    'gridAlt.coach-portrait-rain': 'Coach holding a tablet at the edge of the pitch in the rain',
+    'gridAlt.physio-recovery': 'Physiotherapist treating a player on the table',
 
     'gooey.headlinePrefix': 'Coach + player.',
     'gooey.headlineAccent': 'Synced.',
