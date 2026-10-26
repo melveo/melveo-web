@@ -138,6 +138,8 @@ export const ui = {
     'gridAlt.coach-team-dialogue': 'Trenér v dialogu s týmem při tréninku',
     'gridAlt.coach-player-close': 'Trenér v rozhovoru s hráči na tréninkovém hřišti',
     'gridAlt.team-briefing-wide': 'Týmová porada s trenérem před zápasem',
+    'gridAlt.gym-deadlift': 'Hráčka při mrtvém tahu v posilovně, trenér jí měří čas',
+    'gridAlt.youth-coach-hall': 'Trenérka vysvětluje mladým házenkářům v hale',
 
     // Stage 3 — gooey punctuation. Split into two parts so the
     // "Synced." word can be coloured with brand cyan.
@@ -816,6 +818,8 @@ export const ui = {
     'gridAlt.coach-team-dialogue': 'Coach talking with the team during training',
     'gridAlt.coach-player-close': 'Coach talking with players on the training pitch',
     'gridAlt.team-briefing-wide': 'Team briefing with the coach before the match',
+    'gridAlt.gym-deadlift': 'Athlete doing a trap-bar deadlift in the gym while the coach times the set',
+    'gridAlt.youth-coach-hall': 'Coach talking to a youth handball team in the sports hall',
 
     'gooey.headlinePrefix': 'Coach + player.',
     'gooey.headlineAccent': 'Synced.',
