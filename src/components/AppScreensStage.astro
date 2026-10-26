@@ -1,0 +1,259 @@
+---
+/**
+ * AppScreensStage — real app screens right after "Coach knows…", so the
+ * claim is backed by the product itself (2026-10-26).
+ *
+ * Screens are from the demo team (no real player data), taken from the
+ * press kit and re-encoded into public/images/app-screens/. Phones use
+ * the same device frame as PromoVideoStage; on phones the row becomes
+ * a horizontal scroll-snap strip. No JS.
+ */
+import { ui, useTranslations, type Lang } from '../i18n/ui';
+
+interface Props {
+  lang: Lang;
+}
+
+const { lang } = Astro.props;
+const t = useTranslations(lang);
+const tr = (key: string) => t(key as keyof typeof ui.cs);
+
+const phones = [
+  { file: 'iphone-home', key: 'home' },
+  { file: 'iphone-team', key: 'team' },
+  { file: 'iphone-wellness', key: 'wellness' },
+] as const;
+---
+
+<section id="screens" class="screens-stage" aria-labelledby="screens-heading">
+  <div class="screens-stage__inner">
+    <header class="screens-stage__header">
+      <h2 id="screens-heading" class="screens-stage__headline">{t('screens.headline')}</h2>
+      <p class="screens-stage__body">{t('screens.body')}</p>
+    </header>
+
+    <ul class="screens-stage__phones">
+      {phones.map((phone) => (
+        <li class="screens-stage__item">
+          <figure>
+            <div class="screens-device">
+              <img
+                src={`/images/app-screens/${phone.file}-640.webp`}
+                srcset={`/images/app-screens/${phone.file}-400.webp 400w, /images/app-screens/${phone.file}-640.webp 640w`}
+                sizes="(max-width: 760px) 64vw, 16rem"
+                width="640"
+                height="1391"
+                alt={tr(`screens.${phone.key}.alt`)}
+                loading="lazy"
+                decoding="async"
+              />
+            </div>
+            <figcaption>
+              <strong>{tr(`screens.${phone.key}.title`)}</strong>
+              <span>{tr(`screens.${phone.key}.body`)}</span>
+            </figcaption>
+          </figure>
+        </li>
+      ))}
+    </ul>
+
+    <figure class="screens-stage__tablet">
+      <div class="screens-device screens-device--tablet">
+        <img
+          src="/images/app-screens/ipad-match-events-1400.webp"
+          srcset="/images/app-screens/ipad-match-events-900.webp 900w, /images/app-screens/ipad-match-events-1400.webp 1400w"
+          sizes="(max-width: 900px) 92vw, 44rem"
+          width="1400"
+          height="1050"
+          alt={t('screens.match.alt')}
+          loading="lazy"
+          decoding="async"
+        />
+      </div>
+      <figcaption>
+        <strong>{t('screens.match.title')}</strong>
+        <span>{t('screens.match.body')}</span>
+      </figcaption>
+    </figure>
+
+    <p class="screens-stage__note">{t('screens.note')}</p>
+  </div>
+</section>
+
+<style>
+  .screens-stage {
+    position: relative;
+    isolation: isolate;
+    width: 100%;
+    background: var(--color-bg-canvas);
+    overflow: hidden;
+  }
+
+  /* One soft cyan glow behind the phones — same family as the promo aurora. */
+  .screens-stage::before {
+    content: '';
+    position: absolute;
+    left: 50%;
+    top: 34%;
+    width: min(70rem, 120vw);
+    height: 28rem;
+    transform: translate(-50%, -50%);
+    background: radial-gradient(
+      closest-side,
+      color-mix(in srgb, var(--color-accent-primary) 14%, transparent),
+      transparent
+    );
+    filter: blur(20px);
+    pointer-events: none;
+    z-index: -1;
+  }
+
+  .screens-stage__inner {
+    max-width: 76rem;
+    margin: 0 auto;
+    padding: clamp(4.5rem, 9vw, 7.5rem) clamp(1rem, 4vw, 2rem);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: clamp(2.5rem, 5vw, 4rem);
+  }
+
+  .screens-stage__header {
+    text-align: center;
+  }
+
+  .screens-stage__headline {
+    margin: 0 0 0.85rem;
+    font-size: clamp(2rem, 5vw, 3.25rem);
+    font-weight: 800;
+    line-height: 1;
+    letter-spacing: -0.04em;
+    color: var(--color-text-primary);
+  }
+
+  .screens-stage__body {
+    margin: 0 auto;
+    max-width: 34rem;
+    color: var(--color-text-secondary);
+    font-size: clamp(0.95rem, 1.6vw, 1.1rem);
+    line-height: 1.6;
+  }
+
+  .screens-stage__phones {
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    gap: clamp(1.5rem, 3vw, 3rem);
+    width: 100%;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  /* Middle phone sits a touch higher — a calmer, staged row. */
+  .screens-stage__item:nth-child(2) {
+    margin-top: -1.5rem;
+  }
+
+  .screens-stage__item figure,
+  .screens-stage__tablet {
+    margin: 0;
+  }
+
+  .screens-device {
+    width: 16rem;
+    padding: 0.5rem;
+    border-radius: 2.6rem;
+    background: linear-gradient(150deg, #5b6066 0%, #2b2e33 18%, #16181c 50%, #0c0e11 100%);
+    box-shadow:
+      0 34px 80px rgba(0, 0, 0, 0.55),
+      0 0 0 1px rgba(255, 255, 255, 0.1),
+      0 0 60px color-mix(in srgb, var(--color-accent-primary) 10%, transparent),
+      inset 0 0 0 2px rgba(255, 255, 255, 0.06),
+      inset 0 0 0 6px #000;
+  }
+
+  .screens-device img {
+    display: block;
+    width: 100%;
+    height: auto;
+    border-radius: 2.15rem;
+    background: #000;
+  }
+
+  .screens-device--tablet {
+    width: min(44rem, 92vw);
+    padding: 0.7rem;
+    border-radius: 1.9rem;
+  }
+
+  .screens-device--tablet img {
+    border-radius: 1.25rem;
+  }
+
+  figcaption {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+    max-width: 16rem;
+    margin: 1.25rem auto 0;
+    text-align: center;
+    font-size: 0.95rem;
+    line-height: 1.5;
+    color: var(--color-text-secondary);
+  }
+
+  .screens-stage__tablet figcaption {
+    max-width: 30rem;
+  }
+
+  figcaption strong {
+    color: var(--color-text-primary);
+    font-size: 1.05rem;
+    font-weight: 700;
+  }
+
+  .screens-stage__note {
+    margin: 0;
+    font-size: 0.8rem;
+    color: var(--color-text-tertiary, var(--color-text-secondary));
+    opacity: 0.8;
+    text-align: center;
+  }
+
+  /* Phones: horizontal scroll-snap strip, the next phone peeks in. */
+  @media (max-width: 760px) {
+    .screens-stage__phones {
+      justify-content: flex-start;
+      gap: 1rem;
+      margin-inline: calc(-1 * clamp(1rem, 4vw, 2rem));
+      padding: 1.5rem clamp(1rem, 4vw, 2rem) 0.5rem;
+      overflow-x: auto;
+      scroll-snap-type: x mandatory;
+      scroll-padding-inline: clamp(1rem, 4vw, 2rem);
+      scrollbar-width: none;
+      width: calc(100% + 2 * clamp(1rem, 4vw, 2rem));
+    }
+
+    .screens-stage__phones::-webkit-scrollbar {
+      display: none;
+    }
+
+    .screens-stage__item {
+      flex: 0 0 auto;
+      scroll-snap-align: center;
+    }
+
+    .screens-stage__item:nth-child(2) {
+      margin-top: 0;
+    }
+
+    .screens-stage__item .screens-device {
+      width: min(64vw, 15rem);
+    }
+
+    figcaption {
+      max-width: min(64vw, 15rem);
+    }
+  }
+</style>

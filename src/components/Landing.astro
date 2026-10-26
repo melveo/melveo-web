@@ -27,6 +27,7 @@ import MelveoDataFlowHero from './MelveoDataFlowHero';
 import FaqStage from './FaqStage.astro';
 import PromoVideoStage from './PromoVideoStage.astro';
 import SectionDotsNav from './SectionDotsNav.astro';
+import AppScreensStage from './AppScreensStage.astro';
 import BrandMark from './BrandMark.astro';
 import { testFlightUrl, useTranslations, type Lang } from '../i18n/ui';
 
@@ -227,6 +228,9 @@ const t = useTranslations(lang);
   <!-- STAGE 3.75 — Scroll-linked word highlight (Daniel Haim codepen) -->
   <!-- ============================================================== -->
   <WordScrollStage lang={lang} />
+
+  {/* Stage 3.9 — real app screens backing the "Coach knows" claims */}
+  <AppScreensStage lang={lang} />
 
   {/* Stage 4.5 — promo video in an iPhone frame ("see it in motion") */}
   <PromoVideoStage lang={lang} />
