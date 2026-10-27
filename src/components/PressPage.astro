@@ -58,13 +58,19 @@ const shotSizes = {
   tablet: { w: [720, 1200], h: [540, 900], sizes: '(min-width: 48rem) 45rem, 100vw' },
 } as const;
 
+// Current app (build 277), demo team with simulated data, one set per locale
+// — see docs/app-screenshots-2026-10-26/.
 const shots = [
   ['press.shots.home', 'melveo-iphone-home', 'phone'],
   ['press.shots.team', 'melveo-iphone-team', 'phone'],
-  ['press.shots.wellness', 'melveo-iphone-wellness', 'phone'],
-  ['press.shots.heartRate', 'melveo-ipad-match-heart-rate', 'tablet'],
-  ['press.shots.events', 'melveo-ipad-match-events', 'tablet'],
+  ['press.shots.player', 'melveo-iphone-player', 'phone'],
+  ['press.shots.checkin', 'melveo-iphone-checkin', 'phone'],
+  ['press.shots.heartRate', 'melveo-ipad-heart-rate', 'tablet'],
+  ['press.shots.report', 'melveo-ipad-report', 'tablet'],
+  ['press.shots.video', 'melveo-ipad-video', 'tablet'],
+  ['press.shots.preparation', 'melveo-ipad-preparation', 'tablet'],
 ] as const;
+const shotDir = `/press/screenshots/${lang}`;
 
 const colors = [
   ['press.colors.ink', '#1B2831'],
@@ -89,7 +95,7 @@ const aboutLangs: Lang[] = lang === 'cs' ? ['cs', 'en'] : ['en', 'cs'];
     <h1 class="legal-h1">{t('press.title')}</h1>
     <p class="legal-lead">{t('press.lead')}</p>
     <p>
-      <a class="press-download" href="/press/melveo-press-kit.zip" download>
+      <a class="press-download" href={lang === 'cs' ? '/press/melveo-press-kit.zip' : '/press/melveo-press-kit-en.zip'} download>
         {t('press.downloadZip')} <span>{t('press.zipMeta')}</span>
       </a>
     </p>
@@ -125,10 +131,10 @@ const aboutLangs: Lang[] = lang === 'cs' ? ['cs', 'en'] : ['en', 'cs'];
     <div class="press-shots">
       {shots.map(([label, file, device]) => (
         <figure class={`press-shot press-shot--${device}`}>
-          <a href={`/press/${file}.png`} download>
+          <a href={`${shotDir}/${file}.png`} download>
             <img
-              src={`/press/${file}-preview.webp`}
-              srcset={`/press/${file}-preview-sm.webp ${shotSizes[device].w[0]}w, /press/${file}-preview.webp ${shotSizes[device].w[1]}w`}
+              src={`${shotDir}/${file}-preview.webp`}
+              srcset={`${shotDir}/${file}-preview-sm.webp ${shotSizes[device].w[0]}w, ${shotDir}/${file}-preview.webp ${shotSizes[device].w[1]}w`}
               sizes={shotSizes[device].sizes}
               width={shotSizes[device].w[1]}
               height={shotSizes[device].h[1]}
