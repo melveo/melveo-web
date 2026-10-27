@@ -37,7 +37,7 @@ export const ui = {
     'handball.f2Text': 'Odkud padají vaše góly, zóna po zóně, a kde gólmanku překonávají, roh po rohu.',
     'handball.f3Title': 'Zátěž a připravenost',
     'handball.f3Text': 'Hráčky hodnotí každý trénink a ráno vyplní check-in. Trenér vidí týden i ráno na jedné obrazovce.',
-    'handball.closing': 'Začít můžete zdarma. Melveo Team pro celé kluby.',
+    'handball.closing': 'Začít můžete zdarma. Gameplan pro trenéry, kteří chtějí víc.',
     'handball.pricingLink': 'Ceník',
     'handball.instagramLink': 'Ligu sledujte na Instagramu @melveo.app',
 
@@ -197,8 +197,9 @@ export const ui = {
     // Stage 6.5 — Pricing
     'pricing.eyebrow': '',
     'pricing.headline': 'Začni zdarma.',
-    'pricing.headlineAccent': 'Jeden tarif pro celý tým.',
-    'pricing.subline': 'Jedna licence pro celý tým. Transparentní ceny v Kč.',
+    'pricing.headlineAccent': 'Hráč i trenér mají vlastní tarif.',
+    'pricing.subline':
+      'Tým založíš zdarma a za počet hráčů se neplatí. Placený tarif si volí každý sám: Peak pro hráče, Gameplan pro trenéra.',
     // Daňová poznámka — AKTUÁLNĚ SE NERENDERUJE (rozhodnutí majitele
     // 2026-06-10: na landingu žádné zmínky o DPH). String zůstává
     // připravený; firma není plátce DPH (ověřeno v registru 2026-06-10).
@@ -206,29 +207,48 @@ export const ui = {
     // a po případné registraci k DPH změnit na „Ceny bez DPH.“ — daň
     // počítat v checkoutu (Stripe Tax / MoR), nikdy přepínačem.
     'pricing.vatNote': 'Ceny jsou konečné — nejsme plátci DPH.',
+    'pricing.toggleLabel': 'Období platby',
     'pricing.toggleMonthly': 'Měsíčně',
     'pricing.toggleYearly': 'Ročně',
     'pricing.toggleSavings': '−17 %',
-    'pricing.perDay': '/ den za tým',
     'pricing.perMonth': '/ měsíc',
     'pricing.perYear': '/ rok',
-    'pricing.billedYearly': 'Účtováno ročně',
     'pricing.billedMonthly': 'Účtováno měsíčně',
-    'pricing.perMonthEffective': '~ {amount} / měsíc',
-    'pricing.popular': 'Nejoblíbenější',
-    'pricing.included': 'Co je v plánu',
-    'pricing.ctaFree': 'Test s menší skupinou',
-    'pricing.ctaPilot': 'Mám zájem',
+    'pricing.perMonthEffective': '= {amount} / měsíc · 2 měsíce zdarma',
     'pricing.free': 'Zdarma',
-    'pricing.freeUpsell': 'Až tým povyroste přes 8 hráčů, přejdeš na Melveo Team.',
-    'pricing.athleteHeading': 'Potřebujete víc hráčů?',
-    'pricing.athleteBody':
-      'Athlete Pack rozšíří tým o dalších 10 hráčů za 5 900 Kč/rok (max 1 pack na tým).',
-    'pricing.clubHeading': 'Individuální plán',
-    'pricing.clubBody':
-      'Pro více týmů, akademii nebo celý klub. Vlastní podmínky, integrace a osobní podpora. Napiš nám.',
+    'pricing.freeNote': 'Bez platební karty',
+    'pricing.trackPlayer': 'Pro hráče',
+    'pricing.trackCoach': 'Pro trenéry',
+    'pricing.ctaFree': 'Stáhnout beta verzi',
+    'pricing.ctaNotify': 'Dát vědět při spuštění',
+    'pricing.notifySubject': 'Zájem o {plan}',
+    'pricing.soon': 'Brzy',
+    'pricing.warmup.tagline': 'Start pro každého hráče.',
+    'pricing.warmup.f1': 'Ranní check-in za 30 sekund',
+    'pricing.warmup.f2': 'Osobní přehled připravenosti',
+    'pricing.warmup.f3': 'Vlastní aktivity a měření',
+    'pricing.warmup.f4': 'Připojení k týmu přes pozvánku',
+    'pricing.warmup.f5': 'Sám rozhoduješ, co trenér uvidí',
+    'pricing.peak.tagline': 'Pro hráče, kteří chtějí ze svých dat víc.',
+    'pricing.peak.f1': 'Vše z Warm-up',
+    'pricing.peak.soon1': 'Pokročilé osobní trendy',
+    'pricing.peak.soon2': 'Osobní tréninkové programy',
+    'pricing.sideline.tagline': 'Trenér a celý tým, zdarma.',
+    'pricing.sideline.f1': 'Tým zdarma, za hráče se neplatí',
+    'pricing.sideline.f2': 'Soupiska a pozvánky přes kód nebo QR',
+    'pricing.sideline.f3': 'Check-iny a připravenost týmu',
+    'pricing.sideline.f4': 'Tréninky, docházka a RPE',
+    'pricing.sideline.f5': 'Zápasy a základní report',
+    'pricing.gameplan.tagline': 'Pro trenéra, který chce video a hlubší analýzu.',
+    'pricing.gameplan.f1': 'Vše ze Sideline',
+    'pricing.gameplan.f2': 'Živé tepy hráčů během zápasu',
+    'pricing.gameplan.f3': 'Video zápasu, úseky a klipy',
+    'pricing.gameplan.f4': 'Pokročilá analýza po zápase',
+    'pricing.gameplan.f5': 'Srovnání týdnů a trendy týmu',
+    'pricing.gameplan.soon1': 'Knihovna cvičení k opakovanému použití',
+    'pricing.separate': 'Peak a Gameplan jsou samostatné tarify, jeden nezahrnuje druhý.',
     'pricing.disclaimer':
-      'Všechny platby zpracovává Stripe.',
+      'Placené tarify zatím nejsou v prodeji. Až je spustíme, koupíš je tady na webu a platby zpracuje Stripe.',
 
     // Section dots nav (fixed right, desktop only) + promo video stage
     'sectionNav.label': 'Navigace sekcí',
@@ -398,6 +418,12 @@ export const ui = {
     'faq.q4': 'Kdo vidí hráčská data?',
     'faq.a4':
       'Data zůstávají v klubu. Workspace spravuje klub, hráč má kontrolu nad svým vstupem — data neprodáváme a nepoužíváme k marketingu.',
+    'faq.q5': 'Platí se za každého hráče?',
+    'faq.a5':
+      'Ne. Tým založíš zdarma a za počet hráčů se neplatí. Placené jsou jen osobní tarify: Peak pro hráče a Gameplan pro trenéra.',
+    'faq.q6': 'Dostanou hráči Peak, když trenér platí Gameplan?',
+    'faq.a6':
+      'Ne. Peak a Gameplan jsou samostatné tarify a jeden nezahrnuje druhý. Hráči s tarifem Warm-up dál posílají check-iny a trenér s nimi pracuje jako dřív.',
 
     // Stage 9 — pilot CTA
     'pilot.headline': 'Pojďme to spustit.',
@@ -655,12 +681,12 @@ export const ui = {
     'help.billing.title': 'Tarif vybereš a spravuješ na webu',
     'help.billing.lead': 'V iOS aplikaci nejsou nákupní tlačítka. Platbu i správu tarifu řeší web Melveo.',
     'help.billing.whyTitle': 'Proč se neplatí v aplikaci',
-    'help.billing.whyBody': 'Licenci kupuje klub nebo tým jako organizace, což pravidlo Apple App Store 3.1.3(c) umožňuje mimo aplikaci. Proto všechny platební kroky zůstávají na webu.',
+    'help.billing.whyBody': 'Placené tarify Peak a Gameplan se kupují a spravují jen na webu. V aplikaci proto nenajdeš nákupní tlačítka.',
     'help.billing.howTitle': 'Jak pokračovat',
     'help.billing.step1.title': 'Prohlédni si aktuální tarify',
     'help.billing.step1.body': 'Ceny jsou vždy uvedené v ceníku na hlavní stránce. V nápovědě je neopakujeme, aby se údaje nerozcházely.',
     'help.billing.step2.title': 'Dokonči platbu na webu',
-    'help.billing.step2.body': 'Platby zpracovává Stripe.',
+    'help.billing.step2.body': 'Placené tarify zatím nejsou v prodeji. Až je spustíme, platbu zpracuje Stripe.',
     'help.billing.step3.title': 'Spravuj tarif na webu',
     'help.billing.step3.body': 'Změny tarifu se také řeší na webu, ne v iOS aplikaci. Pokud potřebuješ pomoct, napiš nám.',
     'help.billing.pricingCta': 'Zobrazit aktuální tarify a ceny',
@@ -691,7 +717,7 @@ export const ui = {
     'help.faq.q5': 'Musím povolit HealthKit, notifikace nebo Polar?',
     'help.faq.a5': 'Ne. HealthKit se nabízí hráčům, notifikace realizačnímu týmu a Polar oběma rolím. Všechna tato oprávnění jsou volitelná a můžeš je přeskočit.',
     'help.faq.q6': 'Kde koupím nebo změním tarif?',
-    'help.faq.a6': 'Na webu Melveo. iOS aplikace nemá nákupní tlačítka a platby zpracovává Stripe.',
+    'help.faq.a6': 'Na webu Melveo. iOS aplikace nemá nákupní tlačítka. Placené tarify Peak a Gameplan zatím nejsou v prodeji; platby pak zpracuje Stripe.',
 
     // Press kit (/cs/press/) — issue #7
     'press.metaTitle': 'Pro média',
@@ -768,7 +794,7 @@ export const ui = {
     'handball.f2Text': 'Where your goals come from, zone by zone, and where the keeper gets beaten, corner by corner.',
     'handball.f3Title': 'Load and readiness',
     'handball.f3Text': 'Players rate every session and check in each morning. The coach sees the week and the morning on one screen.',
-    'handball.closing': 'Free to start. Melveo Team for whole clubs.',
+    'handball.closing': 'Free to start. Gameplan for coaches who want more.',
     'handball.pricingLink': 'Pricing',
     'handball.instagramLink': 'Follow the league on Instagram @melveo.app',
 
@@ -899,34 +925,54 @@ export const ui = {
     // Stage 6.5 — Pricing
     'pricing.eyebrow': '',
     'pricing.headline': 'Start free.',
-    'pricing.headlineAccent': 'One plan for the whole team.',
-    'pricing.subline': 'One license for the whole team. Transparent CZK pricing.',
+    'pricing.headlineAccent': 'Players and coaches each get their own plan.',
+    'pricing.subline':
+      'Creating a team is free and you never pay per player. Each person picks their own paid plan: Peak for players, Gameplan for coaches.',
     // Tax note — CURRENTLY NOT RENDERED (owner decision 2026-06-10:
     // no VAT wording on the landing). Kept ready; see CS comment above.
     'pricing.vatNote': 'Prices are final — no VAT is added (seller not VAT-registered).',
+    'pricing.toggleLabel': 'Billing period',
     'pricing.toggleMonthly': 'Monthly',
     'pricing.toggleYearly': 'Yearly',
     'pricing.toggleSavings': '−17 %',
-    'pricing.perDay': '/ day for team',
     'pricing.perMonth': '/ month',
     'pricing.perYear': '/ year',
-    'pricing.billedYearly': 'Billed yearly',
     'pricing.billedMonthly': 'Billed monthly',
-    'pricing.perMonthEffective': '~ {amount} / month',
-    'pricing.popular': 'Most popular',
-    'pricing.included': "What's included",
-    'pricing.ctaFree': 'Start with small group',
-    'pricing.ctaPilot': 'Get in touch',
+    'pricing.perMonthEffective': '= {amount} / month · 2 months free',
     'pricing.free': 'Free',
-    'pricing.freeUpsell': 'When the squad outgrows 8 players, you move up to Melveo Team.',
-    'pricing.athleteHeading': 'Need more players?',
-    'pricing.athleteBody':
-      'The Athlete Pack adds 10 more players for 5,900 CZK / year (max 1 pack per team).',
-    'pricing.clubHeading': 'Enterprise',
-    'pricing.clubBody':
-      'For multiple teams, an academy or a whole club. Custom terms, integrations and dedicated support. Get in touch.',
+    'pricing.freeNote': 'No card required',
+    'pricing.trackPlayer': 'For players',
+    'pricing.trackCoach': 'For coaches',
+    'pricing.ctaFree': 'Get the beta',
+    'pricing.ctaNotify': 'Tell me at launch',
+    'pricing.notifySubject': '{plan} enquiry',
+    'pricing.soon': 'Soon',
+    'pricing.warmup.tagline': 'Where every player starts.',
+    'pricing.warmup.f1': 'Morning check-in in 30 seconds',
+    'pricing.warmup.f2': 'Personal readiness overview',
+    'pricing.warmup.f3': 'Your own activities and measurements',
+    'pricing.warmup.f4': 'Join your team with an invite',
+    'pricing.warmup.f5': 'You decide what your coach sees',
+    'pricing.peak.tagline': 'For players who want more from their data.',
+    'pricing.peak.f1': 'Everything in Warm-up',
+    'pricing.peak.soon1': 'Advanced personal trends',
+    'pricing.peak.soon2': 'Personal training programmes',
+    'pricing.sideline.tagline': 'The coach and the whole team, free.',
+    'pricing.sideline.f1': 'Free team, no per-player fee',
+    'pricing.sideline.f2': 'Roster and invites by code or QR',
+    'pricing.sideline.f3': 'Check-ins and team readiness',
+    'pricing.sideline.f4': 'Sessions, attendance and RPE',
+    'pricing.sideline.f5': 'Matches and a basic report',
+    'pricing.gameplan.tagline': 'For coaches who want video and deeper analysis.',
+    'pricing.gameplan.f1': 'Everything in Sideline',
+    'pricing.gameplan.f2': 'Live player heart rates during matches',
+    'pricing.gameplan.f3': 'Match video, segments and clips',
+    'pricing.gameplan.f4': 'Advanced post-match analysis',
+    'pricing.gameplan.f5': 'Week comparison and team trends',
+    'pricing.gameplan.soon1': 'Reusable drill library',
+    'pricing.separate': 'Peak and Gameplan are separate plans; neither includes the other.',
     'pricing.disclaimer':
-      'All payments processed by Stripe.',
+      'Paid plans are not on sale yet. Once they launch, you buy them here on the website and Stripe processes the payment.',
 
     // Section dots nav + promo video stage
     'sectionNav.label': 'Section navigation',
@@ -1074,6 +1120,12 @@ export const ui = {
     'faq.q4': 'Who can see player data?',
     'faq.a4':
       'Data stays within the club. The club runs the workspace, players control their own input — we never sell data or use it for marketing.',
+    'faq.q5': 'Do we pay per player?',
+    'faq.a5':
+      'No. Creating a team is free and the number of players is never charged. Only the personal plans are paid: Peak for players and Gameplan for coaches.',
+    'faq.q6': 'Do players get Peak when the coach pays for Gameplan?',
+    'faq.a6':
+      'No. Peak and Gameplan are separate plans and neither includes the other. Players on Warm-up keep sending check-ins and the coach works with them as before.',
 
     'pilot.headline': 'Let’s start it.',
     'pilot.body': 'A short email is enough.',
@@ -1329,12 +1381,12 @@ export const ui = {
     'help.billing.title': 'Choose and manage your plan on the website',
     'help.billing.lead': 'The iOS app has no purchase buttons. Payments and plan management happen on the Melveo website.',
     'help.billing.whyTitle': 'Why payment is not in the app',
-    'help.billing.whyBody': 'The licence is bought by a club or team as an organisation, which Apple App Store guideline 3.1.3(c) allows outside the app. That is why every payment step stays on the website.',
+    'help.billing.whyBody': 'The paid Peak and Gameplan plans are bought and managed only on the website. That is why the app has no purchase buttons.',
     'help.billing.howTitle': 'How to continue',
     'help.billing.step1.title': 'Review the current plans',
     'help.billing.step1.body': 'Current prices always live in the pricing section on the home page. We do not repeat them here, so the numbers cannot drift apart.',
     'help.billing.step2.title': 'Complete payment on the website',
-    'help.billing.step2.body': 'Stripe processes the payment.',
+    'help.billing.step2.body': 'Paid plans are not on sale yet. Once they launch, Stripe processes the payment.',
     'help.billing.step3.title': 'Manage the plan on the website',
     'help.billing.step3.body': 'Plan changes also happen on the website, not in the iOS app. Contact us if you need help.',
     'help.billing.pricingCta': 'View current plans and prices',
@@ -1365,7 +1417,7 @@ export const ui = {
     'help.faq.q5': 'Do I have to allow HealthKit, notifications, or Polar?',
     'help.faq.a5': 'No. HealthKit is offered to players, notifications to coaching staff, and Polar to both roles. Every permission is optional and can be skipped.',
     'help.faq.q6': 'Where do I buy or change a plan?',
-    'help.faq.a6': 'On the Melveo website. The iOS app has no purchase buttons, and Stripe processes payments.',
+    'help.faq.a6': 'On the Melveo website. The iOS app has no purchase buttons. The paid Peak and Gameplan plans are not on sale yet; Stripe will process the payments.',
 
 
     // Press kit (/en/press/) — issue #7

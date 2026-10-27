@@ -1,32 +1,29 @@
 ---
 /**
- * PricingStage — 4-tier plan cards with monthly/yearly toggle.
+ * PricingStage — two tracks (player / coach), each a free plan plus its
+ * own paid plan, with a monthly/yearly toggle (melveo-app#1246,
+ * 2026-10-27).
  *
- * Visual language matches the hero pill buttons:
- *   - rounded-pill toggle with cyan glow
- *   - glass-blur ghost cards (translucent + backdrop-filter + cyan stroke)
- *   - one "popular" card filled with the brand cyan
- *   - cyan accents on prices, features bullets, CTAs
+ * Model (melveo-app#1224): personal entitlements, not team licences.
+ * A team is free to create and players are never charged per head.
+ * Peak (player_plus, 9 €/month) and Gameplan (coach_pro, 90 €/month)
+ * are separate products — neither includes the other.
+ *
+ * Feature lines only claim what the app ships today; capabilities that
+ * exist on the server but have no app UI yet are listed as "Soon".
+ * Paid plans are not on sale (no personal checkout exists), so their CTA
+ * asks to be told at launch — never a Buy button.
+ *
+ * Yearly = 2 months free (−17 %). This is the owner's PROPOSAL from
+ * 2026-10-27 and is not yet in Stripe or Supabase plan_prices. Prices
+ * live in three places (see AGENTS.md); align all three before launch.
  *
  * Monthly/yearly switch is CSS-driven: both prices are rendered, the
- * inactive one is hidden via `[data-period]` on the section root.
- * Toggle button just flips the data-attribute (one rAF, no reflow
- * cascade beyond the cards).
- *
- * Full periodicity amount is featured big — monthly amount + "/měsíc"
- * suffix on the monthly card, yearly amount + "/rok" on the yearly card.
- * Previous iteration emphasised the daily price ("X Kč/den") with the
- * monthly as secondary text, but clubs budget in months/years anyway
- * (user feedback 2026-05-15). Effective monthly-equivalent is still
- * shown as small secondary text on the yearly card so the savings
- * vs the monthly plan are visible.
- *
- * Pricing source: project_pilot_pricing memory + planning docs
- * 02_pricing_strategy + 15_billing_and_licensed_scopes (provided
- * by user 2026-04-30).
+ * inactive one is hidden via `[data-period]` on the section root
+ * (pricing-toggle.ts flips it and rolls the amount).
  */
 
-import { useTranslations, type Lang } from '../i18n/ui';
+import { testFlightUrl, useTranslations, type Lang } from '../i18n/ui';
 
 interface Props {
   lang: Lang;
@@ -34,127 +31,84 @@ interface Props {
 
 const { lang } = Astro.props;
 const t = useTranslations(lang);
+type Key = Parameters<typeof t>[0];
 
 interface Plan {
   id: string;
   name: string;
-  badge: string | null;
-  popular: boolean;
-  free: boolean;
-  /** Czech-format monthly price — already grouped with non-breaking spaces. */
-  priceMonthly: number;
-  priceYearly: number;
-  perDayMonthly: number; // monthly price ÷ 30
-  perDayYearly: number; // yearly price ÷ 365
-  perMonthFromYearly: number; // yearly price ÷ 12 (the effective monthly when paying yearly)
-  limits: { players: number; staff: number };
-  features: string[];
-  ctaLabel: string;
-  ctaHref: string;
+  /** Monthly price in EUR; 0 = free plan. */
+  monthly: number;
+  features: Key[];
+  soon: Key[];
 }
 
-const ctaLabelPilot = t('pricing.ctaPilot');
-const ctaLabelFree = t('pricing.ctaFree');
+interface Track {
+  id: 'player' | 'coach';
+  label: Key;
+  plans: [Plan, Plan];
+}
 
-const featuresFreeCs = [
-  'Ranní wellness za 30 sekund',
-  'Plánování sessions',
-  'Docházka + post-session RPE',
-  'Základní coach board (today)',
-  'Test s menší skupinou do 8 hráčů',
-];
-const featuresFreeEn = [
-  'Morning wellness in 30 seconds',
-  'Session planning',
-  'Attendance + post-session RPE',
-  'Basic coach board (today)',
-  'Small-group test with up to 8 players',
-];
-
-/*
-  2026-08-06: Core / Live / Intelligence collapsed into a single paid plan
-  at the former Intelligence price (owner decision). The three feature
-  lists are merged here, deduplicated, with the "Vše z …" cross-references
-  dropped — they only made sense while the tiers stacked on each other.
-  Ordered everyday-first, so the reader meets what they will use daily
-  before the analytics and onboarding lines.
-*/
-const featuresTeamCs = [
-  'Vše z Free Starter',
-  'Plný coach board s historií',
-  'Agregovaná readiness týmu',
-  'Role-based týmový kontext',
-  'Coach Board Live',
-  'Realtime sledování zátěže',
-  'Vedení zápasu s živými tepy',
-  'Pokročilá analytika a periodizace',
-  'PDF / CSV exporty a vlastní reporty',
-  'Onboarding s konzultantem a prioritní podpora',
-];
-const featuresTeamEn = [
-  'Everything in Free Starter',
-  'Full coach board with history',
-  'Aggregate team readiness',
-  'Role-based team context',
-  'Coach Board Live',
-  'Realtime load tracking',
-  'Live match logging with heart rates',
-  'Advanced analytics + periodisation',
-  'PDF / CSV exports and custom reports',
-  'Onboarding with a consultant and priority support',
-];
-
-const mailto = (subject: string) =>
-  `mailto:hello@melveo.app?subject=${encodeURIComponent(subject)}`;
-
-const plans: Plan[] = [
+const tracks: Track[] = [
   {
-    id: 'free',
-    name: 'Free Starter',
-    badge: null,
-    popular: false,
-    free: true,
-    priceMonthly: 0,
-    priceYearly: 0,
-    perDayMonthly: 0,
-    perDayYearly: 0,
-    perMonthFromYearly: 0,
-    limits: { players: 8, staff: 2 },
-    features: lang === 'cs' ? featuresFreeCs : featuresFreeEn,
-    ctaLabel: ctaLabelFree,
-    ctaHref: '#contact',
+    id: 'player',
+    label: 'pricing.trackPlayer',
+    plans: [
+      {
+        id: 'warmup',
+        name: 'Warm-up',
+        monthly: 0,
+        features: ['pricing.warmup.f1', 'pricing.warmup.f2', 'pricing.warmup.f3', 'pricing.warmup.f4', 'pricing.warmup.f5'],
+        soon: [],
+      },
+      {
+        id: 'peak',
+        name: 'Peak',
+        monthly: 9,
+        features: ['pricing.peak.f1'],
+        soon: ['pricing.peak.soon1', 'pricing.peak.soon2'],
+      },
+    ],
   },
   {
-    id: 'team',
-    name: 'Melveo Team',
-    badge: null,
-    // The only paid card now, so it carries the filled brand-cyan treatment.
-    popular: true,
-    free: false,
-    priceMonthly: 4990,
-    priceYearly: 49900,
-    perDayMonthly: 166,
-    perDayYearly: 137,
-    perMonthFromYearly: 4158,
-    limits: { players: 24, staff: 8 },
-    features: lang === 'cs' ? featuresTeamCs : featuresTeamEn,
-    ctaLabel: ctaLabelPilot,
-    ctaHref: mailto(lang === 'cs' ? 'Zájem o Melveo Team' : 'Melveo Team enquiry'),
+    id: 'coach',
+    label: 'pricing.trackCoach',
+    plans: [
+      {
+        id: 'sideline',
+        name: 'Sideline',
+        monthly: 0,
+        features: ['pricing.sideline.f1', 'pricing.sideline.f2', 'pricing.sideline.f3', 'pricing.sideline.f4', 'pricing.sideline.f5'],
+        soon: [],
+      },
+      {
+        id: 'gameplan',
+        name: 'Gameplan',
+        monthly: 90,
+        features: ['pricing.gameplan.f1', 'pricing.gameplan.f2', 'pricing.gameplan.f3', 'pricing.gameplan.f4', 'pricing.gameplan.f5'],
+        soon: ['pricing.gameplan.soon1'],
+      },
+    ],
   },
 ];
 
-/** Format an integer with non-breaking thin spaces between thousands. */
-function fmt(n: number): string {
-  // Locale-aware, not always cs-CZ: the English page printed "49 900" in
-  // the card while the Athlete Pack line beside it read "5,900 CZK" —
-  // same section, two conventions.
-  const locale = lang === 'cs' ? 'cs-CZ' : 'en-GB';
-  return n.toLocaleString(locale).replace(/\u00a0/g, '\u202f');
-}
+/** Yearly = 10 × monthly (2 months free). */
+const YEARLY_MONTHS = 10;
 
-const limitsLabel = lang === 'cs' ? 'hráčů' : 'players';
-const staffLabel = lang === 'cs' ? 'staff' : 'staff';
-const currencyShort = lang === 'cs' ? 'Kč' : 'CZK';
+const locale = lang === 'cs' ? 'cs-CZ' : 'en-GB';
+const money = (n: number, decimals = 0) =>
+  n
+    .toLocaleString(locale, { minimumFractionDigits: decimals, maximumFractionDigits: decimals })
+    .replace(/ /g, ' ');
+/** Effective monthly when paying yearly, e.g. "7,50 €" / "€7.50". */
+const perMonthFromYearly = (monthly: number) => {
+  const value = (monthly * YEARLY_MONTHS) / 12;
+  const amount = money(value, Number.isInteger(value) ? 0 : 2);
+  return lang === 'cs' ? `${amount} €` : `€${amount}`;
+};
+
+const tagline = (plan: Plan) => t(`pricing.${plan.id}.tagline` as Key);
+const notifyHref = (plan: Plan) =>
+  `mailto:hello@melveo.app?subject=${encodeURIComponent(t('pricing.notifySubject').replace('{plan}', plan.name))}`;
 ---
 
 <section
@@ -162,53 +116,42 @@ const currencyShort = lang === 'cs' ? 'Kč' : 'CZK';
   class="pricing-stage"
   data-pricing-section
   data-glass-smoke
-  data-period="yearly"
-  aria-label={t('pricing.eyebrow')}
+  data-period="monthly"
+  aria-labelledby="pricing-heading"
 >
   {/*
     Cyan smoke field behind the pricing cards. The 4-layer glass-card
     recipe relies on having something colourful behind it to refract —
     on flat black canvas the displacement filter has nothing to bend.
-    This canvas drops a slow drifting cyan fog (teolitto codepen
-    KwOVvL pattern) so the cards finally read as real liquid glass.
-    Mounted client-side from glass-smoke.ts via the [data-glass-smoke]
-    attribute on the section.
+    Mounted client-side from glass-smoke.ts via [data-glass-smoke].
   */}
   <canvas class="glass-smoke" data-glass-smoke-canvas aria-hidden="true"></canvas>
 
   <div class="pricing-inner">
     <header class="pricing-header">
-      <h2 class="pricing-headline">
+      <h2 id="pricing-heading" class="pricing-headline">
         {t('pricing.headline')}<br />
         <span class="pricing-headline-accent">{t('pricing.headlineAccent')}</span>
       </h2>
       <p class="pricing-subline">{t('pricing.subline')}</p>
       {/*
-        No VAT note on purpose (owner decision 2026-06-10): the company
-        is currently not VAT-registered so prices are simply final, and
-        we don't surface tax wording on the landing at all. If that ever
+        No VAT note on purpose (owner decision 2026-06-10). If that ever
         changes, `pricing.vatNote` in ui.ts still holds the prepared
-        strings — render it here as
-        `<p class="pricing-vat-note">{t('pricing.vatNote')}</p>` and
-        compute actual VAT in checkout (Stripe Tax / MoR), never as a
-        price toggle (correct rate depends on buyer country + VAT ID).
+        strings; compute actual VAT in checkout, never as a price toggle.
       */}
 
       {/*
-        Twin-pill toggle — each button is its own glass pill that flips
-        between the hero ghost-pill style (inactive) and the hero
-        filled-cyan style (active). No sliding thumb to mis-align with
-        unequal button widths (the −17 % badge made "Ročně" wider than
-        "Měsíčně", and a 50 %-width thumb clipped the wider label).
+        Twin-pill toggle. Monthly is the default: it is the approved price,
+        the yearly one is still a proposal.
       */}
-      <div class="pricing-toggle" role="tablist" aria-label="Billing period">
+      <div class="pricing-toggle" role="tablist" aria-label={t('pricing.toggleLabel')}>
         <span class="pricing-toggle-thumb" aria-hidden="true"></span>
         <button
           type="button"
           role="tab"
           data-period-set="monthly"
-          aria-selected="false"
-          class="pricing-toggle-btn"
+          aria-selected="true"
+          class="pricing-toggle-btn pricing-toggle-btn--active"
         >
           {t('pricing.toggleMonthly')}
         </button>
@@ -216,8 +159,8 @@ const currencyShort = lang === 'cs' ? 'Kč' : 'CZK';
           type="button"
           role="tab"
           data-period-set="yearly"
-          aria-selected="true"
-          class="pricing-toggle-btn pricing-toggle-btn--active"
+          aria-selected="false"
+          class="pricing-toggle-btn"
         >
           <span class="pricing-toggle-label">{t('pricing.toggleYearly')}</span>
           <span class="pricing-toggle-savings">{t('pricing.toggleSavings')}</span>
@@ -225,167 +168,99 @@ const currencyShort = lang === 'cs' ? 'Kč' : 'CZK';
       </div>
     </header>
 
-    {/* Global #glass-lens displacement filter is mounted in BaseLayout
-        (single instance, used by every .glass-card across the page). */}
+    <div class="pricing-tracks">
+      {tracks.map((track) => (
+        <section class="pricing-track" aria-labelledby={`pricing-track-${track.id}`}>
+          <h3 id={`pricing-track-${track.id}`} class="pricing-track-label">{t(track.label)}</h3>
+          <ul class="pricing-cards">
+            {track.plans.map((plan) => {
+              const free = plan.monthly === 0;
+              const yearly = plan.monthly * YEARLY_MONTHS;
+              return (
+                <li
+                  class:list={['pricing-card glass-card', free && 'pricing-card--free']}
+                  data-plan-id={plan.id}
+                >
+                  {/* 4-layer liquid-glass stack (recipe in global.css). */}
+                  <span class="glass-filter" aria-hidden="true" />
+                  <span class="glass-overlay" aria-hidden="true" />
+                  <span class="glass-specular" aria-hidden="true" />
+                  <div class="glass-content">
+                    <header class="pricing-card-header">
+                      <h4 class="pricing-card-name">{plan.name}</h4>
+                      <p class="pricing-card-tagline">{tagline(plan)}</p>
+                    </header>
 
-    <ul class="pricing-cards">
-      {
-        plans.map((plan) => (
-          <li
-            class:list={[
-              'pricing-card glass-card',
-              plan.free && 'pricing-card--free',
-            ]}
-            data-plan-id={plan.id}
-          >
-            {/*
-              4-layer liquid-glass stack (wprod codepen recipe, dark-theme
-              adapted):
-                glass-filter   — backdrop-blur + url(#pricing-lens)
-                                 displacement, refracts what's behind
-                glass-overlay  — a translucent tint on top of the filter
-                glass-specular — inset highlights for the rim "shine"
-                glass-content  — the actual card body (header, price, CTA…)
-              All four layers absolute-positioned and stacked via z-index;
-              .glass-content is the only one that takes flow space.
-            */}
-            <span class="glass-filter" aria-hidden="true" />
-            <span class="glass-overlay" aria-hidden="true" />
-            <span class="glass-specular" aria-hidden="true" />
-            <div class="glass-content">
+                    <div class="pricing-card-price">
+                      {free ? (
+                        <div class="pricing-price-block pricing-price-block--free">
+                          <span class="pricing-price-day">{t('pricing.free')}</span>
+                          <span class="pricing-price-secondary">{t('pricing.freeNote')}</span>
+                        </div>
+                      ) : (
+                        <Fragment>
+                          <div class="pricing-price-block pricing-price-block--monthly">
+                            <span class="pricing-price-day">
+                              {lang === 'en' && <span class="pricing-currency">€</span>}
+                              <span class="pricing-amount" data-amount={plan.monthly}>{money(plan.monthly)}</span>
+                              {lang === 'cs' && <Fragment>&nbsp;<span class="pricing-currency">€</span></Fragment>}
+                            </span>
+                            <span class="pricing-price-suffix">{t('pricing.perMonth')}</span>
+                            <span class="pricing-price-secondary">{t('pricing.billedMonthly')}</span>
+                          </div>
+                          <div class="pricing-price-block pricing-price-block--yearly">
+                            <span class="pricing-price-day">
+                              {lang === 'en' && <span class="pricing-currency">€</span>}
+                              <span class="pricing-amount" data-amount={yearly}>{money(yearly)}</span>
+                              {lang === 'cs' && <Fragment>&nbsp;<span class="pricing-currency">€</span></Fragment>}
+                            </span>
+                            <span class="pricing-price-suffix">{t('pricing.perYear')}</span>
+                            <span class="pricing-price-secondary">
+                              {t('pricing.perMonthEffective').replace('{amount}', perMonthFromYearly(plan.monthly))}
+                            </span>
+                          </div>
+                        </Fragment>
+                      )}
+                    </div>
 
-            <header class="pricing-card-header">
-              <h3 class="pricing-card-name">{plan.name}</h3>
-              <p class="pricing-card-limits">
-                <strong>{plan.limits.players}</strong> {limitsLabel}{' '}
-                <span class="pricing-dot">·</span>{' '}
-                <strong>{plan.limits.staff}</strong> {staffLabel}
-              </p>
-            </header>
+                    {/* Free plans go to the verified TestFlight beta. Paid plans
+                        are not on sale yet, so they only ask to be told at
+                        launch — no fake Buy button. */}
+                    <a
+                      class:list={['hero-pill pricing-card-cta', !free && 'pricing-card-cta--primary']}
+                      href={free ? testFlightUrl : notifyHref(plan)}
+                      {...(free ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
+                    >
+                      <span class="hero-pill-shimmer" aria-hidden="true"></span>
+                      <span class="hero-pill-content">{free ? t('pricing.ctaFree') : t('pricing.ctaNotify')}</span>
+                    </a>
 
-            {/*
-              Pricing display — full periodicity amount, no per-day.
-              Earlier iteration featured the daily price big with the
-              monthly amount as secondary text, but clubs budget in
-              monthly/yearly terms anyway and the daily framing felt
-              misleading (user feedback 2026-05-15: "dejme tam roční
-              a měsíční ceny, nikoliv denní").
-
-              Monthly card: 1 790 Kč / měsíc · Účtováno měsíčně
-              Yearly card:  17 900 Kč / rok · ~ 1 492 Kč / měsíc
-
-              Same `pricing-price-day` class name kept so the
-              :nth-child sizing rules still apply — it's a styling
-              hook now, not a literal "per-day" label.
-            */}
-            <div class="pricing-card-price">
-              {plan.free ? (
-                <div class="pricing-price-block pricing-price-block--free">
-                  <span class="pricing-price-day">{t('pricing.free')}</span>
-                </div>
-              ) : (
-                <Fragment>
-                  {/* MONTHLY view — visible when [data-period="monthly"] */}
-                  <div class="pricing-price-block pricing-price-block--monthly">
-                    <span class="pricing-price-day">
-                      <span class="pricing-amount" data-amount={plan.priceMonthly}>{fmt(plan.priceMonthly)}</span>&nbsp;<span class="pricing-currency">{currencyShort}</span>
-                    </span>
-                    <span class="pricing-price-suffix">{t('pricing.perMonth')}</span>
-                    <span class="pricing-price-secondary">
-                      {t('pricing.billedMonthly')}
-                    </span>
+                    <ul class="pricing-card-features">
+                      {plan.features.map((feat) => (
+                        <li>
+                          <svg class="pricing-tick" viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M3.5 8.5l3 3 6-7" />
+                          </svg>
+                          <span>{t(feat)}</span>
+                        </li>
+                      ))}
+                      {plan.soon.map((feat) => (
+                        <li class="pricing-card-soon">
+                          <span class="pricing-soon-tag">{t('pricing.soon')}</span>
+                          <span>{t(feat)}</span>
+                        </li>
+                      ))}
+                    </ul>
                   </div>
-
-                  {/* YEARLY view — visible when [data-period="yearly"] (default) */}
-                  <div class="pricing-price-block pricing-price-block--yearly">
-                    <span class="pricing-price-day">
-                      <span class="pricing-amount" data-amount={plan.priceYearly}>{fmt(plan.priceYearly)}</span>&nbsp;<span class="pricing-currency">{currencyShort}</span>
-                    </span>
-                    <span class="pricing-price-suffix">{t('pricing.perYear')}</span>
-                    <span class="pricing-price-secondary">
-                      ~ {fmt(plan.perMonthFromYearly)}&nbsp;{currencyShort}{' '}
-                      {t('pricing.perMonth')} · {t('pricing.billedYearly')}
-                    </span>
-                  </div>
-                </Fragment>
-              )}
-            </div>
-
-            {/* Pricing plan CTA — literally the hero-pill from the
-                landing hero (App Store / Pilot buttons). Same class,
-                same internal structure (shimmer + content layers).
-                The pointer-tracking handler in Landing.astro's
-                mountHeroButtons() picks these up for free because it
-                queries .hero-pill across the whole document. */}
-            {/* The paid card's CTA is the filled one. Note this does NOT use
-                hero-pill--filled: that class and hero-pill--ghost appear in
-                markup here and on the landing hero, but no rule anywhere
-                defines them, so both buttons have always rendered identically.
-                Styled locally instead, rather than defining the global
-                variants and silently restyling the hero as a side effect. */}
-            <a
-              class:list={[
-                'hero-pill pricing-card-cta',
-                !plan.free && 'pricing-card-cta--primary',
-              ]}
-              href={plan.ctaHref}
-            >
-              <span class="hero-pill-shimmer" aria-hidden="true"></span>
-              <span class="hero-pill-content">{plan.ctaLabel}</span>
-            </a>
-
-            <ul class="pricing-card-features">
-              {plan.features.map((feat) => (
-                <li>
-                  <svg
-                    class="pricing-tick"
-                    viewBox="0 0 16 16"
-                    aria-hidden="true"
-                    fill="none"
-                    stroke="currentColor"
-                    stroke-width="2.4"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                  >
-                    <path d="M3.5 8.5l3 3 6-7" />
-                  </svg>
-                  <span>{feat}</span>
                 </li>
-              ))}
-            </ul>
-            {/* The free plan lists five features against the paid plan's ten,
-                which left its card ending well short. This closes it with the
-                next step instead of empty space. */}
-            {plan.free && (
-              <p class="pricing-card-upsell">{t('pricing.freeUpsell')}</p>
-            )}
-            </div>{/* /.glass-content */}
-          </li>
-        ))
-      }
-    </ul>
-
-    <div class="pricing-extras">
-      <article class="pricing-extra glass-card glass-card--compact">
-        <span class="glass-filter" aria-hidden="true" />
-        <span class="glass-overlay" aria-hidden="true" />
-        <span class="glass-specular" aria-hidden="true" />
-        <div class="glass-content">
-          <h4>{t('pricing.athleteHeading')}</h4>
-          <p>{t('pricing.athleteBody')}</p>
-        </div>
-      </article>
-      <article class="pricing-extra glass-card glass-card--compact">
-        <span class="glass-filter" aria-hidden="true" />
-        <span class="glass-overlay" aria-hidden="true" />
-        <span class="glass-specular" aria-hidden="true" />
-        <div class="glass-content">
-          <h4>{t('pricing.clubHeading')}</h4>
-          <p>{t('pricing.clubBody')}</p>
-        </div>
-      </article>
+              );
+            })}
+          </ul>
+        </section>
+      ))}
     </div>
 
+    <p class="pricing-separate">{t('pricing.separate')}</p>
     <p class="pricing-disclaimer">{t('pricing.disclaimer')}</p>
   </div>
 </section>
@@ -689,7 +564,30 @@ const currencyShort = lang === 'cs' ? 'Kč' : 'CZK';
     100% { transform: scale(1); }
   }
 
-  /* ─── Cards grid ─────────────────────────────────────────────── */
+  /* ─── Tracks + cards grid ───────────────────────────────────────
+     Phone: one column. Tablet: tracks stacked, two cards per track.
+     Desktop: both tracks side by side, four cards in a row. */
+
+  .pricing-tracks {
+    display: grid;
+    gap: clamp(2rem, 4vw, 2.5rem) 1.25rem;
+    grid-template-columns: 1fr;
+  }
+  @media (min-width: 1100px) {
+    .pricing-tracks {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+
+  .pricing-track-label {
+    margin: 0 0 0.85rem;
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--color-accent-primary);
+    text-align: center;
+  }
 
   .pricing-cards {
     list-style: none;
@@ -698,6 +596,7 @@ const currencyShort = lang === 'cs' ? 'Kč' : 'CZK';
     display: grid;
     gap: 1rem;
     grid-template-columns: 1fr;
+    align-items: stretch;
   }
   @media (min-width: 640px) {
     .pricing-cards {
@@ -705,26 +604,6 @@ const currencyShort = lang === 'cs' ? 'Kč' : 'CZK';
       gap: 1.25rem;
     }
   }
-  @media (min-width: 1100px) {
-    .pricing-cards {
-      /* Two plans since 2026-08-06, not four. A four-column grid left them
-         huddled in the left half of an 84rem container with dead space
-         beside them. Two columns, capped and centred, so the pair sits in
-         the middle of the section like the header above it.
-
-         Equal columns and equal heights. An asymmetric grid was tried to
-         justify the shorter free card and read worse — two cards of the
-         same kind should match. The free plan's shorter list is handled
-         inside the card instead: its closing line is pushed to the bottom
-         edge so the card fills rather than trailing off. */
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      max-width: 52rem;
-      margin-inline: auto;
-      gap: 1.25rem;
-      align-items: stretch;
-    }
-  }
-
   /* Pricing card uses the global .glass-card recipe (all 4 layers +
      hover defined in src/styles/global.css). The component-local rule
      here only contributes pricing-specific padding inside .glass-content. */
@@ -784,20 +663,17 @@ const currencyShort = lang === 'cs' ? 'Kč' : 'CZK';
   }
   .pricing-card-name {
     margin: 0 0 0.4rem;
-    font-size: 1.125rem;
+    font-size: 1.25rem;
     font-weight: 700;
     letter-spacing: -0.01em;
   }
-  .pricing-card-limits {
+  .pricing-card-tagline {
     margin: 0;
     font-size: 0.875rem;
+    line-height: 1.45;
     color: var(--color-text-secondary);
-  }
-  .pricing-card-limits strong {
-    color: var(--color-text-primary);
-  }
-  .pricing-dot {
-    color: var(--color-text-tertiary);
+    /* Two lines reserved so prices line up across the row. */
+    min-height: 2.9em;
   }
 
   .pricing-card-price {
@@ -819,11 +695,7 @@ const currencyShort = lang === 'cs' ? 'Kč' : 'CZK';
     align-items: baseline;
     gap: 0.4rem;
   }
-  .pricing-price-block--free {
-    /* Always shown for the free plan regardless of toggle. */
-  }
-
-  .pricing-card:not(.pricing-card--free) .pricing-card-price {
+  .pricing-card-price {
     position: relative;
     min-height: 4.65rem;
   }
@@ -867,7 +739,7 @@ const currencyShort = lang === 'cs' ? 'Kč' : 'CZK';
     flex-basis: 100%;
     margin-top: 0.4rem;
     font-size: 0.8rem;
-    color: var(--color-text-tertiary);
+    color: var(--color-text-secondary);
   }
 
   /* ─── CTA inside card — full hero pill family ────────────────── */
@@ -903,18 +775,6 @@ const currencyShort = lang === 'cs' ? 'Kč' : 'CZK';
     background: var(--color-accent-primary-pressed);
   }
 
-  .pricing-card-upsell {
-    /* auto pushes it to the bottom of the stretched card, so the free
-       plan's shorter feature list ends on a closing line at the card's
-       edge instead of trailing off mid-card. */
-    margin: 1.25rem 0 0;
-    margin-top: auto;
-    padding-top: 1.25rem;
-    color: var(--color-text-tertiary);
-    font-size: 0.8rem;
-    line-height: 1.5;
-  }
-
   /* ─── Features list ─────────────────────────────────────────── */
 
   .pricing-card-included {
@@ -946,6 +806,20 @@ const currencyShort = lang === 'cs' ? 'Kč' : 'CZK';
     flex: 1;
   }
 
+  .pricing-card-features li .pricing-soon-tag {
+    flex: 0 0 auto;
+    align-self: flex-start;
+    margin-top: 1px;
+    padding: 0.1rem 0.45rem;
+    border-radius: 9999px;
+    border: 1px solid rgba(0, 240, 255, 0.35);
+    font-size: 0.65rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--color-accent-primary);
+  }
+
   .pricing-tick {
     flex-shrink: 0;
     width: 1.05rem;
@@ -954,57 +828,22 @@ const currencyShort = lang === 'cs' ? 'Kč' : 'CZK';
     color: var(--color-accent-primary);
   }
 
-  /* ─── Extras (athlete pack + club bundle) ───────────────────── */
-
-  .pricing-extras {
-    margin-top: clamp(2rem, 4vw, 3rem);
-    display: grid;
-    gap: 1rem;
-    grid-template-columns: 1fr;
-  }
-  @media (min-width: 768px) {
-    .pricing-extras {
-      grid-template-columns: 1fr 1fr;
-      gap: 1.5rem;
-    }
-  }
-  @media (min-width: 1100px) {
-    /* Match the plan grid's cap. While there were four plans the extras
-       spanning the full container lined up underneath them; with two the
-       extras ran 1344px wide under an 832px pair and the block stopped
-       reading as one column of content. */
-    .pricing-extras {
-      max-width: 52rem;
-      margin-inline: auto;
-    }
-  }
-  /* .pricing-extra inherits the full liquid-glass recipe from
-     .glass-card.glass-card--compact (global). Component-local rules
-     here only add the inner padding and typography for the heading +
-     body inside .glass-content. */
-  .pricing-extra .glass-content {
-    padding: 1.5rem 1.75rem;
-  }
-  .pricing-extra h4 {
-    margin: 0 0 0.4rem;
-    font-size: 0.95rem;
-    font-weight: 600;
-    color: var(--color-text-primary);
-  }
-  .pricing-extra p {
-    margin: 0;
-    font-size: 0.85rem;
-    line-height: 1.55;
+  .pricing-separate {
+    margin: 2rem auto 0;
+    max-width: 38rem;
+    text-align: center;
+    font-size: 0.9rem;
+    line-height: 1.5;
     color: var(--color-text-secondary);
   }
 
   .pricing-disclaimer {
-    margin: 2rem auto 0;
+    margin: 0.5rem auto 0;
     max-width: 38rem;
     text-align: center;
     font-size: 0.75rem;
     line-height: 1.5;
-    color: var(--color-text-tertiary);
+    color: var(--color-text-secondary);
   }
 
   /* ─── Reduced motion ─────────────────────────────────────────── */
