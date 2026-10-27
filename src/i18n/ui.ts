@@ -16,6 +16,8 @@ export const defaultLang = 'cs';
 export type Lang = keyof typeof languages;
 
 export const testFlightUrl = 'https://testflight.apple.com/join/M6Td9ADA';
+// TODO před mergem: doplnit Apple ID z App Store Connect (App Information → Apple ID).
+export const appStoreUrl = 'https://apps.apple.com/app/idTBD';
 
 export const ui = {
   cs: {
@@ -73,8 +75,9 @@ export const ui = {
       'jasné rozhodnutí|lepší trénink|včasné upozornění|plán regenerace|akce pro trenéra|kontext pro celý tým',
     'hero.subline':
       'Melveo propojí [[wellness]], [[readiness]], [[zátěž]] a [[kontext zápasu]], aby trenér věděl, co udělat dál.',
-    'hero.cta.testflightEyebrow': 'Beta přes',
-    'hero.cta.testflightTitle': 'TestFlight',
+    'hero.cta.appstore': 'Stáhnout v App Store',
+    'hero.cta.appstoreEyebrow': 'Stáhnout v',
+    'hero.cta.appstoreTitle': 'App Store',
     'hero.cta.installHelp': 'Jak nainstalovat beta verzi přes TestFlight',
     // Key kept as `pilot` for legacy reference; label is now generic
     // contact CTA (pilot offering retired 2026-05-04).
@@ -792,8 +795,9 @@ export const ui = {
       'clear decisions|better training|early alerts|recovery plans|coach actions|team context',
     'hero.subline':
       'Melveo connects [[wellness]], [[readiness]], [[load]] and [[match context]], so coaches know what to do next.',
-    'hero.cta.testflightEyebrow': 'Beta on',
-    'hero.cta.testflightTitle': 'TestFlight',
+    'hero.cta.appstore': 'Download on the App Store',
+    'hero.cta.appstoreEyebrow': 'Download on the',
+    'hero.cta.appstoreTitle': 'App Store',
     'hero.cta.installHelp': 'How to install the TestFlight beta',
     'hero.cta.pilot': 'Get in touch →',
     'hero.beta': 'TestFlight beta · soon',
