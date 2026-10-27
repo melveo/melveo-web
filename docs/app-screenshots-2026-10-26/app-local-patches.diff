@@ -1,0 +1,199 @@
+diff --git a/Melveo/Melveo/Features/SessionVideo/SessionVideoUITestFixture.swift b/Melveo/Melveo/Features/SessionVideo/SessionVideoUITestFixture.swift
+index 316918601..b8b32956f 100644
+--- a/Melveo/Melveo/Features/SessionVideo/SessionVideoUITestFixture.swift
++++ b/Melveo/Melveo/Features/SessionVideo/SessionVideoUITestFixture.swift
+@@ -185,8 +185,8 @@ final class SessionVideoUITestFixture: NativeSessionVideoServicing {
+     /// when selecting a clip requests a lease for its intentionally absent URL.
+     func playbackLease(assetId: UUID) async throws -> NativeSessionVideoLease {
+         NativeSessionVideoLease(
+-            url: URL(fileURLWithPath: "/tmp/melveo-ui-test-session-video.mp4"),
+-            expiresAt: Self.fixtureDate.addingTimeInterval(3_600)
++            url: FileManager.default.temporaryDirectory.appendingPathComponent("melveo-ui-test-session-video.mp4"),
++            expiresAt: Date().addingTimeInterval(3_600)
+         )
+     }
+ 
+diff --git a/Melveo/Melveo/Features/SessionVideo/SessionVideoWorkspaceView.swift b/Melveo/Melveo/Features/SessionVideo/SessionVideoWorkspaceView.swift
+index 5aabdd027..f3c4d3d48 100644
+--- a/Melveo/Melveo/Features/SessionVideo/SessionVideoWorkspaceView.swift
++++ b/Melveo/Melveo/Features/SessionVideo/SessionVideoWorkspaceView.swift
+@@ -65,7 +65,7 @@ struct SessionVideoWorkspaceView: View {
+         self.initialEvent = initialEvent
+         #if DEBUG
+         let resolvedService = service ?? SessionVideoUITestFixture.makeIfEnabled() ?? SupabaseNativeSessionVideoService()
+-        automaticallyLoadsPlayback = !(resolvedService is SessionVideoUITestFixture)
++        automaticallyLoadsPlayback = true // local web-shots patch
+         #else
+         let resolvedService = service ?? SupabaseNativeSessionVideoService()
+         automaticallyLoadsPlayback = true
+diff --git a/Melveo/MelveoUITests/MarketingTourUITests.swift b/Melveo/MelveoUITests/MarketingTourUITests.swift
+index 1cd1ee15e..f46e057d5 100644
+--- a/Melveo/MelveoUITests/MarketingTourUITests.swift
++++ b/Melveo/MelveoUITests/MarketingTourUITests.swift
+@@ -82,6 +82,145 @@ final class MarketingTourUITests: XCTestCase {
+         tourAccountCenter(app, prefix: "\(prefix)_07")
+     }
+ 
++    // MARK: - Web screenshots (melveo.app) — local only, not committed
++
++    func test_web_iphone() throws {
++        let coach = makeApp(email: "demo_coach@melveo.test")
++        coach.launchWithGateDemoSession()
++        skipHealth(coach)
++        _ = waitForAnyText(["Přehled", "Overview", "Dnes", "Today"], in: coach, timeout: 20)
++        sleep(4)
++        shot("web_coach_home", coach)
++        tapTab(["Tým", "Team"], coach)
++        sleep(4)
++        shot("web_coach_roster", coach)
++        if tapRosterRow(containing: "Ondřej Dvořák", coach) {
++            sleep(4); shot("web_coach_player_pain", coach)
++            coach.swipeUp(); sleep(2); shot("web_coach_player_pain_2", coach)
++            closeSheet(coach)
++        }
++        if tapRosterRow(containing: "Jakub Veselý", coach) {
++            sleep(4); shot("web_coach_player_detail", coach)
++            coach.swipeUp(); sleep(2); shot("web_coach_player_detail_2", coach)
++            closeSheet(coach)
++        }
++        coach.terminate()
++
++        let player = makeApp(email: "demo_p01@melveo.test")
++        player.launchWithGateDemoSession()
++        skipHealth(player)
++        _ = waitForAnyText(["Přehled", "Overview", "Dnes", "Today"], in: player, timeout: 20)
++        sleep(4)
++        shot("web_player_home", player)
++        tapTab(["Přehled", "Progress"], player)
++        sleep(4)
++        shot("web_player_progress", player)
++        player.terminate()
++
++        let fresh = makeApp(email: "demo_p08@melveo.test")
++        fresh.launchWithGateDemoSession()
++        skipHealth(fresh)
++        _ = waitForAnyText(["Přehled", "Overview", "Dnes", "Today"], in: fresh, timeout: 20)
++        sleep(3)
++        shot("web_player_home_before_checkin", fresh)
++        if tapByLabel(["Vyplnit", "Vyplnit check-in", "Fill in", "Check in"], fresh) {
++            sleep(3); shot("web_player_checkin", fresh)
++        }
++    }
++
++    func test_web_ipad() throws {
++        XCUIDevice.shared.orientation = .landscapeLeft
++        addTeardownBlock { XCUIDevice.shared.orientation = .portrait }
++        let app = makeApp(email: "demo_coach@melveo.test")
++        app.launchArguments.append("--melveo-ui-tests-demo-coach")
++        app.launchEnvironment["MELVEO_UI_TEST_DEMO_COACH"] = "1"
++        app.launchEnvironment["MELVEO_ENABLE_SESSION_VIDEO_V1"] = "1"
++        app.launchEnvironment["MELVEO_ENABLE_NATIVE_SESSION_VIDEO_IPAD"] = "1"
++        app.launchEnvironment["MELVEO_UI_TEST_SESSION_VIDEO"] = "1"
++        app.launchEnvironment["MELVEO_UI_TEST_STATIC_COACH_HISTORY"] = "1"
++        app.launchEnvironment["MELVEO_UI_TEST_HR_ON_PITCH"] = "1"
++        app.launchWithGateDemoSession()
++        skipHealth(app)
++        _ = waitForAnyText(["Přehled", "Overview", "Dnes", "Today"], in: app, timeout: 20)
++        sleep(4)
++        shot("web_ipad_home", app)
++        tapTab(["Přehled", "Domů"], app)
++        sleep(3)
++        shot("web_ipad_overview", app)
++        let row = app.descendants(matching: .any)
++            .matching(NSPredicate(format: "identifier BEGINSWITH %@", "coachPrehledMatchRow_")).firstMatch
++        for _ in 0..<6 where !(row.exists && row.isHittable) { app.swipeUp() }
++        guard row.waitForExistence(timeout: 8) else { shot("web_ipad_x_no_match_row", app); return }
++        row.tap()
++        sleep(5)
++        shot("web_ipad_report", app)
++        let tabs: [([String], String)] = [
++            (["Timeline", "Osa"], "timeline"),
++            (["Tepy", "Heart rate", "Heart Rate", "HR"], "heart_rate"),
++            (["Hráči", "Players"], "players"),
++            (["Analytika", "Analytics", "Statistiky", "Stats"], "analytics"),
++        ]
++        for (labels, name) in tabs where tapByLabel(labels, app) {
++            sleep(4)
++            shot("web_ipad_report_\(name)", app)
++        }
++        if tapByLabel(["Video"], app) {
++            sleep(3)
++            let entry = app.buttons["matchReportVideoOpenNativeWorkspace"].firstMatch
++            if entry.waitForExistence(timeout: 4) { entry.tap() }
++            sleep(15)
++            shot("web_ipad_video", app)
++            let play = app.buttons.matching(NSPredicate(format: "label IN %@", ["Přehrát", "Play"])).firstMatch
++            if play.exists, play.isHittable { play.tap(); sleep(6); shot("web_ipad_video_playing", app) }
++        }
++    }
++
++    func test_web_prep() throws {
++        XCUIDevice.shared.orientation = .landscapeLeft
++        addTeardownBlock { XCUIDevice.shared.orientation = .portrait }
++        let app = makeApp(email: "demo_coach@melveo.test")
++        app.launchArguments.append("--melveo-ui-tests-demo-coach")
++        app.launchEnvironment["MELVEO_UI_TEST_DEMO_COACH"] = "1"
++        app.launchEnvironment["MELVEO_UI_TEST_SESSION_VIDEO"] = "1"
++        app.launchEnvironment["MELVEO_ENABLE_SESSION_VIDEO_V1"] = "1"
++        app.launchEnvironment["MELVEO_ENABLE_NATIVE_SESSION_VIDEO_IPAD"] = "1"
++        app.launchWithGateDemoSession()
++        skipHealth(app)
++        _ = waitForAnyText(["Přehled", "Overview", "Dnes", "Today"], in: app, timeout: 20)
++        sleep(3)
++        guard tapByIdentifier("coachHome.preparation.open", app, scroll: true) else {
++            shot("web_prep_x_no_tile", app); return
++        }
++        sleep(5)
++        shot("web_prep_list", app)
++        let row = app.descendants(matching: .any).matching(NSPredicate(format: "label CONTAINS %@", "HC Tigers")).firstMatch
++        guard row.waitForExistence(timeout: 8) else { return }
++        row.tap()
++        sleep(6)
++        shot("web_prep_recording", app)
++        for (labels, name) in [(["Timeline", "Osa"], "timeline"), (["Video"], "video")] where tapByLabel(labels, app) {
++            if name == "video" {
++                let entry = app.buttons["matchReportVideoOpenNativeWorkspace"].firstMatch
++                if entry.waitForExistence(timeout: 4) { entry.tap() }
++                sleep(10)
++            } else { sleep(5) }
++            shot("web_prep_\(name)", app)
++        }
++    }
++
++    private func skipHealth(_ app: XCUIApplication) {
++        let skip = app.buttons["appleHealth.onboarding.skip"].firstMatch
++        if skip.waitForExistence(timeout: 10) { skip.tap() }
++    }
++
++    private func tapRosterRow(containing name: String, _ app: XCUIApplication) -> Bool {
++        let row = app.descendants(matching: .any).matching(NSPredicate(
++            format: "identifier BEGINSWITH %@ AND label CONTAINS %@", "teamRosterPlayer_", name)).firstMatch
++        for _ in 0..<4 where !(row.exists && row.isHittable) { app.swipeUp(velocity: .slow) }
++        if row.waitForExistence(timeout: 3), row.isHittable { row.tap(); return true }
++        return false
++    }
++
+     // MARK: - Player tour
+ 
+     func test_tour_player() throws {
+@@ -370,15 +509,18 @@ final class MarketingTourUITests: XCTestCase {
+             "--melveo-ui-tests-reset-auth",
+             "--melveo-ui-tests-demo-coach",
+             "--melveo-demo-health-import",
+-            "-com.melveo.app.account.language", "cs", "-AppleLanguages", "(cs)", "-AppleLocale", "cs_CZ",
+         ]
++        let shotsLang = ProcessInfo.processInfo.environment["MELVEO_SHOTS_LANG"] ?? "cs"
++        app.launchArguments += shotsLang == "en"
++            ? ["-com.melveo.app.account.language", "en", "-AppleLanguages", "(en)", "-AppleLocale", "en_US"]
++            : ["-com.melveo.app.account.language", "cs", "-AppleLanguages", "(cs)", "-AppleLocale", "cs_CZ"]
+         app.launchEnvironment["MELVEO_UI_TEST_DEMO_EMAIL"] = email
+         app.launchEnvironment["MELVEO_UI_TEST_DEMO_LIVE_HR_ZONES"] = "1"
+         return app
+     }
+ 
+     private func shot(_ name: String, _ app: XCUIApplication) {
+-        let screenshot = app.screenshot()
++        let screenshot = XCUIScreen.main.screenshot()
+         let attachment = XCTAttachment(screenshot: screenshot)
+         attachment.name = name
+         attachment.lifetime = .keepAlways
