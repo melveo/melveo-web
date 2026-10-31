@@ -8,7 +8,7 @@ import PageHeader from '../../components/PageHeader.astro';
  * Czech version is authoritative in disputes (jurisdiction CZ).
  */
 
-const lastUpdated = '2026-10-24';
+const lastUpdated = '2026-10-31';
 ---
 
 <BaseLayout
@@ -113,7 +113,35 @@ const lastUpdated = '2026-10-24';
       still work until it expires.
     </p>
 
-    <h3>3.5. Operational and technical data</h3>
+    <h3>3.5. Messages (team chat)</h3>
+    <p>
+      Only members of the same team can message each other. Text, reactions,
+      read receipts and attachments (photos, videos, documents) are end-to-end
+      encrypted with the MLS protocol on the device. Melveo servers cannot read
+      their content.
+    </p>
+    <ul>
+      <li>To deliver messages, the server processes who is in which
+        conversation, which account and device sent a message, the time, the
+        size and the devices' public keys. Notifications contain no message
+        text, name or preview.</li>
+      <li>The server keeps encrypted attachments only until every recipient
+        has downloaded them, for at most 45 days. History stays on the
+        devices.</li>
+      <li>Backup: the recovery key is stored in your iCloud Keychain and never
+        reaches Melveo. Message history is backed up to the Melveo server
+        encrypted with this key, photos and videos to your private iCloud
+        storage. Without the key nobody can read the backup, Melveo included.</li>
+      <li>Reports: you send Melveo support the text of the messages you
+        select, the fingerprint and size of attachments (not the file), the
+        reason, an optional note and a cryptographic proof of who sent the
+        message. Only Melveo support reads reports, never the coach or the
+        club.</li>
+      <li>Blocking: the server stores whom you blocked so that the blocked
+        person cannot message you privately.</li>
+    </ul>
+
+    <h3>3.6. Operational and technical data</h3>
     <ul>
       <li>Login time, IP address (processed only for fraud detection,
         retained max 30 days)</li>
@@ -127,14 +155,14 @@ const lastUpdated = '2026-10-24';
         if the user explicitly exports and sends them to support.</li>
     </ul>
 
-    <h3>3.6. Payment data (clubs only)</h3>
+    <h3>3.7. Payment data (clubs only)</h3>
     <ul>
       <li>Club billing details (name, IČO/VAT, address)</li>
       <li>Stripe Customer ID (we never process card data — handled
         entirely by Stripe Inc.)</li>
     </ul>
 
-    <h3>3.7. Cookies and similar technologies</h3>
+    <h3>3.8. Cookies and similar technologies</h3>
     <ul>
       <li>Necessary storage — for example saving your consent choice in the
         browser (<code>melveo:consent</code>) and security or operational
@@ -231,6 +259,18 @@ const lastUpdated = '2026-10-24';
         the source and derived objects are removed by a controlled deletion
         process; only a short-lived technical record remains to finish and
         audit that deletion.</li>
+      <li>Messages: on the participants' devices until they delete them.
+        Encrypted attachments on the server until every recipient has
+        downloaded them, for at most 45 days.</li>
+      <li>Message reports: 12 months from submission, then deleted. Longer
+        only for a report that support preserves as evidence, for example for
+        the police.</li>
+      <li>Messages after account deletion: the server deletes your devices,
+        keys and encrypted history backup. Messages already delivered to
+        others stay with them under Deleted account; they cannot be removed
+        from other people's devices. The recovery key in iCloud Keychain and
+        the encrypted photos and videos in your iCloud stay in your Apple
+        account until you delete them.</li>
       <li>Cookie consent: until withdrawn or until the consent schema version
         changes</li>
       <li>Analytics and marketing data: per the tool's settings (Google
