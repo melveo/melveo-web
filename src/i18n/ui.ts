@@ -692,6 +692,14 @@ export const ui = {
     'help.faq.a5': 'Ne. HealthKit se nabízí hráčům, notifikace realizačnímu týmu a Polar oběma rolím. Všechna tato oprávnění jsou volitelná a můžeš je přeskočit.',
     'help.faq.q6': 'Kde koupím nebo změním tarif?',
     'help.faq.a6': 'Na webu Melveo. iOS aplikace nemá nákupní tlačítka a platby zpracovává Stripe.',
+    'help.faq.q7': 'Kdo čte moje zprávy?',
+    'help.faq.a7': 'Jen účastníci konverzace ve tvém týmu. Zprávy a přílohy jsou šifrované end to end, server Melveo jejich obsah nepřečte. Vidí, kdo je ve kterém vlákně a kdy zpráva odešla.',
+    'help.faq.q8': 'Jak nahlásím zprávu nebo zablokuji člena?',
+    'help.faq.a8': 'Podrž prst na zprávě a zvol Nahlásit zprávu nebo Blokovat člena. Hlášení čte jen podpora Melvea, ne trenér ani klub, a uchovává ho 12 měsíců. Zablokovaný ti nemůže psát soukromě a jeho zprávy v týmovém chatu neuvidíš.',
+    'help.faq.q9': 'Přijdu o zprávy, když změním telefon?',
+    'help.faq.a9': 'Ne. Nový telefon si historii převezme ze starého, nebo ji obnoví ze šifrované zálohy. Klíč pro obnovení je v tvé klíčence iCloud a Melveo ho nedostane. Historie se zálohuje na server Melveo, fotky a videa do tvého iCloudu.',
+    'help.faq.q10': 'Co se stane se zprávami, když smažu účet?',
+    'help.faq.a10': 'Server smaže tvá zařízení, klíče a zálohu historie. Aplikace smaže i klíč pro obnovení a zálohy fotek a videí v iCloudu, pokud je telefon přihlášený do iCloudu; jinak je smažeš v Nastavení iCloudu. Zprávy, které už ostatní dostali, jim zůstanou pod označením Smazaný účet.',
 
     // Press kit (/cs/press/) — issue #7
     'press.metaTitle': 'Pro média',
@@ -1366,6 +1374,14 @@ export const ui = {
     'help.faq.a5': 'No. HealthKit is offered to players, notifications to coaching staff, and Polar to both roles. Every permission is optional and can be skipped.',
     'help.faq.q6': 'Where do I buy or change a plan?',
     'help.faq.a6': 'On the Melveo website. The iOS app has no purchase buttons, and Stripe processes payments.',
+    'help.faq.q7': 'Who can read my messages?',
+    'help.faq.a7': 'Only the participants of the conversation in your team. Messages and attachments are end-to-end encrypted and Melveo servers cannot read them. The server sees who is in which conversation and when a message was sent.',
+    'help.faq.q8': 'How do I report a message or block a member?',
+    'help.faq.a8': 'Long-press the message and choose Report message or Block member. Only Melveo support reads reports, never the coach or the club, and keeps them for 12 months. A blocked member cannot message you privately and you will not see their team chat messages.',
+    'help.faq.q9': 'Will I lose my messages when I change phones?',
+    'help.faq.a9': 'No. The new phone takes over the history from the old one or restores it from the encrypted backup. The recovery key is in your iCloud Keychain and never reaches Melveo. History is backed up to the Melveo server, photos and videos to your iCloud.',
+    'help.faq.q10': 'What happens to my messages when I delete my account?',
+    'help.faq.a10': 'The server deletes your devices, keys and history backup. The app also deletes the recovery key and the photo and video backups in iCloud if the phone is signed in to iCloud; otherwise delete them in iCloud Settings. Messages others have already received stay with them under Deleted account.',
 
 
     // Press kit (/en/press/) — issue #7

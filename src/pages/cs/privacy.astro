@@ -19,7 +19,7 @@ import PageHeader from '../../components/PageHeader.astro';
  * Tento text je dobrý baseline pro pilot, ne pro enterprise smlouvy.
  */
 
-const lastUpdated = '2026-10-24';
+const lastUpdated = '2026-10-31';
 ---
 
 <BaseLayout
@@ -126,7 +126,31 @@ const lastUpdated = '2026-10-24';
       vypršení platnosti.
     </p>
 
-    <h3>3.5. Provozní a technické údaje</h3>
+    <h3>3.5. Zprávy (týmový chat)</h3>
+    <p>
+      Zprávy si píšou jen členové stejného týmu. Text, reakce, potvrzení
+      o přečtení a přílohy (fotky, videa, dokumenty) se šifrují end to end
+      protokolem MLS přímo v zařízení. Server Melveo jejich obsah nepřečte.
+    </p>
+    <ul>
+      <li>K doručení server zpracovává, kdo je ve kterém vlákně, který účet
+        a zařízení zprávu poslal, čas, velikost a veřejné klíče zařízení.
+        Notifikace neobsahují text zprávy, jméno ani náhled.</li>
+      <li>Přílohy server drží zašifrované jen do stažení všemi příjemci,
+        nejdéle 45 dní. Historie zůstává v zařízeních.</li>
+      <li>Záloha: klíč pro obnovení se uloží do vaší klíčenky iCloud, Melveo
+        ho nedostane. Historie zpráv se tímto klíčem šifrovaná zálohuje na
+        server Melveo, fotky a videa do vašeho soukromého úložiště iCloud.
+        Bez klíče zálohu nepřečte nikdo, ani Melveo.</li>
+      <li>Nahlášení: odešlete podpoře Melvea text vybraných zpráv, otisk
+        a velikost příloh (soubor ne), důvod, případnou poznámku
+        a kryptografický důkaz, kdo zprávu poslal. Hlášení čte jen podpora
+        Melvea, ne trenér ani klub.</li>
+      <li>Blokování: server ukládá, koho jste zablokovali, aby vám zablokovaný
+        nemohl psát soukromě.</li>
+    </ul>
+
+    <h3>3.6. Provozní a technické údaje</h3>
     <ul>
       <li>Čas přihlášení, IP adresa (zpracována pouze pro detekci podvodu,
         neukládá se déle než 30 dní)</li>
@@ -140,14 +164,14 @@ const lastUpdated = '2026-10-24';
         jen tehdy, když ji uživatel sám vyexportuje a předá podpoře.</li>
     </ul>
 
-    <h3>3.6. Údaje pro účely platby (pouze klubů)</h3>
+    <h3>3.7. Údaje pro účely platby (pouze klubů)</h3>
     <ul>
       <li>Fakturační údaje klubu (název, IČO, adresa)</li>
       <li>Stripe Customer ID (samotné údaje o kartě nikdy
         nezpracováváme — vše drží Stripe Inc.)</li>
     </ul>
 
-    <h3>3.7. Cookies a podobné technologie</h3>
+    <h3>3.8. Cookies a podobné technologie</h3>
     <ul>
       <li>Nezbytné ukládání — např. uložení volby souhlasu v prohlížeči
         (<code>melveo:consent</code>) a bezpečnostní či provozní prvky webu.</li>
@@ -244,6 +268,17 @@ const lastUpdated = '2026-10-24';
         nebo ukončení příslušného týmového prostoru. Po požadavku na smazání
         je zdroj i odvozené soubory odstraněn řízeným mazacím procesem; krátce
         zůstává jen technický záznam nutný k dokončení a auditu mazání.</li>
+      <li>Zprávy: v zařízeních účastníků, dokud je nesmažou. Šifrované
+        přílohy na serveru do stažení všemi příjemci, nejdéle 45 dní.</li>
+      <li>Nahlášení zpráv: 12 měsíců od podání, pak se smažou. Déle jen
+        hlášení, které podpora zajistí jako důkaz, například pro policii.</li>
+      <li>Zprávy po smazání účtu: server smaže vaše zařízení, klíče
+        a šifrovanou zálohu historie. Aplikace smaže klíč pro obnovení
+        z klíčenky iCloud a šifrované zálohy fotek a videí z vašeho iCloudu,
+        pokud smažete účet na zařízení přihlášeném do iCloudu. Jinak je
+        smažete sami v Nastavení iCloudu. Zprávy, které už byly doručeny
+        ostatním, jim zůstanou pod označením Smazaný účet; z cizích zařízení
+        je smazat nejde.</li>
       <li>Souhlas s cookies: do odvolání nebo do změny verze souhlasového
         nastavení</li>
       <li>Analytická a marketingová data: dle nastavení daného nástroje

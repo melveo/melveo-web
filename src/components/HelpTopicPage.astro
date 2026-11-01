@@ -299,7 +299,7 @@ const topicTitleKeys: Record<Topic, string> = {
 
     {topic === 'faq' && (
       <section class="help-section help-faq-list">
-        {Array.from({ length: 6 }, (_, index) => index + 1).map((number) => (
+        {Array.from({ length: 10 }, (_, index) => index + 1).map((number) => (
           <details>
             <summary><span>{tr(`help.faq.q${number}`)}</span><span class="help-faq-icon" aria-hidden="true">+</span></summary>
             <p>{tr(`help.faq.a${number}`)}</p>
