@@ -7,11 +7,13 @@ import PageHeader from '../../components/PageHeader.astro';
  *
  * Zdroj: melveo-app docs/legal/podminky_pouziti_DRAFT.md verze 0.6
  * (#1606, rozhodnutí #1601). Nezveřejňovat před spuštěním prodeje.
- *   - Zákon č. 89/2012 Sb. (občanský zákoník), § 31, § 1810 a násl.
+ *   - Zákon č. 89/2012 Sb. (občanský zákoník), § 1767, § 1810 a násl., § 1834
  *   - Zákon č. 634/1992 Sb. o ochraně spotřebitele
  *   - Apple App Store Review Guidelines 3.1.1 a 3.1.2, standardní EULA Applu
  *
- * K OVĚŘENÍ před sloučením: DPH u účetní, čl. 9 a 16.2 právníkem (#1606).
+ * Otázky k čl. 7, 9 a 16 rozhodnuté z delegace vlastníka 4. 11. 2026 (#1606).
+ * Před spuštěním doporučena krátká kontrola čl. 7, 9 a 16 advokátem.
+ * K OVĚŘENÍ před sloučením: DPH u účetní.
  */
 
 const lastUpdated = '2026-11-04';
@@ -131,17 +133,21 @@ const lastUpdated = '2026-11-04';
       U placených tarifů můžeme nabídnout 7 dní zdarma. Zkušební dobu
       dostane každý jen jednou za hráčskou a jednou za trenérskou rodinu
       tarifů, bez ohledu na to, zda ji využil na webu, nebo v App Store.
-      Nabízíme ji jen dospělým. Ve zkušební době Gameplanu jde nahrát
+      Nabízíme ji jen dospělým. Rodič může zahájit zkušební dobu pro své
+      dítě se svou kartou. Ve zkušební době Gameplanu jde nahrát
       nejvýš 5 GB videa a vytvořit AI komentář ke 2 zápasům.
     </p>
     <ul>
       <li><strong>Na webu</strong> zadáte při zahájení zkušební doby
-        platební kartu. <strong>Pokud předplatné do konce zkušební doby
-        nezrušíte, přejde automaticky na placené a strhneme první měsíční
-        platbu.</strong> Před koncem zkušební doby vám pošleme připomínku.</li>
+        platební kartu. Před zahájením vám zvýrazněně ukážeme, kdy zkušební
+        doba skončí a kolik pak zaplatíte. <strong>Pokud předplatné do konce
+        zkušební doby nezrušíte, přejde automaticky na placené a strhneme
+        první měsíční platbu.</strong> 3 dny před koncem zkušební doby vám
+        pošleme připomínku e-mailem.</li>
       <li><strong>V App Store</strong> jde o úvodní nabídku Applu.
         <strong>Pokud předplatné nezrušíte nejpozději 24 hodin před koncem
-        zkušební doby, Apple ho automaticky převede na placené.</strong></li>
+        zkušební doby, Apple ho automaticky převede na placené.</strong>
+        Zrušit ho můžete ve správě předplatného u Applu (čl. 8.2).</li>
     </ul>
     <p>
       Pokud po zkušební době neplatíte, vrátíte se na bezplatný tarif.
@@ -192,28 +198,31 @@ const lastUpdated = '2026-11-04';
       <a href="/cs/privacy/">Ochrana osobních údajů</a>, kapitola 10.
     </p>
     <p>
-      <strong>Předplatné nezletilých jen se souhlasem zákonného zástupce.</strong>
-      Pro předplatné platí hranice 18 let:
+      <strong>Předplatné uzavírá jen dospělý.</strong> Smlouvu o předplatném
+      uzavírá jen osoba od 18 let. Nezletilá hráčka si předplatné nekupuje
+      sama, ani nejlevnější tarif; za ni kupuje rodič.
     </p>
     <ul>
-      <li><strong>Na webu</strong> kupuje jen dospělý pro sebe, nebo zákonný
-        zástupce pro své dítě ze svého účtu. Při platbě potvrzujete: Je mi
-        18 let, nebo platím jako zákonný zástupce dítěte. Když kupuje rodič
-        pro dítě, smlouvu s námi uzavírá a platí rodič; dítě dostane přístup
-        k tarifu.</li>
-      <li><strong>V App Store</strong> prodává Apple. Apple účet dítěte zakládá
-        rodič v Rodinném sdílení a nákupy dítěte schvaluje funkcí Žádat
-        o koupi (Ask to Buy). Takové schválení považujeme za souhlas
-        zákonného zástupce s předplatným.</li>
-      <li>Zákonný zástupce, který s předplatným dítěte souhlasil, za závazky
-        z něj odpovídá podle § 31 občanského zákoníku.</li>
+      <li><strong>Na webu</strong> při platbě samostatným zaškrtnutím
+        prohlašujete: Je mi 18 let, nebo platím jako zákonný zástupce dítěte.
+        Pro dítě může rodič koupit předplatné jen ze svého účtu a jen tehdy,
+        když je k dítěti v Melveu připojený aktivní rodičovskou vazbou.</li>
+      <li><strong>Nákup rodiče pro dítě</strong> je smlouva ve prospěch
+        třetího (§ 1767 občanského zákoníku). Smluvní stranou a plátcem je
+        jen rodič. Dítě je oprávněné přijmout plnění, tedy používat placený
+        tarif. Zrušení, odstoupení i reklamace jsou věcí rodiče.</li>
+      <li><strong>V App Store</strong> uzavírá kupní smlouvu uživatel s Applem
+        podle pravidel Applu. Nákupy dětí v Rodinném sdílení, včetně funkce
+        Žádat o koupi, řídí Apple podle svých pravidel.</li>
+      <li>Nabídku s cenou ukazujeme jen dospělým podle data narození
+        v Melveu. Pokud nezletilá přesto koupí předplatné v App Store,
+        vrácení peněz řeší držitel Apple účtu s Applem (čl. 8.2).</li>
     </ul>
     <p>
-      <strong>Děti ke koupi nevybízíme.</strong> Nabídku s cenou a tlačítkem
-      nákupu ukazujeme jen dospělým. Nezletilá hráčka u placené funkce vidí
-      jen věcný popis bez ceny a bez tlačítka nákupu. Nabídky nikomu samy
-      nevyskakují, nemají odpočty ani výzvy typu kup si hned. Odvolání
-      souhlasu ani ukončení vazby rodiče samo předplatné nezruší.
+      <strong>Děti ke koupi nevybízíme.</strong> Nezletilá hráčka u placené
+      funkce vidí jen věcný popis bez ceny a bez tlačítka nákupu. Nabídky
+      nikomu samy nevyskakují, nemají odpočty ani výzvy typu kup si hned.
+      Odvolání souhlasu ani ukončení vazby rodiče samo předplatné nezruší.
     </p>
 
     <h2>10. Práva a povinnosti uživatele</h2>
@@ -318,24 +327,26 @@ const lastUpdated = '2026-11-04';
       č. 634/1992 Sb. Tyto Podmínky je neomezují.
     </p>
     <h3>16.2. Odstoupení do 14 dnů u nákupu na webu</h3>
-    <!-- K OVĚŘENÍ PRÁVNÍKEM před sloučením (#1606): služba vs. digitální
-         obsah, počátek lhůty při zkušební době a znění souhlasu. -->
     <p>
-      Smlouvu o předplatném uzavřenou na webu můžete zrušit bez udání důvodu
-      do 14 dnů od jejího uzavření, tedy od zahájení zkušební doby, nebo od
-      první platby, pokud zkušební dobu nemáte. Stačí e-mail na
+      Předplatné je služba. Smlouvu o předplatném uzavřenou na webu můžete
+      zrušit bez udání důvodu do 14 dnů od jejího uzavření. Smlouva je
+      uzavřená zahájením zkušební doby, nebo první platbou, pokud zkušební
+      dobu nemáte. Stačí e-mail na
       <a href="mailto:hello@melveo.app">hello@melveo.app</a>. Peníze vrátíme
       do 14 dnů od odstoupení stejným způsobem, jakým jste platili.
     </p>
     <ul>
-      <li>Pokud odstoupíte ve zkušební době, nic neplatíte.</li>
-      <li>Pokud odstoupíte po první platbě a předplatné jste na svou žádost
-        začali využívat hned, vrátíme platbu sníženou o poměrnou část za dny
-        placeného období, kdy služba běžela. Při objednávce vás o okamžité
-        zahájení výslovně požádáme: Žádám, abyste mi předplatné zpřístupnili
-        hned. Beru na vědomí, že když od smlouvy odstoupím do 14 dnů, zaplatím
-        poměrnou část za dobu, kdy jsem předplatné po skončení zkušební doby
-        využíval.</li>
+      <li>Za dny zkušební doby se neplatí. Pokud odstoupíte ve zkušební době,
+        nic neplatíte.</li>
+      <li>Pokud odstoupíte po první platbě a při objednávce jste výslovně
+        požádali o zahájení plnění ve lhůtě pro odstoupení, vrátíme platbu
+        sníženou o poměrnou část za placené dny, kdy služba běžela (§ 1834
+        občanského zákoníku). Bez takové žádosti vrátíme celou platbu.</li>
+      <li>O zahájení plnění žádáte při objednávce samostatným zaškrtnutím:
+        Žádám, abyste mi předplatné zpřístupnili hned, ještě ve lhůtě pro
+        odstoupení. Beru na vědomí, že když od smlouvy odstoupím do 14 dnů,
+        zaplatím poměrnou část za placené dny, kdy jsem předplatné využíval.
+        Za dny zkušební doby neplatím.</li>
     </ul>
     <p>
       <strong>Nákup v App Store</strong> uzavíráte s Applem. Odstoupení

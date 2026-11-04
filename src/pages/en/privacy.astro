@@ -165,7 +165,8 @@ const lastUpdated = '2026-11-04';
         invoices, Stripe customer and subscription IDs, who pays and who
         receives the subscription (for a parent buying for a child, the parent
         and the child) and the payer's confirmation of being 18 or older or
-        paying as a legal guardian. Card data are seen only by Stripe, not by
+        paying as a legal guardian, and the request to start performance within
+        the withdrawal period. Card data are seen only by Stripe, not by
         us.</li>
       <li><strong>In-app purchases:</strong> payment is processed by
         <strong>Apple as an independent controller</strong> under its own
@@ -437,11 +438,12 @@ const lastUpdated = '2026-11-04';
       themselves and parental access ends.
     </p>
     <p>
-      Only adults see subscription offers with a price. For a minor, a parent
-      buys on the website from their own account; we record the parent as the
-      payer and the child as the recipient. In the App Store, the parent
-      approves the child's purchase with Ask to Buy. Data about that approval
-      stay with Apple.
+      Only people aged 18 or over enter into subscriptions, and only adults
+      see offers with a price. For a minor, a parent buys on the website from
+      their own account, only with an active link to the child; we record the
+      parent as the payer and the child as the recipient. In the App Store,
+      children's purchases in Family Sharing follow Apple's rules and the
+      related data stay with Apple.
     </p>
 
     <h2>11. Security</h2>

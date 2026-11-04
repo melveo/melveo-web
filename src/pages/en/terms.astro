@@ -5,7 +5,8 @@ import PageHeader from '../../components/PageHeader.astro';
 /**
  * Terms of use EN, mirror of cs/terms.astro (personal subscriptions on the
  * web and in the App Store, melveo-app #1606). Do not publish before sales
- * launch. Czech version is authoritative in disputes.
+ * launch. Czech version is authoritative in disputes. Decisions on
+ * Sections 7, 9 and 16: owner delegation, 4 Nov 2026 (#1606).
  */
 
 const lastUpdated = '2026-11-04';
@@ -126,7 +127,8 @@ const lastUpdated = '2026-11-04';
     <p>
       For paid plans we may offer 7 days free. Everyone gets the trial only
       once for the player and once for the coach plan family, whether used on
-      the Website or in the App Store. We offer it to adults only. During a
+      the Website or in the App Store. We offer it to adults only. A parent
+      may start a trial for their child with their own card. During a
       Gameplan trial you can upload up to 5 GB of video and create AI
       commentary for 2 matches.
     </p>
@@ -134,11 +136,13 @@ const lastUpdated = '2026-11-04';
       <li><strong>On the Website</strong> you enter a payment card when the
         trial starts. <strong>If you do not cancel before the trial ends, it
         automatically converts to a paid Subscription and we charge the first
-        monthly payment.</strong> We will send you a reminder before the trial
-        ends.</li>
+        monthly payment.</strong> Before the trial starts we clearly show when
+        it ends and what you will pay. We will email you a reminder 3 days
+        before the trial ends.</li>
       <li><strong>In the App Store</strong> the trial is an Apple introductory
         offer. <strong>If you do not cancel at least 24 hours before the trial
-        ends, Apple automatically converts it to a paid Subscription.</strong></li>
+        ends, Apple automatically converts it to a paid Subscription.</strong>
+        You can cancel in Apple's subscription management (Section 8.2).</li>
     </ul>
     <p>
       If you do not pay after the trial, you return to the free plan. Your data
@@ -191,30 +195,37 @@ const lastUpdated = '2026-11-04';
       <a href="/en/privacy/">Privacy Policy</a>, Section 10.
     </p>
     <p>
-      <strong>Subscriptions for minors only with a legal guardian's
-      consent.</strong> For Subscriptions the age limit is 18:
+      <strong>Only adults enter into Subscriptions.</strong> A Subscription
+      agreement can be concluded only by a person aged 18 or over. A minor
+      does not buy a Subscription herself or himself, not even the cheapest
+      plan; a parent buys it for them.
     </p>
     <ul>
-      <li><strong>On the Website</strong> only an adult buys for themselves, or
-        a legal guardian buys for their child from their own account. At
-        payment you confirm: I am 18 or older, or I am paying as the child's
-        legal guardian. When a parent buys for a child, the parent enters into
-        and pays for the agreement; the child gets access to the plan.</li>
-      <li><strong>In the App Store</strong> Apple is the seller. A parent sets
-        up the child's Apple Account in Family Sharing and approves the child's
-        purchases with Ask to Buy. We treat that approval as the legal
-        guardian's consent to the Subscription.</li>
-      <li>A legal guardian who consented to the child's Subscription is liable
-        for obligations arising from it under Section 31 of the Czech Civil
-        Code.</li>
+      <li><strong>On the Website</strong> you confirm at payment with a
+        separate checkbox: I am 18 or older, or I am paying as the child's
+        legal guardian. A parent can buy for a child only from their own
+        account and only with an active parent link to the child in
+        Melveo.</li>
+      <li><strong>A parent buying for a child</strong> concludes an agreement
+        for the benefit of a third party (Section 1767 of the Czech Civil
+        Code). Only the parent is the contracting party and payer. The child
+        is entitled to receive the performance, that is to use the paid plan.
+        Cancellation, withdrawal and complaints are the parent's matter.</li>
+      <li><strong>In the App Store</strong> the user concludes the purchase
+        agreement with Apple under Apple's rules. Children's purchases in
+        Family Sharing, including Ask to Buy, are governed by Apple's
+        rules.</li>
+      <li>We show offers with a price only to adults, based on the date of
+        birth in Melveo. If a minor nevertheless buys a Subscription in the
+        App Store, refunds are a matter between the Apple Account holder and
+        Apple (Section 8.2).</li>
     </ul>
     <p>
-      <strong>We do not urge children to buy.</strong> We show offers with a
-      price and a buy button to adults only. A minor sees only a factual
-      description of a paid feature, without a price or buy button. Offers
-      never pop up on their own and have no countdowns or buy-now prompts.
-      Withdrawing consent or ending a parent link does not by itself cancel a
-      Subscription.
+      <strong>We do not urge children to buy.</strong> A minor sees only a
+      factual description of a paid feature, without a price or buy button.
+      Offers never pop up on their own and have no countdowns or buy-now
+      prompts. Withdrawing consent or ending a parent link does not by itself
+      cancel a Subscription.
     </p>
 
     <h2>10. User rights and obligations</h2>
@@ -319,24 +330,27 @@ const lastUpdated = '2026-11-04';
       Act No. 634/1992 Coll. These Terms do not limit them.
     </p>
     <h3>16.2. 14-day withdrawal for Website purchases</h3>
-    <!-- TO VERIFY WITH A LAWYER before merging, see cs. -->
     <p>
-      You may withdraw from a Subscription agreement concluded on the Website
-      without giving a reason within 14 days of its conclusion, that is from
-      the start of the trial, or from the first payment if you have no trial.
-      An email to <a href="mailto:hello@melveo.app">hello@melveo.app</a> is
-      enough. We refund you within 14 days of withdrawal using the same payment
-      method.
+      A Subscription is a service. You may withdraw from a Subscription
+      agreement concluded on the Website without giving a reason within 14
+      days of its conclusion. The agreement is concluded when the trial
+      starts, or with the first payment if you have no trial. An email to
+      <a href="mailto:hello@melveo.app">hello@melveo.app</a> is enough. We
+      refund you within 14 days of withdrawal using the same payment method.
     </p>
     <ul>
-      <li>If you withdraw during the trial, you pay nothing.</li>
-      <li>If you withdraw after the first payment and asked for the
-        Subscription to start immediately, we refund the payment less a
-        prorated amount for the days of the paid period when the service was
-        running. At the order we ask you to confirm explicitly: I ask you to
-        give me access to the Subscription immediately. I understand that if I
-        withdraw within 14 days, I will pay a prorated amount for the time I
-        used the Subscription after the trial ended.</li>
+      <li>Trial days are free. If you withdraw during the trial, you pay
+        nothing.</li>
+      <li>If you withdraw after the first payment and, when ordering, you
+        explicitly asked for performance to start within the withdrawal
+        period, we refund the payment less a prorated amount for the paid days
+        when the service was running (Section 1834 of the Czech Civil Code).
+        Without such a request we refund the full payment.</li>
+      <li>You request the start of performance at the order with a separate
+        checkbox: I ask you to give me access to the Subscription immediately,
+        within the withdrawal period. I understand that if I withdraw within
+        14 days, I will pay a prorated amount for the paid days I used the
+        Subscription. I do not pay for trial days.</li>
     </ul>
     <p>
       <strong>App Store purchases</strong> are concluded with Apple.
