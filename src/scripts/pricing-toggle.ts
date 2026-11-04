@@ -95,12 +95,14 @@ export function mountPricingToggle() {
   if (sections.length === 0) return;
 
   sections.forEach((section) => {
+    // Spotlight works with or without the period toggle (monthly-only
+    // pricing renders no toggle, 3 Nov 2026).
+    mountCardSpotlight(section);
     const buttons = section.querySelectorAll<HTMLButtonElement>('[data-period-set]');
     if (buttons.length === 0) return;
     const toggle = section.querySelector<HTMLElement>('.pricing-toggle');
     const badge = section.querySelector<HTMLElement>('.pricing-toggle-savings');
     badge?.addEventListener('animationend', () => badge.classList.remove('is-pop'));
-    mountCardSpotlight(section);
 
     function syncThumb(period: Period) {
       if (!toggle) return;
