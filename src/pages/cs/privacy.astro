@@ -15,8 +15,8 @@ import PageHeader from '../../components/PageHeader.astro';
  *   - Zákon č. 89/2012 Sb., občanský zákoník
  *   - Apple App Store Review Guideline 5.1.1
  *
- * Pre-první-velký-klient bude advokát review (per rev.3 Q4).
- * Tento text je dobrý baseline pro pilot, ne pro enterprise smlouvy.
+ * Osobní předplatné na webu a v App Store (melveo-app #1606, #1654):
+ * žádné klubové licence. Nezveřejňovat před spuštěním prodeje.
  */
 
 const lastUpdated = '2026-11-04';
@@ -64,12 +64,12 @@ const lastUpdated = '2026-11-04';
     <ul>
       <li><strong>Aplikace</strong> — mobilní aplikace Melveo pro iOS/iPadOS.</li>
       <li><strong>Web</strong> — webové stránky <code>melveo.app</code>.</li>
-      <li><strong>Klub</strong> — sportovní organizace, která uzavřela smlouvu
-        o licenci.</li>
-      <li><strong>Hráč</strong> — fyzická osoba pozvaná klubem do týmu;
-        uživatel aplikace.</li>
-      <li><strong>Trenér / staff</strong> — fyzická osoba pověřená klubem
-        správou týmu.</li>
+      <li><strong>Hráč</strong> — fyzická osoba, která používá aplikaci jako
+        hráčka nebo hráč, sama nebo jako člen týmu.</li>
+      <li><strong>Trenér</strong> — fyzická osoba, která používá aplikaci
+        jako trenér nebo člen realizačního týmu a vede tým.</li>
+      <li><strong>Rodič</strong> — zákonný zástupce propojený s dítětem
+        do 15 let (kapitola 10).</li>
       <li><strong>Wellness check-in</strong> — denní samohodnocení hráče
         (energie, spánek, bolestivost, nálada, motivace) na škále 1–5.</li>
     </ul>
@@ -82,8 +82,7 @@ const lastUpdated = '2026-11-04';
       <li>Jméno a příjmení</li>
       <li>E-mailová adresa</li>
       <li>Identifikátor uživatele (UUID generovaný systémem)</li>
-      <li>Role v klubu (hráč / trenér / manager / klubový administrátor /
-        majitel klubu)</li>
+      <li>Role (hráč, trenér) a funkce v týmu (zakladatel, správce, člen)</li>
       <li>Volitelně: profilová fotografie, lokalizace (cs/en)</li>
     </ul>
 
@@ -145,7 +144,7 @@ const lastUpdated = '2026-11-04';
       <li>Nahlášení: odešlete podpoře Melvea text vybraných zpráv, otisk
         a velikost příloh (soubor ne), důvod, případnou poznámku
         a kryptografický důkaz, kdo zprávu poslal. Hlášení čte jen podpora
-        Melvea, ne trenér ani klub.</li>
+        Melvea, ne trenér ani tým.</li>
       <li>Blokování: server ukládá, koho jste zablokovali, aby vám zablokovaný
         nemohl psát soukromě.</li>
     </ul>
@@ -254,12 +253,11 @@ const lastUpdated = '2026-11-04';
 
     <h2>5. Princip agregace dat (privacy by design)</h2>
     <p>
-      Trenéři a klubové vedení pracují s <strong>týmovými agregáty a
-      signály</strong> (průměry, počty odeslaných check-inů, přítomné
-      varovné příznaky) za celý tým. Individuální wellness vstup zůstává
-      oddělený od klubového reportingu. Tato pravidla jsou zakotvena v
-      interním dokumentu „doc 174 §3" a vynucována na úrovni databáze
-      (RLS politiky a SECURITY DEFINER RPC funkce).
+      Trenéři týmu pracují s <strong>týmovými přehledy a signály</strong>
+      (průměry, počty odeslaných check-inů, přítomné varovné příznaky).
+      Individuální údaje o zdraví hráčky vidí jen v rozsahu sdílení, který
+      hráčka (do 15 let rodič) povolí. Pravidla jsou vynucována na úrovni
+      databáze (RLS politiky a SECURITY DEFINER RPC funkce).
     </p>
     <p>
       Hráč má přístup ke svým vlastním datům a jako aktivní člen týmu také
@@ -267,15 +265,14 @@ const lastUpdated = '2026-11-04';
       frekvenci v týmovém reportu vidí pouze realizační tým. Trenér může
       v konkrétním reportu povolit přidávání a úpravy vlastních tagů; hráč
       nemůže měnit cizí tagy, společný zdroj videa ani srovnání času. Odebrání
-      tohoto povolení blokuje další úpravy. Klub má přístup k agregovaným
-      reportům za své týmy a k údajům, které jsou nezbytné pro roli trenéra
-      nebo klubového administrátora.
+      tohoto povolení blokuje další úpravy. Melveo nemá kluby ani klubové
+      licence, takže žádná organizace nad týmem k údajům přístup nemá.
     </p>
     <p>
       Melveo neposkytuje výsledek, který by sám o sobě představoval právně
       závazné nebo obdobně významné automatizované rozhodnutí podle čl. 22
-      GDPR. Výstupy aplikace slouží jako podpůrný kontext pro trenéra,
-      realizační tým a klub.
+      GDPR. Výstupy aplikace slouží jako podpůrný kontext pro trenéra
+      a realizační tým.
     </p>
 
     <h2>6. Doba uchování</h2>
@@ -284,7 +281,7 @@ const lastUpdated = '2026-11-04';
         účet a údaje navázané na jeho identitu odstraní. Výjimkou jsou pouze
         záznamy, které musíme uchovat z právního důvodu, uvedené níže.</li>
       <li>Wellness check-iny a osobní sportovní data: po dobu používání účtu
-        nebo členství v klubu; při smazání účtu se odstraní nebo nevratně
+        nebo členství v týmu; při smazání účtu se odstraní nebo nevratně
         oddělí od identity podle vlastnictví daného týmového záznamu.</li>
       <li>Účetní a fakturační údaje: 10 let dle zákona č. 235/2004 Sb.
         o DPH a zákona č. 563/1991 Sb. o účetnictví</li>
@@ -496,7 +493,7 @@ const lastUpdated = '2026-11-04';
         </tr>
         <tr>
           <td>Marketing</td>
-          <td>Reklamní měření a oslovování relevantních klubů.</td>
+          <td>Reklamní měření a oslovování hráčů a trenérů.</td>
           <td>Ano.</td>
         </tr>
       </tbody>
