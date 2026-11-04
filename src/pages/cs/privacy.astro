@@ -172,7 +172,7 @@ const lastUpdated = '2026-11-04';
       <li><strong>Nákup na webu:</strong> tarif, stav, období, cena a doklady,
         identifikátor zákazníka a předplatného u Stripe, kdo platí a kdo
         předplatné dostal (u nákupu rodiče pro dítě rodič a dítě) a potvrzení,
-        že je plátci 18 let, nebo platí jako zákonný zástupce, a žádost
+        že je plátci alespoň 15 let, nebo platí jako zletilý zákonný zástupce dítěte mladšího 15 let, a žádost
         o zahájení plnění ve lhůtě pro odstoupení. Údaje o kartě
         vidí jen Stripe, my ne.</li>
       <li><strong>Nákup v aplikaci:</strong> platbu zpracovává
@@ -447,8 +447,9 @@ const lastUpdated = '2026-11-04';
       15 let platila přesně. Od 15 let rozhoduje hráčka o všem sama a rodičovský přístup končí.
     </p>
     <p>
-      Předplatné uzavírá jen osoba od 18 let a nabídku s cenou vidí jen
-      dospělí. Za nezletilou kupuje na webu rodič ze svého účtu, jen
+      Od 15 let si uživatel pořídí předplatné i zkušební dobu sám a vidí
+      nabídku s cenou. Při neznámém věku se nákup nenabízí. Pro dítě mladší
+      15 let kupuje na webu zletilý rodič ze svého účtu, jen
       s aktivní vazbou k dítěti; evidujeme rodiče jako plátce a dítě jako
       toho, kdo předplatné dostal. V App Store se nákupy dětí v Rodinném
       sdílení řídí pravidly Applu a údaje o nich zůstávají u Applu.
