@@ -1,26 +1,23 @@
 ---
 /**
- * PricingStage — two tracks (player / coach), each a free plan plus its
- * own paid plan, with a monthly/yearly toggle (melveo-app#1246,
- * 2026-10-27).
+ * PricingStage — two tracks (player / coach), each with a free plan and
+ * two paid levels (melveo-app#1601, owner decisions 3–4 Nov 2026).
  *
  * Model (melveo-app#1224): personal entitlements, not team licences.
  * A team is free to create and players are never charged per head.
- * Peak (player_plus, 9 €/month) and Gameplan (coach_pro, 90 €/month)
- * are separate products — neither includes the other.
+ * Player: Warm-up (free), Momentum, MVP. Coach: Throw-off (free),
+ * Playbook, Gameplan. A higher level includes the lower one; player and
+ * coach plans are separate and neither includes the other.
  *
- * Feature lines only claim what the app ships today; capabilities that
- * exist on the server but have no app UI yet are listed as "Soon".
- * Paid plans are not on sale (no personal checkout exists), so their CTA
- * asks to be told at launch — never a Buy button.
+ * Feature lines only claim what the app ships today; anything without
+ * app UI yet is listed as "Soon". Paid plans are not on sale yet, so
+ * their CTA asks to be told at launch — never a Buy button.
  *
- * Yearly = 2 months free (−17 %). This is the owner's PROPOSAL from
- * 2026-10-27 and is not yet in Stripe or Supabase plan_prices. Prices
- * live in three places (see AGENTS.md); align all three before launch.
- *
- * Monthly/yearly switch is CSS-driven: both prices are rendered, the
- * inactive one is hidden via `[data-period]` on the section root
- * (pricing-toggle.ts flips it and rolls the amount).
+ * Monthly only at launch (owner, 3 Nov 2026); yearly plans come later
+ * once real costs are known, so the period toggle is not rendered.
+ * Prices live in three places (see AGENTS.md): this file, the app's
+ * Supabase prices (melveo-app#1619, #1628) and Stripe (#1623). They are
+ * NOT aligned yet; align all three before launch.
  */
 
 import { testFlightUrl, useTranslations, type Lang } from '../i18n/ui';
@@ -45,7 +42,7 @@ interface Plan {
 interface Track {
   id: 'player' | 'coach';
   label: Key;
-  plans: [Plan, Plan];
+  plans: Plan[];
 }
 
 const tracks: Track[] = [
@@ -61,11 +58,18 @@ const tracks: Track[] = [
         soon: [],
       },
       {
-        id: 'peak',
-        name: 'Peak',
-        monthly: 9,
-        features: ['pricing.peak.f1'],
-        soon: ['pricing.peak.soon1', 'pricing.peak.soon2'],
+        id: 'momentum',
+        name: 'Momentum',
+        monthly: 3.99,
+        features: ['pricing.momentum.f1', 'pricing.momentum.f2'],
+        soon: ['pricing.momentum.soon1', 'pricing.momentum.soon2'],
+      },
+      {
+        id: 'mvp',
+        name: 'MVP',
+        monthly: 7.99,
+        features: ['pricing.mvp.f1'],
+        soon: ['pricing.mvp.soon1', 'pricing.mvp.soon2', 'pricing.mvp.soon3', 'pricing.mvp.soon4'],
       },
     ],
   },
@@ -74,37 +78,39 @@ const tracks: Track[] = [
     label: 'pricing.trackCoach',
     plans: [
       {
-        id: 'sideline',
-        name: 'Sideline',
+        id: 'throwoff',
+        name: 'Throw-off',
         monthly: 0,
-        features: ['pricing.sideline.f1', 'pricing.sideline.f2', 'pricing.sideline.f3', 'pricing.sideline.f4', 'pricing.sideline.f5'],
+        features: ['pricing.throwoff.f1', 'pricing.throwoff.f2', 'pricing.throwoff.f3', 'pricing.throwoff.f4', 'pricing.throwoff.f5'],
         soon: [],
+      },
+      {
+        id: 'playbook',
+        name: 'Playbook',
+        monthly: 19.99,
+        features: ['pricing.playbook.f1', 'pricing.playbook.f2', 'pricing.playbook.f3', 'pricing.playbook.f4'],
+        soon: ['pricing.playbook.soon1', 'pricing.playbook.soon2', 'pricing.playbook.soon3'],
       },
       {
         id: 'gameplan',
         name: 'Gameplan',
         monthly: 90,
-        features: ['pricing.gameplan.f1', 'pricing.gameplan.f2', 'pricing.gameplan.f3', 'pricing.gameplan.f4', 'pricing.gameplan.f5'],
-        soon: ['pricing.gameplan.soon1'],
+        features: ['pricing.gameplan.f1', 'pricing.gameplan.f2', 'pricing.gameplan.f3'],
+        soon: ['pricing.gameplan.soon1', 'pricing.gameplan.soon2'],
       },
     ],
   },
 ];
 
-/** Yearly = 10 × monthly (2 months free). */
-const YEARLY_MONTHS = 10;
-
 const locale = lang === 'cs' ? 'cs-CZ' : 'en-GB';
-const money = (n: number, decimals = 0) =>
+/** "3,99" / "3.99"; whole euros without decimals ("90"). */
+const money = (n: number) =>
   n
-    .toLocaleString(locale, { minimumFractionDigits: decimals, maximumFractionDigits: decimals })
+    .toLocaleString(locale, {
+      minimumFractionDigits: Number.isInteger(n) ? 0 : 2,
+      maximumFractionDigits: Number.isInteger(n) ? 0 : 2,
+    })
     .replace(/ /g, ' ');
-/** Effective monthly when paying yearly, e.g. "7,50 €" / "€7.50". */
-const perMonthFromYearly = (monthly: number) => {
-  const value = (monthly * YEARLY_MONTHS) / 12;
-  const amount = money(value, Number.isInteger(value) ? 0 : 2);
-  return lang === 'cs' ? `${amount} €` : `€${amount}`;
-};
 
 const tagline = (plan: Plan) => t(`pricing.${plan.id}.tagline` as Key);
 const notifyHref = (plan: Plan) =>
@@ -141,31 +147,9 @@ const notifyHref = (plan: Plan) =>
       */}
 
       {/*
-        Twin-pill toggle. Monthly is the default: it is the approved price,
-        the yearly one is still a proposal.
+        No monthly/yearly toggle while only monthly plans exist (owner,
+        3 Nov 2026). Its styles and strings stay for when yearly returns.
       */}
-      <div class="pricing-toggle" role="tablist" aria-label={t('pricing.toggleLabel')}>
-        <span class="pricing-toggle-thumb" aria-hidden="true"></span>
-        <button
-          type="button"
-          role="tab"
-          data-period-set="monthly"
-          aria-selected="true"
-          class="pricing-toggle-btn pricing-toggle-btn--active"
-        >
-          {t('pricing.toggleMonthly')}
-        </button>
-        <button
-          type="button"
-          role="tab"
-          data-period-set="yearly"
-          aria-selected="false"
-          class="pricing-toggle-btn"
-        >
-          <span class="pricing-toggle-label">{t('pricing.toggleYearly')}</span>
-          <span class="pricing-toggle-savings">{t('pricing.toggleSavings')}</span>
-        </button>
-      </div>
     </header>
 
     <div class="pricing-tracks">
@@ -175,7 +159,6 @@ const notifyHref = (plan: Plan) =>
           <ul class="pricing-cards">
             {track.plans.map((plan) => {
               const free = plan.monthly === 0;
-              const yearly = plan.monthly * YEARLY_MONTHS;
               return (
                 <li
                   class:list={['pricing-card glass-card', free && 'pricing-card--free']}
@@ -198,28 +181,15 @@ const notifyHref = (plan: Plan) =>
                           <span class="pricing-price-secondary">{t('pricing.freeNote')}</span>
                         </div>
                       ) : (
-                        <Fragment>
-                          <div class="pricing-price-block pricing-price-block--monthly">
-                            <span class="pricing-price-day">
-                              {lang === 'en' && <span class="pricing-currency">€</span>}
-                              <span class="pricing-amount" data-amount={plan.monthly}>{money(plan.monthly)}</span>
-                              {lang === 'cs' && <Fragment>&nbsp;<span class="pricing-currency">€</span></Fragment>}
-                            </span>
-                            <span class="pricing-price-suffix">{t('pricing.perMonth')}</span>
-                            <span class="pricing-price-secondary">{t('pricing.billedMonthly')}</span>
-                          </div>
-                          <div class="pricing-price-block pricing-price-block--yearly">
-                            <span class="pricing-price-day">
-                              {lang === 'en' && <span class="pricing-currency">€</span>}
-                              <span class="pricing-amount" data-amount={yearly}>{money(yearly)}</span>
-                              {lang === 'cs' && <Fragment>&nbsp;<span class="pricing-currency">€</span></Fragment>}
-                            </span>
-                            <span class="pricing-price-suffix">{t('pricing.perYear')}</span>
-                            <span class="pricing-price-secondary">
-                              {t('pricing.perMonthEffective').replace('{amount}', perMonthFromYearly(plan.monthly))}
-                            </span>
-                          </div>
-                        </Fragment>
+                        <div class="pricing-price-block pricing-price-block--monthly">
+                          <span class="pricing-price-day">
+                            {lang === 'en' && <span class="pricing-currency">€</span>}
+                            <span class="pricing-amount" data-amount={plan.monthly}>{money(plan.monthly)}</span>
+                            {lang === 'cs' && <Fragment>&nbsp;<span class="pricing-currency">€</span></Fragment>}
+                          </span>
+                          <span class="pricing-price-suffix">{t('pricing.perMonth')}</span>
+                          <span class="pricing-price-secondary">{t('pricing.billedMonthly')}</span>
+                        </div>
                       )}
                     </div>
 
@@ -565,18 +535,13 @@ const notifyHref = (plan: Plan) =>
   }
 
   /* ─── Tracks + cards grid ───────────────────────────────────────
-     Phone: one column. Tablet: tracks stacked, two cards per track.
-     Desktop: both tracks side by side, four cards in a row. */
+     Phone: one column. Tracks are always stacked; from 900px each track
+     shows its three cards in one row. */
 
   .pricing-tracks {
     display: grid;
     gap: clamp(2rem, 4vw, 2.5rem) 1.25rem;
     grid-template-columns: 1fr;
-  }
-  @media (min-width: 1100px) {
-    .pricing-tracks {
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-    }
   }
 
   .pricing-track-label {
@@ -598,9 +563,9 @@ const notifyHref = (plan: Plan) =>
     grid-template-columns: 1fr;
     align-items: stretch;
   }
-  @media (min-width: 640px) {
+  @media (min-width: 900px) {
     .pricing-cards {
-      grid-template-columns: repeat(2, 1fr);
+      grid-template-columns: repeat(3, minmax(0, 1fr));
       gap: 1.25rem;
     }
   }
