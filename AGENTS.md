@@ -61,3 +61,4 @@ high`, and a guard that fails if Finder `* 2.*` duplicates reach `dist/`.
   the app.
 - `wrangler.toml` carries a specific `account_id` (the Hello@melveo.app account)
   and custom-domain routes. Don't change them.
+- Paid features and tariffs: follow `docs/engineering/entitlements.md` in melveo/melveo-app (check the feature key, not the plan; the server decides and enforces limits; data is never locked; no exports; plans are personal only, no team or club subscriptions).
