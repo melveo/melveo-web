@@ -19,7 +19,7 @@ import PageHeader from '../../components/PageHeader.astro';
  * Tento text je dobrý baseline pro pilot, ne pro enterprise smlouvy.
  */
 
-const lastUpdated = '2026-10-31';
+const lastUpdated = '2026-11-04';
 ---
 
 <BaseLayout
@@ -164,11 +164,28 @@ const lastUpdated = '2026-10-31';
         jen tehdy, když ji uživatel sám vyexportuje a předá podpoře.</li>
     </ul>
 
-    <h3>3.7. Údaje pro účely platby (pouze klubů)</h3>
+    <h3>3.7. Údaje o předplatném a platbách</h3>
+    <p>
+      Osobní předplatné jde koupit na webu přes Stripe, nebo v aplikaci přes
+      App Store.
+    </p>
     <ul>
-      <li>Fakturační údaje klubu (název, IČO, adresa)</li>
-      <li>Stripe Customer ID (samotné údaje o kartě nikdy
-        nezpracováváme — vše drží Stripe Inc.)</li>
+      <li><strong>Nákup na webu:</strong> tarif, stav, období, cena a doklady,
+        identifikátor zákazníka a předplatného u Stripe, kdo platí a kdo
+        předplatné dostal (u nákupu rodiče pro dítě rodič a dítě) a potvrzení,
+        že je plátci 18 let, nebo platí jako zákonný zástupce. Údaje o kartě
+        vidí jen Stripe, my ne.</li>
+      <li><strong>Nákup v aplikaci:</strong> platbu zpracovává
+        <strong>Apple jako samostatný správce</strong> podle svých zásad
+        ochrany soukromí. Vaše Apple ID, platební metodu ani adresu
+        nedostáváme. Od Applu dostáváme jen údaje o transakci: identifikátor
+        transakce, produkt, datum nákupu a konce období, stav obnovy, zda jde
+        o zkušební dobu, zemi App Store, cenu a případné vrácení peněz. Aby šlo
+        nákup přiřadit k vašemu účtu, předá aplikace Applu náhodný
+        identifikátor účtu pro nákup. Jiné údaje o vás Applu neposíláme.</li>
+      <li><strong>Zkušební doba:</strong> pamatujeme si, zda jste už zkušební
+        dobu v hráčské nebo trenérské rodině tarifů využili, aby ji každý
+        dostal jen jednou.</li>
     </ul>
 
     <h3>3.8. Cookies a podobné technologie</h3>
@@ -202,6 +219,15 @@ const lastUpdated = '2026-10-31';
         </tr>
         <tr>
           <td>Komunikace a podpora uživatelů</td>
+          <td>Oprávněný zájem — odst. 1 písm. f)</td>
+        </tr>
+        <tr>
+          <td>Předplatné na webu a v App Store, přiřazení nákupu k účtu,
+            vrácení peněz</td>
+          <td>Plnění smlouvy — odst. 1 písm. b)</td>
+        </tr>
+        <tr>
+          <td>Jedna zkušební doba na osobu a rodinu tarifů</td>
           <td>Oprávněný zájem — odst. 1 písm. f)</td>
         </tr>
         <tr>
@@ -261,6 +287,9 @@ const lastUpdated = '2026-10-31';
         oddělí od identity podle vlastnictví daného týmového záznamu.</li>
       <li>Účetní a fakturační údaje: 10 let dle zákona č. 235/2004 Sb.
         o DPH a zákona č. 563/1991 Sb. o účetnictví</li>
+      <li>Údaje o předplatném a transakcích z webu i App Store: po dobu
+        předplatného a 3 roky po jeho konci kvůli reklamacím a vrácení
+        peněz</li>
       <li>Provozní údaje (IP, crash logs): nejdéle 30 dní</li>
       <li>Události používání produktu: pouze po dobu uděleného souhlasu;
         odvoláním souhlasu v aplikaci se dosavadní události účtu ihned smažou</li>
@@ -306,7 +335,7 @@ const lastUpdated = '2026-10-31';
         </tr>
         <tr>
           <td>Stripe Payments Europe Ltd.</td>
-          <td>Zpracování plateb klubů</td>
+          <td>Platby předplatného kartou na webu</td>
           <td>EU/Irsko</td>
         </tr>
         <tr>
@@ -331,6 +360,12 @@ const lastUpdated = '2026-10-31';
           <td>Apple Inc.</td>
           <td>App Store, push notifikace, App Privacy</td>
           <td>USA — DPF</td>
+        </tr>
+        <tr>
+          <td>Apple (App Store) <em>(samostatný správce)</em></td>
+          <td>Prodej předplatného v aplikaci. Platbu zpracovává Apple sám,
+            od nás dostane jen náhodný identifikátor účtu pro nákup.</td>
+          <td>podle zásad Applu</td>
         </tr>
         <tr>
           <td>Google LLC <em>(po souhlasu)</em></td>
@@ -412,6 +447,12 @@ const lastUpdated = '2026-10-31';
       klepnutím pozastavit. Rodič nevidí denní údaje o zdraví, jen rozpis,
       docházku, dostupnost a zranění. Datum narození potřebujeme, aby hranice
       15 let platila přesně. Od 15 let rozhoduje hráčka o všem sama a rodičovský přístup končí.
+    </p>
+    <p>
+      Nabídku předplatného s cenou vidí jen dospělí. Za nezletilou kupuje
+      na webu rodič ze svého účtu; evidujeme rodiče jako plátce a dítě jako
+      toho, kdo předplatné dostal. V App Store nákup dítěte schvaluje rodič
+      funkcí Žádat o koupi. Údaje o tomto schválení zůstávají u Applu.
     </p>
 
     <h2>11. Bezpečnost</h2>

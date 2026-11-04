@@ -8,7 +8,7 @@ import PageHeader from '../../components/PageHeader.astro';
  * Czech version is authoritative in disputes (jurisdiction CZ).
  */
 
-const lastUpdated = '2026-10-31';
+const lastUpdated = '2026-11-04';
 ---
 
 <BaseLayout
@@ -155,11 +155,29 @@ const lastUpdated = '2026-10-31';
         if the user explicitly exports and sends them to support.</li>
     </ul>
 
-    <h3>3.7. Payment data (clubs only)</h3>
+    <h3>3.7. Subscription and payment data</h3>
+    <p>
+      Personal subscriptions can be bought on the website through Stripe or
+      in the app through the App Store.
+    </p>
     <ul>
-      <li>Club billing details (name, IČO/VAT, address)</li>
-      <li>Stripe Customer ID (we never process card data — handled
-        entirely by Stripe Inc.)</li>
+      <li><strong>Website purchases:</strong> plan, status, period, price and
+        invoices, Stripe customer and subscription IDs, who pays and who
+        receives the subscription (for a parent buying for a child, the parent
+        and the child) and the payer's confirmation of being 18 or older or
+        paying as a legal guardian. Card data are seen only by Stripe, not by
+        us.</li>
+      <li><strong>In-app purchases:</strong> payment is processed by
+        <strong>Apple as an independent controller</strong> under its own
+        privacy policy. We do not receive your Apple ID, payment method or
+        address. From Apple we receive only transaction data: transaction ID,
+        product, purchase date and period end, renewal status, whether it is a
+        trial, App Store country, price and any refund. To match the purchase
+        to your account, the app passes Apple a random purchase account
+        identifier. We send Apple no other data about you.</li>
+      <li><strong>Free trial:</strong> we record whether you have already used
+        a trial in the player or coach plan family, so everyone gets it only
+        once.</li>
     </ul>
 
     <h3>3.8. Cookies and similar technologies</h3>
@@ -191,6 +209,15 @@ const lastUpdated = '2026-10-31';
         </tr>
         <tr>
           <td>User communication and support</td>
+          <td>Legitimate interest — Art. 6(1)(f)</td>
+        </tr>
+        <tr>
+          <td>Subscriptions on the website and in the App Store, matching a
+            purchase to the account, refunds</td>
+          <td>Contract performance — Art. 6(1)(b)</td>
+        </tr>
+        <tr>
+          <td>One free trial per person and plan family</td>
           <td>Legitimate interest — Art. 6(1)(f)</td>
         </tr>
         <tr>
@@ -251,6 +278,9 @@ const lastUpdated = '2026-10-31';
         ownership of the relevant team record.</li>
       <li>Accounting and billing data: 10 years per Czech VAT Act
         No. 235/2004 Coll. and Accounting Act No. 563/1991 Coll.</li>
+      <li>Subscription and transaction data from the website and the App
+        Store: for the subscription and 3 years after it ends, for complaints
+        and refunds</li>
       <li>Operational data (IP, crash logs): max 30 days</li>
       <li>Product-use events: only while consent remains active; withdrawing
         consent in the app immediately deletes the account's existing events</li>
@@ -291,7 +321,7 @@ const lastUpdated = '2026-10-31';
         </tr>
         <tr>
           <td>Stripe Payments Europe Ltd.</td>
-          <td>Club payments processing</td>
+          <td>Card payments for subscriptions on the website</td>
           <td>EU/Ireland</td>
         </tr>
         <tr>
@@ -316,6 +346,13 @@ const lastUpdated = '2026-10-31';
           <td>Apple Inc.</td>
           <td>App Store, push notifications, App Privacy</td>
           <td>USA — DPF</td>
+        </tr>
+        <tr>
+          <td>Apple (App Store) <em>(independent controller)</em></td>
+          <td>Selling subscriptions in the app. Apple processes the payment
+            itself and receives from us only a random purchase account
+            identifier.</td>
+          <td>per Apple's privacy policy</td>
         </tr>
         <tr>
           <td>Google LLC <em>(after consent)</em></td>
@@ -398,6 +435,13 @@ const lastUpdated = '2026-10-31';
       attendance, availability and injuries. We need the full date of birth so the age of
       15 applies exactly. From 15, players decide everything
       themselves and parental access ends.
+    </p>
+    <p>
+      Only adults see subscription offers with a price. For a minor, a parent
+      buys on the website from their own account; we record the parent as the
+      payer and the child as the recipient. In the App Store, the parent
+      approves the child's purchase with Ask to Buy. Data about that approval
+      stay with Apple.
     </p>
 
     <h2>11. Security</h2>

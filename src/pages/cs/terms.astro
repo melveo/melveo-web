@@ -3,26 +3,23 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
 import PageHeader from '../../components/PageHeader.astro';
 
 /**
- * Terms of use CS — V4-B draft.
+ * Smluvní podmínky CS, osobní předplatné na webu a v App Store.
  *
- * Per PLAN.md §16.6 written against:
- *   - Zákon č. 89/2012 Sb. (občanský zákoník), zejm. §1810-1867
- *     spotřebitelské smlouvy
+ * Zdroj: melveo-app docs/legal/podminky_pouziti_DRAFT.md verze 0.6
+ * (#1606, rozhodnutí #1601). Nezveřejňovat před spuštěním prodeje.
+ *   - Zákon č. 89/2012 Sb. (občanský zákoník), § 31, § 1810 a násl.
  *   - Zákon č. 634/1992 Sb. o ochraně spotřebitele
- *   - Zákon č. 480/2004 Sb. — informační společnost
- *   - Apple App Store Review Guideline 3.1.3(c), služby prodávané organizacím
- *   - Pilot pricing decision: 1 970 Kč / 30 dní + auto-convert
- *     (memory project_pilot_pricing_tbd, decided 2026-04-28)
+ *   - Apple App Store Review Guidelines 3.1.1 a 3.1.2, standardní EULA Applu
  *
- * Pre-první-velký-klient bude advokát review (per rev.3 Q4).
+ * K OVĚŘENÍ před sloučením: DPH u účetní, čl. 9 a 16.2 právníkem (#1606).
  */
 
-const lastUpdated = '2026-10-17';
+const lastUpdated = '2026-11-04';
 ---
 
 <BaseLayout
   title="Smluvní podmínky"
-  description="Smluvní podmínky pro používání aplikace Melveo. Klub je plátce, hráč nikdy."
+  description="Smluvní podmínky pro používání aplikace a webu Melveo a pro osobní předplatné."
   lang="cs"
 >
   <PageHeader lang="cs" />
@@ -30,10 +27,10 @@ const lastUpdated = '2026-10-17';
     <p class="legal-eyebrow">Účinnost · {lastUpdated}</p>
     <h1 class="legal-h1">Smluvní podmínky</h1>
     <p class="legal-lead">
-      Tyto smluvní podmínky (dále jen <strong>„Podmínky"</strong>) upravují
-      vztahy mezi provozovatelem aplikace a webu Melveo a jeho uživateli.
-      Vychází ze zákona č. 89/2012 Sb., občanského zákoníku, a navazujících
-      právních předpisů.
+      Tyto smluvní podmínky (dále jen Podmínky) upravují vztah mezi
+      provozovatelem aplikace a webu Melveo a jejich uživateli, včetně
+      osobního předplatného. Vychází ze zákona č. 89/2012 Sb., občanského
+      zákoníku, a navazujících právních předpisů.
     </p>
 
     <hr />
@@ -51,158 +48,218 @@ const lastUpdated = '2026-10-17';
 
     <h2>2. Definice</h2>
     <ul>
-      <li><strong>Aplikace</strong> — mobilní aplikace Melveo pro iOS/iPadOS,
-        dostupná v Apple App Store.</li>
-      <li><strong>Web</strong> — webové stránky <code>melveo.app</code>.</li>
-      <li><strong>Klub</strong> — sportovní klub či organizace (právnická
-        nebo fyzická osoba — podnikatel), která uzavřela licenční smlouvu.</li>
-      <li><strong>Uživatel</strong> — fyzická osoba, která používá aplikaci
-        z titulu pozvání klubem (hráč, trenér, manager, atd.).</li>
-      <li><strong>Licence</strong> — právo používat aplikaci pro jeden tým
-        v jedné sezóně.</li>
-      <li><strong>Pilot</strong> — zvýhodněné krátkodobé licenční schéma
-        pro nové kluby (viz čl. 6).</li>
+      <li><strong>Aplikace</strong>: mobilní aplikace Melveo pro iPhone
+        a iPad, dostupná v Apple App Store.</li>
+      <li><strong>Web</strong>: webové stránky <code>melveo.app</code>.</li>
+      <li><strong>Uživatel</strong>: fyzická osoba, která používá aplikaci
+        nebo web jako hráčka či hráč, trenér nebo rodič.</li>
+      <li><strong>Předplatné</strong>: osobní placený tarif podle čl. 5,
+        koupený na webu nebo v App Store.</li>
     </ul>
 
     <h2>3. Předmět smlouvy</h2>
     <p>
-      Provozovatel poskytuje klubu nevýhradní, nepřevoditelnou licenci
-      k používání aplikace Melveo pro správu wellness, tréninkových sessions
-      a coach board pro jeden tým v jedné sezóně. Klub umožňuje hráčům a
-      dalším uživatelům přístup k aplikaci v rámci své licence.
+      Melveo je aplikace a web pro sportovní týmy, hlavně v házené. Nabízí
+      rozpis a docházku, check-iny, evidenci zranění, měření tepu a HRV,
+      tréninkovou zátěž, testy, zápasový záznam a report, zápasové video
+      a týmové zprávy. Melveo nemá kluby, klubové licence ani týmové
+      balíčky. Smlouvu s námi uzavírá každý uživatel sám za sebe.
     </p>
     <p>
-      Melveo je software pro týmový sportovní provoz: propojuje check-iny,
-      docházku, zátěž, kontext zápasu a další signály do přehledů pro trenéra
-      a realizační tým. Nejde o zdravotnický prostředek, urgentní službu ani
-      náhradu odborné zdravotní péče.
+      Melveo není zdravotnický prostředek, urgentní služba ani náhrada
+      odborné zdravotní péče. Nediagnostikuje a neléčí. Výstupy jsou
+      orientační.
     </p>
 
-    <h2>4. Vznik smlouvy</h2>
+    <h2>4. Účet a vznik smlouvy</h2>
     <p>
-      Smlouva mezi klubem a provozovatelem vzniká okamžikem zaplacení
-      objednané licence prostřednictvím platebního systému Stripe nebo
-      přijetí faktury klubem. Pro hráče a další uživatele vzniká smluvní
-      vztah okamžikem akceptace pozvání do týmu.
+      Smlouva o používání služby vzniká založením účtu. Přihlásit se lze
+      přes Apple, Google nebo e-mail s jednorázovým kódem. Uvádějte pravdivé
+      údaje, hlavně datum narození, protože na věku závisí pravidla pro
+      souhlasy a nákupy. Smlouva o předplatném vzniká objednávkou podle
+      čl. 6.
     </p>
 
-    <h2>5. Cena a platební podmínky</h2>
+    <h2>5. Zdarma a předplatné</h2>
     <p>
-      <strong>Princip:</strong> 1 licence = 1 tým × 1 sezóna. Plátcem
-      licence je vždy klub (právnická osoba nebo statutární zástupce).
-      Hráči, trenéři ani jiní uživatelé aplikaci nikdy přímo neplatí.
+      Základní používání je zdarma natrvalo: hráčka má tarif Warm-up,
+      trenér tarif Throw-off. Zdarma jsou mimo jiné tým, pozvánky, rodiče,
+      kalendář, docházka, check-in, HRV, zápas a jednoduchý report, základní
+      testování a zprávy.
     </p>
-    <p>
-      Aktuální ceny jsou komunikovány individuálně. Veškeré platby jsou
-      zpracovávány přes Stripe Payments Europe Ltd. Akceptujeme platby
-      kartou nebo na fakturu (po předchozí dohodě).
-    </p>
-    <p>
-      Provozovatel <em>není v současné době plátcem DPH.</em> Faktury jsou
-      vystavovány bez DPH. V případě změny statusu plátce DPH budou klubům
-      vystavovány faktury s DPH a podmínky budou aktualizovány s předstihem
-      30 dní.
-    </p>
-
-    <h2>6. Pilotní program</h2>
-    <p>
-      Pro nové kluby nabízíme <strong>pilotní licenci na 30 dní</strong>
-      za zvýhodněnou cenu, která je individuálně dohodnuta při uzavření
-      smlouvy. Pilot zahrnuje:
-    </p>
+    <p>Placená předplatná jsou osobní a jen měsíční:</p>
     <ul>
-      <li>Plnou funkcionalitu aplikace pro celý tým (až 12 hráčů + neomezený
-        počet trenérů a vedení)</li>
-      <li>Onboarding telefonát a podporu při prvním tréninku</li>
-      <li>
-        <strong>Záruku dodání:</strong> pokud aplikace neslouží Vašemu
-        provozu a my nedokážeme problém vyřešit do 14 kalendářních dnů
-        od písemné reklamace, vracíme plnou cenu pilotu.
-      </li>
+      <li>hráčka: <strong>Momentum</strong> a <strong>MVP</strong>;</li>
+      <li>trenér: <strong>Playbook</strong> a <strong>Gameplan</strong>.
+        Gameplan zahrnuje zápasové video s úložištěm 500 GB a AI komentář.
+        Za každé zaplacené období jde nahrát nejvýš 50 GB videa a vytvořit
+        AI komentář k nejvýš 10 zápasům. Po vyčerpání se funkce neodebírá,
+        jen do konce období nejde nahrát nebo vytvořit další.</li>
     </ul>
     <p>
-      Po skončení pilotu má klub možnost pokračovat na roční licenci.
-      Cena roční licence bude komunikována nejméně 7 dní před koncem pilotu.
-      Pokud klub nepokračuje, jeho data zůstanou archivována 90 dní
-      pro případnou re-aktivaci, poté budou trvale smazána.
+      Vyšší tarif obsahuje vše z nižšího. Trenérský tarif neobsahuje hráčský.
+      Co který tarif obsahuje, popisuje aktuální nabídka na webu a v aplikaci.
+      Předplatné nemění roli ani to, co uživatel vidí z údajů jiných lidí.
     </p>
 
-    <h2>7. Aplikace v Apple App Store</h2>
+    <h2>6. Kde se platí</h2>
+    <ul>
+      <li><strong>Na webu melveo.app</strong> kartou přes Stripe Payments
+        Europe Ltd. Předplatné vám prodáváme my.</li>
+      <li><strong>V aplikaci</strong> přes App Store. Prodává a inkasuje
+        Apple podle svých podmínek (Apple Media Services Terms). Platbu,
+        obnovu, zrušení i vrácení peněz řeší Apple podle čl. 8.2.</li>
+    </ul>
     <p>
-      Aplikace Melveo pro iOS slouží členům klubů a týmů, které licenci
-      zakoupily jako organizace, ve smyslu pravidel Apple App Store
-      §3.1.3(c) (služby prodávané organizacím). To znamená, že:
+      Ceny se mohou lišit podle kanálu. Ceny na webu jsou v eurech, ceny
+      v App Store určuje a zobrazuje App Store v měně vaší země. Platí cena
+      zobrazená při objednávce. Hráčskou i trenérskou rodinu tarifů můžete
+      mít v jednu chvíli jen jednou a jen u jednoho prodejce: kdo má
+      předplatné z App Store, nekoupí stejnou rodinu na webu, a naopak.
+    </p>
+    <!-- K OVĚŘENÍ U ÚČETNÍ před sloučením: ARES vede QUIX Global s.r.o.
+         jako plátce DPH, rozhodnutí z 3. 11. 2026 počítá s plátcovstvím
+         od 1. 1. 2027. Podle výsledku nahradit větou o cenách včetně DPH. -->
+    <p>
+      Ceny na webu jsou konečné. Provozovatel <em>není v současné době
+      plátcem DPH.</em> Při změně vás budeme informovat podle čl. 18.
+      U nákupu v App Store odvádí DPH Apple.
+    </p>
+
+    <h2>7. Zkušební doba 7 dní</h2>
+    <p>
+      U placených tarifů můžeme nabídnout 7 dní zdarma. Zkušební dobu
+      dostane každý jen jednou za hráčskou a jednou za trenérskou rodinu
+      tarifů, bez ohledu na to, zda ji využil na webu, nebo v App Store.
+      Nabízíme ji jen dospělým. Ve zkušební době Gameplanu jde nahrát
+      nejvýš 5 GB videa a vytvořit AI komentář ke 2 zápasům.
     </p>
     <ul>
-      <li>Aplikace neobsahuje žádné nákupní tlačítka ani in-app purchases</li>
-      <li>Veškeré komerční operace (zakoupení licence, fakturace) probíhají
-        výhradně mimo aplikaci — na webu nebo přes faktury</li>
-      <li>Stažení aplikace z App Store je zdarma</li>
+      <li><strong>Na webu</strong> zadáte při zahájení zkušební doby
+        platební kartu. <strong>Pokud předplatné do konce zkušební doby
+        nezrušíte, přejde automaticky na placené a strhneme první měsíční
+        platbu.</strong> Před koncem zkušební doby vám pošleme připomínku.</li>
+      <li><strong>V App Store</strong> jde o úvodní nabídku Applu.
+        <strong>Pokud předplatné nezrušíte nejpozději 24 hodin před koncem
+        zkušební doby, Apple ho automaticky převede na placené.</strong></li>
     </ul>
+    <p>
+      Pokud po zkušební době neplatíte, vrátíte se na bezplatný tarif.
+      Data zůstanou a to, co jste vytvořili, můžete dál číst.
+    </p>
 
-    <h2>8. Práva a povinnosti klubu</h2>
-    <p>Klub se zavazuje:</p>
+    <h2>8. Obnova, zrušení a vrácení peněz</h2>
+    <h3>8.1. Předplatné z webu</h3>
+    <p>
+      Předplatné se automaticky obnovuje vždy o další měsíc a platba se
+      strhne z karty na začátku každého období, dokud předplatné nezrušíte.
+      Zrušit ho můžete kdykoli na webu v Moje předplatné. Platí pak do konce
+      zaplaceného období a dál se neobnoví. Za načaté období peníze
+      nevracíme, s výjimkou odstoupení podle čl. 16.2, ukončení podle
+      čl. 15 a případů, kdy to vyžaduje zákon. Při smazání účtu předplatné
+      z webu zrušíme sami.
+    </p>
+    <h3>8.2. Předplatné z App Store</h3>
+    <p>
+      Předplatné se obnovuje podle pravidel Applu, dokud ho nezrušíte.
+      Zrušit ho můžete v Nastavení iPhonu nebo iPadu, pod vaším jménem
+      v části Předplatná, nejpozději 24 hodin před koncem aktuálního období.
+      Předplatné pak běží do konce zaplaceného období.
+      <strong>Smazáním aplikace ani účtu Melveo se předplatné u Applu
+      nezruší.</strong> O vrácení peněz rozhoduje Apple, žádost se podává na
+      <a href="https://reportaproblem.apple.com" target="_blank" rel="noopener">reportaproblem.apple.com</a>.
+      My platby přes App Store vracet neumíme. Když Apple peníze vrátí,
+      předplatné u nás skončí.
+    </p>
+    <h3>8.3. Změna tarifu a ceny</h3>
+    <p>
+      Přechod na vyšší tarif ve stejné rodině platí hned. Na webu doplatíte
+      poměrný rozdíl za zbytek období, v App Store nevyčerpanou část vypořádá
+      Apple. Přechod na nižší tarif platí od dalšího období. O zvýšení ceny
+      na webu vás informujeme nejméně 30 dní před další platbou a do té doby
+      můžete předplatné zrušit. U App Store o změně ceny informuje Apple.
+    </p>
+    <h3>8.4. Konec předplatného</h3>
+    <p>
+      Po skončení předplatného se vrátíte na bezplatný tarif. Data zůstanou,
+      vytvořené věci jde dál číst, novou placenou práci už vytvořit nejde.
+    </p>
+
+    <h2>9. Nezletilí</h2>
+    <p>
+      Melveo mohou používat i nezletilí. Souhlas s údaji o zdraví dává do
+      15 let zákonný zástupce, od 15 let hráčka sama, viz
+      <a href="/cs/privacy/">Ochrana osobních údajů</a>, kapitola 10.
+    </p>
+    <p>
+      <strong>Předplatné nezletilých jen se souhlasem zákonného zástupce.</strong>
+      Pro předplatné platí hranice 18 let:
+    </p>
     <ul>
-      <li>Poskytnout pravdivé fakturační a kontaktní údaje</li>
-      <li>Pozvat do aplikace jen lidi, kteří s pozváním souhlasí. U dětí
-        do 15 let dává souhlas se zpracováním údajů o zdraví zákonný
-        zástupce přímo v aplikaci (§ 7 zák. 110/2019 Sb., viz Ochrana
-        osobních údajů, kapitola 10)</li>
-      <li>Nepoužívat aplikaci k účelům, které jsou v rozporu se zákonem</li>
-      <li>Nesdílet přístupové údaje s neoprávněnými osobami</li>
-      <li>Nevkládat do aplikace protiprávní, diskriminační, hanlivý nebo
-        bezpečnostně rizikový obsah</li>
-      <li>Informovat provozovatele bez zbytečného odkladu, pokud zjistí
-        neoprávněný přístup nebo zneužití účtu</li>
+      <li><strong>Na webu</strong> kupuje jen dospělý pro sebe, nebo zákonný
+        zástupce pro své dítě ze svého účtu. Při platbě potvrzujete: Je mi
+        18 let, nebo platím jako zákonný zástupce dítěte. Když kupuje rodič
+        pro dítě, smlouvu s námi uzavírá a platí rodič; dítě dostane přístup
+        k tarifu.</li>
+      <li><strong>V App Store</strong> prodává Apple. Apple účet dítěte zakládá
+        rodič v Rodinném sdílení a nákupy dítěte schvaluje funkcí Žádat
+        o koupi (Ask to Buy). Takové schválení považujeme za souhlas
+        zákonného zástupce s předplatným.</li>
+      <li>Zákonný zástupce, který s předplatným dítěte souhlasil, za závazky
+        z něj odpovídá podle § 31 občanského zákoníku.</li>
     </ul>
+    <p>
+      <strong>Děti ke koupi nevybízíme.</strong> Nabídku s cenou a tlačítkem
+      nákupu ukazujeme jen dospělým. Nezletilá hráčka u placené funkce vidí
+      jen věcný popis bez ceny a bez tlačítka nákupu. Nabídky nikomu samy
+      nevyskakují, nemají odpočty ani výzvy typu kup si hned. Odvolání
+      souhlasu ani ukončení vazby rodiče samo předplatné nezruší.
+    </p>
 
-    <h2>9. Práva a povinnosti uživatele (hráče, trenéra)</h2>
+    <h2>10. Práva a povinnosti uživatele</h2>
     <p>Uživatel se zavazuje:</p>
     <ul>
-      <li>Používat aplikaci v souladu s pokyny klubu</li>
-      <li>Vyplňovat wellness check-iny pravdivě (jejich účelem je
-        sportovní příprava, ne medicína)</li>
-      <li>Chránit své přihlašovací údaje</li>
-      <li>Nesdílet přístup do aplikace s jinou osobou a nepokoušet se získat
-        data jiného uživatele mimo oprávnění své role</li>
-      <li>Dodržovat <a href="/cs/bezpecnost/">pravidla komunity</a>; nevhodný
-        obsah lze nahlásit přímo v aplikaci nebo na hello@melveo.app</li>
+      <li>Vyplňovat check-iny pravdivě (jejich účelem je sportovní příprava,
+        ne medicína)</li>
+      <li>Chránit své přihlašovací údaje a nesdílet přístup s jinou osobou</li>
+      <li>Nepokoušet se získat data jiného uživatele mimo oprávnění své role
+        a neobcházet technická omezení</li>
+      <li>Zvát do aplikace jen lidi, kteří s pozváním souhlasí, a nevydávat
+        se za rodiče nebo trenéra</li>
+      <li>Nevkládat protiprávní, diskriminační, hanlivý nebo bezpečnostně
+        rizikový obsah a dodržovat <a href="/cs/bezpecnost/">pravidla
+        komunity</a>; nevhodný obsah lze nahlásit přímo v aplikaci nebo na
+        hello@melveo.app</li>
+      <li>Nahrávat zápasové video jen s potřebnými právy a souhlasy, u
+        nezletilých se souhlasem rodičů</li>
     </ul>
     <p>
-      Uživatel má právo kdykoli ukončit používání aplikace smazáním účtu
-      v sekci „Účet" — tím opouští všechny týmy a jeho data jsou smazána
-      v souladu s Ochranou osobních údajů.
+      Uživatel může kdykoli ukončit používání smazáním účtu v sekci Účet.
+      Tím opouští všechny týmy a jeho data jsou smazána v souladu
+      s Ochranou osobních údajů. K předplatnému viz čl. 8.
     </p>
 
-    <h2>10. Omezení odpovědnosti</h2>
+    <h2>11. Omezení odpovědnosti</h2>
     <p>
       <strong>Aplikace Melveo není zdravotnickým prostředkem ani
-      diagnostickým nástrojem.</strong> Wellness check-iny a další
-      data slouží výhradně pro sportovní přípravu a komunikaci v týmu.
-      Provozovatel neodpovídá za rozhodnutí klubu, trenéra ani hráče,
-      která jsou činěna na základě dat z aplikace.
+      diagnostickým nástrojem.</strong> Výstupy aplikace jsou podpůrné
+      informace pro lidské rozhodování. Trenér a realizační tým zůstávají
+      odpovědní za sportovní, organizační a zdravotně bezpečnostní
+      rozhodnutí.
     </p>
-    <p>
-      Výstupy aplikace jsou podpůrné informace pro lidské rozhodování. Klub,
-      trenér a realizační tým zůstávají odpovědní za finální sportovní,
-      organizační a zdravotně-bezpečnostní rozhodnutí.
-    </p>
-    <p>
-      Provozovatel neodpovídá za škody vzniklé:
-    </p>
+    <p>Provozovatel neodpovídá za škody vzniklé:</p>
     <ul>
       <li>Nedostupností služby v důsledku okolností mimo jeho kontrolu
-        (výpadky internetu, App Store, Apple push services, atd.)</li>
-      <li>Nesprávným použitím aplikace ze strany uživatele nebo klubu</li>
+        (výpadky internetu, App Store, Apple push services a podobně)</li>
+      <li>Nesprávným použitím aplikace ze strany uživatele</li>
       <li>Ztrátou dat v důsledku zaviněného jednání uživatele</li>
     </ul>
     <p>
-      V případě prokázané vady na straně provozovatele je odpovědnost
-      omezena maximálně na výši uhrazené ceny licence za poslední účtovací
-      období.
+      Vůči spotřebiteli odpovědnost nevylučujeme ani neomezujeme tam, kde to
+      zákon nedovoluje.
     </p>
 
-    <h2>11. Dostupnost, změny služby a údržba</h2>
+    <h2>12. Dostupnost, změny služby a údržba</h2>
     <p>
       Službu provozujeme s cílem vysoké dostupnosti, ale negarantujeme
       nepřetržitý provoz bez výpadků. Krátkodobá nedostupnost může vzniknout
@@ -210,18 +267,17 @@ const lastUpdated = '2026-10-17';
       nebo okolnostem mimo naši kontrolu.
     </p>
     <p>
-      Funkce aplikace můžeme průběžně měnit, doplňovat nebo omezovat, pokud
-      je to potřebné pro bezpečnost, výkon, právní soulad nebo produktový
-      vývoj. Podstatné změny, které se dotknou aktivních klubů, oznámíme
-      přiměřeně předem.
+      Funkce můžeme průběžně měnit nebo doplňovat, pokud je to potřebné pro
+      bezpečnost, výkon, právní soulad nebo vývoj produktu. Placenou funkci
+      v průběhu zaplaceného období podstatně neomezíme bez oznámení předem.
     </p>
 
-    <h2>12. Duševní vlastnictví a licence</h2>
+    <h2>13. Duševní vlastnictví a licence</h2>
     <p>
       Aplikace, web, design, texty, značky, zdrojový kód a další obsah Melveo
       jsou chráněny autorským právem a dalšími právy duševního vlastnictví.
-      Klub a uživatelé získávají pouze omezené právo aplikaci používat v
-      rozsahu sjednané licence.
+      Uživatelé získávají nevýhradní a nepřevoditelné právo službu používat.
+      Data, která do služby vložíte, zůstávají vaše.
     </p>
     <p>
       Bez písemného souhlasu provozovatele není dovoleno aplikaci kopírovat,
@@ -229,80 +285,102 @@ const lastUpdated = '2026-10-17';
       sublicencovat ani používat mimo sjednaný účel.
     </p>
 
-    <h2>13. Služby třetích stran</h2>
+    <h2>14. Služby třetích stran</h2>
     <p>
-      Melveo může využívat služby třetích stran, zejména Apple App Store,
-      Apple Push Notifications, Stripe, poskytovatele e-mailů, hosting,
-      analytiku a bezpečnostní infrastrukturu. Používání těchto služeb se
-      může řídit také jejich vlastními podmínkami a zásadami ochrany osobních
-      údajů.
+      Melveo využívá služby třetích stran, zejména Apple App Store, Apple
+      Push Notifications, Stripe, poskytovatele e-mailů, hosting a bezpečnostní
+      infrastrukturu. Používání těchto služeb se může řídit také jejich
+      vlastními podmínkami a zásadami ochrany osobních údajů.
     </p>
 
-    <h2>14. Reklamace a ukončení</h2>
+    <h2>15. Reklamace a ukončení</h2>
     <p>
       Reklamaci lze podat e-mailem na
       <a href="mailto:hello@melveo.app">hello@melveo.app</a> nebo
-      datovou schránkou <code>g7v78rx</code>. Reklamace bude vyřízena
-      do 30 dnů od přijetí. V průběhu pilotu platí specifická záruka
-      dodání (čl. 6).
+      datovou schránkou <code>g7v78rx</code>. Vyřídíme ji do 30 dnů od
+      přijetí. Pokud placená funkce nefunguje, jak má, vadu odstraníme,
+      a pokud to nejde, přiměřeně snížíme cenu u předplatného z webu nebo
+      vám pomůžeme s žádostí u Applu.
     </p>
     <p>
-      Smlouvu lze ze strany klubu vypovědět:
+      Přístup můžeme omezit nebo ukončit při podstatném porušení Podmínek.
+      Pokud to nebrání ochraně dítěte nebo vyšetřování, dáme vám předem vědět
+      a vysvětlíme proč. Pokud ukončíme přístup nebo službu bez vašeho
+      porušení, vrátíme u předplatného z webu poměrnou část zaplaceného
+      období. U předplatného z App Store předplatné ukončíme a pomůžeme vám
+      s žádostí o vrácení u Applu.
     </p>
-    <ul>
-      <li>Kdykoli e-mailem na <a href="mailto:hello@melveo.app">hello@melveo.app</a>
-        — s účinností ke konci aktuálního zúčtovacího období</li>
-      <li>Bezprostředně v případě závažného porušení Podmínek
-        provozovatelem</li>
-    </ul>
-    <p>
-      Provozovatel může smlouvu vypovědět:
-    </p>
-    <ul>
-      <li>S výpovědní lhůtou 30 dnů, e-mailem na klubový kontakt</li>
-      <li>Okamžitě v případě závažného porušení Podmínek klubem nebo
-        nezaplacení splatné faktury déle než 30 dní</li>
-    </ul>
 
-    <h2>15. Spotřebitelské spory</h2>
+    <h2>16. Spotřebitelé</h2>
+    <h3>16.1. Vaše práva</h3>
     <p>
-      Tato smlouva je primárně B2B (klub ↔ provozovatel). V případě, že
-      je klub spotřebitelem dle § 419 zák. 89/2012 Sb. (např. nezisková
-      sportovní organizace bez podnikatelské činnosti), uplatní se na
-      tuto smlouvu zvláštní ochrana spotřebitele dle zákona č. 634/1992 Sb.
+      Pokud jste spotřebitel, máte práva podle občanského zákoníku a zákona
+      č. 634/1992 Sb. Tyto Podmínky je neomezují.
     </p>
+    <h3>16.2. Odstoupení do 14 dnů u nákupu na webu</h3>
+    <!-- K OVĚŘENÍ PRÁVNÍKEM před sloučením (#1606): služba vs. digitální
+         obsah, počátek lhůty při zkušební době a znění souhlasu. -->
     <p>
-      V případě sporu se mohou spotřebitelé obrátit na:
+      Smlouvu o předplatném uzavřenou na webu můžete zrušit bez udání důvodu
+      do 14 dnů od jejího uzavření, tedy od zahájení zkušební doby, nebo od
+      první platby, pokud zkušební dobu nemáte. Stačí e-mail na
+      <a href="mailto:hello@melveo.app">hello@melveo.app</a>. Peníze vrátíme
+      do 14 dnů od odstoupení stejným způsobem, jakým jste platili.
     </p>
+    <ul>
+      <li>Pokud odstoupíte ve zkušební době, nic neplatíte.</li>
+      <li>Pokud odstoupíte po první platbě a předplatné jste na svou žádost
+        začali využívat hned, vrátíme platbu sníženou o poměrnou část za dny
+        placeného období, kdy služba běžela. Při objednávce vás o okamžité
+        zahájení výslovně požádáme: Žádám, abyste mi předplatné zpřístupnili
+        hned. Beru na vědomí, že když od smlouvy odstoupím do 14 dnů, zaplatím
+        poměrnou část za dobu, kdy jsem předplatné po skončení zkušební doby
+        využíval.</li>
+    </ul>
+    <p>
+      <strong>Nákup v App Store</strong> uzavíráte s Applem. Odstoupení
+      a vrácení peněz se řídí podmínkami Applu a žádá se u Applu (čl. 8.2).
+    </p>
+    <h3>16.3. Mimosoudní řešení sporů</h3>
+    <p>V případě sporu se mohou spotřebitelé obrátit na:</p>
     <p class="legal-block">
       <strong>Česká obchodní inspekce</strong><br />
+      Ústřední inspektorát, oddělení ADR<br />
       Štěpánská 567/15, 120 00 Praha 2<br />
       <a href="https://www.coi.cz" target="_blank" rel="noopener">www.coi.cz</a>
     </p>
 
-    <h2>16. Změny Podmínek</h2>
+    <h2>17. Aplikace z App Store</h2>
     <p>
-      Tyto Podmínky můžeme aktualizovat. Klubům s aktivní licencí budou
-      podstatné změny oznámeny e-mailem nejméně 30 dní před účinností.
-      Pokud klub se změnami nesouhlasí, má právo smlouvu vypovědět
-      bez sankce.
+      Pro aplikaci staženou z App Store platí i standardní licenční smlouva
+      Applu pro koncové uživatele (Licensed Application End User License
+      Agreement). Tyto Podmínky ji doplňují. Smlouvu o používání služby
+      uzavíráte s námi, ne s Applem. Za službu, její obsah, podporu
+      a reklamace odpovídáme my. Apple odpovídá za platby, obnovu a vrácení
+      peněz u nákupu v App Store podle svých podmínek.
     </p>
 
-    <h2>17. Závěrečná ustanovení</h2>
+    <h2>18. Změny Podmínek</h2>
     <p>
-      Tyto Podmínky a smlouvu mezi provozovatelem a klubem se řídí
-      právním řádem České republiky. Příslušnými soudy jsou české
-      obecné soudy podle sídla provozovatele.
+      O podstatných změnách vás informujeme e-mailem nebo v aplikaci nejméně
+      30 dní předem. Pokud se změnou nesouhlasíte, můžete před její účinností
+      smazat účet nebo zrušit předplatné. Pokračováním v používání po
+      účinnosti se změnou souhlasíte.
+    </p>
+
+    <h2>19. Závěrečná ustanovení</h2>
+    <p>
+      Podmínky se řídí právním řádem České republiky. Spotřebitele to
+      nezbavuje ochrany podle práva státu, kde mají bydliště.
     </p>
     <p>
       Pokud bude některé ustanovení Podmínek neplatné nebo neúčinné,
-      zůstávají ostatní ustanovení v platnosti (salvátorská klauzule).
+      zůstávají ostatní ustanovení v platnosti.
     </p>
 
     <p class="legal-disclaimer">
       Tento dokument je vlastní zpracování provozovatele a vychází z
-      platné legislativy. Pro enterprise smlouvy a komplexní zpracování
-      doporučujeme advokátní revizi.
+      platné legislativy.
     </p>
   </article>
 </BaseLayout>
