@@ -9,7 +9,6 @@ import PageHeader from '../../components/PageHeader.astro';
  * Sections 7, 9 and 16: owner delegation, 4 Nov 2026 (#1606).
  */
 
-const lastUpdated = '2026-11-04';
 ---
 
 <BaseLayout
@@ -19,13 +18,18 @@ const lastUpdated = '2026-11-04';
 >
   <PageHeader lang="en" />
   <article class="legal-article">
-    <p class="legal-eyebrow">Effective · {lastUpdated}</p>
+    <p class="legal-eyebrow">Draft · Effective date at publication</p>
     <h1 class="legal-h1">Terms of Use</h1>
     <p class="legal-lead">
       These Terms of Use (the Terms) govern the relationship between the
       operator of the Melveo app and website and its users, including personal
       subscriptions. They are based on Czech Act No. 89/2012 Coll. (Civil Code)
       and related legal regulations. The Czech version prevails in disputes.
+    </p>
+    <p>
+      Paid plans become available when sales start in the relevant channel.
+      Until then, Melveo is available in its free mode. Any pilot already
+      agreed individually is governed by its own agreement.
     </p>
 
     <hr />
@@ -109,8 +113,8 @@ const lastUpdated = '2026-11-04';
         in Section 8.2.</li>
     </ul>
     <p>
-      Prices may differ by channel. Website prices are in euros; App Store
-      prices are set and shown by the App Store in your country's currency.
+      Prices may differ by channel. Website prices are in euros. The App
+      Store shows the price in your storefront's currency.
       The price shown at the time of the order applies. You can hold the
       player and the coach plan family only once at a time and only with one
       seller: if you subscribe through the App Store, you cannot buy the same
@@ -128,9 +132,10 @@ const lastUpdated = '2026-11-04';
 
     <h2>7. 7-day free trial</h2>
     <p>
-      For paid plans we may offer 7 days free. Everyone gets the trial only
-      once for the player and once for the coach plan family, whether used on
-      the Website or in the App Store. Users aged 15 or over may start it
+      For paid plans we may offer 7 days free. On the Website, each person
+      can use one trial per plan family. Apple checks eligibility for the
+      App Store introductory offer within each subscription group.
+      Users aged 15 or over may start a trial
       themselves. A parent may start a trial for their child under 15 with their own card. During a
       Gameplan trial you can upload up to 5 GB of video and create AI
       commentary for 2 matches.
@@ -325,8 +330,9 @@ const lastUpdated = '2026-11-04';
       Unless it would hinder child protection or an investigation, we will
       tell you in advance and explain why. If we end access or the service
       without a breach on your part, we refund the prorated part of the paid
-      period for a Website Subscription. For an App Store Subscription we end
-      the Subscription and help you request a refund from Apple.
+      period for a Website Subscription. For an App Store Subscription we
+      help you cancel in Apple subscription settings and request a refund
+      from Apple.
     </p>
 
     <h2>16. Consumers</h2>
@@ -374,8 +380,9 @@ const lastUpdated = '2026-11-04';
 
     <h2>17. App from the App Store</h2>
     <p>
-      For the App downloaded from the App Store, Apple's standard Licensed
-      Application End User License Agreement also applies. These Terms
+      For the App downloaded from the App Store,
+      <a href="https://www.apple.com/legal/internet-services/itunes/dev/stdeula/">Apple's standard end user license agreement</a>
+      also applies. These Terms
       supplement it. You conclude the agreement to use the service with us, not
       with Apple. We are responsible for the service, its content, support and
       complaints. Apple is responsible for payments, renewals and refunds of

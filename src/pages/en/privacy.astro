@@ -8,7 +8,6 @@ import PageHeader from '../../components/PageHeader.astro';
  * Czech version is authoritative in disputes (jurisdiction CZ).
  */
 
-const lastUpdated = '2026-11-04';
 ---
 
 <BaseLayout
@@ -18,7 +17,7 @@ const lastUpdated = '2026-11-04';
 >
   <PageHeader lang="en" />
   <article class="legal-article">
-    <p class="legal-eyebrow">Effective · {lastUpdated}</p>
+    <p class="legal-eyebrow">Draft · Effective date at publication</p>
     <h1 class="legal-h1">Privacy Policy</h1>
     <p class="legal-lead">
       This document describes which personal data we collect through the
@@ -158,8 +157,8 @@ const lastUpdated = '2026-11-04';
 
     <h3>3.7. Subscription and payment data</h3>
     <p>
-      Personal subscriptions can be bought on the website through Stripe or
-      in the app through the App Store.
+      When subscriptions launch, Stripe will process website purchases and
+      Apple will process App Store purchases. Public sales are in preparation.
     </p>
     <ul>
       <li><strong>Website purchases:</strong> plan, status, period, price and
@@ -177,9 +176,9 @@ const lastUpdated = '2026-11-04';
         trial, App Store country, price and any refund. To match the purchase
         to your account, the app passes Apple a random purchase account
         identifier. We send Apple no other data about you.</li>
-      <li><strong>Free trial:</strong> we record whether you have already used
-        a trial in the player or coach plan family, so everyone gets it only
-        once.</li>
+      <li><strong>Free trial:</strong> we record trial use in the player or
+        coach plan family to check eligibility on the Website. Apple
+        determines eligibility for introductory offers in the App Store.</li>
     </ul>
 
     <h3>3.8. Cookies and similar technologies</h3>

@@ -19,7 +19,6 @@ import PageHeader from '../../components/PageHeader.astro';
  * žádné klubové licence. Nezveřejňovat před spuštěním prodeje.
  */
 
-const lastUpdated = '2026-11-04';
 ---
 
 <BaseLayout
@@ -29,7 +28,7 @@ const lastUpdated = '2026-11-04';
 >
   <PageHeader lang="cs" />
   <article class="legal-article">
-    <p class="legal-eyebrow">Účinnost · {lastUpdated}</p>
+    <p class="legal-eyebrow">Návrh · Datum účinnosti při zveřejnění</p>
     <h1 class="legal-h1">Ochrana osobních údajů</h1>
     <p class="legal-lead">
       Tento dokument popisuje, jaké osobní údaje shromažďujeme prostřednictvím
@@ -165,8 +164,8 @@ const lastUpdated = '2026-11-04';
 
     <h3>3.7. Údaje o předplatném a platbách</h3>
     <p>
-      Osobní předplatné jde koupit na webu přes Stripe, nebo v aplikaci přes
-      App Store.
+      Při nákupu po spuštění předplatného zpracuje webovou platbu Stripe a
+      platbu v App Store Apple. Veřejný prodej zatím připravujeme.
     </p>
     <ul>
       <li><strong>Nákup na webu:</strong> tarif, stav, období, cena a doklady,
@@ -183,9 +182,9 @@ const lastUpdated = '2026-11-04';
         o zkušební dobu, zemi App Store, cenu a případné vrácení peněz. Aby šlo
         nákup přiřadit k vašemu účtu, předá aplikace Applu náhodný
         identifikátor účtu pro nákup. Jiné údaje o vás Applu neposíláme.</li>
-      <li><strong>Zkušební doba:</strong> pamatujeme si, zda jste už zkušební
-        dobu v hráčské nebo trenérské rodině tarifů využili, aby ji každý
-        dostal jen jednou.</li>
+      <li><strong>Zkušební doba:</strong> evidujeme využití zkoušky
+        v hráčské nebo trenérské rodině tarifů pro ověření nároku na webu.
+        O způsobilosti pro úvodní nabídku v App Store rozhoduje Apple.</li>
     </ul>
 
     <h3>3.8. Cookies a podobné technologie</h3>

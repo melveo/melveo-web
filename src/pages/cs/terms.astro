@@ -16,7 +16,6 @@ import PageHeader from '../../components/PageHeader.astro';
  * K OVĚŘENÍ před sloučením: DPH u účetní.
  */
 
-const lastUpdated = '2026-11-04';
 ---
 
 <BaseLayout
@@ -26,13 +25,18 @@ const lastUpdated = '2026-11-04';
 >
   <PageHeader lang="cs" />
   <article class="legal-article">
-    <p class="legal-eyebrow">Účinnost · {lastUpdated}</p>
+    <p class="legal-eyebrow">Návrh · Datum účinnosti při zveřejnění</p>
     <h1 class="legal-h1">Smluvní podmínky</h1>
     <p class="legal-lead">
       Tyto smluvní podmínky (dále jen Podmínky) upravují vztah mezi
       provozovatelem aplikace a webu Melveo a jejich uživateli, včetně
       osobního předplatného. Vychází ze zákona č. 89/2012 Sb., občanského
       zákoníku, a navazujících právních předpisů.
+    </p>
+    <p>
+      Placené tarify se zpřístupní až po zahájení prodeje v příslušném
+      kanálu. Do té doby lze Melveo používat v dostupném bezplatném režimu.
+      Dříve individuálně sjednané piloty se řídí příslušnou dohodou.
     </p>
 
     <hr />
@@ -113,8 +117,8 @@ const lastUpdated = '2026-11-04';
         obnovu, zrušení i vrácení peněz řeší Apple podle čl. 8.2.</li>
     </ul>
     <p>
-      Ceny se mohou lišit podle kanálu. Ceny na webu jsou v eurech, ceny
-      v App Store určuje a zobrazuje App Store v měně vaší země. Platí cena
+      Ceny se mohou lišit podle kanálu. Ceny na webu jsou v eurech, cenu
+      v App Store uvidíte v měně svého obchodu. Platí cena
       zobrazená při objednávce. Hráčskou i trenérskou rodinu tarifů můžete
       mít v jednu chvíli jen jednou a jen u jednoho prodejce: kdo má
       předplatné z App Store, nekoupí stejnou rodinu na webu, a naopak.
@@ -131,9 +135,9 @@ const lastUpdated = '2026-11-04';
 
     <h2>7. Zkušební doba 7 dní</h2>
     <p>
-      U placených tarifů můžeme nabídnout 7 dní zdarma. Zkušební dobu
-      dostane každý jen jednou za hráčskou a jednou za trenérskou rodinu
-      tarifů, bez ohledu na to, zda ji využil na webu, nebo v App Store.
+      U placených tarifů můžeme nabídnout 7 dní zdarma. Na webu je zkouška
+      nejvýš jedna na osobu v každé rodině tarifů. Nárok na úvodní nabídku
+      v App Store ověřuje Apple podle pravidel dané skupiny předplatných.
       Samostatně ji může zahájit uživatel od 15 let. Rodič může zahájit
       zkušební dobu pro své dítě mladší 15 let se svou kartou. Ve zkušební době Gameplanu jde nahrát
       nejvýš 5 GB videa a vytvořit AI komentář ke 2 zápasům.
@@ -321,8 +325,8 @@ const lastUpdated = '2026-11-04';
       Pokud to nebrání ochraně dítěte nebo vyšetřování, dáme vám předem vědět
       a vysvětlíme proč. Pokud ukončíme přístup nebo službu bez vašeho
       porušení, vrátíme u předplatného z webu poměrnou část zaplaceného
-      období. U předplatného z App Store předplatné ukončíme a pomůžeme vám
-      s žádostí o vrácení u Applu.
+      období. U předplatného z App Store vám pomůžeme se zrušením ve
+      správě předplatných Apple a se žádostí o vrácení platby u Applu.
     </p>
 
     <h2>16. Spotřebitelé</h2>
@@ -368,9 +372,9 @@ const lastUpdated = '2026-11-04';
 
     <h2>17. Aplikace z App Store</h2>
     <p>
-      Pro aplikaci staženou z App Store platí i standardní licenční smlouva
-      Applu pro koncové uživatele (Licensed Application End User License
-      Agreement). Tyto Podmínky ji doplňují. Smlouvu o používání služby
+      Pro aplikaci staženou z App Store platí i
+      <a href="https://www.apple.com/legal/internet-services/itunes/dev/stdeula/">standardní licenční smlouva Applu</a>.
+      Tyto Podmínky ji doplňují. Smlouvu o používání služby
       uzavíráte s námi, ne s Applem. Za službu, její obsah, podporu
       a reklamace odpovídáme my. Apple odpovídá za platby, obnovu a vrácení
       peněz u nákupu v App Store podle svých podmínek.
