@@ -785,7 +785,7 @@ export const ui = {
     'press.about.short':
       'Melveo je aplikace pro sportovní týmy, která propojí wellness, readiness a zátěž hráčů do jednoho přehledu, aby trenér věděl, co udělat dál.',
     'press.about.long':
-      'Hráči v aplikaci Melveo každý den zaznamenají, jak se cítí, a data z Apple Health nebo Polaru doplní spánek a zátěž. Trenér a realizační tým pak v jednom přehledu vidí, kdo je připravený, koho šetřit a co upravit v tréninkovém plánu. Melveo je pro iPhone a iPad, platí klub, hráči nikdy. Za aplikací stojí pražská společnost QUIX Global s.r.o.',
+      'Hráči v aplikaci Melveo každý den zaznamenají, jak se cítí, a data z Apple Health nebo Polaru doplní spánek a zátěž. Trenér a realizační tým pak v jednom přehledu vidí, kdo je připravený, koho šetřit a co upravit v tréninkovém plánu. Melveo je pro iPhone a iPad, začít jde zdarma a hráč i trenér si placený tarif volí každý sám. Za aplikací stojí pražská společnost QUIX Global s.r.o.',
     'press.contact.title': 'Kontakt pro média',
     'press.contact.body': 'Dotazy, rozhovory a podklady, které v kitu chybí:',
 
@@ -1508,7 +1508,7 @@ export const ui = {
     'press.about.short':
       'Melveo is an app for sports teams that brings player wellness, readiness and load into one clear view, so coaches know what to do next.',
     'press.about.long':
-      'Players log how they feel in Melveo every day, and data from Apple Health or Polar adds sleep and training load. Coaches and staff then see in one view who is ready, who to rest and what to change in the training plan. Melveo runs on iPhone and iPad; clubs pay, players never. The app is made by QUIX Global s.r.o., based in Prague.',
+      'Players log how they feel in Melveo every day, and data from Apple Health or Polar adds sleep and training load. Coaches and staff then see in one view who is ready, who to rest and what to change in the training plan. Melveo runs on iPhone and iPad; it is free to start, and players and coaches each choose their own paid plan. The app is made by QUIX Global s.r.o., based in Prague.',
     'press.contact.title': 'Media contact',
     'press.contact.body': 'Questions, interviews and anything missing from the kit:',
 
