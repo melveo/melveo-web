@@ -262,7 +262,7 @@ export const ui = {
     'pricing.gameplan.soon2': 'AI komentář zápasu',
     'pricing.separate': 'Vyšší tarif obsahuje vše z nižšího. Hráčské a trenérské tarify jsou samostatné.',
     'pricing.disclaimer':
-      'Placené tarify zatím nejsou v prodeji. Až je spustíme, koupíš je tady na webu a platby zpracuje Stripe.',
+      'Tady uvádíme ceny pro připravovaný prodej na webu přes Stripe. Cenu App Store uvidíš v aplikaci, jakmile tam bude nákup dostupný.',
 
     // Section dots nav (fixed right, desktop only) + promo video stage
     'sectionNav.label': 'Navigace sekcí',
@@ -1008,7 +1008,7 @@ export const ui = {
     'pricing.gameplan.soon2': 'AI match commentary',
     'pricing.separate': 'A higher plan includes everything in the lower one. Player and coach plans are separate.',
     'pricing.disclaimer':
-      'Paid plans are not on sale yet. Once they launch, you buy them here on the website and Stripe processes the payment.',
+      'The prices shown here are for upcoming website purchases through Stripe. You’ll see the App Store price in the app once purchases are available there.',
 
     // Section dots nav + promo video stage
     'sectionNav.label': 'Section navigation',
