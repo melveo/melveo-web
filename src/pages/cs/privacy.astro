@@ -15,11 +15,10 @@ import PageHeader from '../../components/PageHeader.astro';
  *   - Zákon č. 89/2012 Sb., občanský zákoník
  *   - Apple App Store Review Guideline 5.1.1
  *
- * Pre-první-velký-klient bude advokát review (per rev.3 Q4).
- * Tento text je dobrý baseline pro pilot, ne pro enterprise smlouvy.
+ * Osobní předplatné na webu a v App Store (melveo-app #1606, #1654):
+ * žádné klubové licence. Nezveřejňovat před spuštěním prodeje.
  */
 
-const lastUpdated = '2026-10-31';
 ---
 
 <BaseLayout
@@ -29,7 +28,7 @@ const lastUpdated = '2026-10-31';
 >
   <PageHeader lang="cs" />
   <article class="legal-article">
-    <p class="legal-eyebrow">Účinnost · {lastUpdated}</p>
+    <p class="legal-eyebrow">Návrh · Datum účinnosti při zveřejnění</p>
     <h1 class="legal-h1">Ochrana osobních údajů</h1>
     <p class="legal-lead">
       Tento dokument popisuje, jaké osobní údaje shromažďujeme prostřednictvím
@@ -64,12 +63,12 @@ const lastUpdated = '2026-10-31';
     <ul>
       <li><strong>Aplikace</strong> — mobilní aplikace Melveo pro iOS/iPadOS.</li>
       <li><strong>Web</strong> — webové stránky <code>melveo.app</code>.</li>
-      <li><strong>Klub</strong> — sportovní organizace, která uzavřela smlouvu
-        o licenci.</li>
-      <li><strong>Hráč</strong> — fyzická osoba pozvaná klubem do týmu;
-        uživatel aplikace.</li>
-      <li><strong>Trenér / staff</strong> — fyzická osoba pověřená klubem
-        správou týmu.</li>
+      <li><strong>Hráč</strong> — fyzická osoba, která používá aplikaci jako
+        hráčka nebo hráč, sama nebo jako člen týmu.</li>
+      <li><strong>Trenér</strong> — fyzická osoba, která používá aplikaci
+        jako trenér nebo člen realizačního týmu a vede tým.</li>
+      <li><strong>Rodič</strong> — zákonný zástupce propojený s dítětem
+        do 15 let (kapitola 10).</li>
       <li><strong>Wellness check-in</strong> — denní samohodnocení hráče
         (energie, spánek, bolestivost, nálada, motivace) na škále 1–5.</li>
     </ul>
@@ -82,8 +81,7 @@ const lastUpdated = '2026-10-31';
       <li>Jméno a příjmení</li>
       <li>E-mailová adresa</li>
       <li>Identifikátor uživatele (UUID generovaný systémem)</li>
-      <li>Role v klubu (hráč / trenér / manager / klubový administrátor /
-        majitel klubu)</li>
+      <li>Role (hráč, trenér) a funkce v týmu (zakladatel, správce, člen)</li>
       <li>Volitelně: profilová fotografie, lokalizace (cs/en)</li>
     </ul>
 
@@ -145,7 +143,7 @@ const lastUpdated = '2026-10-31';
       <li>Nahlášení: odešlete podpoře Melvea text vybraných zpráv, otisk
         a velikost příloh (soubor ne), důvod, případnou poznámku
         a kryptografický důkaz, kdo zprávu poslal. Hlášení čte jen podpora
-        Melvea, ne trenér ani klub.</li>
+        Melvea, ne trenér ani tým.</li>
       <li>Blokování: server ukládá, koho jste zablokovali, aby vám zablokovaný
         nemohl psát soukromě.</li>
     </ul>
@@ -164,11 +162,29 @@ const lastUpdated = '2026-10-31';
         jen tehdy, když ji uživatel sám vyexportuje a předá podpoře.</li>
     </ul>
 
-    <h3>3.7. Údaje pro účely platby (pouze klubů)</h3>
+    <h3>3.7. Údaje o předplatném a platbách</h3>
+    <p>
+      Při nákupu po spuštění předplatného zpracuje webovou platbu Stripe a
+      platbu v App Store Apple. Veřejný prodej zatím připravujeme.
+    </p>
     <ul>
-      <li>Fakturační údaje klubu (název, IČO, adresa)</li>
-      <li>Stripe Customer ID (samotné údaje o kartě nikdy
-        nezpracováváme — vše drží Stripe Inc.)</li>
+      <li><strong>Nákup na webu:</strong> tarif, stav, období, cena a doklady,
+        identifikátor zákazníka a předplatného u Stripe, kdo platí a kdo
+        předplatné dostal (u nákupu rodiče pro dítě rodič a dítě) a potvrzení,
+        že je plátci alespoň 15 let, nebo platí jako zletilý zákonný zástupce dítěte mladšího 15 let, a žádost
+        o zahájení plnění ve lhůtě pro odstoupení. Údaje o kartě
+        vidí jen Stripe, my ne.</li>
+      <li><strong>Nákup v aplikaci:</strong> platbu zpracovává
+        <strong>Apple jako samostatný správce</strong> podle svých zásad
+        ochrany soukromí. Vaše Apple ID, platební metodu ani adresu
+        nedostáváme. Od Applu dostáváme jen údaje o transakci: identifikátor
+        transakce, produkt, datum nákupu a konce období, stav obnovy, zda jde
+        o zkušební dobu, zemi App Store, cenu a případné vrácení peněz. Aby šlo
+        nákup přiřadit k vašemu účtu, předá aplikace Applu náhodný
+        identifikátor účtu pro nákup. Jiné údaje o vás Applu neposíláme.</li>
+      <li><strong>Zkušební doba:</strong> evidujeme využití zkoušky
+        v hráčské nebo trenérské rodině tarifů pro ověření nároku na webu.
+        O způsobilosti pro úvodní nabídku v App Store rozhoduje Apple.</li>
     </ul>
 
     <h3>3.8. Cookies a podobné technologie</h3>
@@ -205,6 +221,15 @@ const lastUpdated = '2026-10-31';
           <td>Oprávněný zájem — odst. 1 písm. f)</td>
         </tr>
         <tr>
+          <td>Předplatné na webu a v App Store, přiřazení nákupu k účtu,
+            vrácení peněz</td>
+          <td>Plnění smlouvy — odst. 1 písm. b)</td>
+        </tr>
+        <tr>
+          <td>Jedna zkušební doba na osobu a rodinu tarifů</td>
+          <td>Oprávněný zájem — odst. 1 písm. f)</td>
+        </tr>
+        <tr>
           <td>Plnění zákonných povinností (účetnictví)</td>
           <td>Právní povinnost — odst. 1 písm. c)</td>
         </tr>
@@ -227,12 +252,11 @@ const lastUpdated = '2026-10-31';
 
     <h2>5. Princip agregace dat (privacy by design)</h2>
     <p>
-      Trenéři a klubové vedení pracují s <strong>týmovými agregáty a
-      signály</strong> (průměry, počty odeslaných check-inů, přítomné
-      varovné příznaky) za celý tým. Individuální wellness vstup zůstává
-      oddělený od klubového reportingu. Tato pravidla jsou zakotvena v
-      interním dokumentu „doc 174 §3" a vynucována na úrovni databáze
-      (RLS politiky a SECURITY DEFINER RPC funkce).
+      Trenéři týmu pracují s <strong>týmovými přehledy a signály</strong>
+      (průměry, počty odeslaných check-inů, přítomné varovné příznaky).
+      Individuální údaje o zdraví hráčky vidí jen v rozsahu sdílení, který
+      hráčka (do 15 let rodič) povolí. Pravidla jsou vynucována na úrovni
+      databáze (RLS politiky a SECURITY DEFINER RPC funkce).
     </p>
     <p>
       Hráč má přístup ke svým vlastním datům a jako aktivní člen týmu také
@@ -240,15 +264,14 @@ const lastUpdated = '2026-10-31';
       frekvenci v týmovém reportu vidí pouze realizační tým. Trenér může
       v konkrétním reportu povolit přidávání a úpravy vlastních tagů; hráč
       nemůže měnit cizí tagy, společný zdroj videa ani srovnání času. Odebrání
-      tohoto povolení blokuje další úpravy. Klub má přístup k agregovaným
-      reportům za své týmy a k údajům, které jsou nezbytné pro roli trenéra
-      nebo klubového administrátora.
+      tohoto povolení blokuje další úpravy. Melveo nemá kluby ani klubové
+      licence, takže žádná organizace nad týmem k údajům přístup nemá.
     </p>
     <p>
       Melveo neposkytuje výsledek, který by sám o sobě představoval právně
       závazné nebo obdobně významné automatizované rozhodnutí podle čl. 22
-      GDPR. Výstupy aplikace slouží jako podpůrný kontext pro trenéra,
-      realizační tým a klub.
+      GDPR. Výstupy aplikace slouží jako podpůrný kontext pro trenéra
+      a realizační tým.
     </p>
 
     <h2>6. Doba uchování</h2>
@@ -257,10 +280,13 @@ const lastUpdated = '2026-10-31';
         účet a údaje navázané na jeho identitu odstraní. Výjimkou jsou pouze
         záznamy, které musíme uchovat z právního důvodu, uvedené níže.</li>
       <li>Wellness check-iny a osobní sportovní data: po dobu používání účtu
-        nebo členství v klubu; při smazání účtu se odstraní nebo nevratně
+        nebo členství v týmu; při smazání účtu se odstraní nebo nevratně
         oddělí od identity podle vlastnictví daného týmového záznamu.</li>
       <li>Účetní a fakturační údaje: 10 let dle zákona č. 235/2004 Sb.
         o DPH a zákona č. 563/1991 Sb. o účetnictví</li>
+      <li>Údaje o předplatném a transakcích z webu i App Store: po dobu
+        předplatného a 3 roky po jeho konci kvůli reklamacím a vrácení
+        peněz</li>
       <li>Provozní údaje (IP, crash logs): nejdéle 30 dní</li>
       <li>Události používání produktu: pouze po dobu uděleného souhlasu;
         odvoláním souhlasu v aplikaci se dosavadní události účtu ihned smažou</li>
@@ -306,7 +332,7 @@ const lastUpdated = '2026-10-31';
         </tr>
         <tr>
           <td>Stripe Payments Europe Ltd.</td>
-          <td>Zpracování plateb klubů</td>
+          <td>Platby předplatného kartou na webu</td>
           <td>EU/Irsko</td>
         </tr>
         <tr>
@@ -331,6 +357,12 @@ const lastUpdated = '2026-10-31';
           <td>Apple Inc.</td>
           <td>App Store, push notifikace, App Privacy</td>
           <td>USA — DPF</td>
+        </tr>
+        <tr>
+          <td>Apple (App Store) <em>(samostatný správce)</em></td>
+          <td>Prodej předplatného v aplikaci. Platbu zpracovává Apple sám,
+            od nás dostane jen náhodný identifikátor účtu pro nákup.</td>
+          <td>podle zásad Applu</td>
         </tr>
         <tr>
           <td>Google LLC <em>(po souhlasu)</em></td>
@@ -411,7 +443,15 @@ const lastUpdated = '2026-10-31';
       Dítě vždy vidí, kdo je k němu připojený, a vazbu může jedním
       klepnutím pozastavit. Rodič nevidí denní údaje o zdraví, jen rozpis,
       docházku, dostupnost a zranění. Datum narození potřebujeme, aby hranice
-      15 let platila přesně. Od 15 let rozhoduje hráčka o všem sama a rodičovský přístup končí.
+      15 let platila přesně. Od 15 let rozhoduje hráčka sama o uvedených souhlasech s údaji o zdraví a jejich sdílením; rodičovský přístup v Melveu končí.
+    </p>
+    <p>
+      Od 15 let si uživatel pořídí předplatné i zkušební dobu sám a vidí
+      nabídku s cenou. Při neznámém věku se nákup nenabízí. Pro dítě mladší
+      15 let kupuje na webu zletilý rodič ze svého účtu, jen
+      s aktivní vazbou k dítěti; evidujeme rodiče jako plátce a dítě jako
+      toho, kdo předplatné dostal. V App Store se nákupy dětí v Rodinném
+      sdílení řídí pravidly Applu a údaje o nich zůstávají u Applu.
     </p>
 
     <h2>11. Bezpečnost</h2>
@@ -453,7 +493,7 @@ const lastUpdated = '2026-10-31';
         </tr>
         <tr>
           <td>Marketing</td>
-          <td>Reklamní měření a oslovování relevantních klubů.</td>
+          <td>Reklamní měření a oslovování hráčů a trenérů.</td>
           <td>Ano.</td>
         </tr>
       </tbody>
