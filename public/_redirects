@@ -33,3 +33,13 @@
 # /i/*: AASA declares /j/* so iOS with the app opens it directly; every other
 # browser goes to app.melveo.app/join/<token> (plan 519 W0.1).
 /j/*                 https://app.melveo.app/join/:splat      302
+
+# Announced legal URLs now resolve to the effective texts.
+/cs/terms-upcoming /cs/terms/ 301
+/cs/terms-upcoming/ /cs/terms/ 301
+/cs/privacy-upcoming /cs/privacy/ 301
+/cs/privacy-upcoming/ /cs/privacy/ 301
+/en/terms-upcoming /en/terms/ 301
+/en/terms-upcoming/ /en/terms/ 301
+/en/privacy-upcoming /en/privacy/ 301
+/en/privacy-upcoming/ /en/privacy/ 301
