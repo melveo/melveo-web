@@ -27,13 +27,14 @@ USAGE RULES
   - Do not use screenshots or logos found elsewhere.
 
 BARVY / COLOURS
-  Ink                         #1B2831
-  Cyan (světlé / light bg)    #00D4E8
+  Ink                         #06161B
+  Cyan (světlé / light bg)    #00C2DB
   Cyan (tmavé / dark bg)      #00F0FF
+  Azur ikona / icon gradient  #00F0FF → #0094B3
   Bílá / White                #F4FBFC
 
 PÍSMO / TYPE
-  Comfortaa (wordmark), Inter (text)
+  Comfortaa Bold nakloněná o 14° (nápis) / leaned 14° (wordmark), Inter (text)
 
 KONTAKT / CONTACT
   hello@melveo.app

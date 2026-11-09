@@ -505,15 +505,21 @@ body {
 .melveo-wordmark {
   font-family: var(--font-wordmark);
   /*
-    Weight 600 (semibold) matches the brand image lockup on
-    apparel / downloads better than the previous 700 (bold) —
-    bold made the rounded geometric letterforms read as chunky
-    rather than the cleaner medium-semibold look the brand assets
-    have. User feedback 2026-05-15.
+    Weight 700 (bold) matches the "Azur Sprint" logo (2026-11): bold,
+    leaned Comfortaa next to the forward-leaning mark. Earlier 600 was
+    chosen 2026-05-15 for the upright wordmark.
   */
-  font-weight: 600;
+  font-weight: 700;
+  letter-spacing: -0.022em;
   text-transform: lowercase;
   font-feature-settings: "ss01" on; /* harmless if absent */
+}
+
+/* Brand "Azur Sprint" (2026-11): the word leans 14° like the mark. A
+   transform keeps the angle exact; Comfortaa has no italic. */
+.melveo-wordmark-lean {
+  display: inline-block;
+  transform: skewX(-14deg);
 }
 
 /* ─── Liquid-glass card (.glass-card) ────────────────────────────────
