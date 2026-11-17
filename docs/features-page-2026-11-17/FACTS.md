@@ -23,6 +23,15 @@ tarifu v aplikaci projít tenhle seznam a texty `features.*` v `src/i18n/ui.ts`.
 Vlastník 17. 11.: na stránce nepsat zdarma ani free. Funkce základního
 tarifu nemají štítek, limity se píšou jako základ a bez limitu v Playbooku.
 
+## Nepsat (k 17. 11.)
+
+- Sledování spánku a napojení Oura, WHOOP, Garmin, Polar Flow/AccessLink: v
+  aplikaci není (`HRVWellnessContractTests.swift:22`, `ActivityImportConnector.swift:57-63`),
+  jen v plánech bez termínu (`docs/planning/08_mvp_scope_and_backlog.md:71-72`).
+- Hodnocení rubrikou, sekce Zápasy a Rozvoj ve výkonnostním profilu, cíle s komentáři
+  trenéra, export: jen Debug nebo vypnuté (`PlayerTestingContracts.swift:5-23`).
+- Že trenér vidí cíle hráče. HRV na hodinkách.
+
 ## Limity trenéra na základním tarifu (Throw-off)
 
 30 položek knihovny (koš se počítá), 1 plán sezóny, 3 šablony týdne,
@@ -57,6 +66,11 @@ měsíčně. Přidělování programů hráčům je bez limitu
 | Tepové zóny Easy / Pro | Zdarma / Momentum | `zones.pro.edit` |
 | Výsledky testů / vývoj / normy | Zdarma / Momentum / MVP | `testing.read`, `personal.testing.norms` |
 | Vlastní program z katalogu | MVP (od trenéra zdarma) | `personal.programs` |
+| Výkonnostní profil: radar 0 až 100 ze 7 oblastí testů, referenční rozsahy (ne percentil), poslední výsledek a rekord | Zdarma | `PlayerTestingProfileSections.swift:5-7`, `PlayerTestingAreaRadar.swift:3,16,66-76`, `project.yml:196` |
+| Profil: graf vývoje, srovnání s loňskem, verdikt proti typické chybě testu | Momentum | `personal.trends.advanced`, `PlayerTestingResultsSurface.swift:80-91`, `PlayerTestingTrendViews.swift:4-23,303-337` |
+| Normy pro věk (24 norem, 4 testy) | MVP (hráč), Playbook (trenér) | `personal.testing.norms`, `team.testing.norms`, `20261104_018_testing_norms_mvp.sql:139-163` |
+| Rozvojové cíle: až 3 aktivní, test + cíl + termín, odhad data, soukromé | MVP | `personal.goals`, `20261104_020_personal_testing_goals.sql:20-156`, `PlayerTestingGoals.swift:54-80` |
+| Ranní HRV: Polar H10/H9 nebo standardní BLE pás (0x180D), asi 2 minuty, RMSSD; Apple Watch SDNN; normál po 7 měřeních | Zdarma | `PolarHRVMeasurementSheet.swift:5-119`, `StandardHeartRateBleService.swift:5-7`, `MorningHRVBaselineProgress.swift:5-30` |
 | Sedmičky (minihra) | Zdarma | `SevenMeters/SevenMeterModels.swift:21-82` |
 | Apple Watch: vlastní trénink s tepem | Zdarma | `MelveoWatch/WatchWorkout.swift:7-71` |
 
@@ -71,7 +85,7 @@ měsíčně. Přidělování programů hráčům je bez limitu
   season-phases, season-weeks, library-grid, library-assign. Pro české snímky
   byly názvy fází a cvičení dočasně přeloženy v lokální DB a pak vráceny.
 - Zatím ze sad z 29. 10. a 2. 11., v obou složkách stejný anglický soubor:
-  checkin-mood, checkin-bodymap, player-home, player-tempo, load-top,
+  checkin-mood, checkin-bodymap, player-home, player-tempo, perf-profile, load-top,
   load-activity, player-rtp, climate-pulse, player-comms, live-hr, match-court,
   match-recent, report-court, report-goal, coach-tests, injury-card,
   injury-ostrc, opponent-prep. Potřebují přihlášení hráčky, zápas s událostmi,
