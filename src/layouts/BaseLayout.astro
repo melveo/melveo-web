@@ -40,6 +40,10 @@ interface Props {
   showLandingFooter?: boolean;
   /** Hide utility / transaction pages from search indexes. */
   noindex?: boolean;
+  /** Feature names for the SoftwareApplication JSON-LD (features page). */
+  featureList?: string[];
+  /** When set, adds a BreadcrumbList (home → this page) to the JSON-LD. */
+  breadcrumbName?: string;
 }
 
 const {
@@ -51,6 +55,8 @@ const {
   ogImage = '/og-melveo-v3-2026-11-09.jpg',
   showLandingFooter = true,
   noindex = false,
+  featureList,
+  breadcrumbName,
 } = Astro.props;
 
 const t = useTranslations(lang);
@@ -247,8 +253,23 @@ const altUrls = {
         },
         inLanguage: lang === 'cs' ? 'cs-CZ' : 'en-US',
         url: canonicalUrl,
+        ...(featureList ? { featureList } : {}),
       })}
     />
+    {breadcrumbName && (
+      <script
+        is:inline
+        type="application/ld+json"
+        set:html={JSON.stringify({
+          '@context': 'https://schema.org',
+          '@type': 'BreadcrumbList',
+          itemListElement: [
+            { '@type': 'ListItem', position: 1, name: 'Melveo', item: new URL(`/${lang}/`, Astro.site).toString() },
+            { '@type': 'ListItem', position: 2, name: breadcrumbName, item: canonicalUrl },
+          ],
+        })}
+      />
+    )}
 
     <AnalyticsHead />
   </head>
@@ -291,6 +312,12 @@ const altUrls = {
               class="inline-flex items-center min-h-[44px] py-2 transition-colors hover:text-[var(--color-text-primary)]"
             >
               {t('footer.terms')}
+            </a>
+            <a
+              href={lang === 'cs' ? '/cs/funkce/' : '/en/features/'}
+              class="inline-flex items-center min-h-[44px] py-2 transition-colors hover:text-[var(--color-text-primary)]"
+            >
+              {t('footer.features')}
             </a>
             <a
               href={lang === 'cs' ? '/cs/napoveda/' : '/en/help/'}

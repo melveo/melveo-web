@@ -1,0 +1,1129 @@
+---
+/**
+ * FeaturesPage — what Melveo does, from the coach's and the player's side
+ * (2026-11-17, docs/features-page-2026-11-17/PLAN.md).
+ *
+ * Content follows the "Melveo step by step" series; every claim is checked
+ * against melveo-app main (docs/features-page-2026-11-17/FACTS.md). Screens
+ * are transparent cut-outs of the real app with the demo team, converted to
+ * WebP in public/images/features/.
+ *
+ * Both perspectives are fully in the HTML (indexable); the sticky switch only
+ * scrolls and highlights. Motion is CSS plus one small script, and switches
+ * off under prefers-reduced-motion.
+ */
+import BaseLayout from '../layouts/BaseLayout.astro';
+import BrandMark from './BrandMark.astro';
+import LocaleSwitcher from './LocaleSwitcher.astro';
+import { testFlightUrl, ui, useTranslations, type Lang } from '../i18n/ui';
+
+interface Props {
+  lang: Lang;
+}
+
+const { lang } = Astro.props;
+const t = useTranslations(lang);
+const tr = (key: string) => t(key as keyof typeof ui.cs);
+const isCs = lang === 'cs';
+
+// 'free' shows no tier chip (owner 2026-11-17: no "free" wording on the page).
+// freePlaybook / freeMomentum: usable on the base plan with a limit, unlimited on the paid tier.
+type Tier = 'free' | 'freePlaybook' | 'playbook' | 'gameplan' | 'freeMomentum' | 'momentum' | 'mvp';
+type Extra = { key: string; tier: Tier };
+type HelpTopic = 'coach' | 'player' | 'match' | 'install';
+/** w/h are the source pixel size; `wide` screens are iPad cut-outs. */
+type Shot = { file: string; w: number; h: number; wide?: boolean };
+type Feature = { key: string; anchor: { cs: string; en: string }; tier: Tier; shots: Shot[]; help?: HelpTopic; points: number };
+type Chapter = { key: string; features: Feature[] };
+
+const helpRoutes: Record<HelpTopic, string> = {
+  coach: isCs ? '/cs/napoveda/trener/' : '/en/help/coach/',
+  player: isCs ? '/cs/napoveda/hrac/' : '/en/help/player/',
+  match: isCs ? '/cs/napoveda/zapas/' : '/en/help/match/',
+  install: isCs ? '/cs/napoveda/instalace/' : '/en/help/install/',
+};
+
+const coach: Chapter[] = [
+  {
+    key: 'team',
+    features: [
+      { key: 'createTeam', anchor: { cs: 'zalozeni-tymu', en: 'create-team' }, tier: 'free', help: 'coach', points: 3,
+        shots: [{ file: 'team-invite', w: 1158, h: 1144 }, { file: 'team-qr', w: 1158, h: 1062 }] },
+      { key: 'roster', anchor: { cs: 'soupiska', en: 'roster' }, tier: 'free', help: 'coach', points: 3,
+        shots: [{ file: 'roster-readiness', w: 1012, h: 1456 }] },
+    ],
+  },
+  {
+    key: 'morning',
+    features: [
+      { key: 'today', anchor: { cs: 'prehled-dne', en: 'today' }, tier: 'free', points: 3,
+        shots: [{ file: 'coach-today', w: 1114, h: 645 }] },
+      { key: 'painList', anchor: { cs: 'seznam-bolesti', en: 'pain-list' }, tier: 'free', points: 3,
+        shots: [{ file: 'needs-attention', w: 1110, h: 771 }] },
+      { key: 'teamLoad', anchor: { cs: 'zatez-tymu', en: 'team-load' }, tier: 'free', points: 3,
+        shots: [{ file: 'player-wellness', w: 1110, h: 866 }] },
+    ],
+  },
+  {
+    key: 'planning',
+    features: [
+      { key: 'season', anchor: { cs: 'plan-sezony', en: 'season-plan' }, tier: 'freePlaybook', points: 3,
+        shots: [{ file: 'season-weeks', w: 1158, h: 688 }, { file: 'season-phases', w: 1158, h: 422 }] },
+      { key: 'library', anchor: { cs: 'knihovna', en: 'library' }, tier: 'freePlaybook', points: 3,
+        shots: [{ file: 'library-grid', w: 1110, h: 1174 }, { file: 'library-assign', w: 1110, h: 1542 }] },
+    ],
+  },
+  {
+    key: 'match',
+    features: [
+      { key: 'liveMatch', anchor: { cs: 'zivy-zapas', en: 'live-match' }, tier: 'free', help: 'match', points: 3,
+        shots: [{ file: 'match-court', w: 1320, h: 820 }, { file: 'match-recent', w: 590, h: 530 }] },
+      { key: 'report', anchor: { cs: 'report-zapasu', en: 'match-report' }, tier: 'freePlaybook', help: 'match', points: 3,
+        shots: [{ file: 'report-court', w: 1318, h: 958 }, { file: 'report-goal', w: 1318, h: 528 }] },
+      { key: 'opponent', anchor: { cs: 'priprava-na-soupere', en: 'opponent-prep' }, tier: 'playbook', points: 3,
+        shots: [{ file: 'opponent-prep', w: 1600, h: 785, wide: true }] },
+      { key: 'liveHr', anchor: { cs: 'zive-tepy', en: 'live-heart-rate' }, tier: 'gameplan', points: 3,
+        shots: [{ file: 'live-hr', w: 1109, h: 1856 }] },
+      { key: 'testing', anchor: { cs: 'testovani', en: 'testing' }, tier: 'playbook', points: 3,
+        shots: [{ file: 'coach-tests', w: 1158, h: 1326 }] },
+    ],
+  },
+  {
+    key: 'health',
+    features: [
+      { key: 'injuries', anchor: { cs: 'zraneni', en: 'injuries' }, tier: 'free', points: 3,
+        shots: [{ file: 'injury-card', w: 1206, h: 1690 }, { file: 'injury-ostrc', w: 1206, h: 930 }] },
+    ],
+  },
+];
+
+const player: Chapter[] = [
+  {
+    key: 'morning',
+    features: [
+      { key: 'checkin', anchor: { cs: 'check-in', en: 'check-in' }, tier: 'free', help: 'player', points: 3,
+        shots: [{ file: 'checkin-mood', w: 1206, h: 1970 }, { file: 'checkin-bodymap', w: 1158, h: 1542 }] },
+      { key: 'home', anchor: { cs: 'muj-den', en: 'my-day' }, tier: 'free', points: 3,
+        shots: [{ file: 'player-home', w: 1158, h: 1126 }, { file: 'player-tempo', w: 1158, h: 630 }] },
+    ],
+  },
+  {
+    key: 'load',
+    features: [
+      { key: 'weeklyLoad', anchor: { cs: 'tydenni-zatez', en: 'weekly-load' }, tier: 'freeMomentum', points: 3,
+        shots: [{ file: 'load-top', w: 1158, h: 851 }, { file: 'load-activity', w: 579, h: 522 }] },
+    ],
+  },
+  {
+    key: 'health',
+    features: [
+      { key: 'comeback', anchor: { cs: 'navrat-po-zraneni', en: 'return-to-play' }, tier: 'free', points: 3,
+        shots: [{ file: 'player-rtp', w: 1158, h: 1564 }] },
+    ],
+  },
+  {
+    key: 'team',
+    features: [
+      { key: 'climate', anchor: { cs: 'klima-tymu', en: 'team-climate' }, tier: 'free', points: 3,
+        shots: [{ file: 'climate-pulse', w: 1158, h: 1777 }] },
+      { key: 'profile', anchor: { cs: 'jak-se-mnou-mluvit', en: 'how-to-coach-me' }, tier: 'free', points: 3,
+        shots: [{ file: 'player-comms', w: 1158, h: 1520 }] },
+    ],
+  },
+];
+
+// Verified features without a clean screen yet: compact cards, no image.
+const coachExtras: Extra[] = [
+  { key: 'board', tier: 'freePlaybook' },
+  { key: 'messages', tier: 'free' },
+  { key: 'attendance', tier: 'free' },
+  { key: 'climate', tier: 'free' },
+  { key: 'sharing', tier: 'playbook' },
+  { key: 'communication', tier: 'free' },
+];
+
+const playerExtras: Extra[] = [
+  { key: 'matchReport', tier: 'free' },
+  { key: 'zones', tier: 'freeMomentum' },
+  { key: 'tests', tier: 'freeMomentum' },
+  { key: 'programs', tier: 'mvp' },
+  { key: 'sevens', tier: 'free' },
+  { key: 'messages', tier: 'free' },
+];
+
+const perspectives = [
+  { key: 'coach', id: isCs ? 'trener' : 'coach', chapters: coach, extras: coachExtras },
+  { key: 'player', id: isCs ? 'hrac' : 'player', chapters: player, extras: playerExtras },
+] as const;
+
+const count = (chapters: Chapter[], extras: Extra[]) =>
+  chapters.reduce((sum, chapter) => sum + chapter.features.length, 0) + extras.length;
+const anchorOf = (feature: Feature) => feature.anchor[lang];
+const dir = `/images/features/${lang}`;
+const pricingPath = `/${lang}/#pricing`;
+const helpHub = isCs ? '/cs/napoveda/' : '/en/help/';
+const canonical = isCs ? '/cs/funkce/' : '/en/features/';
+const alternatePath = isCs ? '/en/features/' : '/cs/funkce/';
+
+const featureList = perspectives.flatMap((perspective) => [
+  ...perspective.chapters.flatMap((chapter) => chapter.features.map((feature) => tr(`features.${perspective.key}.${feature.key}.title`))),
+  ...perspective.extras.map((extra) => tr(`features.${perspective.key}.extra.${extra.key}.title`)),
+]);
+
+// Hero collage: three screens that read as "the whole app" at a glance.
+const heroShots = [
+  { file: 'checkin-mood', w: 1206, h: 1970 },
+  { file: 'coach-today', w: 1114, h: 645 },
+  { file: 'season-weeks', w: 1158, h: 688 },
+];
+
+const srcset = (shot: Shot) =>
+  shot.wide
+    ? `${dir}/${shot.file}-900.webp 900w, ${dir}/${shot.file}-1600.webp 1600w`
+    : shot.w <= 480
+      ? `${dir}/${shot.file}-960.webp ${shot.w}w`
+      : `${dir}/${shot.file}-480.webp 480w, ${dir}/${shot.file}-960.webp ${Math.min(960, shot.w)}w`;
+const src = (shot: Shot) => (shot.wide ? `${dir}/${shot.file}-1600.webp` : `${dir}/${shot.file}-960.webp`);
+---
+
+<BaseLayout
+  title={t('features.metaTitle')}
+  description={t('features.metaDescription')}
+  ogImage={`/og-features-2026-11-17-${lang}.jpg`}
+  lang={lang}
+  canonical={canonical}
+  alternatePath={alternatePath}
+  featureList={featureList}
+  breadcrumbName={t('features.navLabel')}
+>
+  <header class="features-site-header" slot="site-header">
+    <div class="features-site-header__inner">
+      <a href={`/${lang}/`} class="melveo-wordmark features-wordmark" aria-label={t('help.homeAria')}>
+        <BrandMark />
+        <span class="melveo-wordmark-lean">melveo</span>
+      </a>
+      <LocaleSwitcher current={lang} alternatePath={alternatePath} ariaLabel={t('help.localeAria')} />
+    </div>
+  </header>
+
+  <div class="features" data-features>
+    <section class="features-hero" aria-labelledby="features-title">
+      <div class="features-hero__aurora" aria-hidden="true"></div>
+      <div class="features-hero__copy">
+        <p class="features-eyebrow">{t('features.eyebrow')}</p>
+        <h1 id="features-title" class="features-hero__title">{t('features.title')}</h1>
+        <p class="features-hero__lead">{t('features.lead')}</p>
+        <div class="features-hero__doors">
+          {perspectives.map((perspective) => (
+            <a class="features-door" href={`#${perspective.id}`} data-door>
+              <span class="features-door__label">{tr(`features.${perspective.key}.door`)}</span>
+              <span class="features-door__body">{tr(`features.${perspective.key}.doorBody`)}</span>
+              <span class="features-door__count">
+                {count(perspective.chapters, perspective.extras)} {t('features.countSuffix')} <span aria-hidden="true">↓</span>
+              </span>
+            </a>
+          ))}
+        </div>
+      </div>
+      <div class="features-hero__collage" data-collage aria-hidden="true">
+        {heroShots.map((shot, index) => (
+          <img
+            class={`features-hero__shot features-hero__shot--${index + 1}`}
+            src={`${dir}/${shot.file}-960.webp`}
+            srcset={srcset(shot)}
+            sizes="(max-width: 900px) 45vw, 18rem"
+            width={shot.w}
+            height={shot.h}
+            alt=""
+            loading={index === 0 ? 'eager' : 'lazy'}
+            fetchpriority={index === 0 ? 'high' : undefined}
+            decoding="async"
+          />
+        ))}
+      </div>
+    </section>
+
+    <nav class="features-switch" aria-label={t('features.switchAria')} data-switch>
+      <div class="features-switch__inner">
+        <div class="features-switch__tabs">
+          {perspectives.map((perspective) => (
+            <a href={`#${perspective.id}`} class="features-switch__tab" data-tab={perspective.id}>
+              {tr(`features.${perspective.key}.door`)}
+            </a>
+          ))}
+          <span class="features-switch__pill" aria-hidden="true" data-pill></span>
+        </div>
+        {perspectives.map((perspective) => (
+          <ol class="features-switch__chapters" data-chapters={perspective.id}>
+            {perspective.chapters.map((chapter) => (
+              <li>
+                <a href={`#${perspective.id}-${chapter.key}`} data-chapter-link>
+                  {tr(`features.chapter.${chapter.key}`)}
+                </a>
+              </li>
+            ))}
+            <li>
+              <a href={`#${perspective.id}-more`} data-chapter-link>{t('features.chapter.more')}</a>
+            </li>
+          </ol>
+        ))}
+      </div>
+    </nav>
+
+    {perspectives.map((perspective) => (
+      <section class="features-perspective" id={perspective.id} data-perspective={perspective.id} aria-labelledby={`${perspective.id}-title`}>
+        <header class="features-perspective__header" data-reveal>
+          <p class="features-eyebrow">{tr(`features.${perspective.key}.eyebrow`)}</p>
+          <h2 id={`${perspective.id}-title`}>{tr(`features.${perspective.key}.title`)}</h2>
+          <p>{tr(`features.${perspective.key}.lead`)}</p>
+        </header>
+
+        {perspective.chapters.map((chapter) => (
+          <section class="features-chapter" id={`${perspective.id}-${chapter.key}`} data-chapter aria-labelledby={`${perspective.id}-${chapter.key}-title`}>
+            <h3 class="features-chapter__title" id={`${perspective.id}-${chapter.key}-title`} data-reveal>
+              <span>{tr(`features.chapter.${chapter.key}`)}</span>
+            </h3>
+
+            {chapter.features.map((feature) => {
+              const base = `features.${perspective.key}.${feature.key}`;
+              return (
+                <article class="feature" id={anchorOf(feature)} data-reveal>
+                  <div class="feature__copy">
+                    {feature.tier !== 'free' && (
+                      <p class={`feature__tier feature__tier--${feature.tier}`}>{tr(`features.tier.${feature.tier}`)}</p>
+                    )}
+                    <h4 class="feature__title">{tr(`${base}.title`)}</h4>
+                    <p class="feature__lead">{tr(`${base}.lead`)}</p>
+                    <ul class="feature__points">
+                      {Array.from({ length: feature.points }, (_, index) => (
+                        <li>{tr(`${base}.p${index + 1}`)}</li>
+                      ))}
+                    </ul>
+                    {feature.help && (
+                      <a class="feature__help" href={helpRoutes[feature.help]}>
+                        {t('features.helpLink')} <span aria-hidden="true">→</span>
+                      </a>
+                    )}
+                  </div>
+                  <div class:list={['feature__stage', { 'feature__stage--pair': feature.shots.length > 1 }]} data-stage>
+                    {feature.shots.map((shot, index) => (
+                      <img
+                        class:list={['feature__shot', `feature__shot--${index + 1}`, { 'feature__shot--wide': shot.wide, 'feature__shot--tall': shot.h / shot.w > 1.3 }]}
+                        src={src(shot)}
+                        srcset={srcset(shot)}
+                        sizes={shot.wide ? '(max-width: 900px) 90vw, 36rem' : '(max-width: 900px) 80vw, 24rem'}
+                        width={shot.w}
+                        height={shot.h}
+                        alt={tr(`${base}.alt${index + 1}`)}
+                        loading="lazy"
+                        decoding="async"
+                      />
+                    ))}
+                  </div>
+                </article>
+              );
+            })}
+          </section>
+        ))}
+
+        <section class="features-chapter" id={`${perspective.id}-more`} data-chapter aria-labelledby={`${perspective.id}-more-title`}>
+          <h3 class="features-chapter__title" id={`${perspective.id}-more-title`} data-reveal>
+            <span>{t('features.chapter.more')}</span>
+          </h3>
+          <ul class="features-extras">
+            {perspective.extras.map((extra) => (
+              <li class="features-extra" data-reveal data-stage>
+                {extra.tier !== 'free' && (
+                  <p class={`feature__tier feature__tier--${extra.tier}`}>{tr(`features.tier.${extra.tier}`)}</p>
+                )}
+                <h4>{tr(`features.${perspective.key}.extra.${extra.key}.title`)}</h4>
+                <p>{tr(`features.${perspective.key}.extra.${extra.key}.body`)}</p>
+              </li>
+            ))}
+          </ul>
+        </section>
+      </section>
+    ))}
+
+    <section class="features-close" aria-labelledby="features-close-title" data-reveal>
+      <h2 id="features-close-title">{t('features.close.title')}</h2>
+      <p>{t('features.close.body')}</p>
+      <div class="features-close__actions">
+        <a class="hero-pill features-close__primary" href={testFlightUrl} target="_blank" rel="noopener noreferrer">
+          <span class="hero-pill-content">{t('features.close.cta')}</span>
+        </a>
+        <a class="hero-pill" href={pricingPath}>
+          <span class="hero-pill-content">{t('features.close.pricing')}</span>
+        </a>
+      </div>
+      <p class="features-close__note">
+        {t('features.close.helpLead')} <a href={helpHub}>{t('features.close.help')}</a>
+      </p>
+      <p class="features-close__note">{t('features.demoNote')}</p>
+    </section>
+  </div>
+</BaseLayout>
+
+<script>
+  import { mountFeatures } from '../scripts/features-page';
+
+  mountFeatures();
+</script>
+
+<style>
+  .features-site-header {
+    position: relative;
+    z-index: 20;
+    background: color-mix(in srgb, var(--color-bg-canvas) 88%, transparent);
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
+  }
+
+  .features-site-header__inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: min(100% - 2rem, 76rem);
+    min-height: 4.75rem;
+    margin-inline: auto;
+    gap: 1rem;
+  }
+
+  .features-wordmark {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45em;
+    min-height: 44px;
+    font-size: 1.25rem;
+    color: var(--color-text-primary);
+    text-decoration: none;
+  }
+
+  .features {
+    --features-ease: cubic-bezier(0.22, 1, 0.36, 1);
+    --features-lift:
+      inset 0 1px 0 rgb(255 255 255 / 0.06),
+      0 1px 2px rgb(0 0 0 / 0.4),
+      0 24px 60px -24px rgb(0 0 0 / 0.85);
+    position: relative;
+    overflow-x: clip;
+  }
+
+  .features-eyebrow {
+    margin: 0;
+    font-size: 0.8rem;
+    font-weight: 700;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--color-accent-primary);
+  }
+
+  /* ─── Hero ─────────────────────────────────────────────────────── */
+  .features-hero {
+    position: relative;
+    isolation: isolate;
+    display: grid;
+    gap: 3rem;
+    width: min(100% - 2rem, 76rem);
+    margin-inline: auto;
+    padding-block: clamp(3rem, 8vw, 6.5rem) clamp(3rem, 6vw, 5rem);
+  }
+
+  .features-hero__aurora {
+    position: absolute;
+    inset: -10% -20% auto;
+    height: 46rem;
+    z-index: -1;
+    background:
+      radial-gradient(40% 50% at 70% 40%, color-mix(in srgb, var(--color-accent-primary) 20%, transparent), transparent 70%),
+      radial-gradient(30% 40% at 85% 70%, color-mix(in srgb, var(--color-accent-warm-dark) 14%, transparent), transparent 70%),
+      radial-gradient(35% 45% at 20% 20%, color-mix(in srgb, var(--color-accent-primary) 8%, transparent), transparent 70%);
+    filter: blur(30px);
+    animation: features-breathe 12s ease-in-out infinite alternate;
+    pointer-events: none;
+  }
+
+  .features-hero__title {
+    margin: 0.9rem 0 1.1rem;
+    font-size: clamp(2.4rem, 6.4vw, 4.75rem);
+    font-weight: 800;
+    line-height: 1.04;
+    letter-spacing: -0.045em;
+    text-wrap: balance;
+    animation: features-title-enter 0.8s var(--features-ease) both;
+  }
+
+  .features-hero__lead {
+    max-width: 34rem;
+    margin: 0;
+    font-size: clamp(1rem, 1.7vw, 1.2rem);
+    line-height: 1.6;
+    color: var(--color-text-secondary);
+    text-wrap: pretty;
+  }
+
+  .features-hero__doors {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.9rem;
+    margin-top: 2.25rem;
+    max-width: 34rem;
+  }
+
+  .features-door {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    padding: 1.15rem 1.2rem 1.05rem;
+    border-radius: 1.4rem;
+    background: linear-gradient(160deg, rgb(255 255 255 / 0.07), rgb(255 255 255 / 0.015));
+    box-shadow: var(--features-lift);
+    color: var(--color-text-primary);
+    text-decoration: none;
+    overflow: hidden;
+    transition: transform 0.5s var(--features-ease), box-shadow 0.5s var(--features-ease);
+  }
+
+  .features-door::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background: radial-gradient(circle at var(--x, 50%) var(--y, 0%), color-mix(in srgb, var(--color-accent-primary) 22%, transparent), transparent 60%);
+    opacity: 0;
+    transition: opacity 0.4s ease;
+    pointer-events: none;
+  }
+
+  .features-door:hover {
+    transform: translateY(-4px);
+    box-shadow:
+      inset 0 1px 0 rgb(255 255 255 / 0.1),
+      0 24px 60px -20px color-mix(in srgb, var(--color-accent-primary) 35%, transparent);
+  }
+
+  .features-door:hover::after {
+    opacity: 1;
+  }
+
+  .features-door__label {
+    font-size: 1.2rem;
+    font-weight: 750;
+    letter-spacing: -0.02em;
+  }
+
+  .features-door__body {
+    font-size: 0.9rem;
+    line-height: 1.45;
+    color: var(--color-text-secondary);
+  }
+
+  .features-door__count {
+    margin-top: 0.4rem;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--color-accent-primary);
+  }
+
+  .features-hero__collage {
+    position: relative;
+    min-height: 26rem;
+    --px: 0;
+    --py: 0;
+  }
+
+  .features-hero__shot {
+    position: absolute;
+    height: auto;
+    filter: drop-shadow(0 30px 50px rgb(0 0 0 / 0.7));
+    transition: translate 0.9s var(--features-ease);
+  }
+
+  .features-hero__shot--1 {
+    width: 46%;
+    left: 4%;
+    top: 0;
+    z-index: 2;
+    translate: calc(var(--px) * -14px) calc(var(--py) * -14px);
+    animation: features-float 7s ease-in-out infinite;
+  }
+
+  .features-hero__shot--2 {
+    width: 44%;
+    right: 2%;
+    top: 8%;
+    z-index: 1;
+    translate: calc(var(--px) * 10px) calc(var(--py) * 10px);
+    animation: features-float 8s ease-in-out -2s infinite;
+  }
+
+  .features-hero__shot--3 {
+    width: 52%;
+    right: 14%;
+    bottom: 0;
+    z-index: 3;
+    translate: calc(var(--px) * 20px) calc(var(--py) * 20px);
+    animation: features-float 9s ease-in-out -4s infinite;
+  }
+
+  @media (min-width: 900px) {
+    .features-hero {
+      grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr);
+      align-items: center;
+      min-height: min(52rem, 88vh);
+    }
+
+    .features-hero__collage {
+      min-height: 36rem;
+    }
+  }
+
+  /* ─── Sticky switch ────────────────────────────────────────────── */
+  .features-switch {
+    position: sticky;
+    top: 0;
+    z-index: 15;
+    background: color-mix(in srgb, var(--color-bg-canvas) 82%, transparent);
+    backdrop-filter: blur(20px) saturate(150%);
+    -webkit-backdrop-filter: blur(20px) saturate(150%);
+    box-shadow: 0 12px 30px -20px rgb(0 0 0 / 0.9);
+  }
+
+  .features-switch__inner {
+    display: flex;
+    align-items: center;
+    gap: 1.25rem;
+    width: min(100% - 2rem, 76rem);
+    min-height: 4rem;
+    margin-inline: auto;
+  }
+
+  .features-switch__tabs {
+    position: relative;
+    display: inline-flex;
+    flex: none;
+    padding: 0.3rem;
+    border-radius: 999px;
+    background: rgb(255 255 255 / 0.05);
+    box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.05);
+  }
+
+  .features-switch__tab {
+    position: relative;
+    z-index: 1;
+    display: inline-flex;
+    align-items: center;
+    min-height: 2.4rem;
+    padding: 0 1.1rem;
+    border-radius: 999px;
+    font-size: 0.92rem;
+    font-weight: 650;
+    color: var(--color-text-secondary);
+    text-decoration: none;
+    transition: color 0.3s ease;
+  }
+
+  .features-switch__tab[aria-current='true'] {
+    color: var(--color-accent-primary-cta-fg);
+  }
+
+  .features-switch__pill {
+    position: absolute;
+    top: 0.3rem;
+    bottom: 0.3rem;
+    left: 0;
+    width: 0;
+    border-radius: 999px;
+    background: var(--color-accent-primary);
+    box-shadow: 0 0 24px color-mix(in srgb, var(--color-accent-primary) 45%, transparent);
+    transition: transform 0.5s var(--features-ease), width 0.5s var(--features-ease);
+  }
+
+  .features-switch__chapters {
+    display: none;
+    gap: 0.25rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+
+  .features-switch__chapters.is-active {
+    display: flex;
+  }
+
+  .features-switch__chapters a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 2.4rem;
+    padding: 0 0.85rem;
+    border-radius: 999px;
+    font-size: 0.88rem;
+    white-space: nowrap;
+    color: var(--color-text-secondary);
+    text-decoration: none;
+    transition: color 0.3s ease, background 0.3s ease;
+  }
+
+  .features-switch__chapters a:hover,
+  .features-switch__chapters a[aria-current='true'] {
+    color: var(--color-text-primary);
+    background: rgb(255 255 255 / 0.07);
+  }
+
+  @media (max-width: 700px) {
+    .features-switch__inner {
+      flex-wrap: wrap;
+      gap: 0.4rem;
+      padding-block: 0.5rem;
+    }
+
+    .features-switch__chapters {
+      width: 100%;
+    }
+  }
+
+  /* ─── Perspectives and chapters ────────────────────────────────── */
+  .features-perspective {
+    width: min(100% - 2rem, 76rem);
+    margin-inline: auto;
+    padding-top: clamp(4rem, 9vw, 7rem);
+    scroll-margin-top: 4rem;
+  }
+
+  .features-perspective__header {
+    max-width: 44rem;
+  }
+
+  .features-perspective__header h2 {
+    margin: 0.8rem 0 1rem;
+    font-size: clamp(2.1rem, 5.4vw, 4rem);
+    font-weight: 800;
+    line-height: 1;
+    letter-spacing: -0.045em;
+    text-wrap: balance;
+  }
+
+  .features-perspective__header p:last-child {
+    margin: 0;
+    font-size: clamp(1rem, 1.6vw, 1.15rem);
+    line-height: 1.6;
+    color: var(--color-text-secondary);
+  }
+
+  .features-chapter {
+    padding-top: clamp(3rem, 7vw, 5rem);
+    scroll-margin-top: 5rem;
+  }
+
+  .features-chapter__title {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin: 0 0 clamp(1.5rem, 4vw, 2.5rem);
+    font-size: 0.85rem;
+    font-weight: 700;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--color-text-secondary);
+  }
+
+  .features-chapter__title::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: linear-gradient(90deg, color-mix(in srgb, var(--color-accent-primary) 40%, transparent), transparent);
+  }
+
+  /* ─── Feature row ──────────────────────────────────────────────── */
+  .feature {
+    display: grid;
+    gap: 2rem;
+    align-items: center;
+    padding-block: clamp(1.5rem, 4vw, 3rem);
+    scroll-margin-top: 5.5rem;
+  }
+
+  @media (min-width: 900px) {
+    .feature {
+      grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+      gap: clamp(3rem, 6vw, 6rem);
+    }
+
+    .features-chapter .feature:nth-of-type(even) .feature__copy {
+      order: 2;
+    }
+  }
+
+  .feature__tier {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    margin: 0 0 1rem;
+    padding: 0.32rem 0.8rem;
+    border-radius: 999px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--color-text-primary);
+    background: rgb(255 255 255 / 0.05);
+    isolation: isolate;
+  }
+
+  .feature__tier::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    padding: 1px;
+    background: linear-gradient(135deg, var(--tier-a), var(--tier-b), var(--tier-a));
+    background-size: 200% 200%;
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    animation: hero-pill-border-flow 4s linear infinite;
+    z-index: -1;
+  }
+
+  .feature__tier--freePlaybook,
+  .feature__tier--freeMomentum,
+  .feature__tier--playbook,
+  .feature__tier--momentum {
+    --tier-a: var(--color-accent-primary);
+    --tier-b: var(--color-accent-warm-dark);
+  }
+
+  .feature__tier--gameplan,
+  .feature__tier--mvp {
+    --tier-a: var(--color-accent-warm-dark);
+    --tier-b: rgb(255 255 255 / 0.7);
+    color: var(--color-accent-warm-dark);
+  }
+
+  .feature__title {
+    margin: 0 0 0.8rem;
+    font-size: clamp(1.6rem, 3.4vw, 2.4rem);
+    font-weight: 780;
+    line-height: 1.08;
+    letter-spacing: -0.035em;
+    text-wrap: balance;
+  }
+
+  .feature__lead {
+    margin: 0 0 1.4rem;
+    font-size: clamp(1rem, 1.5vw, 1.12rem);
+    line-height: 1.6;
+    color: var(--color-text-secondary);
+    text-wrap: pretty;
+  }
+
+  .feature__points {
+    display: grid;
+    gap: 0.75rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .feature__points li {
+    position: relative;
+    padding-left: 1.9rem;
+    line-height: 1.5;
+    color: var(--color-text-primary);
+  }
+
+  .feature__points li::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0.2em;
+    width: 1.15rem;
+    height: 1.15rem;
+    border-radius: 50%;
+    background:
+      no-repeat center / 0.7rem url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12' fill='none' stroke='%23001014' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M2.5 6.2l2.2 2.2 4.8-4.9'/%3E%3C/svg%3E"),
+      var(--color-accent-primary);
+    box-shadow: 0 0 14px color-mix(in srgb, var(--color-accent-primary) 40%, transparent);
+  }
+
+  .feature__help {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    min-height: 44px;
+    margin-top: 1rem;
+    font-weight: 600;
+    color: var(--color-accent-primary);
+    text-decoration: none;
+  }
+
+  .feature__help:hover {
+    text-decoration: underline;
+    text-underline-offset: 0.2em;
+  }
+
+  .feature__stage {
+    position: relative;
+    isolation: isolate;
+    display: grid;
+    place-items: center;
+    min-height: 22rem;
+    padding: clamp(1.5rem, 4vw, 3rem);
+    border-radius: 2rem;
+    background:
+      radial-gradient(circle at var(--mx, 50%) var(--my, 40%), color-mix(in srgb, var(--color-accent-primary) 16%, transparent), transparent 55%),
+      linear-gradient(160deg, rgb(255 255 255 / 0.045), rgb(255 255 255 / 0.01));
+    box-shadow: var(--features-lift);
+    overflow: hidden;
+  }
+
+  /* Faint court-like grid behind the screens. */
+  .feature__stage::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background-image:
+      linear-gradient(rgb(255 255 255 / 0.035) 1px, transparent 1px),
+      linear-gradient(90deg, rgb(255 255 255 / 0.035) 1px, transparent 1px);
+    background-size: 2.5rem 2.5rem;
+    mask-image: radial-gradient(circle at 50% 50%, #000 20%, transparent 75%);
+  }
+
+  .feature__shot {
+    width: min(100%, 24rem);
+    height: auto;
+    filter: drop-shadow(0 26px 40px rgb(0 0 0 / 0.65));
+  }
+
+  /* Long lists end in a fade instead of a hard crop (as in the IG series). */
+  .feature__shot--tall {
+    aspect-ratio: 4 / 5;
+    object-fit: cover;
+    object-position: top;
+    -webkit-mask-image: linear-gradient(#000 78%, transparent);
+    mask-image: linear-gradient(#000 78%, transparent);
+  }
+
+  .feature__shot--wide {
+    width: min(100%, 34rem);
+  }
+
+  .feature__stage--pair {
+    grid-template-columns: 1fr;
+  }
+
+  .feature__stage--pair .feature__shot--1 {
+    width: min(86%, 24rem);
+    justify-self: start;
+    grid-area: 1 / 1;
+  }
+
+  .feature__stage--pair .feature__shot--2 {
+    width: min(62%, 17rem);
+    justify-self: end;
+    align-self: end;
+    grid-area: 1 / 1;
+    margin-bottom: -1.5rem;
+    z-index: 1;
+  }
+
+  .feature__stage--pair .feature__shot--wide.feature__shot--1 {
+    width: min(92%, 32rem);
+    align-self: start;
+  }
+
+  .feature__stage--pair .feature__shot--wide.feature__shot--2 {
+    width: min(70%, 24rem);
+  }
+
+  /* Scroll-linked parallax on the second screen where supported. */
+  @supports (animation-timeline: view()) {
+    .feature__stage--pair .feature__shot--2 {
+      animation: features-parallax linear both;
+      animation-timeline: view();
+      animation-range: entry 0% exit 100%;
+    }
+  }
+
+  /* ─── Reveal ───────────────────────────────────────────────────── */
+  :global(.features-js) [data-reveal] {
+    opacity: 0;
+    transform: translateY(2.5rem);
+    filter: blur(8px);
+    transition:
+      opacity 0.9s var(--features-ease),
+      transform 0.9s var(--features-ease),
+      filter 0.9s var(--features-ease);
+  }
+
+  :global(.features-js) [data-reveal].is-in {
+    opacity: 1;
+    transform: none;
+    filter: none;
+  }
+
+  :global(.features-js) .feature[data-reveal] .feature__shot {
+    opacity: 0;
+    transform: translateY(2rem) scale(0.96);
+    transition:
+      opacity 1s var(--features-ease) 0.15s,
+      transform 1.1s var(--features-ease) 0.15s;
+  }
+
+  :global(.features-js) .feature[data-reveal] .feature__shot--2 {
+    transition-delay: 0.35s;
+  }
+
+  :global(.features-js) .feature[data-reveal].is-in .feature__shot {
+    opacity: 1;
+    transform: none;
+  }
+
+  /* ─── More features grid ─────────────────────────────────────── */
+  .features-extras {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 19rem), 1fr));
+    gap: 1rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .features-extra {
+    position: relative;
+    padding: 1.5rem 1.5rem 1.6rem;
+    border-radius: 1.6rem;
+    background:
+      radial-gradient(circle at var(--mx, 50%) var(--my, 0%), color-mix(in srgb, var(--color-accent-primary) 12%, transparent), transparent 60%),
+      linear-gradient(160deg, rgb(255 255 255 / 0.05), rgb(255 255 255 / 0.012));
+    box-shadow: var(--features-lift);
+    transition: transform 0.5s var(--features-ease);
+  }
+
+  .features-extra:hover {
+    transform: translateY(-4px);
+  }
+
+  .features-extra h4 {
+    margin: 0 0 0.5rem;
+    font-size: 1.2rem;
+    font-weight: 750;
+    letter-spacing: -0.02em;
+  }
+
+  .features-extra p:last-child {
+    margin: 0;
+    font-size: 0.95rem;
+    line-height: 1.55;
+    color: var(--color-text-secondary);
+  }
+
+  .features-extra .feature__tier {
+    margin-bottom: 0.85rem;
+  }
+
+  /* ─── Close ────────────────────────────────────────────────────── */
+  .features-close {
+    position: relative;
+    isolation: isolate;
+    width: min(100% - 2rem, 52rem);
+    margin: clamp(5rem, 10vw, 8rem) auto clamp(4rem, 8vw, 6rem);
+    padding: clamp(2.5rem, 6vw, 4rem) clamp(1.5rem, 5vw, 3.5rem);
+    border-radius: 2.25rem;
+    text-align: center;
+    background:
+      radial-gradient(80% 120% at 50% 0%, color-mix(in srgb, var(--color-accent-primary) 16%, transparent), transparent 70%),
+      linear-gradient(160deg, rgb(255 255 255 / 0.06), rgb(255 255 255 / 0.015));
+    box-shadow: var(--features-lift);
+  }
+
+  .features-close h2 {
+    margin: 0 0 0.9rem;
+    font-size: clamp(1.9rem, 4.6vw, 3rem);
+    font-weight: 800;
+    line-height: 1.05;
+    letter-spacing: -0.04em;
+    text-wrap: balance;
+  }
+
+  .features-close > p {
+    max-width: 36rem;
+    margin: 0 auto;
+    line-height: 1.6;
+    color: var(--color-text-secondary);
+  }
+
+  .features-close__actions {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.9rem;
+    margin: 2rem 0 1.5rem;
+  }
+
+  .features-close__primary {
+    background: var(--color-accent-primary);
+    color: var(--color-accent-primary-cta-fg);
+  }
+
+  .features-close__primary:hover {
+    background: var(--color-accent-primary-hover);
+  }
+
+  .features-close .features-close__note {
+    margin-top: 0.6rem;
+    font-size: 0.85rem;
+  }
+
+  .features-close__note a {
+    color: var(--color-accent-primary);
+  }
+
+  .features a:focus-visible {
+    outline: 2px solid var(--color-accent-primary);
+    outline-offset: 4px;
+  }
+
+  @keyframes features-title-enter {
+    from { opacity: 0.001; transform: translateY(0.6rem); }
+    to { opacity: 1; transform: none; }
+  }
+
+  @keyframes features-float {
+    0%, 100% { transform: translateY(0) rotate(0deg); }
+    50% { transform: translateY(-14px) rotate(-0.6deg); }
+  }
+
+  @keyframes features-breathe {
+    from { opacity: 0.75; transform: scale(1); }
+    to { opacity: 1; transform: scale(1.08) translateY(-2%); }
+  }
+
+  @keyframes features-parallax {
+    from { translate: 0 3rem; }
+    to { translate: 0 -3rem; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .features-hero__title,
+    .features-hero__aurora,
+    .features-hero__shot,
+    .feature__tier::before,
+    .feature__stage--pair .feature__shot--2 {
+      animation: none !important;
+    }
+
+    .features-hero__shot {
+      translate: none !important;
+    }
+
+    .features-switch__pill,
+    .features-door {
+      transition: none;
+    }
+  }
+</style>
