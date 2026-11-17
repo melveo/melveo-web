@@ -94,6 +94,10 @@ const dir = `/images/app-screens/${lang}`;
       ))}
     </ul>
 
+    <a class="screens-stage__more" href={lang === 'cs' ? '/cs/funkce/' : '/en/features/'}>
+      {t('screens.featuresLink')} <span aria-hidden="true">→</span>
+    </a>
+
     <p class="screens-stage__note">{t('screens.note')}</p>
   </div>
 </section>
@@ -241,6 +245,21 @@ const dir = `/images/app-screens/${lang}`;
     color: var(--color-text-primary);
     font-size: 1.05rem;
     font-weight: 700;
+  }
+
+  .screens-stage__more {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    min-height: 44px;
+    font-weight: 600;
+    color: var(--color-accent-primary);
+    text-decoration: none;
+  }
+
+  .screens-stage__more:hover {
+    text-decoration: underline;
+    text-underline-offset: 0.2em;
   }
 
   .screens-stage__note {
