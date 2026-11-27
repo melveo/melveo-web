@@ -58,9 +58,9 @@ high`, and a guard that fails if Finder `* 2.*` duplicates reach `dist/`.
   sync. Flag it, don't quietly edit.
 - No VAT/DPH wording on the landing page (owner decision 2026-06-10). The string
   `pricing.vatNote` exists but is deliberately not rendered.
-- The iOS app must not contain purchase buttons (Apple guideline 3.1.3(f)) — all
-  payment flows belong on this site, so never write copy telling users to buy in
-  the app.
+- Since 3 Nov 2026 (variant C, melveo-app#1601) personal plans are sold both on
+  this site (Stripe) and in the iOS app via Apple IAP. The app must not mention
+  or link the cheaper web price. No club licences.
 - `wrangler.toml` carries a specific `account_id` (the Hello@melveo.app account)
   and custom-domain routes. Don't change them.
 - Paid features and tariffs: follow `docs/engineering/entitlements.md` in melveo/melveo-app (check the feature key, not the plan; the server decides and enforces limits; data is never locked; no exports; plans are personal only, no team or club subscriptions).
