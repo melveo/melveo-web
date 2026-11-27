@@ -13,11 +13,13 @@
  * app UI yet is listed as "Soon". Paid plans are not on sale yet, so
  * their CTA asks to be told at launch — never a Buy button.
  *
- * Monthly only at launch (owner, 3 Nov 2026); yearly plans come later
- * once real costs are known, so the period toggle is not rendered.
- * Prices live in three places (see AGENTS.md): this file, the app's
- * Supabase prices (melveo-app#1619, #1628) and Stripe (#1623). They are
- * NOT aligned yet; align all three before launch.
+ * Monthly only, no yearly prices (owner, melveo-app#1623, 27 Nov 2026),
+ * so the period toggle is not rendered.
+ * Web prices (EUR incl. VAT) per melveo-app#1623: Momentum 3.99, MVP 7.99,
+ * Playbook 19.99, Gameplan 90. They live in three places (see AGENTS.md):
+ * this file, the app's Supabase `personal_product_prices` (399 / 799 /
+ * 1999 / 9000 cents) and Stripe; change all three together. App Store
+ * prices are intentionally higher and are not shown here.
  */
 
 import { testFlightUrl, useTranslations, type Lang } from '../i18n/ui';

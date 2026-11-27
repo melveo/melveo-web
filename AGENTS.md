@@ -51,9 +51,11 @@ high`, and a guard that fails if Finder `* 2.*` duplicates reach `dist/`.
 - Never create files with a trailing `" 2"` / `" 3"` in the name — those are macOS
   Finder duplicates, they are gitignored, and CI fails the build if any reach `dist/`.
 - **Pricing lives in three places** — this repo (hardcoded in
-  `src/components/PricingStage.astro`), the app's Supabase `plan_prices`, and
-  Stripe. The web is canonical; changing a price here without the other two puts
-  them out of sync. Flag it, don't quietly edit.
+  `src/components/PricingStage.astro`), the app's Supabase
+  `personal_product_prices`, and Stripe (web prices, melveo-app#1623). App Store
+  prices are intentionally higher and live only in App Store Connect. The web
+  is canonical; changing a price here without the other two puts them out of
+  sync. Flag it, don't quietly edit.
 - No VAT/DPH wording on the landing page (owner decision 2026-06-10). The string
   `pricing.vatNote` exists but is deliberately not rendered.
 - The iOS app must not contain purchase buttons (Apple guideline 3.1.3(f)) — all
