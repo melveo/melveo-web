@@ -51,14 +51,16 @@ high`, and a guard that fails if Finder `* 2.*` duplicates reach `dist/`.
 - Never create files with a trailing `" 2"` / `" 3"` in the name — those are macOS
   Finder duplicates, they are gitignored, and CI fails the build if any reach `dist/`.
 - **Pricing lives in three places** — this repo (hardcoded in
-  `src/components/PricingStage.astro`), the app's Supabase `plan_prices`, and
-  Stripe. The web is canonical; changing a price here without the other two puts
-  them out of sync. Flag it, don't quietly edit.
+  `src/components/PricingStage.astro`), the app's Supabase
+  `personal_product_prices`, and Stripe (web prices, melveo-app#1623). App Store
+  prices are intentionally higher and live only in App Store Connect. The web
+  is canonical; changing a price here without the other two puts them out of
+  sync. Flag it, don't quietly edit.
 - No VAT/DPH wording on the landing page (owner decision 2026-06-10). The string
   `pricing.vatNote` exists but is deliberately not rendered.
-- The iOS app must not contain purchase buttons (Apple guideline 3.1.3(f)) — all
-  payment flows belong on this site, so never write copy telling users to buy in
-  the app.
+- Since 3 Nov 2026 (variant C, melveo-app#1601) personal plans are sold both on
+  this site (Stripe) and in the iOS app via Apple IAP. The app must not mention
+  or link the cheaper web price. No club licences.
 - `wrangler.toml` carries a specific `account_id` (the Hello@melveo.app account)
   and custom-domain routes. Don't change them.
 - Paid features and tariffs: follow `docs/engineering/entitlements.md` in melveo/melveo-app (check the feature key, not the plan; the server decides and enforces limits; data is never locked; no exports; plans are personal only, no team or club subscriptions).
