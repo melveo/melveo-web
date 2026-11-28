@@ -115,6 +115,13 @@ const player: Chapter[] = [
     ],
   },
   {
+    key: 'growth',
+    features: [
+      { key: 'performance', anchor: { cs: 'vykonnostni-profil', en: 'performance-profile' }, tier: 'freeMomentum', points: 3,
+        shots: [{ file: 'perf-profile', w: 1158, h: 1326 }] },
+    ],
+  },
+  {
     key: 'health',
     features: [
       { key: 'comeback', anchor: { cs: 'navrat-po-zraneni', en: 'return-to-play' }, tier: 'free', points: 3,
@@ -145,7 +152,7 @@ const coachExtras: Extra[] = [
 const playerExtras: Extra[] = [
   { key: 'matchReport', tier: 'free' },
   { key: 'zones', tier: 'freeMomentum' },
-  { key: 'tests', tier: 'freeMomentum' },
+  { key: 'goals', tier: 'mvp' },
   { key: 'programs', tier: 'mvp' },
   { key: 'sevens', tier: 'free' },
   { key: 'messages', tier: 'free' },
