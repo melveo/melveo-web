@@ -12,6 +12,8 @@
  * Feature lines only claim what the app ships today; anything without
  * app UI yet is listed as "Soon". Paid plans are not on sale yet, so
  * their CTA asks to be told at launch — never a Buy button.
+ * Feature lines follow melveo-app docs/product/package_benefits.md and the
+ * server capability map as of 28 Nov 2026 (build 342).
  *
  * Monthly only, no yearly prices (owner, melveo-app#1623, 27 Nov 2026),
  * so the period toggle is not rendered.
@@ -56,22 +58,22 @@ const tracks: Track[] = [
         id: 'warmup',
         name: 'Warm-up',
         monthly: 0,
-        features: ['pricing.warmup.f1', 'pricing.warmup.f2', 'pricing.warmup.f3', 'pricing.warmup.f4', 'pricing.warmup.f5'],
+        features: ['pricing.warmup.f1', 'pricing.warmup.f2', 'pricing.warmup.f3', 'pricing.warmup.f4', 'pricing.warmup.f5', 'pricing.warmup.f6'],
         soon: [],
       },
       {
         id: 'momentum',
         name: 'Momentum',
         monthly: 3.99,
-        features: ['pricing.momentum.f1', 'pricing.momentum.f2'],
-        soon: ['pricing.momentum.soon1', 'pricing.momentum.soon2'],
+        features: ['pricing.momentum.f1', 'pricing.momentum.f2', 'pricing.momentum.f3', 'pricing.momentum.f4', 'pricing.momentum.f5', 'pricing.momentum.f6'],
+        soon: [],
       },
       {
         id: 'mvp',
         name: 'MVP',
         monthly: 7.99,
-        features: ['pricing.mvp.f1'],
-        soon: ['pricing.mvp.soon1', 'pricing.mvp.soon2', 'pricing.mvp.soon3', 'pricing.mvp.soon4'],
+        features: ['pricing.mvp.f1', 'pricing.mvp.f2', 'pricing.mvp.f3', 'pricing.mvp.f4', 'pricing.mvp.f5'],
+        soon: [],
       },
     ],
   },
@@ -83,22 +85,22 @@ const tracks: Track[] = [
         id: 'throwoff',
         name: 'Throw-off',
         monthly: 0,
-        features: ['pricing.throwoff.f1', 'pricing.throwoff.f2', 'pricing.throwoff.f3', 'pricing.throwoff.f4', 'pricing.throwoff.f5'],
+        features: ['pricing.throwoff.f1', 'pricing.throwoff.f2', 'pricing.throwoff.f3', 'pricing.throwoff.f4', 'pricing.throwoff.f5', 'pricing.throwoff.f6'],
         soon: [],
       },
       {
         id: 'playbook',
         name: 'Playbook',
         monthly: 19.99,
-        features: ['pricing.playbook.f1', 'pricing.playbook.f2', 'pricing.playbook.f3', 'pricing.playbook.f4'],
-        soon: ['pricing.playbook.soon1', 'pricing.playbook.soon2', 'pricing.playbook.soon3'],
+        features: ['pricing.playbook.f1', 'pricing.playbook.f2', 'pricing.playbook.f3', 'pricing.playbook.f4', 'pricing.playbook.f5', 'pricing.playbook.f6'],
+        soon: [],
       },
       {
         id: 'gameplan',
         name: 'Gameplan',
         monthly: 90,
-        features: ['pricing.gameplan.f1', 'pricing.gameplan.f2', 'pricing.gameplan.f3'],
-        soon: ['pricing.gameplan.soon1', 'pricing.gameplan.soon2'],
+        features: ['pricing.gameplan.f1', 'pricing.gameplan.f2', 'pricing.gameplan.f3', 'pricing.gameplan.f4', 'pricing.gameplan.f5'],
+        soon: ['pricing.gameplan.soon1'],
       },
     ],
   },
